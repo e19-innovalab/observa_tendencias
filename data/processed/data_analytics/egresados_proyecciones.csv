@@ -1,0 +1,37 @@
+﻿pais,nombre,anio,graduados_proyectado,limite_inferior,limite_superior
+chile,desarrollo de software,2026,66,0,143
+chile,desarrollo de software,2027,69,0,178
+chile,desarrollo de software,2028,72,0,206
+chile,desarrollo de software,2029,75,0,230
+chile,eficiencia energetica,2026,218,163,273
+chile,eficiencia energetica,2027,227,149,305
+chile,eficiencia energetica,2028,236,140,331
+chile,eficiencia energetica,2029,245,135,355
+chile,enfermeria,2026,19427,13864,24991
+chile,enfermeria,2027,20119,12252,27987
+chile,enfermeria,2028,20811,11176,30447
+chile,enfermeria,2029,21503,10377,32629
+chile,ingenieria en computacion e informatica,2026,704,522,886
+chile,ingenieria en computacion e informatica,2027,708,451,966
+chile,ingenieria en computacion e informatica,2028,713,398,1028
+chile,ingenieria en computacion e informatica,2029,718,354,1082
+chile,ingenieria en energias renovables,2026,934,812,1055
+chile,ingenieria en energias renovables,2027,1102,929,1274
+chile,ingenieria en energias renovables,2028,1270,1059,1481
+chile,ingenieria en energias renovables,2029,1438,1194,1681
+chile,ingenieria en minas o extraccion de litio,2026,1704,1394,2014
+chile,ingenieria en minas o extraccion de litio,2027,1786,1348,2224
+chile,ingenieria en minas o extraccion de litio,2028,1868,1331,2405
+chile,ingenieria en minas o extraccion de litio,2029,1949,1329,2569
+chile,marketing directo y digital,2026,810,616,1004
+chile,marketing directo y digital,2027,921,647,1196
+chile,marketing directo y digital,2028,1033,696,1369
+chile,marketing directo y digital,2029,1144,756,1532
+chile,medicina,2026,4213,3227,5199
+chile,medicina,2027,4483,3089,5878
+chile,medicina,2028,4754,3046,6462
+chile,medicina,2029,5024,3052,6997
+chile,turismo ecosustentable,2026,429,328,530
+chile,turismo ecosustentable,2027,452,309,595
+chile,turismo ecosustentable,2028,475,300,649
+chile,turismo ecosustentable,2029,497,295,699

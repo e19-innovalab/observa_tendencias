@@ -1,0 +1,20 @@
+﻿pais,nombre,anio_desde,anio_hasta,n_anios_serie,ventana_anios,graduados_inicio_ventana,graduados_ultimo,pendiente_normalizada,variacion_ventana_pct,tendencia,tiene_huecos,proyeccion
+argentina,informatica,2014,2023,10,5,2732,3883,0.08483179616481981,42.13,growing,False,historia_insuficiente(<12)
+argentina,medicina,2014,2023,10,5,8607,11462,0.10421308486935382,33.17,growing,False,historia_insuficiente(<12)
+argentina,paramedicas y auxiliares de la medicina,2014,2023,10,5,10028,17961,0.1598762402011096,79.11,growing,False,historia_insuficiente(<12)
+chile,ciberseguridad,2019,2025,7,5,165,1498,0.4399601395117091,807.88,growing,False,historia_insuficiente(<12)
+chile,ciencias de datos,2019,2025,7,5,105,685,0.27163023679417114,552.38,growing,False,historia_insuficiente(<12)
+chile,desarrollo de software,2007,2025,19,5,10,210,0.6365079365079366,2000.0,growing,False,generada
+chile,diseno ux/ui,2015,2025,11,5,72,116,0.04110612855007456,61.11,growing,False,historia_insuficiente(<12)
+chile,eficiencia energetica,2009,2025,17,5,121,209,0.11223277909738712,72.73,growing,False,generada
+chile,enfermeria,2007,2025,19,5,20146,17916,-0.026934491039313863,-11.07,declining,False,generada
+chile,especialista en hidrogeno verde,2022,2025,4,4,6,59,0.49101796407185627,883.33,growing,False,historia_insuficiente(<12)
+chile,gestion de proyectos agiles,2020,2025,6,5,118,288,0.17632367632367632,144.07,growing,False,historia_insuficiente(<12)
+chile,ingenieria en computacion e informatica,2007,2025,19,5,408,699,0.15697254335260102,71.32,growing,False,generada
+chile,ingenieria en energias renovables,2011,2025,15,5,265,783,0.2673511293634497,195.47,growing,False,generada
+chile,ingenieria en minas o extraccion de litio,2007,2025,19,5,1576,1620,0.004186525827643815,2.79,stable,False,generada
+chile,inteligencia artificial,2019,2025,7,5,46,1564,0.6770098730606487,3300.0,growing,False,historia_insuficiente(<12)
+chile,marketing directo y digital,2009,2025,17,5,428,757,0.18440402476780182,76.87,growing,False,generada
+chile,medicina,2007,2025,19,5,3302,4126,0.05064068339562193,24.95,growing,False,generada
+chile,revenue management,2015,2025,11,5,0,17,,,insufficient_data,True,con_huecos
+chile,turismo ecosustentable,2007,2025,19,5,363,301,-0.02589967284623791,-17.08,declining,False,generada
