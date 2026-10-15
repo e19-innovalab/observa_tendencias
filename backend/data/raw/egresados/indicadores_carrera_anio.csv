@@ -1,0 +1,335 @@
+anio,pais,nivel,carrera_objetivo,graduados,mujeres,hombre,n_instituciones,n_programas,nombre,pct_mujeres,var_interanual_pct,indice_base100,participacion_pct
+2014,argentina,carrera_objetivo,informatica,3899.0,0.0,0.0,,1.0,informatica,,,99.29,16.51
+2015,argentina,carrera_objetivo,informatica,3927.0,0.0,0.0,,1.0,informatica,,0.72,100.0,15.66
+2016,argentina,carrera_objetivo,informatica,2978.0,0.0,0.0,,1.0,informatica,,-24.17,75.83,14.04
+2017,argentina,carrera_objetivo,informatica,2887.0,0.0,0.0,,1.0,informatica,,-3.06,73.52,13.38
+2018,argentina,carrera_objetivo,informatica,3254.0,0.0,0.0,,1.0,informatica,,12.71,82.86,14.22
+2019,argentina,carrera_objetivo,informatica,2732.0,0.0,0.0,,1.0,informatica,,-16.04,69.57,12.79
+2020,argentina,carrera_objetivo,informatica,2682.0,0.0,0.0,,1.0,informatica,,-1.83,68.3,13.58
+2021,argentina,carrera_objetivo,informatica,2837.0,0.0,0.0,,1.0,informatica,,5.78,72.24,12.27
+2022,argentina,carrera_objetivo,informatica,2937.0,0.0,0.0,,1.0,informatica,,3.52,74.79,10.06
+2023,argentina,carrera_objetivo,informatica,3883.0,0.0,0.0,,1.0,informatica,,32.21,98.88,11.66
+2014,argentina,carrera_objetivo,medicina,7758.0,0.0,0.0,,1.0,medicina,,,101.81,32.85
+2015,argentina,carrera_objetivo,medicina,7620.0,0.0,0.0,,1.0,medicina,,-1.78,100.0,30.39
+2016,argentina,carrera_objetivo,medicina,8228.0,0.0,0.0,,1.0,medicina,,7.98,107.98,38.79
+2017,argentina,carrera_objetivo,medicina,7866.0,0.0,0.0,,1.0,medicina,,-4.4,103.23,36.45
+2018,argentina,carrera_objetivo,medicina,9162.0,0.0,0.0,,1.0,medicina,,16.48,120.24,40.03
+2019,argentina,carrera_objetivo,medicina,8607.0,0.0,0.0,,1.0,medicina,,-6.06,112.95,40.28
+2020,argentina,carrera_objetivo,medicina,5917.0,0.0,0.0,,1.0,medicina,,-31.25,77.65,29.96
+2021,argentina,carrera_objetivo,medicina,8979.0,0.0,0.0,,1.0,medicina,,51.75,117.83,38.83
+2022,argentina,carrera_objetivo,medicina,9468.0,0.0,0.0,,1.0,medicina,,5.45,124.25,32.44
+2023,argentina,carrera_objetivo,medicina,11462.0,0.0,0.0,,1.0,medicina,,21.06,150.42,34.41
+2014,argentina,carrera_objetivo,paramedicas y auxiliares de la medicina,11960.0,0.0,0.0,,1.0,paramedicas y auxiliares de la medicina,,,88.39,50.64
+2015,argentina,carrera_objetivo,paramedicas y auxiliares de la medicina,13531.0,0.0,0.0,,1.0,paramedicas y auxiliares de la medicina,,13.14,100.0,53.96
+2016,argentina,carrera_objetivo,paramedicas y auxiliares de la medicina,10004.0,0.0,0.0,,1.0,paramedicas y auxiliares de la medicina,,-26.07,73.93,47.17
+2017,argentina,carrera_objetivo,paramedicas y auxiliares de la medicina,10827.0,0.0,0.0,,1.0,paramedicas y auxiliares de la medicina,,8.23,80.02,50.17
+2018,argentina,carrera_objetivo,paramedicas y auxiliares de la medicina,10471.0,0.0,0.0,,1.0,paramedicas y auxiliares de la medicina,,-3.29,77.39,45.75
+2019,argentina,carrera_objetivo,paramedicas y auxiliares de la medicina,10028.0,0.0,0.0,,1.0,paramedicas y auxiliares de la medicina,,-4.23,74.11,46.93
+2020,argentina,carrera_objetivo,paramedicas y auxiliares de la medicina,11150.0,0.0,0.0,,1.0,paramedicas y auxiliares de la medicina,,11.19,82.4,56.46
+2021,argentina,carrera_objetivo,paramedicas y auxiliares de la medicina,11308.0,0.0,0.0,,1.0,paramedicas y auxiliares de la medicina,,1.42,83.57,48.9
+2022,argentina,carrera_objetivo,paramedicas y auxiliares de la medicina,16780.0,0.0,0.0,,1.0,paramedicas y auxiliares de la medicina,,48.39,124.01,57.5
+2023,argentina,carrera_objetivo,paramedicas y auxiliares de la medicina,17961.0,0.0,0.0,,1.0,paramedicas y auxiliares de la medicina,,7.04,132.74,53.93
+2007,chile,carrera_objetivo,0,0.0,0.0,0.0,0.0,0.0,ciberseguridad,,,,0.0
+2008,chile,carrera_objetivo,0,0.0,0.0,0.0,0.0,0.0,ciberseguridad,,,,0.0
+2009,chile,carrera_objetivo,0,0.0,0.0,0.0,0.0,0.0,ciberseguridad,,,,0.0
+2010,chile,carrera_objetivo,0,0.0,0.0,0.0,0.0,0.0,ciberseguridad,,,,0.0
+2011,chile,carrera_objetivo,0,0.0,0.0,0.0,0.0,0.0,ciberseguridad,,,,0.0
+2012,chile,carrera_objetivo,0,0.0,0.0,0.0,0.0,0.0,ciberseguridad,,,,0.0
+2013,chile,carrera_objetivo,0,0.0,0.0,0.0,0.0,0.0,ciberseguridad,,,,0.0
+2014,chile,carrera_objetivo,0,0.0,0.0,0.0,0.0,0.0,ciberseguridad,,,,0.0
+2015,chile,carrera_objetivo,0,0.0,0.0,0.0,0.0,0.0,ciberseguridad,,,,0.0
+2016,chile,carrera_objetivo,0,0.0,0.0,0.0,0.0,0.0,ciberseguridad,,,,0.0
+2017,chile,carrera_objetivo,0,0.0,0.0,0.0,0.0,0.0,ciberseguridad,,,,0.0
+2018,chile,carrera_objetivo,0,0.0,0.0,0.0,0.0,0.0,ciberseguridad,,,,0.0
+2019,chile,carrera_objetivo,ciberseguridad,62.0,9.0,53.0,3.0,3.0,ciberseguridad,14.52,,,0.27
+2020,chile,carrera_objetivo,ciberseguridad,156.0,18.0,138.0,5.0,5.0,ciberseguridad,11.54,151.61,,1.05
+2021,chile,carrera_objetivo,ciberseguridad,165.0,15.0,150.0,5.0,7.0,ciberseguridad,9.09,5.77,,0.61
+2022,chile,carrera_objetivo,ciberseguridad,350.0,28.0,322.0,8.0,9.0,ciberseguridad,8.0,112.12,,1.29
+2023,chile,carrera_objetivo,ciberseguridad,785.0,91.0,694.0,18.0,17.0,ciberseguridad,11.59,124.29,,2.69
+2024,chile,carrera_objetivo,ciberseguridad,1216.0,153.0,1063.0,22.0,21.0,ciberseguridad,12.58,54.9,,4.15
+2025,chile,carrera_objetivo,ciberseguridad,1498.0,177.0,1321.0,24.0,19.0,ciberseguridad,11.82,23.19,,4.86
+2007,chile,carrera_objetivo,0,0.0,0.0,0.0,0.0,0.0,ciencias de datos,,,,0.0
+2008,chile,carrera_objetivo,0,0.0,0.0,0.0,0.0,0.0,ciencias de datos,,,,0.0
+2009,chile,carrera_objetivo,0,0.0,0.0,0.0,0.0,0.0,ciencias de datos,,,,0.0
+2010,chile,carrera_objetivo,0,0.0,0.0,0.0,0.0,0.0,ciencias de datos,,,,0.0
+2011,chile,carrera_objetivo,0,0.0,0.0,0.0,0.0,0.0,ciencias de datos,,,,0.0
+2012,chile,carrera_objetivo,0,0.0,0.0,0.0,0.0,0.0,ciencias de datos,,,,0.0
+2013,chile,carrera_objetivo,0,0.0,0.0,0.0,0.0,0.0,ciencias de datos,,,,0.0
+2014,chile,carrera_objetivo,0,0.0,0.0,0.0,0.0,0.0,ciencias de datos,,,,0.0
+2015,chile,carrera_objetivo,0,0.0,0.0,0.0,0.0,0.0,ciencias de datos,,,,0.0
+2016,chile,carrera_objetivo,0,0.0,0.0,0.0,0.0,0.0,ciencias de datos,,,,0.0
+2017,chile,carrera_objetivo,0,0.0,0.0,0.0,0.0,0.0,ciencias de datos,,,,0.0
+2018,chile,carrera_objetivo,0,0.0,0.0,0.0,0.0,0.0,ciencias de datos,,,,0.0
+2019,chile,carrera_objetivo,ciencias de datos,39.0,7.0,32.0,1.0,1.0,ciencias de datos,17.95,,,0.17
+2020,chile,carrera_objetivo,ciencias de datos,134.0,31.0,103.0,1.0,1.0,ciencias de datos,23.13,243.59,,0.91
+2021,chile,carrera_objetivo,ciencias de datos,105.0,25.0,80.0,4.0,4.0,ciencias de datos,23.81,-21.64,,0.39
+2022,chile,carrera_objetivo,ciencias de datos,440.0,116.0,324.0,5.0,5.0,ciencias de datos,26.36,319.05,,1.62
+2023,chile,carrera_objetivo,ciencias de datos,493.0,148.0,345.0,10.0,13.0,ciencias de datos,30.02,12.05,,1.69
+2024,chile,carrera_objetivo,ciencias de datos,473.0,148.0,325.0,10.0,14.0,ciencias de datos,31.29,-4.06,,1.62
+2025,chile,carrera_objetivo,ciencias de datos,685.0,184.0,501.0,12.0,17.0,ciencias de datos,26.86,44.82,,2.22
+2007,chile,carrera_objetivo,desarrollo de software,16.0,6.0,10.0,3.0,3.0,desarrollo de software,37.5,,37.21,0.24
+2008,chile,carrera_objetivo,desarrollo de software,25.0,10.0,15.0,4.0,5.0,desarrollo de software,40.0,56.25,58.14,0.22
+2009,chile,carrera_objetivo,desarrollo de software,22.0,3.0,19.0,4.0,6.0,desarrollo de software,13.64,-12.0,51.16,0.19
+2010,chile,carrera_objetivo,desarrollo de software,32.0,6.0,26.0,4.0,5.0,desarrollo de software,18.75,45.45,74.42,0.29
+2011,chile,carrera_objetivo,desarrollo de software,22.0,5.0,17.0,4.0,5.0,desarrollo de software,22.73,-31.25,51.16,0.15
+2012,chile,carrera_objetivo,desarrollo de software,37.0,8.0,29.0,3.0,3.0,desarrollo de software,21.62,68.18,86.05,0.21
+2013,chile,carrera_objetivo,desarrollo de software,24.0,1.0,23.0,4.0,5.0,desarrollo de software,4.17,-35.14,55.81,0.12
+2014,chile,carrera_objetivo,desarrollo de software,30.0,8.0,22.0,4.0,4.0,desarrollo de software,26.67,25.0,69.77,0.14
+2015,chile,carrera_objetivo,desarrollo de software,43.0,7.0,36.0,4.0,5.0,desarrollo de software,16.28,43.33,100.0,0.19
+2016,chile,carrera_objetivo,desarrollo de software,21.0,3.0,18.0,1.0,2.0,desarrollo de software,14.29,-51.16,48.84,0.09
+2017,chile,carrera_objetivo,desarrollo de software,25.0,3.0,22.0,4.0,5.0,desarrollo de software,12.0,19.05,58.14,0.11
+2018,chile,carrera_objetivo,desarrollo de software,18.0,2.0,16.0,2.0,3.0,desarrollo de software,11.11,-28.0,41.86,0.08
+2019,chile,carrera_objetivo,desarrollo de software,18.0,1.0,17.0,3.0,3.0,desarrollo de software,5.56,0.0,41.86,0.08
+2020,chile,carrera_objetivo,desarrollo de software,30.0,3.0,27.0,3.0,3.0,desarrollo de software,10.0,66.67,69.77,0.2
+2021,chile,carrera_objetivo,desarrollo de software,10.0,1.0,9.0,3.0,3.0,desarrollo de software,10.0,-66.67,23.26,0.04
+2022,chile,carrera_objetivo,desarrollo de software,31.0,4.0,27.0,3.0,3.0,desarrollo de software,12.9,210.0,72.09,0.11
+2023,chile,carrera_objetivo,desarrollo de software,32.0,3.0,29.0,3.0,3.0,desarrollo de software,9.38,3.23,74.42,0.11
+2024,chile,carrera_objetivo,desarrollo de software,32.0,4.0,28.0,2.0,2.0,desarrollo de software,12.5,0.0,74.42,0.11
+2025,chile,carrera_objetivo,desarrollo de software,210.0,21.0,189.0,5.0,5.0,desarrollo de software,10.0,556.25,488.37,0.68
+2007,chile,carrera_objetivo,0,0.0,0.0,0.0,0.0,0.0,diseno ux/ui,,,0.0,0.0
+2008,chile,carrera_objetivo,0,0.0,0.0,0.0,0.0,0.0,diseno ux/ui,,,0.0,0.0
+2009,chile,carrera_objetivo,0,0.0,0.0,0.0,0.0,0.0,diseno ux/ui,,,0.0,0.0
+2010,chile,carrera_objetivo,0,0.0,0.0,0.0,0.0,0.0,diseno ux/ui,,,0.0,0.0
+2011,chile,carrera_objetivo,0,0.0,0.0,0.0,0.0,0.0,diseno ux/ui,,,0.0,0.0
+2012,chile,carrera_objetivo,0,0.0,0.0,0.0,0.0,0.0,diseno ux/ui,,,0.0,0.0
+2013,chile,carrera_objetivo,0,0.0,0.0,0.0,0.0,0.0,diseno ux/ui,,,0.0,0.0
+2014,chile,carrera_objetivo,0,0.0,0.0,0.0,0.0,0.0,diseno ux/ui,,,0.0,0.0
+2015,chile,carrera_objetivo,diseno ux/ui,10.0,5.0,5.0,1.0,1.0,diseno ux/ui,50.0,,100.0,0.04
+2016,chile,carrera_objetivo,diseno ux/ui,31.0,12.0,19.0,1.0,1.0,diseno ux/ui,38.71,210.0,310.0,0.14
+2017,chile,carrera_objetivo,diseno ux/ui,1.0,0.0,1.0,1.0,1.0,diseno ux/ui,0.0,-96.77,10.0,0.0
+2018,chile,carrera_objetivo,diseno ux/ui,34.0,15.0,19.0,1.0,1.0,diseno ux/ui,44.12,3300.0,340.0,0.14
+2019,chile,carrera_objetivo,diseno ux/ui,98.0,49.0,49.0,3.0,3.0,diseno ux/ui,50.0,188.24,980.0,0.43
+2020,chile,carrera_objetivo,diseno ux/ui,57.0,37.0,20.0,2.0,2.0,diseno ux/ui,64.91,-41.84,570.0,0.39
+2021,chile,carrera_objetivo,diseno ux/ui,72.0,37.0,35.0,1.0,1.0,diseno ux/ui,51.39,26.32,720.0,0.27
+2022,chile,carrera_objetivo,diseno ux/ui,178.0,101.0,77.0,4.0,4.0,diseno ux/ui,56.74,147.22,1780.0,0.66
+2023,chile,carrera_objetivo,diseno ux/ui,158.0,109.0,49.0,4.0,4.0,diseno ux/ui,68.99,-11.24,1580.0,0.54
+2024,chile,carrera_objetivo,diseno ux/ui,145.0,84.0,61.0,4.0,4.0,diseno ux/ui,57.93,-8.23,1450.0,0.5
+2025,chile,carrera_objetivo,diseno ux/ui,116.0,82.0,34.0,4.0,4.0,diseno ux/ui,70.69,-20.0,1160.0,0.38
+2007,chile,carrera_objetivo,0,0.0,0.0,0.0,0.0,0.0,eficiencia energetica,,,0.0,0.0
+2008,chile,carrera_objetivo,0,0.0,0.0,0.0,0.0,0.0,eficiencia energetica,,,0.0,0.0
+2009,chile,carrera_objetivo,eficiencia energetica,66.0,25.0,41.0,2.0,2.0,eficiencia energetica,37.88,,113.79,0.57
+2010,chile,carrera_objetivo,eficiencia energetica,40.0,11.0,29.0,3.0,3.0,eficiencia energetica,27.5,-39.39,68.97,0.37
+2011,chile,carrera_objetivo,eficiencia energetica,64.0,22.0,42.0,4.0,7.0,eficiencia energetica,34.38,60.0,110.34,0.44
+2012,chile,carrera_objetivo,eficiencia energetica,41.0,17.0,24.0,3.0,7.0,eficiencia energetica,41.46,-35.94,70.69,0.23
+2013,chile,carrera_objetivo,eficiencia energetica,22.0,9.0,13.0,3.0,4.0,eficiencia energetica,40.91,-46.34,37.93,0.11
+2014,chile,carrera_objetivo,eficiencia energetica,52.0,18.0,34.0,5.0,6.0,eficiencia energetica,34.62,136.36,89.66,0.24
+2015,chile,carrera_objetivo,eficiencia energetica,58.0,14.0,44.0,7.0,7.0,eficiencia energetica,24.14,11.54,100.0,0.26
+2016,chile,carrera_objetivo,eficiencia energetica,123.0,21.0,102.0,9.0,11.0,eficiencia energetica,17.07,112.07,212.07,0.54
+2017,chile,carrera_objetivo,eficiencia energetica,122.0,36.0,86.0,6.0,8.0,eficiencia energetica,29.51,-0.81,210.34,0.54
+2018,chile,carrera_objetivo,eficiencia energetica,93.0,25.0,68.0,8.0,10.0,eficiencia energetica,26.88,-23.77,160.34,0.39
+2019,chile,carrera_objetivo,eficiencia energetica,65.0,11.0,54.0,6.0,8.0,eficiencia energetica,16.92,-30.11,112.07,0.29
+2020,chile,carrera_objetivo,eficiencia energetica,89.0,20.0,69.0,6.0,7.0,eficiencia energetica,22.47,36.92,153.45,0.6
+2021,chile,carrera_objetivo,eficiencia energetica,121.0,23.0,98.0,7.0,7.0,eficiencia energetica,19.01,35.96,208.62,0.45
+2022,chile,carrera_objetivo,eficiencia energetica,159.0,37.0,122.0,7.0,8.0,eficiencia energetica,23.27,31.4,274.14,0.59
+2023,chile,carrera_objetivo,eficiencia energetica,181.0,32.0,149.0,9.0,10.0,eficiencia energetica,17.68,13.84,312.07,0.62
+2024,chile,carrera_objetivo,eficiencia energetica,172.0,38.0,134.0,9.0,10.0,eficiencia energetica,22.09,-4.97,296.55,0.59
+2025,chile,carrera_objetivo,eficiencia energetica,209.0,33.0,176.0,9.0,9.0,eficiencia energetica,15.79,21.51,360.34,0.68
+2007,chile,carrera_objetivo,enfermeria,4792.0,4059.0,733.0,42.0,46.0,enfermeria,84.7,,25.8,70.94
+2008,chile,carrera_objetivo,enfermeria,9442.0,8179.0,1263.0,46.0,52.0,enfermeria,86.62,97.04,50.83,82.14
+2009,chile,carrera_objetivo,enfermeria,9406.0,8056.0,1350.0,53.0,47.0,enfermeria,85.65,-0.38,50.63,80.71
+2010,chile,carrera_objetivo,enfermeria,8398.0,7230.0,1168.0,58.0,52.0,enfermeria,86.09,-10.72,45.21,76.86
+2011,chile,carrera_objetivo,enfermeria,11944.0,10313.0,1631.0,61.0,56.0,enfermeria,86.34,42.22,64.29,82.76
+2012,chile,carrera_objetivo,enfermeria,14852.0,12794.0,2058.0,67.0,65.0,enfermeria,86.14,24.35,79.95,84.3
+2013,chile,carrera_objetivo,enfermeria,16678.0,14367.0,2311.0,72.0,64.0,enfermeria,86.14,12.29,89.78,84.2
+2014,chile,carrera_objetivo,enfermeria,17669.0,15154.0,2515.0,75.0,65.0,enfermeria,85.77,5.94,95.11,82.89
+2015,chile,carrera_objetivo,enfermeria,18577.0,15958.0,2619.0,75.0,59.0,enfermeria,85.9,5.14,100.0,83.56
+2016,chile,carrera_objetivo,enfermeria,19102.0,16467.0,2635.0,76.0,67.0,enfermeria,86.21,2.83,102.83,83.63
+2017,chile,carrera_objetivo,enfermeria,18248.0,15763.0,2485.0,77.0,78.0,enfermeria,86.38,-4.47,98.23,80.1
+2018,chile,carrera_objetivo,enfermeria,18598.0,15910.0,2688.0,78.0,75.0,enfermeria,85.55,1.92,100.11,78.99
+2019,chile,carrera_objetivo,enfermeria,17009.0,14357.0,2652.0,73.0,62.0,enfermeria,84.41,-8.54,91.56,75.18
+2020,chile,carrera_objetivo,enfermeria,11041.0,9433.0,1608.0,72.0,47.0,enfermeria,85.44,-35.09,59.43,74.61
+2021,chile,carrera_objetivo,enfermeria,20146.0,17164.0,2982.0,76.0,60.0,enfermeria,85.2,82.47,108.45,74.27
+2022,chile,carrera_objetivo,enfermeria,19099.0,16059.0,3040.0,74.0,71.0,enfermeria,84.08,-5.2,102.81,70.52
+2023,chile,carrera_objetivo,enfermeria,19778.0,16629.0,3149.0,71.0,70.0,enfermeria,84.08,3.56,106.46,67.72
+2024,chile,carrera_objetivo,enfermeria,18422.0,15522.0,2900.0,73.0,74.0,enfermeria,84.26,-6.86,99.17,62.91
+2025,chile,carrera_objetivo,enfermeria,17916.0,15050.0,2866.0,74.0,84.0,enfermeria,84.0,-2.75,96.44,58.08
+2007,chile,carrera_objetivo,0,0.0,0.0,0.0,0.0,0.0,especialista en hidrogeno verde,,,,0.0
+2008,chile,carrera_objetivo,0,0.0,0.0,0.0,0.0,0.0,especialista en hidrogeno verde,,,,0.0
+2009,chile,carrera_objetivo,0,0.0,0.0,0.0,0.0,0.0,especialista en hidrogeno verde,,,,0.0
+2010,chile,carrera_objetivo,0,0.0,0.0,0.0,0.0,0.0,especialista en hidrogeno verde,,,,0.0
+2011,chile,carrera_objetivo,0,0.0,0.0,0.0,0.0,0.0,especialista en hidrogeno verde,,,,0.0
+2012,chile,carrera_objetivo,0,0.0,0.0,0.0,0.0,0.0,especialista en hidrogeno verde,,,,0.0
+2013,chile,carrera_objetivo,0,0.0,0.0,0.0,0.0,0.0,especialista en hidrogeno verde,,,,0.0
+2014,chile,carrera_objetivo,0,0.0,0.0,0.0,0.0,0.0,especialista en hidrogeno verde,,,,0.0
+2015,chile,carrera_objetivo,0,0.0,0.0,0.0,0.0,0.0,especialista en hidrogeno verde,,,,0.0
+2016,chile,carrera_objetivo,0,0.0,0.0,0.0,0.0,0.0,especialista en hidrogeno verde,,,,0.0
+2017,chile,carrera_objetivo,0,0.0,0.0,0.0,0.0,0.0,especialista en hidrogeno verde,,,,0.0
+2018,chile,carrera_objetivo,0,0.0,0.0,0.0,0.0,0.0,especialista en hidrogeno verde,,,,0.0
+2019,chile,carrera_objetivo,0,0.0,0.0,0.0,0.0,0.0,especialista en hidrogeno verde,,,,0.0
+2020,chile,carrera_objetivo,0,0.0,0.0,0.0,0.0,0.0,especialista en hidrogeno verde,,,,0.0
+2021,chile,carrera_objetivo,0,0.0,0.0,0.0,0.0,0.0,especialista en hidrogeno verde,,,,0.0
+2022,chile,carrera_objetivo,especialista en hidrogeno verde,6.0,3.0,3.0,1.0,1.0,especialista en hidrogeno verde,50.0,,,0.02
+2023,chile,carrera_objetivo,especialista en hidrogeno verde,28.0,5.0,23.0,2.0,2.0,especialista en hidrogeno verde,17.86,366.67,,0.1
+2024,chile,carrera_objetivo,especialista en hidrogeno verde,74.0,24.0,50.0,2.0,2.0,especialista en hidrogeno verde,32.43,164.29,,0.25
+2025,chile,carrera_objetivo,especialista en hidrogeno verde,59.0,11.0,48.0,3.0,3.0,especialista en hidrogeno verde,18.64,-20.27,,0.19
+2007,chile,carrera_objetivo,0,0.0,0.0,0.0,0.0,0.0,gestion de proyectos agiles,,,,0.0
+2008,chile,carrera_objetivo,0,0.0,0.0,0.0,0.0,0.0,gestion de proyectos agiles,,,,0.0
+2009,chile,carrera_objetivo,0,0.0,0.0,0.0,0.0,0.0,gestion de proyectos agiles,,,,0.0
+2010,chile,carrera_objetivo,0,0.0,0.0,0.0,0.0,0.0,gestion de proyectos agiles,,,,0.0
+2011,chile,carrera_objetivo,0,0.0,0.0,0.0,0.0,0.0,gestion de proyectos agiles,,,,0.0
+2012,chile,carrera_objetivo,0,0.0,0.0,0.0,0.0,0.0,gestion de proyectos agiles,,,,0.0
+2013,chile,carrera_objetivo,0,0.0,0.0,0.0,0.0,0.0,gestion de proyectos agiles,,,,0.0
+2014,chile,carrera_objetivo,0,0.0,0.0,0.0,0.0,0.0,gestion de proyectos agiles,,,,0.0
+2015,chile,carrera_objetivo,0,0.0,0.0,0.0,0.0,0.0,gestion de proyectos agiles,,,,0.0
+2016,chile,carrera_objetivo,0,0.0,0.0,0.0,0.0,0.0,gestion de proyectos agiles,,,,0.0
+2017,chile,carrera_objetivo,0,0.0,0.0,0.0,0.0,0.0,gestion de proyectos agiles,,,,0.0
+2018,chile,carrera_objetivo,0,0.0,0.0,0.0,0.0,0.0,gestion de proyectos agiles,,,,0.0
+2019,chile,carrera_objetivo,0,0.0,0.0,0.0,0.0,0.0,gestion de proyectos agiles,,,,0.0
+2020,chile,carrera_objetivo,gestion de proyectos agiles,10.0,2.0,8.0,1.0,1.0,gestion de proyectos agiles,20.0,,,0.07
+2021,chile,carrera_objetivo,gestion de proyectos agiles,118.0,36.0,82.0,2.0,2.0,gestion de proyectos agiles,30.51,1080.0,,0.44
+2022,chile,carrera_objetivo,gestion de proyectos agiles,160.0,64.0,96.0,3.0,3.0,gestion de proyectos agiles,40.0,35.59,,0.59
+2023,chile,carrera_objetivo,gestion de proyectos agiles,262.0,127.0,135.0,4.0,7.0,gestion de proyectos agiles,48.47,63.75,,0.9
+2024,chile,carrera_objetivo,gestion de proyectos agiles,173.0,87.0,86.0,5.0,8.0,gestion de proyectos agiles,50.29,-33.97,,0.59
+2025,chile,carrera_objetivo,gestion de proyectos agiles,288.0,145.0,143.0,7.0,11.0,gestion de proyectos agiles,50.35,66.47,,0.93
+2007,chile,carrera_objetivo,ingenieria en computacion e informatica,615.0,119.0,496.0,19.0,7.0,ingenieria en computacion e informatica,19.35,,91.38,9.1
+2008,chile,carrera_objetivo,ingenieria en computacion e informatica,499.0,79.0,420.0,19.0,8.0,ingenieria en computacion e informatica,15.83,-18.86,74.15,4.34
+2009,chile,carrera_objetivo,ingenieria en computacion e informatica,554.0,86.0,468.0,19.0,11.0,ingenieria en computacion e informatica,15.52,11.02,82.32,4.75
+2010,chile,carrera_objetivo,ingenieria en computacion e informatica,617.0,87.0,530.0,21.0,10.0,ingenieria en computacion e informatica,14.1,11.37,91.68,5.65
+2011,chile,carrera_objetivo,ingenieria en computacion e informatica,501.0,56.0,445.0,19.0,12.0,ingenieria en computacion e informatica,11.18,-18.8,74.44,3.47
+2012,chile,carrera_objetivo,ingenieria en computacion e informatica,635.0,56.0,579.0,22.0,16.0,ingenieria en computacion e informatica,8.82,26.75,94.35,3.6
+2013,chile,carrera_objetivo,ingenieria en computacion e informatica,674.0,89.0,585.0,19.0,10.0,ingenieria en computacion e informatica,13.2,6.14,100.15,3.4
+2014,chile,carrera_objetivo,ingenieria en computacion e informatica,745.0,89.0,656.0,20.0,12.0,ingenieria en computacion e informatica,11.95,10.53,110.7,3.5
+2015,chile,carrera_objetivo,ingenieria en computacion e informatica,673.0,72.0,601.0,19.0,9.0,ingenieria en computacion e informatica,10.7,-9.66,100.0,3.03
+2016,chile,carrera_objetivo,ingenieria en computacion e informatica,493.0,53.0,440.0,19.0,9.0,ingenieria en computacion e informatica,10.75,-26.75,73.25,2.16
+2017,chile,carrera_objetivo,ingenieria en computacion e informatica,495.0,46.0,449.0,19.0,9.0,ingenieria en computacion e informatica,9.29,0.41,73.55,2.17
+2018,chile,carrera_objetivo,ingenieria en computacion e informatica,431.0,44.0,387.0,16.0,6.0,ingenieria en computacion e informatica,10.21,-12.93,64.04,1.83
+2019,chile,carrera_objetivo,ingenieria en computacion e informatica,362.0,31.0,331.0,14.0,7.0,ingenieria en computacion e informatica,8.56,-16.01,53.79,1.6
+2020,chile,carrera_objetivo,ingenieria en computacion e informatica,344.0,35.0,309.0,15.0,8.0,ingenieria en computacion e informatica,10.17,-4.97,51.11,2.32
+2021,chile,carrera_objetivo,ingenieria en computacion e informatica,408.0,51.0,357.0,13.0,7.0,ingenieria en computacion e informatica,12.5,18.6,60.62,1.5
+2022,chile,carrera_objetivo,ingenieria en computacion e informatica,426.0,34.0,392.0,14.0,8.0,ingenieria en computacion e informatica,7.98,4.41,63.3,1.57
+2023,chile,carrera_objetivo,ingenieria en computacion e informatica,522.0,58.0,464.0,15.0,7.0,ingenieria en computacion e informatica,11.11,22.54,77.56,1.79
+2024,chile,carrera_objetivo,ingenieria en computacion e informatica,713.0,81.0,632.0,12.0,9.0,ingenieria en computacion e informatica,11.36,36.59,105.94,2.43
+2025,chile,carrera_objetivo,ingenieria en computacion e informatica,699.0,98.0,601.0,12.0,7.0,ingenieria en computacion e informatica,14.02,-1.96,103.86,2.27
+2007,chile,carrera_objetivo,0,0.0,0.0,0.0,0.0,0.0,ingenieria en energias renovables,,,0.0,0.0
+2008,chile,carrera_objetivo,0,0.0,0.0,0.0,0.0,0.0,ingenieria en energias renovables,,,0.0,0.0
+2009,chile,carrera_objetivo,0,0.0,0.0,0.0,0.0,0.0,ingenieria en energias renovables,,,0.0,0.0
+2010,chile,carrera_objetivo,0,0.0,0.0,0.0,0.0,0.0,ingenieria en energias renovables,,,0.0,0.0
+2011,chile,carrera_objetivo,ingenieria en energias renovables,8.0,3.0,5.0,1.0,1.0,ingenieria en energias renovables,37.5,,11.27,0.06
+2012,chile,carrera_objetivo,ingenieria en energias renovables,9.0,0.0,9.0,1.0,1.0,ingenieria en energias renovables,0.0,12.5,12.68,0.05
+2013,chile,carrera_objetivo,ingenieria en energias renovables,26.0,3.0,23.0,2.0,1.0,ingenieria en energias renovables,11.54,188.89,36.62,0.13
+2014,chile,carrera_objetivo,ingenieria en energias renovables,40.0,6.0,34.0,3.0,2.0,ingenieria en energias renovables,15.0,53.85,56.34,0.19
+2015,chile,carrera_objetivo,ingenieria en energias renovables,71.0,11.0,60.0,5.0,3.0,ingenieria en energias renovables,15.49,77.5,100.0,0.32
+2016,chile,carrera_objetivo,ingenieria en energias renovables,45.0,7.0,38.0,4.0,2.0,ingenieria en energias renovables,15.56,-36.62,63.38,0.2
+2017,chile,carrera_objetivo,ingenieria en energias renovables,58.0,12.0,46.0,5.0,3.0,ingenieria en energias renovables,20.69,28.89,81.69,0.25
+2018,chile,carrera_objetivo,ingenieria en energias renovables,95.0,27.0,68.0,7.0,4.0,ingenieria en energias renovables,28.42,63.79,133.8,0.4
+2019,chile,carrera_objetivo,ingenieria en energias renovables,113.0,26.0,87.0,7.0,5.0,ingenieria en energias renovables,23.01,18.95,159.15,0.5
+2020,chile,carrera_objetivo,ingenieria en energias renovables,79.0,11.0,68.0,7.0,5.0,ingenieria en energias renovables,13.92,-30.09,111.27,0.53
+2021,chile,carrera_objetivo,ingenieria en energias renovables,265.0,46.0,219.0,11.0,11.0,ingenieria en energias renovables,17.36,235.44,373.24,0.98
+2022,chile,carrera_objetivo,ingenieria en energias renovables,362.0,59.0,303.0,12.0,14.0,ingenieria en energias renovables,16.3,36.6,509.86,1.34
+2023,chile,carrera_objetivo,ingenieria en energias renovables,397.0,65.0,332.0,15.0,15.0,ingenieria en energias renovables,16.37,9.67,559.15,1.36
+2024,chile,carrera_objetivo,ingenieria en energias renovables,628.0,73.0,555.0,16.0,16.0,ingenieria en energias renovables,11.62,58.19,884.51,2.14
+2025,chile,carrera_objetivo,ingenieria en energias renovables,783.0,102.0,681.0,18.0,17.0,ingenieria en energias renovables,13.03,24.68,1102.82,2.54
+2007,chile,carrera_objetivo,ingenieria en minas o extraccion de litio,186.0,21.0,165.0,6.0,8.0,ingenieria en minas o extraccion de litio,11.29,,29.71,2.75
+2008,chile,carrera_objetivo,ingenieria en minas o extraccion de litio,182.0,28.0,154.0,6.0,9.0,ingenieria en minas o extraccion de litio,15.38,-2.15,29.07,1.58
+2009,chile,carrera_objetivo,ingenieria en minas o extraccion de litio,179.0,25.0,154.0,6.0,12.0,ingenieria en minas o extraccion de litio,13.97,-1.65,28.59,1.54
+2010,chile,carrera_objetivo,ingenieria en minas o extraccion de litio,236.0,30.0,206.0,6.0,9.0,ingenieria en minas o extraccion de litio,12.71,31.84,37.7,2.16
+2011,chile,carrera_objetivo,ingenieria en minas o extraccion de litio,258.0,33.0,225.0,7.0,10.0,ingenieria en minas o extraccion de litio,12.79,9.32,41.21,1.79
+2012,chile,carrera_objetivo,ingenieria en minas o extraccion de litio,308.0,32.0,276.0,9.0,10.0,ingenieria en minas o extraccion de litio,10.39,19.38,49.2,1.75
+2013,chile,carrera_objetivo,ingenieria en minas o extraccion de litio,445.0,60.0,385.0,9.0,10.0,ingenieria en minas o extraccion de litio,13.48,44.48,71.09,2.25
+2014,chile,carrera_objetivo,ingenieria en minas o extraccion de litio,585.0,89.0,496.0,9.0,14.0,ingenieria en minas o extraccion de litio,15.21,31.46,93.45,2.74
+2015,chile,carrera_objetivo,ingenieria en minas o extraccion de litio,626.0,92.0,534.0,10.0,17.0,ingenieria en minas o extraccion de litio,14.7,7.01,100.0,2.82
+2016,chile,carrera_objetivo,ingenieria en minas o extraccion de litio,806.0,145.0,661.0,13.0,16.0,ingenieria en minas o extraccion de litio,17.99,28.75,128.75,3.53
+2017,chile,carrera_objetivo,ingenieria en minas o extraccion de litio,1153.0,235.0,918.0,16.0,19.0,ingenieria en minas o extraccion de litio,20.38,43.05,184.19,5.06
+2018,chile,carrera_objetivo,ingenieria en minas o extraccion de litio,1344.0,305.0,1039.0,23.0,23.0,ingenieria en minas o extraccion de litio,22.69,16.57,214.7,5.71
+2019,chile,carrera_objetivo,ingenieria en minas o extraccion de litio,1561.0,363.0,1198.0,23.0,12.0,ingenieria en minas o extraccion de litio,23.25,16.15,249.36,6.9
+2020,chile,carrera_objetivo,ingenieria en minas o extraccion de litio,1173.0,267.0,906.0,25.0,13.0,ingenieria en minas o extraccion de litio,22.76,-24.86,187.38,7.93
+2021,chile,carrera_objetivo,ingenieria en minas o extraccion de litio,1576.0,428.0,1148.0,25.0,17.0,ingenieria en minas o extraccion de litio,27.16,34.36,251.76,5.81
+2022,chile,carrera_objetivo,ingenieria en minas o extraccion de litio,1530.0,401.0,1129.0,27.0,19.0,ingenieria en minas o extraccion de litio,26.21,-2.92,244.41,5.65
+2023,chile,carrera_objetivo,ingenieria en minas o extraccion de litio,1530.0,381.0,1149.0,27.0,20.0,ingenieria en minas o extraccion de litio,24.9,0.0,244.41,5.24
+2024,chile,carrera_objetivo,ingenieria en minas o extraccion de litio,1507.0,392.0,1115.0,29.0,23.0,ingenieria en minas o extraccion de litio,26.01,-1.5,240.73,5.15
+2025,chile,carrera_objetivo,ingenieria en minas o extraccion de litio,1620.0,400.0,1220.0,27.0,19.0,ingenieria en minas o extraccion de litio,24.69,7.5,258.79,5.25
+2007,chile,carrera_objetivo,0,0.0,0.0,0.0,0.0,0.0,inteligencia artificial,,,,0.0
+2008,chile,carrera_objetivo,0,0.0,0.0,0.0,0.0,0.0,inteligencia artificial,,,,0.0
+2009,chile,carrera_objetivo,0,0.0,0.0,0.0,0.0,0.0,inteligencia artificial,,,,0.0
+2010,chile,carrera_objetivo,0,0.0,0.0,0.0,0.0,0.0,inteligencia artificial,,,,0.0
+2011,chile,carrera_objetivo,0,0.0,0.0,0.0,0.0,0.0,inteligencia artificial,,,,0.0
+2012,chile,carrera_objetivo,0,0.0,0.0,0.0,0.0,0.0,inteligencia artificial,,,,0.0
+2013,chile,carrera_objetivo,0,0.0,0.0,0.0,0.0,0.0,inteligencia artificial,,,,0.0
+2014,chile,carrera_objetivo,0,0.0,0.0,0.0,0.0,0.0,inteligencia artificial,,,,0.0
+2015,chile,carrera_objetivo,0,0.0,0.0,0.0,0.0,0.0,inteligencia artificial,,,,0.0
+2016,chile,carrera_objetivo,0,0.0,0.0,0.0,0.0,0.0,inteligencia artificial,,,,0.0
+2017,chile,carrera_objetivo,0,0.0,0.0,0.0,0.0,0.0,inteligencia artificial,,,,0.0
+2018,chile,carrera_objetivo,0,0.0,0.0,0.0,0.0,0.0,inteligencia artificial,,,,0.0
+2019,chile,carrera_objetivo,inteligencia artificial,38.0,6.0,32.0,1.0,1.0,inteligencia artificial,15.79,,,0.17
+2020,chile,carrera_objetivo,inteligencia artificial,40.0,2.0,38.0,2.0,3.0,inteligencia artificial,5.0,5.26,,0.27
+2021,chile,carrera_objetivo,inteligencia artificial,46.0,7.0,39.0,1.0,1.0,inteligencia artificial,15.22,15.0,,0.17
+2022,chile,carrera_objetivo,inteligencia artificial,109.0,14.0,95.0,2.0,2.0,inteligencia artificial,12.84,136.96,,0.4
+2023,chile,carrera_objetivo,inteligencia artificial,204.0,27.0,177.0,3.0,4.0,inteligencia artificial,13.24,87.16,,0.7
+2024,chile,carrera_objetivo,inteligencia artificial,913.0,184.0,729.0,9.0,15.0,inteligencia artificial,20.15,347.55,,3.12
+2025,chile,carrera_objetivo,inteligencia artificial,1564.0,412.0,1152.0,11.0,26.0,inteligencia artificial,26.34,71.3,,5.07
+2007,chile,carrera_objetivo,0,0.0,0.0,0.0,0.0,0.0,marketing directo y digital,,,0.0,0.0
+2008,chile,carrera_objetivo,0,0.0,0.0,0.0,0.0,0.0,marketing directo y digital,,,0.0,0.0
+2009,chile,carrera_objetivo,marketing directo y digital,11.0,5.0,6.0,1.0,1.0,marketing directo y digital,45.45,,30.56,0.09
+2010,chile,carrera_objetivo,marketing directo y digital,13.0,7.0,6.0,1.0,1.0,marketing directo y digital,53.85,18.18,36.11,0.12
+2011,chile,carrera_objetivo,marketing directo y digital,14.0,7.0,7.0,2.0,2.0,marketing directo y digital,50.0,7.69,38.89,0.1
+2012,chile,carrera_objetivo,marketing directo y digital,29.0,14.0,15.0,4.0,4.0,marketing directo y digital,48.28,107.14,80.56,0.16
+2013,chile,carrera_objetivo,marketing directo y digital,121.0,69.0,52.0,4.0,4.0,marketing directo y digital,57.02,317.24,336.11,0.61
+2014,chile,carrera_objetivo,marketing directo y digital,223.0,105.0,118.0,4.0,4.0,marketing directo y digital,47.09,84.3,619.44,1.05
+2015,chile,carrera_objetivo,marketing directo y digital,36.0,18.0,18.0,3.0,3.0,marketing directo y digital,50.0,-83.86,100.0,0.16
+2016,chile,carrera_objetivo,marketing directo y digital,33.0,16.0,17.0,2.0,2.0,marketing directo y digital,48.48,-8.33,91.67,0.14
+2017,chile,carrera_objetivo,marketing directo y digital,59.0,33.0,26.0,2.0,2.0,marketing directo y digital,55.93,78.79,163.89,0.26
+2018,chile,carrera_objetivo,marketing directo y digital,122.0,78.0,44.0,6.0,7.0,marketing directo y digital,63.93,106.78,338.89,0.52
+2019,chile,carrera_objetivo,marketing directo y digital,238.0,145.0,93.0,6.0,5.0,marketing directo y digital,60.92,95.08,661.11,1.05
+2020,chile,carrera_objetivo,marketing directo y digital,222.0,140.0,82.0,6.0,7.0,marketing directo y digital,63.06,-6.72,616.67,1.5
+2021,chile,carrera_objetivo,marketing directo y digital,428.0,250.0,178.0,8.0,9.0,marketing directo y digital,58.41,92.79,1188.89,1.58
+2022,chile,carrera_objetivo,marketing directo y digital,290.0,171.0,119.0,9.0,8.0,marketing directo y digital,58.97,-32.24,805.56,1.07
+2023,chile,carrera_objetivo,marketing directo y digital,524.0,328.0,196.0,12.0,12.0,marketing directo y digital,62.6,80.69,1455.56,1.79
+2024,chile,carrera_objetivo,marketing directo y digital,585.0,367.0,218.0,14.0,15.0,marketing directo y digital,62.74,11.64,1625.0,2.0
+2025,chile,carrera_objetivo,marketing directo y digital,757.0,467.0,290.0,21.0,19.0,marketing directo y digital,61.69,29.4,2102.78,2.45
+2007,chile,carrera_objetivo,medicina,1101.0,516.0,585.0,14.0,32.0,medicina,46.87,,55.0,16.3
+2008,chile,carrera_objetivo,medicina,1317.0,631.0,686.0,17.0,34.0,medicina,47.91,19.62,65.78,11.46
+2009,chile,carrera_objetivo,medicina,1388.0,645.0,743.0,18.0,43.0,medicina,46.47,5.39,69.33,11.91
+2010,chile,carrera_objetivo,medicina,1503.0,707.0,796.0,19.0,41.0,medicina,47.04,8.29,75.07,13.76
+2011,chile,carrera_objetivo,medicina,1539.0,718.0,821.0,19.0,32.0,medicina,46.65,2.4,76.87,10.66
+2012,chile,carrera_objetivo,medicina,1623.0,730.0,893.0,19.0,34.0,medicina,44.98,5.46,81.07,9.21
+2013,chile,carrera_objetivo,medicina,1732.0,808.0,924.0,20.0,33.0,medicina,46.65,6.72,86.51,8.74
+2014,chile,carrera_objetivo,medicina,1850.0,858.0,992.0,21.0,34.0,medicina,46.38,6.81,92.41,8.68
+2015,chile,carrera_objetivo,medicina,2002.0,924.0,1078.0,21.0,43.0,medicina,46.15,8.22,100.0,9.01
+2016,chile,carrera_objetivo,medicina,1991.0,931.0,1060.0,21.0,42.0,medicina,46.76,-0.55,99.45,8.72
+2017,chile,carrera_objetivo,medicina,2346.0,1099.0,1247.0,21.0,55.0,medicina,46.85,17.83,117.18,10.3
+2018,chile,carrera_objetivo,medicina,2529.0,1191.0,1338.0,21.0,53.0,medicina,47.09,7.8,126.32,10.74
+2019,chile,carrera_objetivo,medicina,2636.0,1261.0,1375.0,21.0,65.0,medicina,47.84,4.23,131.67,11.65
+2020,chile,carrera_objetivo,medicina,1201.0,576.0,625.0,22.0,59.0,medicina,47.96,-54.44,59.99,8.12
+2021,chile,carrera_objetivo,medicina,3302.0,1657.0,1645.0,22.0,62.0,medicina,50.18,174.94,164.94,12.17
+2022,chile,carrera_objetivo,medicina,3564.0,1828.0,1736.0,23.0,74.0,medicina,51.29,7.93,178.02,13.16
+2023,chile,carrera_objetivo,medicina,3925.0,2091.0,1834.0,24.0,87.0,medicina,53.27,10.13,196.05,13.44
+2024,chile,carrera_objetivo,medicina,3813.0,2074.0,1739.0,26.0,83.0,medicina,54.39,-2.85,190.46,13.02
+2025,chile,carrera_objetivo,medicina,4126.0,2325.0,1801.0,25.0,89.0,medicina,56.35,8.21,206.09,13.38
+2007,chile,carrera_objetivo,0,0.0,0.0,0.0,0.0,0.0,revenue management,,,0.0,0.0
+2008,chile,carrera_objetivo,0,0.0,0.0,0.0,0.0,0.0,revenue management,,,0.0,0.0
+2009,chile,carrera_objetivo,0,0.0,0.0,0.0,0.0,0.0,revenue management,,,0.0,0.0
+2010,chile,carrera_objetivo,0,0.0,0.0,0.0,0.0,0.0,revenue management,,,0.0,0.0
+2011,chile,carrera_objetivo,0,0.0,0.0,0.0,0.0,0.0,revenue management,,,0.0,0.0
+2012,chile,carrera_objetivo,0,0.0,0.0,0.0,0.0,0.0,revenue management,,,0.0,0.0
+2013,chile,carrera_objetivo,0,0.0,0.0,0.0,0.0,0.0,revenue management,,,0.0,0.0
+2014,chile,carrera_objetivo,0,0.0,0.0,0.0,0.0,0.0,revenue management,,,0.0,0.0
+2015,chile,carrera_objetivo,revenue management,8.0,6.0,2.0,1.0,1.0,revenue management,75.0,,100.0,0.04
+2016,chile,carrera_objetivo,revenue management,11.0,4.0,7.0,1.0,1.0,revenue management,36.36,37.5,137.5,0.05
+2017,chile,carrera_objetivo,revenue management,7.0,4.0,3.0,1.0,1.0,revenue management,57.14,-36.36,87.5,0.03
+2018,chile,carrera_objetivo,revenue management,1.0,0.0,1.0,1.0,1.0,revenue management,0.0,-85.71,12.5,0.0
+2019,chile,carrera_objetivo,0,0.0,0.0,0.0,0.0,0.0,revenue management,,-100.0,0.0,0.0
+2020,chile,carrera_objetivo,0,0.0,0.0,0.0,0.0,0.0,revenue management,,,0.0,0.0
+2021,chile,carrera_objetivo,0,0.0,0.0,0.0,0.0,0.0,revenue management,,,0.0,0.0
+2022,chile,carrera_objetivo,0,0.0,0.0,0.0,0.0,0.0,revenue management,,,0.0,0.0
+2023,chile,carrera_objetivo,0,0.0,0.0,0.0,0.0,0.0,revenue management,,,0.0,0.0
+2024,chile,carrera_objetivo,revenue management,11.0,6.0,5.0,1.0,1.0,revenue management,54.55,,137.5,0.04
+2025,chile,carrera_objetivo,revenue management,17.0,7.0,10.0,1.0,1.0,revenue management,41.18,54.55,212.5,0.06
+2007,chile,carrera_objetivo,turismo ecosustentable,45.0,26.0,19.0,3.0,3.0,turismo ecosustentable,57.78,,35.43,0.67
+2008,chile,carrera_objetivo,turismo ecosustentable,30.0,14.0,16.0,3.0,3.0,turismo ecosustentable,46.67,-33.33,23.62,0.26
+2009,chile,carrera_objetivo,turismo ecosustentable,28.0,12.0,16.0,4.0,4.0,turismo ecosustentable,42.86,-6.67,22.05,0.24
+2010,chile,carrera_objetivo,turismo ecosustentable,87.0,40.0,47.0,6.0,5.0,turismo ecosustentable,45.98,210.71,68.5,0.8
+2011,chile,carrera_objetivo,turismo ecosustentable,82.0,42.0,40.0,5.0,3.0,turismo ecosustentable,51.22,-5.75,64.57,0.57
+2012,chile,carrera_objetivo,turismo ecosustentable,85.0,48.0,37.0,3.0,1.0,turismo ecosustentable,56.47,3.66,66.93,0.48
+2013,chile,carrera_objetivo,turismo ecosustentable,85.0,34.0,51.0,4.0,2.0,turismo ecosustentable,40.0,0.0,66.93,0.43
+2014,chile,carrera_objetivo,turismo ecosustentable,122.0,67.0,55.0,4.0,2.0,turismo ecosustentable,54.92,43.53,96.06,0.57
+2015,chile,carrera_objetivo,turismo ecosustentable,127.0,70.0,57.0,4.0,2.0,turismo ecosustentable,55.12,4.1,100.0,0.57
+2016,chile,carrera_objetivo,turismo ecosustentable,185.0,85.0,100.0,5.0,3.0,turismo ecosustentable,45.95,45.67,145.67,0.81
+2017,chile,carrera_objetivo,turismo ecosustentable,268.0,124.0,144.0,5.0,4.0,turismo ecosustentable,46.27,44.86,211.02,1.18
+2018,chile,carrera_objetivo,turismo ecosustentable,280.0,158.0,122.0,5.0,4.0,turismo ecosustentable,56.43,4.48,220.47,1.19
+2019,chile,carrera_objetivo,turismo ecosustentable,386.0,180.0,206.0,5.0,4.0,turismo ecosustentable,46.63,37.86,303.94,1.71
+2020,chile,carrera_objetivo,turismo ecosustentable,222.0,104.0,118.0,6.0,5.0,turismo ecosustentable,46.85,-42.49,174.8,1.5
+2021,chile,carrera_objetivo,turismo ecosustentable,363.0,177.0,186.0,7.0,6.0,turismo ecosustentable,48.76,63.51,285.83,1.34
+2022,chile,carrera_objetivo,turismo ecosustentable,378.0,170.0,208.0,7.0,6.0,turismo ecosustentable,44.97,4.13,297.64,1.4
+2023,chile,carrera_objetivo,turismo ecosustentable,385.0,198.0,187.0,6.0,5.0,turismo ecosustentable,51.43,1.85,303.15,1.32
+2024,chile,carrera_objetivo,turismo ecosustentable,407.0,220.0,187.0,9.0,7.0,turismo ecosustentable,54.05,5.71,320.47,1.39
+2025,chile,carrera_objetivo,turismo ecosustentable,301.0,139.0,162.0,8.0,8.0,turismo ecosustentable,46.18,-26.04,237.01,0.98

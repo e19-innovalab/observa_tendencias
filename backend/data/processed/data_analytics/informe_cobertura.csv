@@ -1,0 +1,16 @@
+pais,sector,n_anios_observados,anio_min,anio_max,elegible_proyeccion,estado
+ARG,Tecnología,0,,,False,sin_datos_observados
+ARG,Economía del conocimiento,3,2019.0,2021.0,False,solo_mostrar
+ARG,Salud,3,2019.0,2021.0,False,solo_mostrar
+ARG,Energía,3,2019.0,2021.0,False,solo_mostrar
+ARG,Turismo,0,,,False,sin_datos_observados
+CHL,Tecnología,19,2007.0,2025.0,True,proyectable
+CHL,Economía del conocimiento,19,2007.0,2025.0,True,proyectable
+CHL,Salud,19,2007.0,2025.0,True,proyectable
+CHL,Energía,19,2007.0,2025.0,True,proyectable
+CHL,Turismo,19,2007.0,2025.0,True,proyectable
+URY,Tecnología,0,,,False,sin_datos_observados
+URY,Economía del conocimiento,0,,,False,sin_datos_observados
+URY,Salud,0,,,False,sin_datos_observados
+URY,Energía,0,,,False,sin_datos_observados
+URY,Turismo,0,,,False,sin_datos_observados
