@@ -2,7 +2,7 @@
 import numpy as np
 from statsmodels.tsa.holtwinters import ExponentialSmoothing
 
-DEFAULT_PARAMS = {"min_points": 12, "horizon": 4, "ci_z": 1.96}
+from app.core.config_files import analytics_params
 
 
 def project_series(values: list[float], params: dict | None = None) -> list[dict] | None:
@@ -10,7 +10,7 @@ def project_series(values: list[float], params: dict | None = None) -> list[dict
 
     The caller stores these with data_type='projected' and flags them as indicative.
     """
-    p = {**DEFAULT_PARAMS, **(params or {})}
+    p = analytics_params("projections", params)
     if len(values) < p["min_points"]:
         return None
     y = np.asarray(values, dtype=float)

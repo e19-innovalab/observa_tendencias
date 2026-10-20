@@ -1,0 +1,261 @@
+# Methodology parameters for every calculation the platform makes.
+# Each section is versioned so results can record which parameters produced them.
+
+employability:
+  version: "0.2"
+  name: Índice Sintético de Empleabilidad (ISE)
+  description: >-
+    Índice orientativo por ocupación: ISE = 0,35·Demanda neta + 0,25·Salario PPA +
+    0,25·Tasa de inserción − 0,15·Riesgo de automatización.
+
+    Cada dimensión se escala de 0 a 100 dentro del grupo comparado (las 20 ocupaciones de los
+    3 países, para que los puntajes sean comparables entre países). En el riesgo de
+    automatización la escala se invierte, que es como se aplica la penalización.
+
+    Demanda neta: crecimiento anual promedio del empleo del grupo ocupacional en los últimos
+    window_years años (Argentina y Uruguay: grupos de 2 dígitos CIUO-08, OIT; Chile: grandes
+    grupos de 1 dígito CIUO-08.CL, Encuesta Nacional de Empleo vía SIMEL), sin contar 2020 y 2021 (caída y rebote por
+    la pandemia) y solo si el grupo tiene al menos min_base miles de ocupados al inicio (con
+    muestras más chicas la encuesta varía mucho de un año a otro). Salario: ingreso mensual promedio en USD PPA
+    del gran grupo ocupacional (CIUO-08, 1 dígito, OIT). Riesgo de automatización: exposición
+    a la IA generativa de la OIT (2025), que mide cuánto de las tareas podría hacer la IA, sea
+    automatizándolas o complementándolas. Tasa de inserción: todavía sin fuente.
+
+    Puntaje: de 0 a 100 y relativo. 100 es la mejor combinación del grupo comparado y 0 la
+    peor; no es un porcentaje de nada. Niveles: Baja por debajo de levels.low, Alta por encima
+    de levels.high, Media en el medio.
+
+    Cobertura: qué parte del peso total del índice tiene datos para esa ocupación y país. Si
+    falta una dimensión, su peso se reparte entre las que tienen datos. Hoy ninguna ocupación
+    tiene tasa de inserción (25 %), así que la cobertura máxima es 75 %. Si la cobertura es
+    menor que min_coverage, el índice no se calcula (Datos insuficientes). Las ocupaciones de un
+    mismo grupo comparten los valores de ese grupo.
+  # ISE = 0.35·D_neta + 0.25·Salario_PPA + 0.25·Tasa_Inserción − 0.15·Riesgo_Automatización
+  # Each dimension is min-max scaled to 0-100 within the comparison cohort; dimensions where
+  # lower is better (automation risk) are inverted, which applies the penalty.
+  weights:
+    net_demand: 0.35
+    salary_ppp: 0.25
+    insertion_rate: 0.25
+    automation_risk: 0.15
+  # Where each dimension comes from. measure: latest (most recent value) or growth (average
+  # annual growth over window_years). indicator: null means no source yet (counts as missing).
+  dimensions:
+    net_demand:
+      indicator: employment
+      measure: growth
+      window_years: 3
+      # Years left out of growth calculations: the 2020 collapse and the 2021 rebound would
+      # read as demand (e.g. Chile only has 2020 and 2022 by occupation: +36%/year).
+      exclude_years: [2020, 2021]
+      # Growth is not computed when the starting value is below this (thousands of people):
+      # survey samples that small swing widely from year to year.
+      min_base: 10
+    salary_ppp:
+      indicator: mean_monthly_earnings_ppp
+      measure: latest
+    insertion_rate:
+      indicator: null
+      measure: latest
+    automation_risk:
+      indicator: genai_exposure
+      measure: latest
+      # A characteristic of the occupation's tasks, not a yearly measurement: the published
+      # table applies to every reference year.
+      applies_to_all_years: true
+  # Values older than this many years before the reference year are not used.
+  max_age_years: 5
+  # Scores are computed for every reference year from first_year to the latest year with data.
+  first_year: 2018
+  # all: the 3 countries x 20 occupations form one cohort (scores comparable across countries);
+  # country: each country is scaled on its own.
+  cohort: all
+  higher_is_better:
+    net_demand: true
+    salary_ppp: true
+    insertion_rate: true
+    automation_risk: false
+  levels:
+    low: 40
+    high: 70
+  # Below this share of total weight with data, the score is not computed.
+  min_coverage: 0.6
+  # Score assigned when every member of the cohort has the same value for a dimension.
+  flat_cohort_score: 50.0
+  scale_max: 100.0
+
+trends:
+  version: "0.1"
+  name: Clasificación de tendencias
+  description: >-
+    Se toman los últimos window_points valores observados de cada serie y se ajusta una
+    regresión lineal. La pendiente se normaliza por el nivel medio de la serie: si supera
+    +threshold la tendencia es de crecimiento, si es menor que -threshold es de disminución y
+    en otro caso es estable. Con menos de min_points valores no se clasifica. Si se elige un
+    período (from_year / to_year), se usan todos los valores observados de esos años en lugar
+    de los últimos window_points.
+  # Number of most recent observed points used to classify the trend.
+  window_points: 5
+  # normalize: divide the slope by the mean level (relative change per period). Indicators that
+  # are already rates of change (growth, inflation) override it in indicators.yaml.
+  normalize: true
+  # Slope above +threshold is growing, below -threshold is declining.
+  threshold: 0.02
+  min_points: 4
+
+projections:
+  version: "0.1"
+  name: Proyecciones orientativas
+  # Shown in the explorer and returned by /methodologies/projection. Folded style: line breaks
+  # inside a paragraph become spaces; a blank line starts a new paragraph or list item.
+  description: >-
+    Método: suavizado exponencial de Holt con tendencia aditiva. Es el mismo método para todos
+    los indicadores, pero se ajusta por separado a cada serie (indicador × país × sector), así
+    que cada una tiene sus propios coeficientes.
+
+    1. Con toda la historia observada se estiman dos componentes: el nivel (dónde está la serie
+    hoy, con más peso en los valores recientes) y la tendencia (cuánto cambia por período).
+
+    2. Cuánto reacciona cada componente a los datos nuevos se ajusta automáticamente a la serie:
+    una serie volátil reacciona rápido, una estable reacciona lento.
+
+    3. Proyección: valor en h períodos = último nivel + h × última tendencia. Es decir, se
+    prolonga en línea recta la tendencia actual.
+
+    4. Intervalo: valor ± ci_z × σ × √h, donde σ es el desvío de los errores del modelo sobre la
+    historia. Se ensancha con √h: cuanto más lejos, más incertidumbre.
+
+    Se proyectan horizon períodos en la frecuencia de la serie (años, trimestres o meses). Con
+    menos de min_points valores observados no se proyecta.
+
+    Limitaciones: no modela estacionalidad (en series trimestrales y mensuales el intervalo
+    sale más ancho), prolonga la tendencia sin amortiguarla y el intervalo es aproximado. Son
+    proyecciones orientativas: no anticipan cambios de contexto ni de política.
+  min_points: 12
+  horizon: 4
+  ci_z: 1.96
+
+skill_gaps:
+  version: "0.2"
+  name: Brechas de habilidades
+  description: >-
+    Compara cuánto crece la demanda de cada habilidad con cuánto crece la formación que la
+    enseña, ambas como crecimiento anual promedio en la misma ventana de años.
+
+    Demanda de una habilidad: crecimiento del empleo de las ocupaciones que la usan (el mismo
+    dato de la demanda neta del ISE), promediado según el peso de la habilidad en cada
+    ocupación (ESCO).
+
+    Oferta de una habilidad: crecimiento de los titulados de las carreras que forman para esas
+    ocupaciones (Mi Futuro, pregrado), promediado con los mismos pesos. Una carrera que forma
+    para varias ocupaciones reparte sus titulados en partes iguales. La correspondencia carrera
+    → ocupación es un borrador sin revisar (config/reference/carreras_chile_ciuo.yaml).
+
+    La ventana de la oferta (supply_window_years) no excluye 2020 y 2021: la exclusión de la
+    demanda responde a la caída del empleo en la pandemia, que no tuvo un equivalente en las
+    titulaciones.
+
+    Brecha = demanda − oferta, en puntos porcentuales: positiva si la demanda crece más rápido
+    que la formación. Solo se calcula si las ocupaciones con datos de oferta suman al menos
+    min_supply_coverage del peso de la habilidad; si no, "datos insuficientes" (nunca se inventa
+    una brecha). Una habilidad es emergente si su demanda crece más que emerging_growth por año.
+  emerging_growth: 0.10
+  # Demand growth window: same as the ISE's net demand (years, excluded years).
+  window_years: 3
+  exclude_years: [2020, 2021]
+  # Supply (graduates) window. The pandemic exclusion is for employment shocks; graduations had
+  # no such collapse, and excluding those years would leave Argentina (data up to 2023) with a
+  # one-year window that amplifies any swing.
+  supply_window_years: 3
+  supply_exclude_years: []
+  # Minimum graduates per occupation at the start of the window to compute its supply growth.
+  min_supply_base: 30
+  # Share of the skill's total weight that must have supply data to report a gap.
+  min_supply_coverage: 0.3
+  # Supply data by country: crosswalk files in config/reference (career -> ISCO).
+  crosswalks:
+    CHL: reference/carreras_chile_ciuo.yaml
+    ARG: reference/carreras_argentina_ciuo.yaml
+    URY: reference/carreras_uruguay_ciuo.yaml
+  # Gap above this many percentage points is a "high" gap (used by the new_skill_gap alert).
+  high_gap_points: 3.0
+
+alerts:
+  version: "0.1"
+  name: Alertas
+  description: >-
+    Después de cada actualización se revisan los últimos datos y se registran alertas.
+
+    Variación significativa: el último valor cambió respecto del período inmediatamente anterior
+    (sin huecos, y solo si el dato tiene a lo sumo max_age_years años) más que change_pct
+    (indicadores en cantidades, dinero o índices) o más que absolute_change puntos (indicadores
+    en porcentaje), o el cambio es atípico (más de z_threshold desvíos de los cambios previos de
+    la serie). Es severidad alta si supera high_severity_factor veces el umbral.
+
+    Cambio de tendencia: la tendencia de la última ventana es distinta de la de la ventana que
+    termina un período antes (crecimiento, estabilidad o disminución).
+
+    Cambio de nivel del ISE: una ocupación pasó de nivel (Baja, Media, Alta) respecto del año
+    anterior.
+
+    Fuente desactualizada: la última actualización exitosa es más vieja que stale_factor veces
+    la frecuencia esperada de la fuente.
+
+    Formato de archivo cambiado: un archivo oficial descargado automáticamente no tiene el
+    formato validado (hoja, columnas, períodos, valores o revisiones). No se carga y se
+    mantienen los datos anteriores hasta que alguien revise el perfil del dataset.
+
+    Cada alerta se registra una sola vez y guarda el valor anterior, el actual y el período.
+  change_pct: 0.10
+  # Units whose change is measured in their own unit (percentage points) instead of as a ratio,
+  # and the threshold for them. Indicators can override it (indicators.yaml -> alerts).
+  absolute_units: [percent]
+  absolute_change: 1.0
+  z_threshold: 2.0
+  # Minimum history (points) before the z-score rule is applied.
+  z_min_points: 5
+  # A change above change_pct * high_severity_factor is high severity.
+  high_severity_factor: 2
+  # Skill gap (percentage points of growth, skill_gaps section) above which a gap is new.
+  gap_threshold: 3.0
+  stale_factor: 1.5
+  # Ignore relative changes whose previous value is below this (percent changes on tiny bases
+  # are noise). Does not apply to absolute_units.
+  min_base: 30
+  # Which series are checked: national and sector series always; occupation-level series and
+  # ISE level changes for featured | all | none occupations.
+  occupation_scope: featured
+  # Significant changes are only checked between consecutive periods (no gaps in the series)
+  # and when the latest value is at most max_age_years old: old or gapped comparisons (e.g.
+  # Chile 2020 -> 2022 by occupation) are not news.
+  require_consecutive: true
+  max_age_years: 2
+  severities:
+    significant_change_default: medium
+    significant_change_high: high
+    index_level_change: medium
+    trend_reversal: medium
+    new_skill_gap: medium
+    stale_source: low
+    source_format_changed: high
+  messages:
+    significant_change: "Variación de {change:+.1%} respecto del período anterior"
+    significant_change_points: "Variación de {change:+.1f} puntos respecto del período anterior"
+    # Appended when one ISCO group change covers several occupations (they share the value).
+    shared_group: " (grupo CIUO {group}: {occupations})"
+    index_level_change: "El nivel de empleabilidad pasó de {previous} a {current}"
+    trend_reversal: "La tendencia cambió de {previous} a {current}"
+    new_skill_gap: "La brecha de habilidad superó el umbral por primera vez"
+    stale_source: "Fuente sin actualizar desde {last_update:%Y-%m-%d}"
+    source_format_changed: "El archivo {file} de {source} no tiene el formato validado: {reason}. No se cargó; se mantienen los datos anteriores."
+
+# Which occupation-level series get trends and projections after each update: featured | all |
+# none. Occupation series repeat the values of their ISCO group, so computing them for every
+# occupation adds time without adding information. The employability index always covers all.
+recompute:
+  occupation_series: featured
+  # Results computed with parameters no longer in this file (superseded methodologies) are
+  # deleted when their calculation runs again; the methodologies rows are always kept, so what
+  # each version used stays documented. true keeps the old results too (the API only shows the
+  # current ones either way).
+  keep_superseded_results: true

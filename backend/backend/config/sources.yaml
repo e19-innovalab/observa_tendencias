@@ -1,0 +1,207 @@
+# Data sources. `connector` names a class registered in app/connectors/registry.py;
+# sources without a connector are declared for traceability only (not fetched yet).
+# Credentials never go here: they live in backend/.env.
+
+# Days after which a source counts as stale, per expected_frequency. A source is flagged
+# stale when its last successful run is older than days * stale_factor (analytics.yaml).
+frequency_days:
+  daily: 1
+  weekly: 7
+  monthly: 30
+  quarterly: 91
+  annual: 365
+
+http:
+  timeout_seconds: 60
+  retries: 3
+  backoff_seconds: 2
+  # Sent when downloading pages and files from official sites (some refuse requests without one).
+  user_agent: "ObservaTendencias/0.1 (+observatorio de tendencias laborales; datos abiertos)"
+  # Extra intermediate certificates added to the standard bundle (certificate verification
+  # stays on). Each file explains which site needs it and why.
+  extra_ca_files:
+    - certs/sectigo_public_server_auth_ca_dv_r36.pem   # INE Uruguay
+
+# Automatic updates (python -m app.jobs.scheduler). Each source with a connector is checked on
+# the cron of its expected_frequency, or on its own `schedule:` if set. Dataset sources check
+# the official page and only download when a new release is linked, so checking often is cheap.
+scheduler:
+  timezone: America/Argentina/Buenos_Aires
+  cron_by_frequency:
+    daily: "0 6 * * *"
+    weekly: "0 6 * * 1"
+    monthly: "0 6 * * *"     # monthly sources are checked daily: release dates vary
+  # Checked once a day in any case, after the source jobs.
+  stale_check_cron: "30 7 * * *"
+  # Seconds a job may start late (e.g. the machine was asleep) and still run.
+  misfire_grace_seconds: 3600
+
+sources:
+  - source_code: world_bank
+    name: World Bank Open Data
+    kind: api
+    base_url: https://api.worldbank.org/v2
+    expected_frequency: weekly
+    connector: world_bank
+    # Fields every series of this source must define in indicators.yaml (checked at startup).
+    series_fields: [id]
+    options:
+      country_separator: ";"
+      per_page: 1000
+      start_year: 2000
+
+  - source_code: ilostat
+    name: ILOSTAT
+    kind: api
+    base_url: https://sdmx.ilo.org/rest
+    expected_frequency: weekly
+    connector: ilostat
+    series_fields: [dataflow, key]
+    options:
+      agency: ILO
+      dataflow_version: "1.0"
+      country_separator: "+"
+      start_year: 2000
+      accept: application/vnd.sdmx.data+csv;version=1.0.0
+
+  - source_code: cepalstat
+    name: CEPALSTAT
+    kind: api
+    base_url: null
+    expected_frequency: monthly
+
+  - source_code: datos_argentina
+    name: Datos Argentina (Series de Tiempo)
+    kind: api
+    base_url: https://apis.datos.gob.ar/series/api
+    expected_frequency: daily
+    connector: datos_argentina
+    series_fields: [id]
+    options:
+      # National source: every series it serves belongs to this country.
+      country: ARG
+      page_size: 1000
+      start_date: "2003-01-01"
+      # The API caches each exact URL, and some cached answers are stale: many periods come back
+      # null although they have data (37 of 93 quarters on the EPH unemployment series). Each
+      # series is read this many times with a different page size (page_size, page_size - 1, ...)
+      # so every read hits a different cache entry, and non-null values are merged.
+      reads: 5
+
+  - source_code: simel_chile
+    name: SIMEL · Sistema de Información del Mercado Laboral (INE Chile)
+    kind: api
+    # SDMX REST API of INE Chile (guide: https://www.ine.gob.cl/simel/guia-de-uso)
+    base_url: https://sdmx.ine.gob.cl/rest
+    expected_frequency: monthly
+    connector: simel
+    series_fields: [dataflow, key]
+    options:
+      agency: CL01
+      dataflow_version: "1.0"
+      accept: application/vnd.sdmx.data+csv;version=1.0.0
+      country: CHL
+      start_period: "2017-01"
+      # INE quality flags (codelist CL_OBS_STATUS): X = estimación no fiable,
+      # Y = estimación poco fiable. Those observations are not loaded.
+      exclude_status: [X, Y]
+
+  - source_code: bcentral_chile
+    name: Banco Central de Chile
+    kind: api
+    base_url: null
+    expected_frequency: monthly
+
+  - source_code: ilo_genai_exposure
+    name: OIT · Exposición ocupacional a la IA generativa (WP 140, 2025)
+    kind: dataset
+    base_url: https://doi.org/10.54394/HETP0387
+    expected_frequency: null
+    connector: reference_table
+    series_fields: [file, value_field]
+    options: {}
+
+  - source_code: sipa_argentina
+    name: SIPA · Situación y evolución del trabajo registrado (Secretaría de Trabajo)
+    kind: dataset
+    base_url: https://www.argentina.gob.ar/trabajo/estadisticas/situacion-y-evolucion-del-trabajo-registrado
+    expected_frequency: monthly
+    connector: dataset_download
+    series_fields: [profile]
+    options: {}
+
+  - source_code: esco
+    name: ESCO · Clasificación europea de capacidades, competencias, cualificaciones y ocupaciones (Comisión Europea)
+    kind: api
+    # Public REST API, no key (docs: https://ec.europa.eu/esco/api/doc/esco_api_doc.html).
+    base_url: https://ec.europa.eu/esco/api
+    expected_frequency: annual
+    # ESCO publishes new versions irregularly (about once a year): check on the 1st of each month.
+    schedule: "0 5 1 * *"
+    connector: esco
+    series_fields: []
+    options:
+      language: es
+      # ISCO groups fetched in parallel.
+      concurrency: 8
+      # Weight of each relation; a skill's weight for an ISCO unit group is the mean over the
+      # group's ESCO occupations (0 where the skill is absent).
+      relation_weights:
+        hasEssentialSkill: 1.0
+        hasOptionalSkill: 0.5
+      # Skills below this weight for a group are not stored.
+      min_weight: 0.0
+      # Some ESCO records answer with a server error every time (e.g. occupation
+      # 6426ada1-...). They are skipped and listed in the run; if more than this share of
+      # occupations fail, the run fails and nothing is replaced.
+      max_failed_share: 0.02
+
+  - source_code: mifuturo_chile
+    name: Mi Futuro · Servicio de Información de Educación Superior (MINEDUC, Chile)
+    kind: dataset
+    base_url: https://www.mifuturo.cl/bases-de-datos-titulados/
+    expected_frequency: annual
+    # Published once a year (around May); the page is checked weekly and the file is only
+    # downloaded when a new release is linked.
+    schedule: "0 6 * * 1"
+    connector: dataset_download
+    series_fields: []
+    options: {}
+
+  - source_code: ine_uruguay
+    name: INE Uruguay · Instituto Nacional de Estadística
+    kind: dataset
+    base_url: https://www.ine.gub.uy/
+    expected_frequency: monthly
+    connector: dataset_download
+    series_fields: [profile]
+    options: {}
+
+  - source_code: indicadores_cti_argentina
+    name: Indicadores CTI · Estudiantes y egresados de nivel superior (Argentina, datos del DIU)
+    kind: dataset
+    base_url: https://www.argentina.gob.ar/ciencia/indicadores-cti
+    expected_frequency: annual
+    # Published once a year, same URL: checked weekly, loaded only if the file changed.
+    schedule: "0 6 * * 2"
+    connector: dataset_download
+    series_fields: []
+    options: {}
+
+  - source_code: mec_uruguay
+    name: MEC Uruguay · Anuario Estadístico de Educación (Dirección Nacional de Educación)
+    kind: dataset
+    base_url: https://www.gub.uy/ministerio-educacion-cultura/datos-y-estadisticas/datos
+    expected_frequency: annual
+    # One yearbook per year (published around November, sometimes revised later): the list of
+    # yearbooks is checked weekly and each year's file is only downloaded when its link changes.
+    schedule: "0 6 * * 3"
+    connector: dataset_download
+    series_fields: []
+    options: {}
+
+  - source_code: manual_upload
+    name: Carga manual
+    kind: manual
+    base_url: null
+    expected_frequency: null

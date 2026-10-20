@@ -1,0 +1,46 @@
+# INE Uruguay: Índice de Precios del Consumo (IPC), total país, índice general y variaciones,
+# base octubre 2022 = 100, mensual desde julio de 1937.
+# Publisher: Instituto Nacional de Estadística (INE), Uruguay.
+
+dataset_code: ine_uy_ipc
+source: ine_uruguay
+title: IPC total país y variaciones (INE Uruguay)
+landing_page: https://www.ine.gub.uy/ipc-indice-de-precios-del-consumo
+
+download:
+  # Linked from the official IPC page; the base year is part of the path and the file name.
+  link_pattern: 'https://www5\.ine\.gub\.uy/documents/Estad(?:%C3%AD|í)sticasecon(?:%C3%B3|ó)micas/SERIES%20Y%20OTROS/IPC/Base%20[A-Za-z]+%20(?P<release>\d{4})=100/IPC%20gral%20y%20variaciones_base%20\d{4}\.xlsx'
+  allowed_hosts: [www5.ine.gub.uy]
+  max_bytes: 20000000
+  # INE updates this file every month under the same URL.
+  always_download: true
+
+file:
+  format: xlsx
+  sheet: "IPC_Cua 2.0"
+  header_row: 8
+  first_data_row: 9
+
+country: URY
+indicator: inflation_monthly_yoy
+frequency: M
+
+period:
+  column: "Mes y año"
+  formats: [date]
+
+# "Acum.12 meses" = variation of the index with respect to the same month of the previous year,
+# in percent (empty for the first 12 months of the series).
+columns:
+  "Acum.12 meses": {total: true, skip_empty: true}
+
+expected:
+  headers: ["Mes y año", "Índice", "Mensual", "Acum. año", "Acum.12 meses", "Trimestre",
+            "Cuatrimestre", "Semestre"]
+  first_period: "1937-07"
+  min_periods: 1000
+  value_min: -100
+  value_max: 10000
+  # Published CPI values are not revised; older months changing more than this blocks the load.
+  max_revision: 0.01
+  revision_grace_periods: 3

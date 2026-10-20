@@ -54,6 +54,12 @@ def test_jobs_summary(client):
     r = client.get("/api/v1/jobs/summary", params={"pais": "arg"}).json()
     assert r["total"] == 3
     assert {"provincia": "Santa Fe", "sector": "Otros", "n": 1} in r["por_provincia_sector"]
+    # how to show it comes from app.yaml (jobs_view), the same for every client
+    from app.core.config_files import app_config
+
+    view = app_config().jobs_view
+    assert r["view"]["notice"] == view.notice and r["view"]["page_size"] == view.page_size
+    assert r["view"]["other_sector"] not in r["view"]["sector_order"]
 
 
 def test_coverage(client):
@@ -70,3 +76,14 @@ def test_graduate_trends_filter(client):
 def test_graduate_projections(client):
     r = client.get("/api/v1/graduates/projections", params={"nombre": "medicina"}).json()
     assert r[0]["anio"] == 2026 and r[0]["limite_inferior"] <= r[0]["graduados_proyectado"]
+
+
+def test_country_and_legacy_pais_are_equivalent(client):
+    for path in ("/api/v1/jobs/summary", "/api/v1/coverage"):
+        a = client.get(path, params={"pais": "chl" if "coverage" in path else "arg"}).json()
+        b = client.get(path, params={"country": "CHL" if "coverage" in path else "ARG"}).json()
+        assert a == b
+    trends = client.get("/api/v1/graduates/trends", params={"country": "CHL"}).json()
+    assert {i["pais"] for i in trends["items"]} == {"chile"}
+    proj = client.get("/api/v1/graduates/projections", params={"country": "CHL"}).json()
+    assert proj and all(p["pais"] == "chile" for p in proj)

@@ -1,0 +1,29 @@
+# Local Postgres for development. Same major version as Supabase (17), so moving to Supabase
+# later only means changing DATABASE_URL in .env.
+#
+#   docker compose up -d      start (data persists in the rumbo_pgdata volume)
+#   docker compose down       stop
+#   docker compose down -v    stop and delete all local data
+#
+# Credentials and port come from .env (see .env.example).
+services:
+  db:
+    image: postgres:17
+    container_name: rumbo-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    ports:
+      - "${POSTGRES_PORT}:5432"
+    volumes:
+      - rumbo_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  rumbo_pgdata:

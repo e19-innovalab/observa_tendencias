@@ -1,7 +1,7 @@
 [project]
 name = "rumbo-backend"
 version = "0.1.0"
-description = "Rumbo: backend del observatorio laboral y educativo del Cono Sur"
+description = "Observa Tendencias: backend del observatorio laboral y educativo del Cono Sur"
 requires-python = ">=3.11"
 dependencies = [
   "fastapi>=0.115",
@@ -19,16 +19,20 @@ dependencies = [
   "scikit-learn>=1.5",
   "apscheduler>=3.10",
   "pyyaml>=6.0",
+  "python-multipart>=0.0.9",
 ]
 
 [project.optional-dependencies]
-dev = ["pytest>=8", "ruff>=0.6"]
+dev = ["pytest>=8", "ruff>=0.6", "pypdf>=4.0"]
 
 [tool.ruff]
 line-length = 100
 
 [tool.setuptools.packages.find]
-include = ["app*"]
+include = ["app*", "seeds*"]
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
 
 [tool.ruff.lint]
 select = ["E", "F", "I"]

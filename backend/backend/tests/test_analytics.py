@@ -22,9 +22,9 @@ def test_projection_needs_history():
 
 def test_employability_relative_and_coverage():
     cohort = {
-        "a": {"demand": 10, "wages": 10, "stability": 5, "outlook": 1, "skills_fit": 80},
-        "b": {"demand": 0, "wages": 0, "stability": 20, "outlook": -1, "skills_fit": 20},
-        "c": {"demand": 5, "wages": None, "stability": None, "outlook": None, "skills_fit": None},
+        "a": {"net_demand": 10, "salary_ppp": 10, "insertion_rate": 80, "automation_risk": 5},
+        "b": {"net_demand": 0, "salary_ppp": 0, "insertion_rate": 20, "automation_risk": 20},
+        "c": {"net_demand": 5, "salary_ppp": None, "insertion_rate": None, "automation_risk": None},
     }
     res = compute_employability_index(cohort)
     assert res["a"]["score"] == 100 and res["a"]["level"] == "high"

@@ -2,6 +2,10 @@ from datetime import date, datetime
 
 from pydantic import BaseModel, ConfigDict
 
+from app.core.config_files import JobsView, app_config
+
+NOTICES = app_config().notices
+
 
 class CoverageItem(BaseModel):
     model_config = ConfigDict(from_attributes=True)
@@ -40,19 +44,13 @@ class JobsPage(BaseModel):
     limit: int
     offset: int
     items: list[JobItem]
-    source: str = "LinkedIn (Apify), clasificación por reglas; no es una fuente oficial"
+    source: str = NOTICES["jobs"]
 
 
 class JobsSummaryCell(BaseModel):
     provincia: str
     sector: str
     n: int
-
-
-GRADUATES_SOURCE = (
-    "SIES (Chile) y datos.gob.ar (Argentina), procesado por el equipo de datos. "
-    "Las proyecciones son orientativas."
-)
 
 
 class GraduateTrendItem(BaseModel):
@@ -85,11 +83,13 @@ class GraduateProjectionItem(BaseModel):
 
 class GraduateTrends(BaseModel):
     items: list[GraduateTrendItem]
-    source: str = GRADUATES_SOURCE
+    source: str = NOTICES["graduates"]
 
 
 class JobsSummary(BaseModel):
     total: int
     scraped_at: datetime | None
     por_provincia_sector: list[JobsSummaryCell]
-    source: str = "LinkedIn (Apify), clasificación por reglas; no es una fuente oficial"
+    source: str = NOTICES["jobs"]
+    # how to show it (app.yaml -> jobs_view): notice, sector order with "other" last, page size
+    view: JobsView = app_config().jobs_view

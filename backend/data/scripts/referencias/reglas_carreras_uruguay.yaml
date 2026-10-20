@@ -1,0 +1,147 @@
+# Reglas para la correspondencia carrera → ocupación (CIUO-08) de Uruguay.
+#
+# Las carreras del Anuario Estadístico de Educación (MEC) aparecen con muchas variantes del mismo
+# nombre ("Licenciatura en Psicología" y "Licenciado en Psicología", "Contador Público" en cada
+# universidad). En vez de escribir 534 filas a mano, cada regla asocia un patrón a los códigos
+# CIUO-08 de 4 dígitos para los que forma la carrera. generar_correspondencia_uruguay.py aplica las
+# reglas a todas las carreras cargadas y escribe config/reference/carreras_uruguay_ciuo.yaml.
+#
+# - El patrón es una expresión regular sobre el nombre normalizado (minúsculas, sin tildes, espacios
+#   simples). Gana la PRIMERA regla que coincide: las más específicas van antes.
+# - codes: [] marca una carrera genérica, que no forma para una ocupación concreta (ciclos
+#   iniciales comunes): sus egresados no cuentan para ninguna ocupación.
+# - Mismos criterios que Chile y Argentina (data/scripts/referencias/README.md, sección 5). Es un
+#   borrador sin revisar.
+
+# Pasar a true cuando Data Analytics termine la revisión (se copia al archivo generado).
+revisada: false
+
+reglas:
+  # --- Genéricas: ciclos iniciales y básicos (no titulan para una ocupación) -------------------
+  - {patron: '^ciclo |^cio |ciclo (inicial|basico|unico)', codes: [], nota: ciclo común}
+
+  # --- Ciencias económicas y administración ---------------------------------------------------
+  - {patron: 'administracion y contabilidad', codes: [3313]}
+  - {patron: 'contador', codes: [2411]}
+  - {patron: 'tecnic(o|atura)( universitari[oa])? en (administracion|adminsitracion)|tecnico en administracion|gestion universitaria', codes: [3343]}
+  - {patron: 'economia agricola|agronegocios', codes: [2631, 1311]}
+  - {patron: 'politica, filosofia y economia', codes: [2631, 2633]}
+  - {patron: 'finanzas', codes: [2412, 2413]}
+  - {patron: 'econom', codes: [2631]}
+  - {patron: 'comercio exterior', codes: [3331]}
+  - {patron: 'negocios internacionales|estudios internacionales', codes: [2421, 3331]}
+  - {patron: 'relaciones internacionales|diplomacia', codes: [2422]}
+  - {patron: 'relaciones laborales|recursos humanos|gestion humana', codes: [2423]}
+  - {patron: 'marketing|comunicacion empresarial|negocios digitales|comercializacion', codes: [2431]}
+  - {patron: 'ciencias? de datos|datos y negocios|business analytics|inteligencia artificial', codes: [2511, 2120]}
+  - {patron: 'logistica', codes: [1324]}
+  - {patron: 'turistic|turismo|eventos y hospitalidad', codes: [3332, 4221]}
+  - {patron: 'gastronom', codes: [1412, 3434]}
+  - {patron: 'gerencia|administracion|direccion de empresas|gestion de empresas|direccion y administracion', codes: [2421, 1219]}
+
+  # --- Derecho ------------------------------------------------------------------------------------
+  - {patron: 'derecho|abogac', codes: [2611]}
+  - {patron: 'escriban|notariado', codes: [2619]}
+  - {patron: 'traduc|interpretacion lsu|lengua de senas', codes: [2643]}
+
+  # --- Salud ----------------------------------------------------------------------------------------
+  - {patron: 'medicina transfusional|hemoterapia|laboratorio clinico|anatomia patologica', codes: [3212]}
+  - {patron: 'veterinari', codes: [2250]}
+  - {patron: 'medicina', codes: [2211, 2212]}
+  - {patron: 'psicopedagog', codes: [2634, 2352]}
+  - {patron: 'psicomotric', codes: [2269]}
+  - {patron: 'psicolog', codes: [2634]}
+  - {patron: 'enfermeria|emfermeria', codes: [2221]}
+  - {patron: 'nutricion', codes: [2265]}
+  - {patron: 'fisioterap', codes: [2264]}
+  - {patron: 'laboratorista en odontologia', codes: [3214]}
+  - {patron: 'asistente (en odontologia|dental)|higienista', codes: [3251]}
+  - {patron: 'odontolog', codes: [2261]}
+  - {patron: 'quimico farmaceutico', codes: [2262]}
+  - {patron: 'bioquimico clinico', codes: [2131]}
+  - {patron: 'obstetr|partera', codes: [2222]}
+  - {patron: 'fonoaudiolog', codes: [2266]}
+  - {patron: 'imagenolog|radioterapia|radioisotopos', codes: [3211]}
+  - {patron: 'fisica medica', codes: [2111]}
+  - {patron: 'oftalmolog', codes: [2267]}
+  - {patron: 'instrumentacion quirurgica|neumocardiolog|neurofisiologia|acompanamiento terapeutico', codes: [3259]}
+  - {patron: 'terapia ocupacional|musicoterapia|podologia', codes: [2269]}
+  - {patron: 'registros medicos', codes: [3252]}
+  - {patron: 'cosmetologia', codes: [5142]}
+  - {patron: 'salud ocupacional', codes: [2263, 3257]}
+
+  # --- Ingeniería y tecnología --------------------------------------------------------------------
+  - {patron: 'analista en infraestructura', codes: [3513, 2522]}
+  - {patron: 'analista en|tecnolog[oa](/a)? en informatica|analisis y desarrollo de sistemas|desarrollador de software', codes: [3512, 2512]}
+  - {patron: 'telematica|telecomunicacion|sistemas de comunicacion', codes: [2153]}
+  - {patron: 'sistemas electricos|electric', codes: [2151]}
+  - {patron: 'sistemas|computacion|informatica|software|tecnologias de la informacion', codes: [2511, 2512, 2514, 2519]}
+  - {patron: 'ingenier(ia|o) civil', codes: [2142]}
+  - {patron: 'agrimens|cartografia', codes: [2165]}
+  - {patron: 'ingenier(ia|o) (de |en )?alimen|ingeniero alimentario', codes: [2145]}
+  - {patron: 'analisis alimentario|lacteos', codes: [2113, 3111]}
+  - {patron: 'carnico|operador de alimentos', codes: [3139]}
+  - {patron: 'ingenier(ia|o) quimic', codes: [2145]}
+  - {patron: 'tecnolog(o|ias)( en)? quimic|quimicas|tecnologo/a quimico', codes: [3111]}
+  - {patron: 'tecnologo (industrial )?mecanic|mecatronica industrial|mectronica', codes: [3115]}
+  - {patron: 'industrial mecanic|ingenieria naval|ingeniero naval', codes: [2144]}
+  - {patron: 'ingenier(ia|o) industrial|ingenier(ia|o) de produccion', codes: [2141]}
+  - {patron: 'electronica|control y automatica|mecatronica', codes: [2152]}
+  - {patron: 'tecnologo en telecomunicaciones', codes: [3522]}
+  - {patron: 'biomedic', codes: [2149]}
+  - {patron: 'energias renovables', codes: [2151]}
+  - {patron: 'minero', codes: [3117]}
+  - {patron: 'madera', codes: [3119]}
+  - {patron: 'ingenieria audiovisual', codes: [3521]}
+
+  # --- Agro y ambiente ----------------------------------------------------------------------------
+  - {patron: 'produccion lechera|produccion agropecuaria|produccion equina', codes: [3142]}
+  - {patron: 'agronom|agroambiental|agropecuaria|agricola ganadera|forestal', codes: [2132]}
+  - {patron: 'recursos naturales|gestion ambiental|control ambiental|agua y desarrollo|recursos hidricos|ingenieria ambiental|efluentes|desarrollo sustentable', codes: [2133]}
+
+  # --- Educación ----------------------------------------------------------------------------------
+  - {patron: 'profesorado|profesor de', codes: [2330]}
+  - {patron: 'primera infancia|educacion inicial', codes: [2342]}
+  - {patron: 'magisterio|maestro', codes: [2341]}
+  - {patron: 'educacion fisica', codes: [2330, 3422]}
+  - {patron: 'deporte|deportiv|fitness|futbol', codes: [3422]}
+  - {patron: 'recreacion|tiempo libre', codes: [3423]}
+  - {patron: 'educacion|acompanamiento pedagogico', codes: [2351]}
+
+  # --- Arquitectura, diseño y artes ---------------------------------------------------------------
+  - {patron: 'diseno del paisaje', codes: [2162]}
+  - {patron: 'diseno de interiores', codes: [3432]}
+  - {patron: 'diseno industrial|modas?\b|indumentaria|textil', codes: [2163]}
+  - {patron: 'diseno grafico|comunicacion visual|multimedia|animacion|arte digital|diseno, arte|diseno integrado|diseno aplicado', codes: [2166]}
+  - {patron: 'arquitect', codes: [2161]}
+  - {patron: 'fotograf', codes: [3431]}
+  - {patron: 'danza', codes: [2653]}
+  - {patron: 'music|jazz|interpretacion|composicion|coral|coros', codes: [2652]}
+  - {patron: 'artes escenicas', codes: [2655]}
+  - {patron: 'cine|audiovisual', codes: [2654]}
+  - {patron: 'artes?\b|plastic|dibujo|pintura|ceramica|escultura|creador', codes: [2651]}
+
+  # --- Ciencias exactas y naturales ---------------------------------------------------------------
+  - {patron: 'bioquimica|biolog|biotecnolog', codes: [2131]}
+  - {patron: 'quimic', codes: [2113]}
+  - {patron: 'geolog', codes: [2114]}
+  - {patron: 'atmosfera', codes: [2112]}
+  - {patron: 'astronom|fisica|fisico-matematica', codes: [2111]}
+
+  # --- Matemática y estadística (después de "fisico-matematica") ----------------------------------
+  - {patron: 'matematic|estadistic', codes: [2120]}
+
+  # --- Ciencias sociales y humanidades ------------------------------------------------------------
+  - {patron: 'trabajo social|asistente social', codes: [2635]}
+  - {patron: 'ciencia politica', codes: [2633]}
+  - {patron: 'sociolog|ciencias sociales|antropolog|geografia|desarrollo', codes: [2632]}
+  - {patron: 'historia|historicas|filosofia|humanidades', codes: [2633]}
+  - {patron: 'linguistica', codes: [2643]}
+  - {patron: 'letras|correccion de estilo|dramaturgia', codes: [2641]}
+  - {patron: 'teolog|religios', codes: [2636]}
+  - {patron: 'bibliotecolog', codes: [2622]}
+  - {patron: 'archivolog|museolog|bienes culturales', codes: [2621]}
+  - {patron: 'gestion cultural', codes: [3435]}
+  - {patron: 'comunicacion', codes: [2642, 2432]}
+  - {patron: 'ciencias militares', codes: ["0110"]}
+  - {patron: 'seguridad y orden publico', codes: [5412]}

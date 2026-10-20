@@ -1,4 +1,4 @@
-# Rumbo: backend
+# Observa Tendencias: backend
 
 FastAPI + PostgreSQL (Supabase). La estructura sigue `backend_plan_ES.md`.
 

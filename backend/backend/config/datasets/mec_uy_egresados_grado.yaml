@@ -1,0 +1,49 @@
+# MEC Uruguay, Anuario Estadístico de Educación: university graduates ("egresados") by degree
+# program, one yearbook per year (2020 onwards as spreadsheets; earlier years are not published
+# as .xlsx).
+# Publisher: División de Investigación y Estadística, Dirección Nacional de Educación (MEC), with
+#   data from each institution. UdelaR's figures for the latest year are preliminary.
+# Sheets (same codes every year): II-7.2.1 public universities (UdelaR, UTEC), II-7.2.2 private
+#   universities, II-7.2.3 university institutes. Each sheet nests institution > faculty >
+#   campus > program: headings are bold, programs are not. Programs with the same name are added
+#   up across institutions and campuses into the graduates table (level Grado).
+
+dataset_code: mec_uy_egresados_grado
+source: mec_uruguay
+title: Egresados universitarios de grado por carrera (Anuario Estadístico de Educación, MEC Uruguay)
+landing_page: https://www.gub.uy/ministerio-educacion-cultura/datos-y-estadisticas/datos
+target: graduates
+target_scope: period
+country: URY
+
+download:
+  # The list links one page per yearbook; each page links its spreadsheet (relative URL).
+  page_pattern: '/ministerio-educacion-cultura/datos-y-estadisticas/datos/anuario-estadistico-educacion-(?P<release>\d{4})(?=")'
+  min_release: "2020"
+  link_pattern: '/ministerio-educacion-cultura/sites/ministerio-educacion-cultura/files/\d{4}-\d{2}/Anuario[^"''<>]*?\.xlsx'
+  allowed_hosts: [www.gub.uy]
+  max_bytes: 60000000
+
+file:
+  format: xlsx
+
+outline:
+  sheets:
+    - {sheet: II-7.2.1, level: Grado}
+    - {sheet: II-7.2.2, level: Grado}
+    - {sheet: II-7.2.3, level: Grado}
+  name_column: A
+  # Columns: B-D entrants (total, men, women), E-G enrolment, H-J graduates.
+  value_column: H
+  title_rows: 7
+  period_pattern: 'Todo el pa[ií]s,\s*(?P<year>\d{4})'
+  total_pattern: '^TOTAL'
+  end_pattern: '^Fuente'
+  missing_values: ["s/d", "-"]
+  # 2024, private universities: two programs are empty while their campus counts them (23 of
+  # 2.321 graduates, 1 %).
+  max_total_gap: 0.02
+
+expected:
+  value_min: 0
+  value_max: 5000

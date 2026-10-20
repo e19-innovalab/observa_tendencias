@@ -1,0 +1,72 @@
+# Crosswalk: Argentine university disciplines ("disciplina específica", DIU data published by the
+# Subsecretaría de Ciencia, Tecnología e Innovación) → ISCO-08 / CIUO-08 unit groups they mainly
+# train for. Used for the supply side of skill gaps.
+#
+# STATUS: draft written by profession, NOT REVIEWED (reviewed: false). There is no official
+# crosswalk. Same rules as the Chilean one (data/scripts/referencias/README.md, section 5).
+#
+# Differences with Chile:
+# - The unit is a discipline, broader than a career ("Ingeniería" covers every engineering), so
+#   most rows list several occupations; graduates are split equally among them.
+# - Two levels: Grado (degrees) and Pregrado (short university degrees, mostly technical). A row
+#   can give codes per level: {Pregrado: [...], "*": [...]} where "*" is every other level.
+# - Universities only: non-university tertiary institutes are not in the source file.
+
+reviewed: false
+country: ARG
+source_profile: arg_egresados_universitarios
+levels: [Grado, Pregrado]
+
+careers:
+  # Ciencias Agrícolas
+  "Ciencias Agropecuarias": {Pregrado: [3142], "*": [2132]}
+  "Veterinaria": {Pregrado: [3240], "*": [2250]}
+
+  # Ciencias Médicas
+  "Bioquímica y Farmacia": [2262, 2131]
+  "Medicina": [2211, 2212]
+  "Odontología": {Pregrado: [3251], "*": [2261]}
+  "Paramédicas y Auxiliares de la Medicina":
+    Pregrado: [3221, 3211, 3212, 3256]
+    "*": [2221, 2264, 2265, 2266]
+  "Salud Pública": [2263]
+  "Sanidad": [3259]
+
+  # Ciencias Sociales
+  "Ciencias Políticas, Relaciones Internacionales y Diplomacia": [2633, 2422]
+  "Ciencias de la Información y de la Comunicación": {Pregrado: [3521, 2642], "*": [2642, 2432]}
+  "Demografía y Geografía": [2632]
+  "Derecho": {Pregrado: [3411], "*": [2611, 2612, 2619]}
+  "Economía y Administración": {Pregrado: [3313, 3343], "*": [2411, 2421, 2631, 2412]}
+  "Educación": {Pregrado: [5312, 2342], "*": [2330, 2341, 2342, 2352]}
+  "Otras Ciencias Aplicadas": []
+  "Otras Ciencias Sociales": []
+  "Psicología": [2634]
+  "Sociología, Antropología y Servicio Social": [2632, 2635]
+
+  # Exactas y Naturales
+  "Astronomía": [2111]
+  "Biología": [2131]
+  "Ciencias del Suelo": [2114, 2132]
+  "Estadística": [2120]
+  "Física": [2111]
+  "Industrias": {Pregrado: [3119], "*": [2141]}
+  "Informática": {Pregrado: [3512, 3511, 3514], "*": [2511, 2512, 2514, 2519]}
+  "Matemática": [2120]
+  "Meteorología": [2112]
+  "Química": {Pregrado: [3111], "*": [2113]}
+
+  # Humanidades
+  "Arqueología": [2632]
+  "Artes": [2651, 2652, 2655]
+  "Filosofía": [2633]
+  "Historia": [2633]
+  "Letras e Idiomas": [2641, 2643]
+  "Relaciones Institucionales y Humanas": [2432, 2423]
+  "Teología": [2636]
+
+  # Ingeniería y Tecnología
+  "Arquitectura y Diseño": {Pregrado: [3118, 2166], "*": [2161, 2163, 2166]}
+  "Ingeniería":
+    Pregrado: [3112, 3113, 3114, 3115]
+    "*": [2141, 2142, 2144, 2145, 2146, 2151, 2152]

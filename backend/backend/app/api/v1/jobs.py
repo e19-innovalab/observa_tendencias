@@ -2,11 +2,13 @@ from fastapi import APIRouter, Depends, Query
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
+from app.core.config_files import app_config
 from app.core.database import get_session
 from app.models import JobPosting
 from app.schemas.analytics import JobItem, JobsPage, JobsSummary, JobsSummaryCell
 
 router = APIRouter(tags=["jobs"])
+_pagination = app_config().pagination
 
 
 def _filters(pais: str | None, provincia: str | None, sector: str | None, q: str | None):
@@ -24,15 +26,16 @@ def _filters(pais: str | None, provincia: str | None, sector: str | None, q: str
 
 @router.get("/jobs", response_model=JobsPage)
 def list_jobs(
-    pais: str | None = None,
+    country: str | None = Query(None, description="ISO3 (ARG, URY, CHL)"),
+    pais: str | None = Query(None, description="Igual que country (se mantiene por compatibilidad)"),
     provincia: str | None = None,
     sector: str | None = None,
     q: str | None = Query(None, description="Texto a buscar en el título"),
-    limit: int = Query(50, ge=1, le=500),
+    limit: int = Query(_pagination.default_limit, ge=1, le=_pagination.max_limit),
     offset: int = Query(0, ge=0),
     session: Session = Depends(get_session),
 ):
-    conds = _filters(pais, provincia, sector, q)
+    conds = _filters(country or pais, provincia, sector, q)
     total = session.scalar(select(func.count()).select_from(JobPosting).where(*conds))
     rows = session.scalars(
         select(JobPosting).where(*conds)
@@ -46,8 +49,12 @@ def list_jobs(
 
 
 @router.get("/jobs/summary", response_model=JobsSummary)
-def jobs_summary(pais: str | None = None, session: Session = Depends(get_session)):
-    conds = _filters(pais, None, None, None)
+def jobs_summary(
+    country: str | None = Query(None, description="ISO3 (ARG, URY, CHL)"),
+    pais: str | None = Query(None, description="Igual que country (se mantiene por compatibilidad)"),
+    session: Session = Depends(get_session),
+):
+    conds = _filters(country or pais, None, None, None)
     cells = session.execute(
         select(JobPosting.provincia, JobPosting.sector, func.count())
         .where(*conds).group_by(JobPosting.provincia, JobPosting.sector)

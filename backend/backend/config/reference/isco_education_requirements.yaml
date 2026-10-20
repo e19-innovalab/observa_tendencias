@@ -1,0 +1,115 @@
+# Education each ISCO-08 major group requires, for the over/under-qualification indicators
+# (ILOSTAT series "employment by occupation and education", DF_EMP_TEMP_SEX_OCU_EDU_NB).
+#
+# Normative approach of the ILO (ISCO-08 skill levels and their ISCED equivalence; same rule as the
+# ILO's education-mismatch estimates): skill level 1 (group 9) <-> primary; skill level 2 (groups
+# 4-8) <-> secondary (ISCED 2-4); skill levels 3-4 (groups 1-3) <-> tertiary (ISCED 5 and above).
+# A worker is over-qualified with a band above the one their occupation requires, and
+# under-qualified with one below. Rates are over the workers with a classified occupation and
+# education level.
+#
+# Source of the equivalence: ILO, International Standard Classification of Occupations ISCO-08,
+# Vol. 1, introduction, table 1 (mapping of the four ISCO-08 skill levels to ISCED-97 levels)
+# https://www.ilo.org/publications/international-standard-classification-occupations-2008-isco-08-structure
+
+occupation_dimension: OCU
+education_dimension: EDU
+occupation_code_prefix: OCU_ISCO08_
+occupation_isco_digits: 1
+
+# Education bands from lowest to highest. ILOSTAT codes Argentina and Uruguay in ISCED-97 and
+# Chile in ISCED-11. No schooling (X) and pre-primary (0) share the band of primary: Uruguay's
+# 2023 and 2025 data move between 11 % and 16 % of workers from primary to level 0 and back, a
+# coding change that would otherwise show as under-qualification in elementary occupations.
+# Not stated (ISCED97 UNK, ISCED11 9) is left out.
+bands:
+  - code: primary_or_less
+    name: Primaria o menos
+    edu_codes: [EDU_ISCED97_X, EDU_ISCED97_0, EDU_ISCED97_1,
+                EDU_ISCED11_X, EDU_ISCED11_0, EDU_ISCED11_1]
+  - code: secondary
+    name: Secundaria (CINE 2 a 4)
+    edu_codes: [EDU_ISCED97_2, EDU_ISCED97_3, EDU_ISCED97_4,
+                EDU_ISCED11_2, EDU_ISCED11_3, EDU_ISCED11_4]
+  - code: tertiary
+    name: Terciaria (CINE 5 o más)
+    edu_codes: [EDU_ISCED97_5, EDU_ISCED97_6,
+                EDU_ISCED11_5, EDU_ISCED11_6, EDU_ISCED11_7, EDU_ISCED11_8]
+
+# Education codes kept as "not stated" (shown in the explorer, left out of the rates).
+not_stated:
+  code: not_stated
+  name: No informado
+  edu_codes: [EDU_ISCED97_UNK, EDU_ISCED11_9]
+
+# Major group -> required band. Group 0 (armed forces) spans several skill levels and is left out.
+requirements:
+  "1": tertiary
+  "2": tertiary
+  "3": tertiary
+  "4": secondary
+  "5": secondary
+  "6": secondary
+  "7": secondary
+  "8": secondary
+  "9": primary_or_less
+
+# Groups shown but left out of the rates, with the reason.
+excluded_groups:
+  "0": Fuerzas armadas (mezclan varios niveles de competencia)
+  "X": Ocupación no informada
+
+# Observation status ILOSTAT uses for a break in series. Only the years from each country's last
+# break onward are kept: Uruguay's survey changed its education coding in 2022 (before it, 53 % of
+# workers were classified as primary; after it, 24 %).
+break_status: B
+
+# Meaning of each cell status, shown as the table legend (Spanish).
+status_info:
+  matched:
+    label: Nivel adecuado
+    description: >-
+      Tienen el nivel educativo que pide su ocupación. Ejemplo: profesionales con educación
+      terciaria, o empleados de oficina con secundaria.
+  over:
+    label: Sobrecalificados
+    description: >-
+      Tienen más educación de la que pide su ocupación. Ejemplo: personas con título terciario que
+      trabajan como empleados de oficina o en ocupaciones elementales.
+  under:
+    label: Subcalificados
+    description: >-
+      Tienen menos educación de la que pide su ocupación. Ejemplo: gerentes o técnicos sin
+      educación terciaria, u operarios sin secundaria.
+  excluded:
+    label: Fuera del cálculo
+    description: >-
+      Fuerzas armadas, ocupación no informada o nivel educativo no informado: se muestran para que
+      los totales coincidan con la fuente, pero no entran en los porcentajes.
+
+# Explanation shown in the explorer ("¿Cómo se calcula?"), in Spanish. One paragraph per item.
+explanation:
+  - >-
+    ¿Qué mide? Qué parte de los ocupados tiene más educación (sobrecalificación) o menos educación
+    (subcalificación) de la que pide su ocupación. Responde si el sistema educativo forma a la gente
+    al nivel que el mercado de trabajo usa, con la misma regla para los tres países.
+  - >-
+    La regla es el enfoque normativo de la OIT. La Clasificación Internacional Uniforme de
+    Ocupaciones (CIUO-08) define cuatro niveles de competencia y los asocia a niveles educativos.
+    Directivos, profesionales y técnicos (grandes grupos 1 a 3) piden educación terciaria; empleados
+    de oficina, vendedores, agricultores, oficios y operadores (4 a 8), secundaria; las ocupaciones
+    elementales (9), primaria.
+  - >-
+    Cálculo: sobrecalificación = ocupados con un nivel mayor al que pide su grupo ÷ ocupados con
+    grupo y nivel informados. Subcalificación, igual con un nivel menor. La tabla muestra los
+    ocupados (en miles) de cada grupo y nivel: en verde los que coinciden con su grupo, en naranja
+    los sobrecalificados y en azul los subcalificados. Las fuerzas armadas y los casos sin
+    información se muestran pero no entran en el cálculo.
+  - >-
+    Fuente: encuestas de hogares de cada país procesadas por la OIT (ILOSTAT, serie "ocupados por
+    ocupación y nivel educativo"): EPH urbana en Argentina, ECH en Uruguay y ENE en Chile. Solo se
+    usan los años desde el último quiebre de serie que informa ILOSTAT.
+  - >-
+    Límites: mide niveles, no especialidades (un ingeniero que trabaja de contador figura como bien
+    calificado). El valor es el mismo para todas las ocupaciones de un gran grupo. Un título no
+    garantiza competencias, ni su falta las descarta: es una aproximación.

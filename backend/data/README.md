@@ -1,4 +1,4 @@
-# Rumbo data
+# Observa Tendencias: datos
 
 - `raw/linkedin_jobs/`: Apify LinkedIn scrapes, one CSV per run (`jobs_ar_YYYY-MM-DD.csv`). Never overwrite; add a new file per scrape.
 - `processed/`: cleaned or derived files.

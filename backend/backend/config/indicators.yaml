@@ -1,0 +1,372 @@
+# Indicator definitions and the source series that feed them.
+# Adding a series here is enough for the next ingestion run to fetch it: no code changes.
+#
+# domain maps to the dashboard tabs: economic -> Socioeconómicos, labor -> Laborales,
+# education -> Educativos (labels in app.yaml).
+#
+# Series fields by source:
+#   world_bank: id                       World Bank indicator code
+#   ilostat:    dataflow, key            SDMX dataflow and key; {countries} is replaced by the
+#                                        catalog countries joined with the source separator
+#               sector_dimension         (optional) column holding the ISIC code; rows are mapped
+#                                        to catalog sectors through sectors[].ilostat_eco
+#               total_code               (optional) code of the national total (stored with no sector)
+#               sector_aggregation       sum | mean, used when a sector spans several ISIC sections
+#   ilostat occupation series:
+#               occupation_dimension     column holding the ISCO-08 group code
+#               occupation_code_prefix   prefix before the ISCO digits (OC2_ISCO08_, OCU_ISCO08_)
+#               occupation_isco_digits   digits of the group (2 or 1); every catalog occupation
+#                                        whose isco08_code starts with them gets the group value
+#   ilostat education-mismatch series:
+#               education_mismatch       {file, measure: over | under}: employment by occupation
+#                                        and education turned into the % of workers above or below
+#                                        the education their major group requires (rules in file)
+#   reference_table: file, value_field   YAML table under config/ keyed by ISCO-08 4-digit code;
+#                                        same value for every catalog country
+#   dataset_download: profile           dataset profile in config/datasets/ (file, columns, checks)
+#   simel_chile: dataflow, key           SIMEL (INE Chile) SDMX dataflow and key, e.g. key
+#                                        M.OCUCIUO._T..AS = monthly, national, all groups, both sexes
+#               occupation_*             as for ilostat (SIMEL publishes CIUO-08.CL major groups)
+#               annualize                {method: mean, months: [1, 4, 7, 10]}: yearly value from
+#                                        the rolling quarters that start in those months (the 4
+#                                        calendar quarters); only complete years
+#   countries (any source, optional): restrict a series to these countries
+#   datos_argentina: id                  series id from apis.datos.gob.ar/series/api/search
+#               collapse, collapse_aggregation   (optional) API aggregation to a lower frequency;
+#                                        only complete periods are returned
+#               transform                (optional) pct_change_year_ago: computed locally as
+#                                        value / value one year earlier - 1
+#               scale                    (optional) multiplier applied last (100 -> percent)
+# trend (optional): overrides of the trends methodology for this indicator, e.g. for indicators
+#   that are already rates of change: {normalize: false, threshold: 0.5} (points per period).
+# alerts (optional): overrides of the alert rules for this indicator, e.g. {absolute_change: 3}
+#   for a volatile rate.
+# frequency: A (annual), Q (quarterly), M (monthly)
+
+indicators:
+  # --- Laborales -------------------------------------------------------------
+  - code: unemployment_rate
+    name: Tasa de desocupación
+    unit: percent
+    domain: labor
+    higher_is_better: false
+    description: Desocupados como porcentaje de la fuerza de trabajo, 15 años y más.
+    series:
+      - source: ilostat
+        dataflow: DF_UNE_DEAP_SEX_AGE_RT
+        key: "{countries}.A..SEX_T.AGE_YTHADULT_YGE15"
+        frequency: A
+
+  - code: unemployment_rate_quarterly
+    name: Tasa de desocupación trimestral (EPH)
+    unit: percent
+    domain: labor
+    higher_is_better: false
+    description: Encuesta Permanente de Hogares, total de aglomerados urbanos (INDEC).
+    trend:
+      window_points: 8
+    series:
+      - source: datos_argentina
+        id: 42.3_EPH_PUNTUATAL_0_M_30
+        scale: 100
+        frequency: Q
+
+  - code: activity_rate_quarterly
+    name: Tasa de actividad trimestral (EPH)
+    unit: percent
+    domain: labor
+    higher_is_better: true
+    description: Encuesta Permanente de Hogares, total de aglomerados urbanos (INDEC).
+    trend:
+      window_points: 8
+    series:
+      - source: datos_argentina
+        id: 43.2_ECTAT_0_T_33
+        scale: 100
+        frequency: Q
+
+  - code: registered_private_employment
+    name: Asalariados registrados del sector privado (SIPA)
+    unit: thousands_persons
+    domain: labor
+    higher_is_better: true
+    description: >-
+      Personas con empleo asalariado registrado en el sector privado, total y por rama (CIIU
+      Rev.3), serie original mensual. Registros administrativos del SIPA (Argentina). Por
+      sector solo Turismo, Salud y Energía, que coinciden con una sección de Rev.3.
+    trend:
+      window_points: 12
+    series:
+      - source: sipa_argentina
+        profile: sipa_asalariados_por_rama
+        frequency: M
+
+  - code: youth_unemployment_rate
+    name: Desocupación juvenil (15 a 24 años)
+    unit: percent
+    domain: labor
+    higher_is_better: false
+    description: Estimación modelada de la OIT publicada por el Banco Mundial.
+    series:
+      - source: world_bank
+        id: SL.UEM.1524.ZS
+        frequency: A
+
+  - code: labor_force_participation
+    name: Tasa de actividad
+    unit: percent
+    domain: labor
+    higher_is_better: true
+    description: Población económicamente activa como porcentaje de la población de 15 años y más.
+    series:
+      - source: world_bank
+        id: SL.TLF.CACT.ZS
+        frequency: A
+
+  - code: self_employment_share
+    name: Trabajo por cuenta propia
+    unit: percent
+    domain: labor
+    higher_is_better: null
+    description: Trabajadores independientes como porcentaje del empleo total.
+    series:
+      - source: world_bank
+        id: SL.EMP.SELF.ZS
+        frequency: A
+
+  - code: employment
+    name: Personas ocupadas
+    unit: thousands_persons
+    domain: labor
+    higher_is_better: true
+    description: >-
+      Ocupados totales, por sector (secciones CIIU Rev.4) y por ocupación: Argentina y Uruguay
+      por grupos de 2 dígitos CIUO-08 (OIT); Chile por grandes grupos CIUO-08.CL (1 dígito) de
+      la Encuesta Nacional de Empleo vía SIMEL, promedio anual de los 4 trimestres calendario.
+      Las ocupaciones del mismo grupo comparten el valor.
+    series:
+      - source: ilostat
+        dataflow: DF_EMP_TEMP_SEX_ECO_NB
+        key: "{countries}.A..SEX_T."
+        sector_dimension: ECO
+        total_code: ECO_ISIC4_TOTAL
+        sector_aggregation: sum
+        frequency: A
+      - source: ilostat
+        dataflow: DF_EMP_TEMP_SEX_OC2_NB
+        key: "{countries}.A..SEX_T."
+        occupation_dimension: OC2
+        occupation_code_prefix: OC2_ISCO08_
+        occupation_isco_digits: 2
+        frequency: A
+        # Chile by occupation comes from SIMEL (current ENE data); ILOSTAT only has 2011-2022
+        # for Chile and mixing both would compare 2-digit with 1-digit groups.
+        countries: [ARG, URY]
+      - source: simel_chile
+        dataflow: DF_OCUCIUO_CIUO_SEXO
+        key: "M.OCUCIUO._T..AS"
+        occupation_dimension: CIUO
+        occupation_code_prefix: CIUO_
+        occupation_isco_digits: 1
+        scale: 0.001
+        annualize: {method: mean, months: [1, 4, 7, 10]}
+        frequency: A
+        countries: [CHL]
+
+  - code: mean_monthly_earnings_ppp
+    name: Ingreso laboral mensual promedio (USD PPA)
+    unit: ppp_usd_month
+    domain: labor
+    higher_is_better: true
+    description: >-
+      Ingreso mensual promedio de los asalariados en dólares a paridad de poder adquisitivo.
+      En sectores que abarcan varias secciones CIIU se usa el promedio simple de las secciones.
+      Por ocupación se usa el gran grupo CIUO-08 (1 dígito), que comparten varias ocupaciones.
+    series:
+      - source: ilostat
+        dataflow: DF_EAR_EMTA_SEX_ECO_CUR_NB
+        key: "{countries}.A..SEX_T..CUR_TYPE_PPP"
+        sector_dimension: ECO
+        total_code: ECO_ISIC4_TOTAL
+        sector_aggregation: mean
+        frequency: A
+      - source: ilostat
+        dataflow: DF_EAR_EMTA_SEX_OCU_CUR_NB
+        key: "{countries}.A..SEX_T..CUR_TYPE_PPP"
+        occupation_dimension: OCU
+        occupation_code_prefix: OCU_ISCO08_
+        occupation_isco_digits: 1
+        frequency: A
+
+  - code: genai_exposure
+    name: Exposición a la IA generativa
+    unit: index_0_1
+    domain: labor
+    higher_is_better: false
+    description: >-
+      Puntaje medio de exposición de las tareas de la ocupación a la IA generativa (0 a 1),
+      OIT 2025. Incluye tareas que la IA podría automatizar o complementar. No varía por país.
+    series:
+      - source: ilo_genai_exposure
+        file: reference/ilo_genai_exposure.yaml
+        value_field: mean
+        frequency: A
+
+  # --- Socioeconómicos ------------------------------------------------------
+  - code: gdp_growth
+    name: Crecimiento del PBI
+    unit: percent
+    domain: economic
+    higher_is_better: true
+    description: Variación anual del PBI a precios constantes.
+    trend:
+      normalize: false
+      threshold: 0.5
+    # Growth swings several points a year: alert only on larger moves.
+    alerts:
+      absolute_change: 3.0
+    series:
+      - source: world_bank
+        id: NY.GDP.MKTP.KD.ZG
+        frequency: A
+
+  - code: inflation
+    name: Inflación
+    unit: percent
+    domain: economic
+    higher_is_better: false
+    description: >-
+      Variación del promedio anual del índice de precios al consumidor. Argentina: IPC Nacional
+      de INDEC vía Datos Argentina; Uruguay y Chile: Banco Mundial.
+    trend:
+      normalize: false
+      threshold: 0.5
+    series:
+      - source: datos_argentina
+        id: 148.3_INIVELNAL_DICI_M_26
+        collapse: year
+        collapse_aggregation: avg
+        transform: pct_change_year_ago
+        scale: 100
+        frequency: A
+      - source: world_bank
+        id: FP.CPI.TOTL.ZG
+        frequency: A
+
+  - code: inflation_monthly_yoy
+    name: Inflación interanual (mensual)
+    unit: percent
+    domain: economic
+    higher_is_better: false
+    description: >-
+      Variación del índice de precios al consumidor respecto del mismo mes del año anterior.
+      Argentina: IPC Nacional de INDEC (Datos Argentina). Uruguay: IPC total país del INE.
+    trend:
+      normalize: false
+      threshold: 0.5
+      window_points: 12
+    series:
+      - source: datos_argentina
+        id: 148.3_INIVELNAL_DICI_M_26
+        transform: pct_change_year_ago
+        scale: 100
+        frequency: M
+      - source: ine_uruguay
+        profile: ine_uy_ipc
+        frequency: M
+
+  - code: economic_activity_yoy
+    name: Actividad económica interanual (EMAE)
+    unit: percent
+    domain: economic
+    higher_is_better: true
+    description: Variación del Estimador Mensual de Actividad Económica respecto del mismo mes del año anterior (INDEC).
+    trend:
+      normalize: false
+      threshold: 0.5
+      window_points: 12
+    series:
+      - source: datos_argentina
+        id: 143.3_NO_PR_2004_A_21
+        transform: pct_change_year_ago
+        scale: 100
+        frequency: M
+
+  - code: gdp_per_capita_ppp
+    name: PBI per cápita (USD PPA constantes 2021)
+    unit: ppp_usd
+    domain: economic
+    higher_is_better: true
+    description: PBI por habitante a paridad de poder adquisitivo, dólares internacionales constantes de 2021.
+    series:
+      - source: world_bank
+        id: NY.GDP.PCAP.PP.KD
+        frequency: A
+
+  # --- Educativos ------------------------------------------------------------
+  - code: tertiary_enrollment
+    name: Matrícula en educación superior (bruta)
+    unit: percent
+    domain: education
+    higher_is_better: true
+    description: Matrícula terciaria total como porcentaje de la población en edad teórica.
+    series:
+      - source: world_bank
+        id: SE.TER.ENRR
+        frequency: A
+
+  - code: lower_secondary_completion
+    name: Finalización de secundaria básica
+    unit: percent
+    domain: education
+    higher_is_better: true
+    description: Tasa de finalización del primer ciclo de educación secundaria.
+    series:
+      - source: world_bank
+        id: SE.SEC.CMPT.LO.ZS
+        frequency: A
+
+  - code: internet_users
+    name: Población que usa internet
+    unit: percent
+    domain: education
+    higher_is_better: true
+    description: Personas que usaron internet en los últimos tres meses, como porcentaje de la población.
+    series:
+      - source: world_bank
+        id: IT.NET.USER.ZS
+        frequency: A
+
+  - code: overeducation_rate
+    name: Sobrecalificación (educación mayor a la que pide la ocupación)
+    unit: percent
+    domain: education
+    higher_is_better: false
+    description: >-
+      Ocupados con un nivel educativo superior al que requiere su gran grupo de ocupación, como
+      porcentaje de los ocupados con ocupación y nivel educativo informados (enfoque normativo de
+      la OIT: grupos 1 a 3 piden educación terciaria, 4 a 8 secundaria y 9 primaria). Por gran
+      grupo de ocupación: las ocupaciones del mismo grupo comparten el valor. Encuestas de hogares
+      de cada país vía ILOSTAT; solo desde el último quiebre de serie (Uruguay desde 2022).
+    series:
+      - source: ilostat
+        dataflow: DF_EMP_TEMP_SEX_OCU_EDU_NB
+        key: "{countries}.A..SEX_T.."
+        education_mismatch: {file: reference/isco_education_requirements.yaml, measure: over}
+        frequency: A
+
+  - code: undereducation_rate
+    name: Subcalificación (educación menor a la que pide la ocupación)
+    unit: percent
+    domain: education
+    higher_is_better: false
+    description: >-
+      Ocupados con un nivel educativo inferior al que requiere su gran grupo de ocupación, como
+      porcentaje de los ocupados con ocupación y nivel educativo informados (mismo enfoque y
+      fuente que la sobrecalificación).
+    series:
+      - source: ilostat
+        dataflow: DF_EMP_TEMP_SEX_OCU_EDU_NB
+        key: "{countries}.A..SEX_T.."
+        education_mismatch: {file: reference/isco_education_requirements.yaml, measure: under}
+        frequency: A

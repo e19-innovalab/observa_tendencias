@@ -2,10 +2,9 @@
 
     python -m app.ingestion.load_analytics
 
-Reads  data/processed/data_analytics/informe_cobertura.csv       -> coverage_report
-       data/processed/data_analytics/ofertas_linkedin.csv        -> job_postings
-       data/processed/data_analytics/egresados_tendencias.csv    -> graduate_trends
-       data/processed/data_analytics/egresados_proyecciones.csv  -> graduate_projections
+Reads the files listed under paths in config/app.yaml:
+       coverage -> coverage_report, jobs -> job_postings,
+       graduate_trends -> graduate_trends, graduate_projections -> graduate_projections
 Needs DATABASE_URL in backend/.env.
 """
 from pathlib import Path
@@ -13,10 +12,12 @@ from pathlib import Path
 import pandas as pd
 from sqlalchemy.dialects.postgresql import insert
 
+from app.core.config_files import app_config
 from app.core.database import SessionLocal
 from app.models import CoverageReport, GraduateProjection, GraduateTrend, JobPosting
 
-CSV_DIR = Path(__file__).resolve().parents[3] / "data" / "processed" / "data_analytics"
+PATHS = app_config().paths
+ENCODING = PATHS.csv_encoding
 
 
 def _clean(df: pd.DataFrame) -> list[dict]:
@@ -24,30 +25,30 @@ def _clean(df: pd.DataFrame) -> list[dict]:
     return df.to_dict("records")
 
 
-def read_coverage(path: Path = CSV_DIR / "informe_cobertura.csv") -> list[dict]:
-    df = pd.read_csv(path, encoding="utf-8-sig")
+def read_coverage(path: Path = PATHS.processed_file("coverage")) -> list[dict]:
+    df = pd.read_csv(path, encoding=ENCODING)
     for col in ("anio_min", "anio_max"):
         df[col] = df[col].astype("Int64")
     df["elegible_proyeccion"] = df["elegible_proyeccion"].astype(bool)
     return _clean(df)
 
 
-def read_jobs(path: Path = CSV_DIR / "ofertas_linkedin.csv") -> list[dict]:
-    df = pd.read_csv(path, encoding="utf-8-sig", dtype={"id": str})
+def read_jobs(path: Path = PATHS.processed_file("jobs")) -> list[dict]:
+    df = pd.read_csv(path, encoding=ENCODING, dtype={"id": str})
     df["fecha_publicacion"] = pd.to_datetime(df["fecha_publicacion"]).dt.date
     df["postulantes"] = pd.to_numeric(df["postulantes"], errors="coerce").astype("Int64")
     df["scraped_at"] = pd.to_datetime(df["scraped_at"], utc=True)
     return _clean(df)
 
 
-def read_graduate_trends(path: Path = CSV_DIR / "egresados_tendencias.csv") -> list[dict]:
-    df = pd.read_csv(path, encoding="utf-8-sig")
+def read_graduate_trends(path: Path = PATHS.processed_file("graduate_trends")) -> list[dict]:
+    df = pd.read_csv(path, encoding=ENCODING)
     df["tiene_huecos"] = df["tiene_huecos"].astype(bool)
     return _clean(df[[c.name for c in GraduateTrend.__table__.columns]])
 
 
-def read_graduate_projections(path: Path = CSV_DIR / "egresados_proyecciones.csv") -> list[dict]:
-    df = pd.read_csv(path, encoding="utf-8-sig")
+def read_graduate_projections(path: Path = PATHS.processed_file("graduate_projections")) -> list[dict]:
+    df = pd.read_csv(path, encoding=ENCODING)
     return _clean(df[[c.name for c in GraduateProjection.__table__.columns]])
 
 

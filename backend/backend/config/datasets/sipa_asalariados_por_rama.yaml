@@ -1,0 +1,78 @@
+# SIPA: registered private-sector salaried employment by branch of activity (Argentina).
+# Publisher: Ministerio de Capital Humano, Secretaría de Trabajo, Empleo y Seguridad Social,
+#   Observatorio de Empleo y Dinámica Empresarial. "Situación y evolución del trabajo
+#   registrado", statistical annex (monthly).
+# Read by app/connectors/dataset_download.py (automatic) and by /datasets/upload (manual).
+
+dataset_code: sipa_asalariados_por_rama
+source: sipa_argentina
+title: Asalariados registrados del sector privado por rama de actividad (SIPA)
+landing_page: https://www.argentina.gob.ar/trabajo/estadisticas/situacion-y-evolucion-del-trabajo-registrado
+
+download:
+  # The file name changes every month (trabajoregistrado_<YYMM>_estadisticas.xlsx), so the
+  # current link is found on the official page. Only these hosts are accepted.
+  link_pattern: 'https://www\.argentina\.gob\.ar/sites/default/files/trabajoregistrado_(?P<release>\d{4})_estadisticas\.xlsx'
+  allowed_hosts: [www.argentina.gob.ar]
+  max_bytes: 80000000
+
+file:
+  format: xlsx
+  sheet: A.2.1
+  header_row: 2        # 1-based row holding the column headers
+  first_data_row: 3
+  # Data stops at the first row whose period cell cannot be read (footnotes follow).
+
+country: ARG
+indicator: registered_private_employment
+frequency: M
+
+period:
+  column: "Período"
+  # Up to Jan 2015 the cells are real dates; afterwards text like "feb-15", and provisional
+  # months carry a trailing "*" (e.g. "jul-26*").
+  formats: [date, month_abbr_yy]
+  month_abbr: {ene: 1, feb: 2, mar: 3, abr: 4, may: 5, jun: 6, jul: 7, ago: 8, sep: 9, oct: 10, nov: 11, dic: 12}
+  provisional_marker: "*"
+
+# Values are in thousands of people ("En miles"); stored as is with the indicator's unit.
+# Columns use ISIC Rev.3 sections. Only sections that match a catalog sector one-to-one are
+# mapped; Tecnología and Economía del conocimiento are inside broader Rev.3 sections
+# ("Transporte, almacenamiento y comunicación", "Actividades inmobiliarias, empresariales y de
+# alquiler") and are not split. "total" is the national total (stored with no sector).
+columns:
+  "Hoteles y restaurantes": {sector: tourism}
+  "Servicios sociales y de salud": {sector: health}
+  "Suministro de electricidad, gas y agua": {sector: energy}
+  "Total": {total: true}
+
+# Format check before loading a new file (automatic or uploaded). The header row must match
+# exactly (compared case-, accent- and whitespace-insensitively); if the publisher renames,
+# adds or removes a column, nothing is loaded and a "format changed" alert is raised.
+expected:
+  headers:
+    - "Período"
+    - "Agricultura, ganadería, caza y silvicultura"
+    - "Pesca"
+    - "Explotación de minas y canteras"
+    - "Industrias manufactureras"
+    - "Suministro de electricidad, gas y agua"
+    - "Construcción"
+    - "Comercio y reparaciones"
+    - "Hoteles y restaurantes"
+    - "Transporte, almacenamiento y comunicación"
+    - "Intermediación financiera"
+    - "Actividades inmobiliarias, empresariales y de alquiler"
+    - "Enseñanza"
+    - "Servicios sociales y de salud"
+    - "Servicios comunitarios, sociales y personales"
+    - "Sin especificar"
+    - "Total"
+  first_period: "2009-01"
+  min_periods: 200
+  value_min: 0
+  value_max: 20000
+  # A new release may revise recent months; older values changing more than this (relative)
+  # suggests a different series and blocks the load.
+  max_revision: 0.05
+  revision_grace_periods: 12
