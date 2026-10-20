@@ -1,0 +1,32 @@
+# Generic template for manual uploads: one row per value ("long" format). Any official
+# dataset can be loaded this way after arranging it in these columns. The person uploading
+# declares the source (name and URL) and the reference date; they are stored with the data.
+
+dataset_code: plantilla_generica
+source: manual_upload
+title: Plantilla genérica (una fila por valor)
+landing_page: null
+requires_declared_source: true
+
+file:
+  format: auto          # csv or xlsx, by file extension
+  sheet: null           # xlsx: first sheet
+  header_row: 1
+  first_data_row: 2
+  csv_delimiter: ","
+  csv_encoding: utf-8-sig
+
+long_format:
+  columns:
+    indicator: indicador        # indicator code (config/indicators.yaml)
+    country: pais               # ISO3: ARG, URY, CHL
+    period: periodo             # 2024, 2024-Q2 or 2024-03
+    frequency: frecuencia       # A, Q or M
+    value: valor
+    sector: sector              # optional: sector code (catalog.yaml)
+    occupation: ocupacion       # optional: ISCO-08 code (4 digits)
+  required: [indicator, country, period, frequency, value]
+
+expected:
+  value_min: null
+  value_max: null

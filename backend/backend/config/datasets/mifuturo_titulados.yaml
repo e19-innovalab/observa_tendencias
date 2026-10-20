@@ -1,0 +1,59 @@
+# Mi Futuro (MINEDUC, Chile): higher-education graduates ("titulaciones") by program, 2007 onwards.
+# Publisher: Servicio de Información de Educación Superior (SIES), Subsecretaría de Educación
+#   Superior. One row per program, institution and year; the profile adds them up by generic
+#   career ("área carrera genérica"), level and year into the graduates table.
+
+dataset_code: mifuturo_titulados
+source: mifuturo_chile
+title: Titulaciones de educación superior por carrera genérica (Mi Futuro, Chile)
+landing_page: https://www.mifuturo.cl/bases-de-datos-titulados/
+target: graduates
+country: CHL
+
+download:
+  # The full series is TITULADO_2007-<last year>_web_<date>_E[-n].xlsx; the single-year file
+  # (TITULADO_<year>_...) is not matched.
+  link_pattern: 'https://www\.mifuturo\.cl/wp-content/uploads/\d{4}/\d{2}/TITULADO_2007-(?P<release>\d{4})_web_[0-9_]+_E(?:-\d+)?\.xlsx'
+  allowed_hosts: [www.mifuturo.cl, mifuturo.cl]
+  max_bytes: 150000000
+
+file:
+  format: xlsx
+  sheet: in
+  header_row: 1
+  first_data_row: 2
+
+aggregate:
+  period_column: "AÑO"
+  period_pattern: 'TIT_(?P<year>\d{4})'
+  value_column: "TOTAL TITULACIONES"
+  group_columns:
+    career: "ÁREA CARRERA GENÉRICA"
+    level: "NIVEL GLOBAL"
+    field_area: "CINE-F_13 ÁREA"
+    field_subarea: "CINE-F_13 SUBAREA"
+
+expected:
+  headers: ["AÑO", "TOTAL TITULACIONES", "TITULACIONES MUJERES POR PROGRAMA",
+            "TITULACIONES HOMBRES POR PROGRAMA", "TITULACIONES NB E INDEFINIDO POR PROGRAMA",
+            "CLASIFICACIÓN INSTITUCIÓN NIVEL 1", "CLASIFICACIÓN INSTITUCIÓN NIVEL 2",
+            "CLASIFICACIÓN INSTITUCIÓN NIVEL 3", "CÓDIGO INSTITUCIÓN", "NOMBRE INSTITUCIÓN",
+            "COMUNA", "PROVINCIA", "REGIÓN", "NOMBRE SEDE", "NOMBRE CARRERA",
+            "ÁREA DEL CONOCIMIENTO", "CINE-F_97 ÁREA", "CINE-F_97 SUBAREA",
+            "ÁREA CARRERA GENÉRICA", "CINE-F_13 ÁREA", "CINE-F_13 SUBAREA", "NIVEL GLOBAL",
+            "CARRERA CLASIFICACIÓN NIVEL 1", "CARRERA CLASIFICACIÓN NIVEL 2", "MODALIDAD",
+            "JORNADA", "TIPO DE PLAN DE LA CARRERA", "DURACIÓN ESTUDIO CARRERA",
+            "DURACIÓN TOTAL DE LA CARRERA", "CÓDIGO PROGRAMA", "TOTAL RANGO EDAD",
+            "RANGO DE EDAD 15 A 19 AÑOS", "RANGO DE EDAD 20 A 24 AÑOS",
+            "RANGO DE EDAD 25 A 29 AÑOS", "RANGO DE EDAD 30 A 34 AÑOS",
+            "RANGO DE EDAD 35 A 39 AÑOS", "RANGO DE EDAD 40 Y MÁS AÑOS",
+            "RANGO DE EDAD SIN INFORMACIÓN", "PROMEDIO EDAD PROGRAMA", "PROMEDIO EDAD MUJER",
+            "PROMEDIO EDAD HOMBRE", "PROMEDIO EDAD NB E INDEFINIDO"]
+  first_period: "2007"
+  min_periods: 15
+  value_min: 0
+  value_max: 100000
+  # Totals per career and year may be revised for recent years; older ones changing more than
+  # this (relative) blocks the load.
+  max_revision: 0.10
+  revision_grace_periods: 3

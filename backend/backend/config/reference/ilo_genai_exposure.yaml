@@ -1,0 +1,442 @@
+# Exposure of occupations to generative AI (mean task score, 0-1; higher = more exposed).
+# Source: Gmyrek, P., Berg, J., Kamiński, K., Konopczyński, F., Ładna, A., Nafradi, B.,
+#   Rosłaniec, K., Troszyński, M. (2025). "Generative AI and Jobs: A Refined Global Index of
+#   Occupational Exposure". ILO Working Paper 140 (Geneva, ILO). Annex, Table A1.
+#   https://doi.org/10.54394/HETP0387 · https://www.ilo.org/sites/default/files/2025-05/WP140_web.pdf
+# All 427 rows of Table A1 (Mean, SD, exposure gradient), extracted from the PDF text and
+# checked against the paper: 427 occupations, 13 in Gradient 4, 112 exposed (Gradients 1-4).
+# Exposure measures how much of an occupation's tasks generative AI could perform; it covers both
+# automation and augmentation, so the index uses it as a proxy for automation risk (see
+# analytics.yaml).
+
+reference_year: 2025
+# Publication month (the paper is dated "May / 2025"); used as the source update date.
+published: "2025-05-01"
+values:
+  "1111": {mean: 0.31, sd: 0.04, gradient: "Not Exposed"}  # Legislators
+  "1112": {mean: 0.38, sd: 0.08, gradient: "Minimal Exposure"}  # Senior Government Officials
+  "1113": {mean: 0.23, sd: 0.1, gradient: "Not Exposed"}  # Traditional Chiefs and Heads of Villages
+  "1114": {mean: 0.37, sd: 0.06, gradient: "Minimal Exposure"}  # Senior Officials of Special-interest Organizations
+  "1120": {mean: 0.38, sd: 0.06, gradient: "Minimal Exposure"}  # Managing Directors and Chief Executives
+  "1211": {mean: 0.37, sd: 0.04, gradient: "Minimal Exposure"}  # Finance Managers
+  "1212": {mean: 0.36, sd: 0.05, gradient: "Minimal Exposure"}  # Human Resource Managers
+  "1213": {mean: 0.36, sd: 0.04, gradient: "Not Exposed"}  # Policy and Planning Managers
+  "1219": {mean: 0.42, sd: 0.1, gradient: "Gradient 2"}  # Business Services and Administration Managers Not Elsewhere Classified
+  "1221": {mean: 0.41, sd: 0.09, gradient: "Gradient 2"}  # Sales and Marketing Managers
+  "1222": {mean: 0.39, sd: 0.05, gradient: "Minimal Exposure"}  # Advertising and Public Relations Managers
+  "1223": {mean: 0.4, sd: 0.06, gradient: "Minimal Exposure"}  # Research and Development Managers
+  "1311": {mean: 0.27, sd: 0.13, gradient: "Minimal Exposure"}  # Agricultural and Forestry Production Managers
+  "1312": {mean: 0.22, sd: 0.08, gradient: "Not Exposed"}  # Aquaculture and Fisheries Production Managers
+  "1321": {mean: 0.38, sd: 0.11, gradient: "Minimal Exposure"}  # Manufacturing Managers
+  "1322": {mean: 0.35, sd: 0.11, gradient: "Minimal Exposure"}  # Mining Managers
+  "1323": {mean: 0.34, sd: 0.06, gradient: "Minimal Exposure"}  # Construction Managers
+  "1324": {mean: 0.38, sd: 0.05, gradient: "Minimal Exposure"}  # Supply, Distribution and Related Managers
+  "1330": {mean: 0.44, sd: 0.07, gradient: "Gradient 2"}  # Information and Communications Technology Service Managers
+  "1341": {mean: 0.3, sd: 0.15, gradient: "Minimal Exposure"}  # Child Care Service Managers
+  "1342": {mean: 0.36, sd: 0.05, gradient: "Minimal Exposure"}  # Health Service Managers
+  "1343": {mean: 0.34, sd: 0.09, gradient: "Minimal Exposure"}  # Aged Care Service Managers
+  "1344": {mean: 0.37, sd: 0.07, gradient: "Minimal Exposure"}  # Social Welfare Managers
+  "1345": {mean: 0.36, sd: 0.1, gradient: "Minimal Exposure"}  # Education Managers
+  "1346": {mean: 0.47, sd: 0.12, gradient: "Gradient 2"}  # Financial and Insurance Services Branch managers
+  "1349": {mean: 0.38, sd: 0.07, gradient: "Minimal Exposure"}  # Professional Services Managers Not Elsewhere Classified
+  "1411": {mean: 0.37, sd: 0.13, gradient: "Gradient 1"}  # Hotel Managers
+  "1412": {mean: 0.36, sd: 0.12, gradient: "Minimal Exposure"}  # Restaurant Managers
+  "1420": {mean: 0.44, sd: 0.15, gradient: "Gradient 2"}  # Retail and Wholesale Trade Managers
+  "1431": {mean: 0.32, sd: 0.1, gradient: "Minimal Exposure"}  # Sports, Recreation and Cultural Centre Managers
+  "2111": {mean: 0.38, sd: 0.14, gradient: "Gradient 1"}  # Physicists and Astronomers
+  "2112": {mean: 0.54, sd: 0.13, gradient: "Gradient 3"}  # Meteorologists
+  "2113": {mean: 0.39, sd: 0.1, gradient: "Minimal Exposure"}  # Chemists
+  "2114": {mean: 0.36, sd: 0.1, gradient: "Minimal Exposure"}  # Geologists and geophysicists
+  "2120": {mean: 0.56, sd: 0.09, gradient: "Gradient 3"}  # Mathematicians, Actuaries and Statisticians
+  "2131": {mean: 0.4, sd: 0.1, gradient: "Gradient 2"}  # Biologists, Botanists, Zoologists and Related Professionals
+  "2132": {mean: 0.29, sd: 0.1, gradient: "Not Exposed"}  # Farming, Forestry and Fisheries Advisers
+  "2133": {mean: 0.38, sd: 0.04, gradient: "Minimal Exposure"}  # Environmental Protection Professionals
+  "2141": {mean: 0.37, sd: 0.07, gradient: "Minimal Exposure"}  # Industrial and Production Engineers
+  "2142": {mean: 0.3, sd: 0.06, gradient: "Not Exposed"}  # Civil Engineers
+  "2143": {mean: 0.38, sd: 0.07, gradient: "Minimal Exposure"}  # Environmental Engineers
+  "2144": {mean: 0.32, sd: 0.07, gradient: "Not Exposed"}  # Mechanical Engineers
+  "2145": {mean: 0.35, sd: 0.12, gradient: "Minimal Exposure"}  # Chemical Engineers
+  "2146": {mean: 0.29, sd: 0.05, gradient: "Not Exposed"}  # Mining Engineers, Metallurgists and Related Professionals
+  "2149": {mean: 0.3, sd: 0.08, gradient: "Not Exposed"}  # Engineering Professionals Not Elsewhere Classified
+  "2151": {mean: 0.31, sd: 0.08, gradient: "Not Exposed"}  # Electrical Engineers
+  "2152": {mean: 0.42, sd: 0.13, gradient: "Gradient 2"}  # Electronics Engineers
+  "2153": {mean: 0.48, sd: 0.12, gradient: "Gradient 2"}  # Telecommunications Engineers
+  "2161": {mean: 0.37, sd: 0.08, gradient: "Minimal Exposure"}  # Building Architects
+  "2162": {mean: 0.37, sd: 0.08, gradient: "Minimal Exposure"}  # Landscape Architects
+  "2163": {mean: 0.35, sd: 0.09, gradient: "Minimal Exposure"}  # Product and Garment Designers
+  "2164": {mean: 0.41, sd: 0.06, gradient: "Minimal Exposure"}  # Town and Traffic Planners
+  "2165": {mean: 0.44, sd: 0.12, gradient: "Gradient 2"}  # Cartographers and Surveyors
+  "2166": {mean: 0.49, sd: 0.09, gradient: "Gradient 2"}  # Graphic and Multimedia Designers
+  "2211": {mean: 0.29, sd: 0.1, gradient: "Not Exposed"}  # Generalist Medical Practitioners
+  "2212": {mean: 0.27, sd: 0.12, gradient: "Not Exposed"}  # Specialist Medical Practitioners
+  "2221": {mean: 0.25, sd: 0.13, gradient: "Not Exposed"}  # Nursing Professionals
+  "2222": {mean: 0.3, sd: 0.15, gradient: "Minimal Exposure"}  # Midwifery Professionals
+  "2230": {mean: 0.32, sd: 0.11, gradient: "Minimal Exposure"}  # Traditional and Complementary Medicine Professionals
+  "2240": {mean: 0.23, sd: 0.13, gradient: "Not Exposed"}  # Paramedical Practitioners
+  "2250": {mean: 0.14, sd: 0.05, gradient: "Not Exposed"}  # Veterinarians
+  "2261": {mean: 0.15, sd: 0.06, gradient: "Not Exposed"}  # Dentists
+  "2262": {mean: 0.33, sd: 0.09, gradient: "Minimal Exposure"}  # Pharmacists
+  "2263": {mean: 0.28, sd: 0.05, gradient: "Not Exposed"}  # Environmental and Occupational Health and Hygiene Professionals
+  "2264": {mean: 0.28, sd: 0.14, gradient: "Minimal Exposure"}  # Physiotherapists
+  "2265": {mean: 0.41, sd: 0.07, gradient: "Minimal Exposure"}  # Dieticians and Nutritionists
+  "2266": {mean: 0.24, sd: 0.04, gradient: "Not Exposed"}  # Audiologists and Speech Therapists
+  "2267": {mean: 0.24, sd: 0.07, gradient: "Not Exposed"}  # Optometrists and Ophthalmic Opticians
+  "2269": {mean: 0.2, sd: 0.08, gradient: "Not Exposed"}  # Health Professionals Not Elsewhere Classified
+  "2310": {mean: 0.37, sd: 0.12, gradient: "Minimal Exposure"}  # University and Higher Education Teachers
+  "2320": {mean: 0.35, sd: 0.12, gradient: "Minimal Exposure"}  # Vocational Education Teachers
+  "2330": {mean: 0.3, sd: 0.07, gradient: "Not Exposed"}  # Secondary Education Teachers
+  "2341": {mean: 0.26, sd: 0.09, gradient: "Not Exposed"}  # Primary School Teachers
+  "2342": {mean: 0.21, sd: 0.05, gradient: "Not Exposed"}  # Early Childhood Educators
+  "2351": {mean: 0.39, sd: 0.11, gradient: "Gradient 1"}  # Education Methods Specialists
+  "2352": {mean: 0.28, sd: 0.1, gradient: "Not Exposed"}  # Special Needs Teachers
+  "2353": {mean: 0.34, sd: 0.11, gradient: "Minimal Exposure"}  # Other Language Teachers
+  "2354": {mean: 0.35, sd: 0.09, gradient: "Minimal Exposure"}  # Other Music Teachers
+  "2355": {mean: 0.35, sd: 0.1, gradient: "Minimal Exposure"}  # Other Arts Teachers
+  "2356": {mean: 0.47, sd: 0.1, gradient: "Gradient 2"}  # Information Technology Trainers
+  "2359": {mean: 0.33, sd: 0.1, gradient: "Minimal Exposure"}  # Teaching Professionals Not Elsewhere Classified
+  "2411": {mean: 0.51, sd: 0.08, gradient: "Gradient 3"}  # Accountants
+  "2412": {mean: 0.57, sd: 0.11, gradient: "Gradient 3"}  # Financial and Investment Advisers
+  "2413": {mean: 0.62, sd: 0.06, gradient: "Gradient 4"}  # Financial Analysts
+  "2421": {mean: 0.46, sd: 0.1, gradient: "Gradient 2"}  # Management and Organization Analysts
+  "2422": {mean: 0.42, sd: 0.06, gradient: "Minimal Exposure"}  # Policy Administration Professionals
+  "2423": {mean: 0.45, sd: 0.07, gradient: "Gradient 2"}  # Personnel and Careers Professionals
+  "2424": {mean: 0.41, sd: 0.09, gradient: "Gradient 2"}  # Training and Staff Development Professionals
+  "2431": {mean: 0.55, sd: 0.09, gradient: "Gradient 3"}  # Advertising and Marketing Professionals
+  "2432": {mean: 0.43, sd: 0.09, gradient: "Gradient 2"}  # Public Relations Professionals
+  "2433": {mean: 0.5, sd: 0.1, gradient: "Gradient 3"}  # Technical and Medical Sales Professionals (excluding ICT)
+  "2434": {mean: 0.51, sd: 0.09, gradient: "Gradient 3"}  # Information and Communications Technology Sales Professionals
+  "2511": {mean: 0.49, sd: 0.05, gradient: "Gradient 2"}  # Systems Analysts
+  "2512": {mean: 0.53, sd: 0.07, gradient: "Gradient 3"}  # Software Developers
+  "2513": {mean: 0.6, sd: 0.08, gradient: "Gradient 4"}  # Web and Multimedia Developers
+  "2514": {mean: 0.57, sd: 0.08, gradient: "Gradient 3"}  # Applications Programmers
+  "2519": {mean: 0.55, sd: 0.16, gradient: "Gradient 3"}  # Software and Applications Developers and Analysts Not Elsewhere Classified
+  "2521": {mean: 0.57, sd: 0.08, gradient: "Gradient 3"}  # Database Designers and Administrators
+  "2522": {mean: 0.57, sd: 0.05, gradient: "Gradient 3"}  # Systems Aministrators
+  "2523": {mean: 0.52, sd: 0.06, gradient: "Gradient 3"}  # Computer Network Professionals
+  "2529": {mean: 0.49, sd: 0.06, gradient: "Gradient 2"}  # Database and Network Professionals Not Elsewhere Classified
+  "2611": {mean: 0.36, sd: 0.09, gradient: "Minimal Exposure"}  # Lawyers
+  "2612": {mean: 0.31, sd: 0.08, gradient: "Not Exposed"}  # Judges
+  "2619": {mean: 0.37, sd: 0.09, gradient: "Minimal Exposure"}  # Legal Professionals Not Elsewhere Classified
+  "2621": {mean: 0.47, sd: 0.11, gradient: "Gradient 2"}  # Archivists and Curators
+  "2622": {mean: 0.55, sd: 0.04, gradient: "Gradient 3"}  # Librarians and Related Information Professionals
+  "2631": {mean: 0.55, sd: 0.08, gradient: "Gradient 3"}  # Economists
+  "2632": {mean: 0.48, sd: 0.12, gradient: "Gradient 2"}  # Sociologists, Anthropologists and Related Professionals
+  "2633": {mean: 0.47, sd: 0.06, gradient: "Gradient 2"}  # Philosophers, Historians and Political Scientists
+  "2634": {mean: 0.39, sd: 0.14, gradient: "Gradient 1"}  # Psychologists
+  "2635": {mean: 0.28, sd: 0.1, gradient: "Not Exposed"}  # Social Work and Counselling Professionals
+  "2636": {mean: 0.17, sd: 0.12, gradient: "Not Exposed"}  # Religious Professionals
+  "2641": {mean: 0.55, sd: 0.09, gradient: "Gradient 3"}  # Authors and Related Writers
+  "2642": {mean: 0.54, sd: 0.1, gradient: "Gradient 3"}  # Journalists
+  "2643": {mean: 0.59, sd: 0.11, gradient: "Gradient 3"}  # Translators, Interpreters and Other Linguists
+  "2651": {mean: 0.21, sd: 0.04, gradient: "Not Exposed"}  # Visual Artists
+  "2652": {mean: 0.28, sd: 0.09, gradient: "Not Exposed"}  # Musicians, Singers and Composers
+  "2653": {mean: 0.19, sd: 0.1, gradient: "Not Exposed"}  # Dancers and Choreographers
+  "2654": {mean: 0.37, sd: 0.07, gradient: "Minimal Exposure"}  # Film, Stage and Related Directors and Producers
+  "2655": {mean: 0.31, sd: 0.15, gradient: "Minimal Exposure"}  # Actors
+  "2656": {mean: 0.47, sd: 0.12, gradient: "Gradient 2"}  # Announcers on Radio, Television and Other Media
+  "2659": {mean: 0.13, sd: 0.06, gradient: "Not Exposed"}  # Creative and Performing Artists Not Elsewhere Classified
+  "3111": {mean: 0.26, sd: 0.09, gradient: "Not Exposed"}  # Chemical and Physical Science Technicians
+  "3112": {mean: 0.28, sd: 0.07, gradient: "Not Exposed"}  # Civil Engineering Technicians
+  "3113": {mean: 0.27, sd: 0.05, gradient: "Not Exposed"}  # Electrical Engineering Technicians
+  "3114": {mean: 0.38, sd: 0.11, gradient: "Minimal Exposure"}  # Electronics Engineering Technicians
+  "3115": {mean: 0.26, sd: 0.08, gradient: "Not Exposed"}  # Mechanical Engineering Technicians
+  "3116": {mean: 0.32, sd: 0.02, gradient: "Not Exposed"}  # Chemical Engineering Technicians
+  "3117": {mean: 0.28, sd: 0.06, gradient: "Not Exposed"}  # Mining and metallurgical technicians
+  "3118": {mean: 0.35, sd: 0.11, gradient: "Minimal Exposure"}  # Draughtspersons
+  "3119": {mean: 0.26, sd: 0.05, gradient: "Not Exposed"}  # Physical and Engineering Science Technicians Not Elsewhere Classified
+  "3121": {mean: 0.29, sd: 0.08, gradient: "Not Exposed"}  # Mining Supervisors
+  "3122": {mean: 0.35, sd: 0.13, gradient: "Minimal Exposure"}  # Manufacturing Supervisors
+  "3123": {mean: 0.28, sd: 0.06, gradient: "Not Exposed"}  # Construction Supervisors
+  "3131": {mean: 0.28, sd: 0.11, gradient: "Not Exposed"}  # Power Production Plant Operators
+  "3132": {mean: 0.27, sd: 0.09, gradient: "Not Exposed"}  # Incinerator and Water Treatment Plant Operators
+  "3133": {mean: 0.29, sd: 0.1, gradient: "Not Exposed"}  # Chemical Processing Plant Controllers
+  "3134": {mean: 0.29, sd: 0.11, gradient: "Not Exposed"}  # Petroleum and Natural Gas Refining Plant Operators
+  "3135": {mean: 0.31, sd: 0.13, gradient: "Minimal Exposure"}  # Metal Production Process Controllers
+  "3141": {mean: 0.38, sd: 0.18, gradient: "Gradient 1"}  # Life Science Technicians (excluding Medical)
+  "3142": {mean: 0.26, sd: 0.09, gradient: "Not Exposed"}  # Agricultural Technicians
+  "3143": {mean: 0.21, sd: 0.07, gradient: "Not Exposed"}  # Forestry Technicians
+  "3151": {mean: 0.23, sd: 0.05, gradient: "Not Exposed"}  # Ships' Engineers
+  "3152": {mean: 0.29, sd: 0.11, gradient: "Not Exposed"}  # Ships' Deck Officers and Pilots
+  "3153": {mean: 0.27, sd: 0.05, gradient: "Not Exposed"}  # Aircraft Pilots and Related Associate Professionals
+  "3154": {mean: 0.31, sd: 0.09, gradient: "Minimal Exposure"}  # Air Traffic Controllers
+  "3155": {mean: 0.34, sd: 0.1, gradient: "Minimal Exposure"}  # Air Traffic Safety Electronics Technicians
+  "3211": {mean: 0.22, sd: 0.03, gradient: "Not Exposed"}  # Medical Imaging and Therapeutic Equipment Technicians
+  "3212": {mean: 0.31, sd: 0.16, gradient: "Minimal Exposure"}  # Medical and Pathology Laboratory Technicians
+  "3213": {mean: 0.3, sd: 0.12, gradient: "Minimal Exposure"}  # Pharmaceutical Technicians and Assistants
+  "3214": {mean: 0.18, sd: 0.05, gradient: "Not Exposed"}  # Medical and Dental Prosthetic Technicians
+  "3221": {mean: 0.22, sd: 0.21, gradient: "Minimal Exposure"}  # Nursing Associate Professionals
+  "3222": {mean: 0.2, sd: 0.07, gradient: "Not Exposed"}  # Midwifery Associate Professionals
+  "3230": {mean: 0.19, sd: 0.11, gradient: "Not Exposed"}  # Traditional and Complementary Medicine Associate Professionals
+  "3240": {mean: 0.14, sd: 0.02, gradient: "Not Exposed"}  # Veterinary Technicians and Assistants
+  "3251": {mean: 0.16, sd: 0.1, gradient: "Not Exposed"}  # Dental Assistants and Therapists
+  "3252": {mean: 0.52, sd: 0.1, gradient: "Gradient 3"}  # Medical Records and Health Information Technicians
+  "3253": {mean: 0.22, sd: 0.08, gradient: "Not Exposed"}  # Community Health Workers
+  "3254": {mean: 0.24, sd: 0.07, gradient: "Not Exposed"}  # Dispensing Opticians
+  "3255": {mean: 0.17, sd: 0.07, gradient: "Not Exposed"}  # Physiotherapy Technicians and Assistants
+  "3256": {mean: 0.35, sd: 0.23, gradient: "Gradient 1"}  # Medical Assistants
+  "3257": {mean: 0.24, sd: 0.04, gradient: "Not Exposed"}  # Environmental and Occupational Health Inspectors and Associates
+  "3258": {mean: 0.22, sd: 0.17, gradient: "Not Exposed"}  # Ambulance Workers
+  "3259": {mean: 0.3, sd: 0.15, gradient: "Minimal Exposure"}  # Health Associate Professionals Not Elsewhere Classified
+  "3311": {mean: 0.63, sd: 0.04, gradient: "Gradient 4"}  # Securities and Finance Dealers and Brokers
+  "3312": {mean: 0.6, sd: 0.04, gradient: "Gradient 4"}  # Credit and Loans Officers
+  "3313": {mean: 0.49, sd: 0.13, gradient: "Gradient 2"}  # Accounting Associate Professionals
+  "3314": {mean: 0.57, sd: 0.1, gradient: "Gradient 3"}  # Statistical, Mathematical and Related Associate Professionals
+  "3315": {mean: 0.45, sd: 0.19, gradient: "Gradient 2"}  # Valuers and Loss Assessors
+  "3321": {mean: 0.53, sd: 0.12, gradient: "Gradient 3"}  # Insurance Representatives
+  "3322": {mean: 0.49, sd: 0.08, gradient: "Gradient 2"}  # Commercial Sales Representatives
+  "3323": {mean: 0.39, sd: 0.08, gradient: "Minimal Exposure"}  # Buyers
+  "3324": {mean: 0.44, sd: 0.1, gradient: "Gradient 2"}  # Trade Brokers
+  "3331": {mean: 0.57, sd: 0.09, gradient: "Gradient 3"}  # Clearing and Forwarding Aents
+  "3332": {mean: 0.48, sd: 0.14, gradient: "Gradient 2"}  # Conference and Event Planners
+  "3333": {mean: 0.39, sd: 0.09, gradient: "Minimal Exposure"}  # Employment agents and contractors
+  "3334": {mean: 0.35, sd: 0.09, gradient: "Minimal Exposure"}  # Real Estate Agents and Property Managers
+  "3339": {mean: 0.44, sd: 0.12, gradient: "Gradient 2"}  # Business Services Agents Not Elsewhere Classified
+  "3341": {mean: 0.43, sd: 0.11, gradient: "Gradient 2"}  # Office Supervisors
+  "3342": {mean: 0.55, sd: 0.13, gradient: "Gradient 3"}  # Legal Secretaries
+  "3343": {mean: 0.54, sd: 0.14, gradient: "Gradient 3"}  # Administrative and Executive Secretaries
+  "3344": {mean: 0.53, sd: 0.11, gradient: "Gradient 3"}  # Medical Secretaries
+  "3351": {mean: 0.32, sd: 0.14, gradient: "Minimal Exposure"}  # Customs and Border Inspectors
+  "3352": {mean: 0.49, sd: 0.12, gradient: "Gradient 2"}  # Government Tax and Excise Officials
+  "3353": {mean: 0.45, sd: 0.07, gradient: "Gradient 2"}  # Government Social Benefits Officials
+  "3354": {mean: 0.43, sd: 0.07, gradient: "Gradient 2"}  # Government Licensing Officials
+  "3355": {mean: 0.23, sd: 0.07, gradient: "Not Exposed"}  # Police Inspectors and Detectives
+  "3359": {mean: 0.36, sd: 0.1, gradient: "Minimal Exposure"}  # Government Regulatory AssociatePprofessionals Not Elsewhere Classified
+  "3411": {mean: 0.39, sd: 0.14, gradient: "Gradient 1"}  # Legal and Related Associate Professionals
+  "3412": {mean: 0.33, sd: 0.13, gradient: "Minimal Exposure"}  # Social Work Associate Professionals
+  "3413": {mean: 0.12, sd: 0.07, gradient: "Not Exposed"}  # Religious Associate Professionals
+  "3421": {mean: 0.23, sd: 0.11, gradient: "Not Exposed"}  # Athletes and Sports Players
+  "3422": {mean: 0.37, sd: 0.12, gradient: "Minimal Exposure"}  # Sports Coaches, Instructors and Officials
+  "3423": {mean: 0.25, sd: 0.07, gradient: "Not Exposed"}  # Fitness and Recreation Instructors and Programme Leaders
+  "3431": {mean: 0.39, sd: 0.12, gradient: "Gradient 1"}  # Photographers
+  "3432": {mean: 0.37, sd: 0.08, gradient: "Minimal Exposure"}  # Interior Designers and Decorators
+  "3433": {mean: 0.37, sd: 0.2, gradient: "Gradient 1"}  # Gallery, Museum and Library Technicians
+  "3434": {mean: 0.25, sd: 0.06, gradient: "Not Exposed"}  # Chefs
+  "3511": {mean: 0.43, sd: 0.13, gradient: "Gradient 2"}  # Information and Communications Technology Operations Technicians
+  "3512": {mean: 0.47, sd: 0.19, gradient: "Gradient 2"}  # Information and Communications Technology User Support Technicians
+  "3513": {mean: 0.43, sd: 0.08, gradient: "Gradient 2"}  # Computer Network and Systems Technicians
+  "3514": {mean: 0.53, sd: 0.12, gradient: "Gradient 3"}  # Web Technicians
+  "3521": {mean: 0.35, sd: 0.11, gradient: "Minimal Exposure"}  # Broadcasting and Audio-visual Technicians
+  "3522": {mean: 0.45, sd: 0.04, gradient: "Minimal Exposure"}  # Telecommunications Engineering Technicians
+  "4110": {mean: 0.6, sd: 0.1, gradient: "Gradient 4"}  # General Office Clerks
+  "4120": {mean: 0.58, sd: 0.1, gradient: "Gradient 3"}  # Secretaries (general)
+  "4131": {mean: 0.65, sd: 0.05, gradient: "Gradient 4"}  # Typists and Word Processing Operators
+  "4132": {mean: 0.7, sd: 0.03, gradient: "Gradient 4"}  # Data Entry Clerks
+  "4211": {mean: 0.58, sd: 0.09, gradient: "Gradient 3"}  # Bank Tellers and Related Clerks
+  "4212": {mean: 0.45, sd: 0.19, gradient: "Gradient 2"}  # Bookmakers, Croupiers and Related Gaming Workers
+  "4213": {mean: 0.48, sd: 0.06, gradient: "Gradient 2"}  # Pawnbrokers and Money-lenders
+  "4214": {mean: 0.43, sd: 0.07, gradient: "Gradient 2"}  # Debt Collectors and Related Workers
+  "4221": {mean: 0.56, sd: 0.07, gradient: "Gradient 3"}  # Travel Consultants and Clerks
+  "4222": {mean: 0.58, sd: 0.06, gradient: "Gradient 3"}  # Contact Centre Information Clerks
+  "4223": {mean: 0.54, sd: 0.15, gradient: "Gradient 3"}  # Telephone Switchboard Operators
+  "4224": {mean: 0.51, sd: 0.07, gradient: "Gradient 3"}  # Hotel Receptionists
+  "4225": {mean: 0.57, sd: 0.09, gradient: "Gradient 3"}  # Inquiry Clerks
+  "4226": {mean: 0.57, sd: 0.17, gradient: "Gradient 3"}  # Receptionists (general)
+  "4227": {mean: 0.55, sd: 0.16, gradient: "Gradient 3"}  # Survey and Market Research Interviewers
+  "4229": {mean: 0.42, sd: 0.13, gradient: "Gradient 2"}  # Client Information Workers Not Elsewhere Classified
+  "4311": {mean: 0.64, sd: 0.07, gradient: "Gradient 4"}  # Accounting and Bookkeeping Clerks
+  "4312": {mean: 0.64, sd: 0.02, gradient: "Gradient 4"}  # Statistical, Finance and Insurance Clerks
+  "4313": {mean: 0.61, sd: 0.08, gradient: "Gradient 4"}  # Payroll Clerks
+  "4321": {mean: 0.37, sd: 0.06, gradient: "Minimal Exposure"}  # Stock Clerks
+  "4322": {mean: 0.44, sd: 0.06, gradient: "Gradient 2"}  # Production Clerks
+  "4323": {mean: 0.5, sd: 0.1, gradient: "Gradient 3"}  # Transport Clerks
+  "4411": {mean: 0.46, sd: 0.18, gradient: "Gradient 2"}  # Library Clerks
+  "4412": {mean: 0.41, sd: 0.15, gradient: "Gradient 2"}  # Mail Carriers and Sorting Clerks
+  "4413": {mean: 0.51, sd: 0.2, gradient: "Gradient 3"}  # Coding, Proofreading and Related Clerks
+  "4414": {mean: 0.58, sd: 0.08, gradient: "Gradient 3"}  # Scribes and Related Workers
+  "4415": {mean: 0.37, sd: 0.17, gradient: "Gradient 1"}  # Filing and Copying Clerks
+  "4416": {mean: 0.6, sd: 0.09, gradient: "Gradient 4"}  # Personnel Clerks
+  "4419": {mean: 0.63, sd: 0.03, gradient: "Gradient 4"}  # Clerical Support Workers Not Elsewhere Classified
+  "5111": {mean: 0.22, sd: 0.1, gradient: "Not Exposed"}  # Travel Attendants and Travel Stewards
+  "5112": {mean: 0.25, sd: 0.17, gradient: "Minimal Exposure"}  # Transport Conductors
+  "5113": {mean: 0.32, sd: 0.11, gradient: "Minimal Exposure"}  # Travel Guides
+  "5120": {mean: 0.18, sd: 0.06, gradient: "Not Exposed"}  # Cooks
+  "5131": {mean: 0.28, sd: 0.16, gradient: "Minimal Exposure"}  # Waiters
+  "5132": {mean: 0.26, sd: 0.12, gradient: "Not Exposed"}  # Bartenders
+  "5141": {mean: 0.17, sd: 0.18, gradient: "Not Exposed"}  # Hairdressers
+  "5142": {mean: 0.18, sd: 0.19, gradient: "Not Exposed"}  # Beauticians and Related Workers
+  "5151": {mean: 0.22, sd: 0.1, gradient: "Not Exposed"}  # Cleaning and Housekeeping Supervisors in Offices, Hotels and Other Establishments
+  "5152": {mean: 0.2, sd: 0.1, gradient: "Not Exposed"}  # Domestic Housekeepers
+  "5153": {mean: 0.27, sd: 0.16, gradient: "Minimal Exposure"}  # Building Caretakers
+  "5161": {mean: 0.3, sd: 0.16, gradient: "Minimal Exposure"}  # Astrologers, Fortune-tellers and Related Workers
+  "5162": {mean: 0.22, sd: 0.05, gradient: "Not Exposed"}  # Companions and Valets
+  "5163": {mean: 0.17, sd: 0.17, gradient: "Not Exposed"}  # Undertakers and Embalmers
+  "5164": {mean: 0.14, sd: 0.06, gradient: "Not Exposed"}  # Pet Groomers and Animal Care Workers
+  "5165": {mean: 0.2, sd: 0.03, gradient: "Not Exposed"}  # Driving Instructors
+  "5169": {mean: 0.21, sd: 0.07, gradient: "Not Exposed"}  # Personal Services Workers Not Elsewhere Classified
+  "5211": {mean: 0.35, sd: 0.17, gradient: "Gradient 1"}  # Stall and Market Salespersons
+  "5212": {mean: 0.22, sd: 0.11, gradient: "Not Exposed"}  # Street Food Salespersons
+  "5221": {mean: 0.43, sd: 0.1, gradient: "Gradient 2"}  # Shopkeepers
+  "5222": {mean: 0.36, sd: 0.12, gradient: "Minimal Exposure"}  # Shop Supervisors
+  "5223": {mean: 0.38, sd: 0.16, gradient: "Gradient 1"}  # Shop Sales Assistants
+  "5230": {mean: 0.39, sd: 0.14, gradient: "Gradient 1"}  # Cashiers and Ticket Clerks
+  "5241": {mean: 0.25, sd: 0.06, gradient: "Not Exposed"}  # Fashion and Other Models
+  "5242": {mean: 0.42, sd: 0.11, gradient: "Gradient 2"}  # Sales Demonstrators
+  "5243": {mean: 0.46, sd: 0.18, gradient: "Gradient 2"}  # Door-to-door Salespersons
+  "5244": {mean: 0.61, sd: 0.1, gradient: "Gradient 4"}  # Contact Centre Salespersons
+  "5245": {mean: 0.24, sd: 0.16, gradient: "Minimal Exposure"}  # Service Station Attendants
+  "5246": {mean: 0.24, sd: 0.13, gradient: "Not Exposed"}  # Food Service Counter Attendants
+  "5311": {mean: 0.19, sd: 0.09, gradient: "Not Exposed"}  # Child Care Workers
+  "5312": {mean: 0.24, sd: 0.14, gradient: "Not Exposed"}  # Teachers' Aides
+  "5321": {mean: 0.14, sd: 0.06, gradient: "Not Exposed"}  # Health Care Assistants
+  "5322": {mean: 0.25, sd: 0.18, gradient: "Minimal Exposure"}  # Home-based Personal Care Workers
+  "5329": {mean: 0.15, sd: 0.03, gradient: "Not Exposed"}  # Personal Care Workers in Health Services Not Elsewhere Classified
+  "5411": {mean: 0.18, sd: 0.1, gradient: "Not Exposed"}  # Fire Fighters
+  "5412": {mean: 0.14, sd: 0.03, gradient: "Not Exposed"}  # Police Officers
+  "5413": {mean: 0.14, sd: 0.04, gradient: "Not Exposed"}  # Prison Guards
+  "5414": {mean: 0.2, sd: 0.09, gradient: "Not Exposed"}  # Security Guards
+  "5419": {mean: 0.2, sd: 0.05, gradient: "Not Exposed"}  # Protective Services Workers Not Elsewhere Classified
+  "6111": {mean: 0.18, sd: 0.12, gradient: "Not Exposed"}  # Field Crop and Vegetable Growers
+  "6112": {mean: 0.17, sd: 0.11, gradient: "Not Exposed"}  # Tree and Shrub Crop Growers
+  "6113": {mean: 0.18, sd: 0.11, gradient: "Not Exposed"}  # Gardeners, Horticultural and Nursery Growers
+  "6114": {mean: 0.17, sd: 0.12, gradient: "Not Exposed"}  # Mixed Crop Growers
+  "6121": {mean: 0.17, sd: 0.1, gradient: "Not Exposed"}  # Livestock and Dairy Producers
+  "6122": {mean: 0.19, sd: 0.1, gradient: "Not Exposed"}  # Poultry Producers
+  "6123": {mean: 0.22, sd: 0.11, gradient: "Not Exposed"}  # Apiarists and Sericulturists
+  "6129": {mean: 0.2, sd: 0.14, gradient: "Not Exposed"}  # Animal Producers Not Elsewhere Classified
+  "6130": {mean: 0.19, sd: 0.11, gradient: "Not Exposed"}  # Mixed Crop and Animal Producers
+  "6210": {mean: 0.12, sd: 0.05, gradient: "Not Exposed"}  # Forestry and Related Workers
+  "6221": {mean: 0.22, sd: 0.15, gradient: "Not Exposed"}  # Aquaculture Workers
+  "6222": {mean: 0.17, sd: 0.1, gradient: "Not Exposed"}  # Inland and Coastal Waters Fishery Workers
+  "6223": {mean: 0.18, sd: 0.07, gradient: "Not Exposed"}  # Deep-sea Fishery Workers
+  "6224": {mean: 0.09, sd: 0.03, gradient: "Not Exposed"}  # Hunters and Trappers
+  "6310": {mean: 0.13, sd: 0.05, gradient: "Not Exposed"}  # Subsistence Crop Farmers
+  "6320": {mean: 0.13, sd: 0.04, gradient: "Not Exposed"}  # Subsistence Livestock Farmers
+  "6330": {mean: 0.12, sd: 0.05, gradient: "Not Exposed"}  # Subsistence Mixed Crop and Livestock Farmers
+  "6340": {mean: 0.12, sd: 0.05, gradient: "Not Exposed"}  # Subsistence Fishers, Hunters, Trappers and Gatherers
+  "7111": {mean: 0.14, sd: 0.07, gradient: "Not Exposed"}  # House Builders
+  "7112": {mean: 0.09, sd: 0.01, gradient: "Not Exposed"}  # Bricklayers and Related Workers
+  "7113": {mean: 0.11, sd: 0.02, gradient: "Not Exposed"}  # Stonemasons, Stone Cutters, Splitters and Carvers
+  "7114": {mean: 0.1, sd: 0.03, gradient: "Not Exposed"}  # Concrete Placers, Concrete Finishers and Related Workers
+  "7115": {mean: 0.13, sd: 0.02, gradient: "Not Exposed"}  # Carpenters and Joiners
+  "7119": {mean: 0.09, sd: 0.01, gradient: "Not Exposed"}  # Building Frame and Related Trades Workers Not Elsewhere Classified
+  "7121": {mean: 0.13, sd: 0.08, gradient: "Not Exposed"}  # Roofers
+  "7122": {mean: 0.1, sd: 0.02, gradient: "Not Exposed"}  # Floor Layers and Tile Setters
+  "7123": {mean: 0.11, sd: 0.01, gradient: "Not Exposed"}  # Plasterers
+  "7124": {mean: 0.13, sd: 0.02, gradient: "Not Exposed"}  # Insulation Workers
+  "7125": {mean: 0.14, sd: 0.0, gradient: "Not Exposed"}  # Glaziers
+  "7126": {mean: 0.18, sd: 0.1, gradient: "Not Exposed"}  # Plumbers and Pipe Fitters
+  "7127": {mean: 0.21, sd: 0.11, gradient: "Not Exposed"}  # Air Conditioning and Refrigeration Mechanics
+  "7131": {mean: 0.13, sd: 0.04, gradient: "Not Exposed"}  # Painters and Related Workers
+  "7132": {mean: 0.12, sd: 0.0, gradient: "Not Exposed"}  # Spray Painters and Varnishers
+  "7133": {mean: 0.09, sd: 0.01, gradient: "Not Exposed"}  # Building Structure Cleaners
+  "7211": {mean: 0.13, sd: 0.01, gradient: "Not Exposed"}  # Metal Moulders and Coremakers
+  "7212": {mean: 0.13, sd: 0.05, gradient: "Not Exposed"}  # Welders and Flame Cutters
+  "7213": {mean: 0.21, sd: 0.09, gradient: "Not Exposed"}  # Sheet Metal Workers
+  "7214": {mean: 0.11, sd: 0.02, gradient: "Not Exposed"}  # Structural Metal Preparers and Erectors
+  "7215": {mean: 0.13, sd: 0.03, gradient: "Not Exposed"}  # Riggers and Cable Splicers
+  "7221": {mean: 0.17, sd: 0.05, gradient: "Not Exposed"}  # Blacksmiths, Hammersmiths and Forging Press Workers
+  "7222": {mean: 0.2, sd: 0.1, gradient: "Not Exposed"}  # Toolmakers and Related Workers
+  "7223": {mean: 0.18, sd: 0.05, gradient: "Not Exposed"}  # Metal Working Machine Tool Setters and Operators
+  "7224": {mean: 0.17, sd: 0.05, gradient: "Not Exposed"}  # Metal Polishers, Wheel Grinders and Tool Sharpeners
+  "7231": {mean: 0.18, sd: 0.04, gradient: "Not Exposed"}  # Motor Vehicle Mechanics and Repairers
+  "7232": {mean: 0.19, sd: 0.07, gradient: "Not Exposed"}  # Aircraft Engine Mechanics and Repairers
+  "7233": {mean: 0.17, sd: 0.04, gradient: "Not Exposed"}  # Agricultural and Industrial Machinery Mechanics and Repairers
+  "7234": {mean: 0.13, sd: 0.02, gradient: "Not Exposed"}  # Bicycle and Related Repairers
+  "7311": {mean: 0.21, sd: 0.08, gradient: "Not Exposed"}  # Precision-instrument Makers and Repairers
+  "7312": {mean: 0.14, sd: 0.02, gradient: "Not Exposed"}  # Musical Instrument Makers and Tuners
+  "7313": {mean: 0.18, sd: 0.05, gradient: "Not Exposed"}  # Jewellery and Precious Metal Workers
+  "7314": {mean: 0.18, sd: 0.07, gradient: "Not Exposed"}  # Potters and Related Workers
+  "7315": {mean: 0.19, sd: 0.06, gradient: "Not Exposed"}  # Glass Makers, Cutters, Grinders and Finishers
+  "7316": {mean: 0.18, sd: 0.08, gradient: "Not Exposed"}  # Sign Writers, Decorative Painters, Engravers and Etchers
+  "7317": {mean: 0.14, sd: 0.01, gradient: "Not Exposed"}  # Handicraft Workers in Wood, Basketry and Related Materials
+  "7318": {mean: 0.13, sd: 0.03, gradient: "Not Exposed"}  # Handicraft Workers in Textile, Leather and Related Materials
+  "7321": {mean: 0.38, sd: 0.22, gradient: "Gradient 1"}  # Pre-press Technicians
+  "7322": {mean: 0.25, sd: 0.11, gradient: "Not Exposed"}  # Printers
+  "7323": {mean: 0.22, sd: 0.09, gradient: "Not Exposed"}  # Print Finishing and Binding Workers
+  "7411": {mean: 0.19, sd: 0.06, gradient: "Not Exposed"}  # Building and Related Electricians
+  "7412": {mean: 0.17, sd: 0.05, gradient: "Not Exposed"}  # Electrical Mechanics and Fitters
+  "7413": {mean: 0.15, sd: 0.08, gradient: "Not Exposed"}  # Electrical Line Installers and Repairers
+  "7421": {mean: 0.25, sd: 0.13, gradient: "Not Exposed"}  # Electronics Mechanics and Servicers
+  "7422": {mean: 0.24, sd: 0.14, gradient: "Not Exposed"}  # Information and Communications Technology Installers and Servicers
+  "7511": {mean: 0.13, sd: 0.03, gradient: "Not Exposed"}  # Butchers, Fishmongers and Related Food Preparers
+  "7512": {mean: 0.17, sd: 0.08, gradient: "Not Exposed"}  # Bakers, Pastry-cooks and Confectionery Makers
+  "7513": {mean: 0.22, sd: 0.17, gradient: "Not Exposed"}  # Dairy Products Makers
+  "7514": {mean: 0.15, sd: 0.04, gradient: "Not Exposed"}  # Fruit, Vegetable and Related Preservers
+  "7515": {mean: 0.31, sd: 0.16, gradient: "Minimal Exposure"}  # Food and Beverage Tasters and Graders
+  "7516": {mean: 0.14, sd: 0.06, gradient: "Not Exposed"}  # Tobacco Preparers and Tobacco Products Makers
+  "7521": {mean: 0.22, sd: 0.15, gradient: "Not Exposed"}  # Wood Treaters
+  "7522": {mean: 0.16, sd: 0.06, gradient: "Not Exposed"}  # Cabinet-makers and Related Workers
+  "7523": {mean: 0.22, sd: 0.16, gradient: "Not Exposed"}  # Woodworking Machine Tool Setters and Operators
+  "7531": {mean: 0.15, sd: 0.05, gradient: "Not Exposed"}  # Tailors, Dressmakers, Furriers and Hatters
+  "7532": {mean: 0.17, sd: 0.04, gradient: "Not Exposed"}  # Garment and Related Patternmakers and Cutters
+  "7533": {mean: 0.12, sd: 0.02, gradient: "Not Exposed"}  # Sewing, Embroidery and Related Workers
+  "7534": {mean: 0.18, sd: 0.09, gradient: "Not Exposed"}  # Upholsterers and Related Workers
+  "7535": {mean: 0.11, sd: 0.03, gradient: "Not Exposed"}  # Pelt Dressers, Tanners and Fellmongers
+  "7536": {mean: 0.17, sd: 0.06, gradient: "Not Exposed"}  # Shoemakers and Related Workers
+  "7541": {mean: 0.16, sd: 0.09, gradient: "Not Exposed"}  # Underwater Divers
+  "7542": {mean: 0.12, sd: 0.05, gradient: "Not Exposed"}  # Shotfirers and Blasters
+  "7543": {mean: 0.31, sd: 0.11, gradient: "Minimal Exposure"}  # Product Graders and Testers (except Foods and Beverages)
+  "7544": {mean: 0.13, sd: 0.04, gradient: "Not Exposed"}  # Fumigators and Other Pest and Weed Controllers
+  "7549": {mean: 0.14, sd: 0.01, gradient: "Not Exposed"}  # Craft and Related Workers not Elsewhere Classified
+  "8111": {mean: 0.17, sd: 0.11, gradient: "Not Exposed"}  # Miners and Quarriers
+  "8112": {mean: 0.21, sd: 0.1, gradient: "Not Exposed"}  # Mineral and Stone Processing Plant Operators
+  "8113": {mean: 0.19, sd: 0.12, gradient: "Not Exposed"}  # Well Drillers and Borers and Related Workers
+  "8114": {mean: 0.23, sd: 0.11, gradient: "Not Exposed"}  # Cement, Stone and Other Mineral Products Machine Operators
+  "8121": {mean: 0.26, sd: 0.1, gradient: "Not Exposed"}  # Metal Processing Plant Operators
+  "8122": {mean: 0.2, sd: 0.04, gradient: "Not Exposed"}  # Metal Finishing, Plating and Coating Machine Operators
+  "8131": {mean: 0.24, sd: 0.07, gradient: "Not Exposed"}  # Chemical Products Plant and Machine Operators
+  "8132": {mean: 0.27, sd: 0.06, gradient: "Not Exposed"}  # Photographic Products Machine Operators
+  "8141": {mean: 0.18, sd: 0.05, gradient: "Not Exposed"}  # Rubber Products Machine Operators
+  "8142": {mean: 0.17, sd: 0.05, gradient: "Not Exposed"}  # Plastic Products Machine Operators
+  "8143": {mean: 0.18, sd: 0.02, gradient: "Not Exposed"}  # Paper Products Machine Operators
+  "8151": {mean: 0.15, sd: 0.02, gradient: "Not Exposed"}  # Fibre Preparing, Spinning and Winding Machine Operators
+  "8152": {mean: 0.16, sd: 0.03, gradient: "Not Exposed"}  # Weaving and Knitting Machine Operators
+  "8153": {mean: 0.15, sd: 0.03, gradient: "Not Exposed"}  # Sewing Machine Operators
+  "8154": {mean: 0.21, sd: 0.15, gradient: "Not Exposed"}  # Bleaching, Dyeing and Fabric Cleaning Machine Operators
+  "8155": {mean: 0.15, sd: 0.02, gradient: "Not Exposed"}  # Fur and Leather Preparing Machine Operators
+  "8156": {mean: 0.16, sd: 0.02, gradient: "Not Exposed"}  # Shoemaking and Related Machine Operators
+  "8157": {mean: 0.16, sd: 0.03, gradient: "Not Exposed"}  # Laundry Machine Operators
+  "8159": {mean: 0.16, sd: 0.01, gradient: "Not Exposed"}  # Textile, Fur and Leather Products Machine Operators Not Elsewhere Classified
+  "8160": {mean: 0.15, sd: 0.03, gradient: "Not Exposed"}  # Food and Related Products Machine Operators
+  "8171": {mean: 0.28, sd: 0.14, gradient: "Minimal Exposure"}  # Pulp and Papermaking Plant Operators
+  "8172": {mean: 0.14, sd: 0.05, gradient: "Not Exposed"}  # Wood Processing Plant Operators
+  "8181": {mean: 0.17, sd: 0.06, gradient: "Not Exposed"}  # Glass and Ceramics Plant Operators
+  "8182": {mean: 0.2, sd: 0.04, gradient: "Not Exposed"}  # Steam Engine and Boiler Operators
+  "8183": {mean: 0.22, sd: 0.01, gradient: "Not Exposed"}  # Packing, Bottling and Labelling Machine Operators
+  "8211": {mean: 0.27, sd: 0.17, gradient: "Minimal Exposure"}  # Mechanical Machinery Assemblers
+  "8212": {mean: 0.28, sd: 0.19, gradient: "Minimal Exposure"}  # Electrical and Electronic Equipment Assemblers
+  "8219": {mean: 0.32, sd: 0.17, gradient: "Minimal Exposure"}  # Assemblers Not Elsewhere Classified
+  "8311": {mean: 0.2, sd: 0.08, gradient: "Not Exposed"}  # Locomotive Engine Drivers
+  "8312": {mean: 0.17, sd: 0.04, gradient: "Not Exposed"}  # Railway Brake, Signal and Switch Operators
+  "8321": {mean: 0.25, sd: 0.17, gradient: "Minimal Exposure"}  # Motorcycle Drivers
+  "8322": {mean: 0.28, sd: 0.23, gradient: "Gradient 1"}  # Car, Taxi and Van Drivers
+  "8331": {mean: 0.18, sd: 0.06, gradient: "Not Exposed"}  # Bus and Tram Drivers
+  "8332": {mean: 0.24, sd: 0.22, gradient: "Minimal Exposure"}  # Heavy Truck and Lorry Drivers
+  "8341": {mean: 0.12, sd: 0.03, gradient: "Not Exposed"}  # Mobile Farm and Forestry Plant Operators
+  "8342": {mean: 0.13, sd: 0.02, gradient: "Not Exposed"}  # Earthmoving and Related Plant Operators
+  "8343": {mean: 0.18, sd: 0.03, gradient: "Not Exposed"}  # Crane, hoist and related plant operators
+  "8344": {mean: 0.2, sd: 0.1, gradient: "Not Exposed"}  # Lifting Truck Operators
+  "8350": {mean: 0.14, sd: 0.02, gradient: "Not Exposed"}  # Ships' Deck Crews and Related Workers
+  "9111": {mean: 0.14, sd: 0.08, gradient: "Not Exposed"}  # Domestic Cleaners and Helpers
+  "9112": {mean: 0.12, sd: 0.02, gradient: "Not Exposed"}  # Cleaners and Helpers in Offices, Hotels and Other Establishments
+  "9121": {mean: 0.14, sd: 0.03, gradient: "Not Exposed"}  # Hand Launderers and Pressers
+  "9122": {mean: 0.09, sd: 0.01, gradient: "Not Exposed"}  # Vehicle Cleaners
+  "9123": {mean: 0.11, sd: 0.03, gradient: "Not Exposed"}  # Window Cleaners
+  "9129": {mean: 0.1, sd: 0.01, gradient: "Not Exposed"}  # Other Cleaning Workers
+  "9211": {mean: 0.09, sd: 0.02, gradient: "Not Exposed"}  # Crop Farm Labourers
+  "9212": {mean: 0.12, sd: 0.03, gradient: "Not Exposed"}  # Livestock Farm Labourers
+  "9213": {mean: 0.11, sd: 0.03, gradient: "Not Exposed"}  # Mixed Crop and Livestock Farm Labourers
+  "9214": {mean: 0.12, sd: 0.02, gradient: "Not Exposed"}  # Garden and Horticultural Labourers
+  "9215": {mean: 0.09, sd: 0.02, gradient: "Not Exposed"}  # Forestry Labourers
+  "9216": {mean: 0.11, sd: 0.03, gradient: "Not Exposed"}  # Fishery and Aquaculture Labourers
+  "9311": {mean: 0.11, sd: 0.02, gradient: "Not Exposed"}  # Mining and Quarrying Labourers
+  "9312": {mean: 0.09, sd: 0.02, gradient: "Not Exposed"}  # Civil Engineering Labourers
+  "9313": {mean: 0.09, sd: 0.02, gradient: "Not Exposed"}  # Building Construction Labourers
+  "9321": {mean: 0.2, sd: 0.05, gradient: "Not Exposed"}  # Hand Packers
+  "9329": {mean: 0.12, sd: 0.02, gradient: "Not Exposed"}  # Manufacturing Labourers Not Elsewhere Classified
+  "9331": {mean: 0.21, sd: 0.08, gradient: "Not Exposed"}  # Hand and Pedal Vehicle Drivers
+  "9332": {mean: 0.13, sd: 0.08, gradient: "Not Exposed"}  # Drivers of Animal-drawn Vehicles and Machinery
+  "9333": {mean: 0.14, sd: 0.03, gradient: "Not Exposed"}  # Freight Handlers
+  "9334": {mean: 0.2, sd: 0.1, gradient: "Not Exposed"}  # Shelf Fillers
+  "9411": {mean: 0.18, sd: 0.05, gradient: "Not Exposed"}  # Fast Food Preparers
+  "9412": {mean: 0.13, sd: 0.02, gradient: "Not Exposed"}  # Kitchen Helpers
+  "9510": {mean: 0.18, sd: 0.09, gradient: "Not Exposed"}  # Street and Related Service Workers
+  "9520": {mean: 0.2, sd: 0.1, gradient: "Not Exposed"}  # Street Vendors (excluding Food)
+  "9611": {mean: 0.09, sd: 0.02, gradient: "Not Exposed"}  # Garbage and Recycling Collectors
+  "9612": {mean: 0.18, sd: 0.11, gradient: "Not Exposed"}  # Refuse Sorters
+  "9613": {mean: 0.09, sd: 0.03, gradient: "Not Exposed"}  # Sweepers and Related Labourers
+  "9621": {mean: 0.37, sd: 0.19, gradient: "Gradient 1"}  # Messengers, Package Deliverers and Luggage Porters
+  "9622": {mean: 0.11, sd: 0.03, gradient: "Not Exposed"}  # Odd Job Persons
+  "9623": {mean: 0.38, sd: 0.21, gradient: "Gradient 1"}  # Meter Readers and Vending-machine Collectors
+  "9624": {mean: 0.09, sd: 0.03, gradient: "Not Exposed"}  # Water and Firewood Collectors
+  "9629": {mean: 0.29, sd: 0.14, gradient: "Minimal Exposure"}  # Elementary Workers Not Elsewhere Classified

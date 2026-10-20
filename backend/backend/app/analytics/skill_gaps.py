@@ -1,6 +1,6 @@
 """Skill gaps (plan 8.4): demand vs. supply, both on a 0-100 scale."""
 
-DEFAULT_PARAMS = {"emerging_growth": 0.10}
+from app.core.config_files import analytics_params
 
 
 def data_sufficiency(demand: float | None, supply: float | None) -> str:
@@ -19,7 +19,7 @@ def compute_skill_gaps(
     gap_score = demand - supply. If either side is missing gap_score is None; we never
     invent a gap (data_sufficiency tells the API what to say).
     """
-    p = {**DEFAULT_PARAMS, **(params or {})}
+    p = analytics_params("skill_gaps", params)
     out = []
     for code, v in skills.items():
         demand, supply, growth = v.get("demand"), v.get("supply"), v.get("demand_growth")

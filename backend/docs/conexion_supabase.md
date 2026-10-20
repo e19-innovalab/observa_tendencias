@@ -1,6 +1,6 @@
 # Conexión del backend a Supabase
 
-Cómo conectar la API de Rumbo (`backend/`) a la base de datos en Supabase, y cómo resolver los problemas
+Cómo conectar la API de Observa Tendencias (`backend/`) a la base de datos en Supabase, y cómo resolver los problemas
 más comunes.
 
 ## Datos del proyecto
@@ -29,7 +29,7 @@ El dashboard (`frontend/`) nunca habla con la base: llama a la API de FastAPI en
 ### 1. Crear el archivo `.env`
 
 ```powershell
-cd C:\rumbo_app\backend
+cd C:\backend_app_test\backend
 copy .env.example .env
 ```
 
@@ -88,20 +88,19 @@ Si imprime `postgres`, la conexión funciona.
 
 ### 5. Preparar las tablas y cargar los datos
 
-Las tablas ya existen en Supabase (se crearon con las migraciones de Alembic aplicadas desde MCP). Solo hay que
-decirle a Alembic que están al día y cargar los CSV:
+La base de Supabase ya está en la migración 0003 (`alembic_version`). Las migraciones 0002 en adelante crean
+cada tabla solo si no existe, así que `upgrade head` es seguro:
 
 ```powershell
-alembic stamp 0002
-python -m app.ingestion.load_analytics
+alembic upgrade head                    # aplica 0004: tabla observations
+python -m seeds.load                    # catálogo, fuentes e indicadores desde config/*.yaml
+python -m app.jobs.run --all            # World Bank, ILOSTAT y Datos Argentina
+python -m app.ingestion.load_analytics  # CSV procesados por el equipo de datos
 ```
 
-- `alembic stamp 0002` marca la migración 0002 como aplicada. **No uses `alembic upgrade head`** en esta base: las
-  tablas ya existen y daría error.
-- `load_analytics` lee `data/processed/data_analytics/informe_cobertura.csv` y `ofertas_linkedin.csv` y los
-  carga con upsert, así que se puede repetir sin duplicar filas.
-- En una base nueva y vacía el orden sería `alembic upgrade head`, `python -m seeds.load` y luego
-  `load_analytics`.
+- Todos los pasos hacen upsert: se pueden repetir sin duplicar filas.
+- Cada corrida de `app.jobs.run` queda registrada en `ingestion_runs` (historial de actualizaciones).
+- **No uses `alembic stamp 0002`**: dejaría a Alembic desfasado respecto de la base.
 
 ### 6. Levantar la API y verificar
 
@@ -115,7 +114,8 @@ uvicorn app.main:app --port 8010
 ## Tablas en Supabase
 
 `countries`, `sectors`, `occupations`, `occupation_crosswalks`, `skills`, `occupation_skills`, `sources`,
-`ingestion_runs`, `indicators`, `coverage_report` y `job_postings`. Las dos últimas alimentan el dashboard.
+`ingestion_runs`, `indicators`, `observations`, `coverage_report`, `job_postings`, `graduate_trends` y
+`graduate_projections`. `observations` guarda cada valor con su fuente, fecha y tipo de dato.
 
 ## Problemas frecuentes
 
@@ -127,7 +127,7 @@ uvicorn app.main:app --port 8010
 | `FATAL: (ENOTFOUND)` o `Tenant or user not found` | Host del pooler equivocado (`aws-0-` en vez de `aws-1-`) o falta el sufijo del proyecto en el usuario (`postgres.mfoiqrnmzbipjfsitnbi`). |
 | `password authentication failed` | Contraseña incorrecta o sin codificar. Restablecela en Project Settings → Database. |
 | Cambié `.env` y no pasa nada | Reiniciá la API (`Ctrl+C` y volver a ejecutar `uvicorn`). |
-| `relation … already exists` al correr Alembic | Usaste `upgrade head` en esta base. Usá `alembic stamp 0002`. |
+| `relation … already exists` al correr Alembic | Revisá `alembic current`; la base debería estar en 0003 o 0004. |
 
 ## Seguridad
 

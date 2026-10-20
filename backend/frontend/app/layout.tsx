@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Rumbo · Observatorio laboral y educativo",
+  title: "Observa Tendencias · Observatorio laboral y educativo",
   description: "Tendencias laborales y educativas del Cono Sur (Argentina, Uruguay y Chile).",
 };
 

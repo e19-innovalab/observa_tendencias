@@ -1,6 +1,17 @@
 from datetime import date, datetime
 
-from sqlalchemy import Boolean, Date, DateTime, Float, Index, Integer, String, Text
+from sqlalchemy import (
+    Boolean,
+    Date,
+    DateTime,
+    Float,
+    ForeignKey,
+    Index,
+    Integer,
+    String,
+    Text,
+    UniqueConstraint,
+)
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.models.base import Base
@@ -70,3 +81,24 @@ class GraduateProjection(Base):
     graduados_proyectado: Mapped[int] = mapped_column(Integer)
     limite_inferior: Mapped[int] = mapped_column(Integer)
     limite_superior: Mapped[int] = mapped_column(Integer)
+
+
+class Graduate(Base):
+    """Graduates per year by generic career and level, from official files (e.g. Mi Futuro).
+    Kept separate from observations because the career is its own dimension."""
+
+    __tablename__ = "graduates"
+    __table_args__ = (UniqueConstraint("country_iso3", "career_key", "level", "year", "source_id",
+                                       name="uq_graduates_key"),)
+    graduate_id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    country_iso3: Mapped[str] = mapped_column(String(3), ForeignKey("countries.iso3"))
+    career_key: Mapped[str] = mapped_column(Text)  # normalized career name
+    career: Mapped[str] = mapped_column(Text)
+    level: Mapped[str] = mapped_column(Text)
+    field_area: Mapped[str | None] = mapped_column(Text)
+    field_subarea: Mapped[str | None] = mapped_column(Text)
+    year: Mapped[int] = mapped_column(Integer)
+    graduates: Mapped[float] = mapped_column(Float)
+    source_id: Mapped[int] = mapped_column(ForeignKey("sources.source_id"))
+    run_id: Mapped[int | None] = mapped_column(ForeignKey("ingestion_runs.run_id"))
+    dataset_id: Mapped[int | None] = mapped_column(ForeignKey("dataset_files.dataset_id"))

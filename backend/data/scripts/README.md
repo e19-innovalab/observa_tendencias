@@ -9,9 +9,12 @@ Requieren el entorno del backend (`backend\.venv`), porque usan pandas.
 | `build_egresados_series.py` | `raw/egresados/indicadores_carrera_anio.csv` | `processed/data_analytics/egresados_series.csv` |
 | `build_egresados_trends.py` | `processed/data_analytics/egresados_series.csv` | `egresados_tendencias.csv`, `egresados_proyecciones.csv` |
 
+Las tablas de referencia de ocupaciones (CIUO-08, exposición a IA de la OIT) y la correspondencia
+carrera → ocupación tienen su propio README: [`referencias/README.md`](referencias/README.md).
+
 ## Cómo ejecutarlos
 
-Desde `C:\rumbo_app`:
+Desde `C:\backend_app_test`:
 
 ```powershell
 backend\.venv\Scripts\python data\scripts\build_ofertas_linkedin.py

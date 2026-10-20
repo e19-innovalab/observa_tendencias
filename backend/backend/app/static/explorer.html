@@ -1,0 +1,1030 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Explorer - Observatorio de Tendencias</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+  :root { --bg:#f6f7f9; --card:#fff; --ink:#1d2433; --muted:#667085; --line:#e4e7ec;
+          --accent:#2563eb; --good:#16794c; --bad:#b42318; --neutral:#667085; }
+  * { box-sizing: border-box; }
+  body { margin:0; font:14px/1.45 system-ui,-apple-system,"Segoe UI",sans-serif; background:var(--bg); color:var(--ink); }
+  header { padding:16px 24px; background:var(--card); border-bottom:1px solid var(--line); display:flex; gap:16px; align-items:baseline; flex-wrap:wrap; }
+  header h1 { font-size:18px; margin:0; }
+  header small { color:var(--muted); }
+  main { padding:16px 24px; display:grid; gap:16px; max-width:1200px; margin:0 auto; }
+  .card { background:var(--card); border:1px solid var(--line); border-radius:8px; padding:16px; }
+  .filters { display:flex; flex-wrap:wrap; gap:12px; align-items:end; }
+  label { display:flex; flex-direction:column; gap:4px; font-size:12px; color:var(--muted); }
+  select, input { font:inherit; padding:6px 8px; border:1px solid var(--line); border-radius:6px; background:#fff; color:var(--ink); }
+  input[type=number] { width:90px; }
+  .countries { display:flex; gap:10px; align-items:center; padding:6px 0; }
+  .countries label { flex-direction:row; align-items:center; gap:4px; color:var(--ink); font-size:14px; }
+  button { font:inherit; padding:7px 14px; border:0; border-radius:6px; background:var(--accent); color:#fff; cursor:pointer; }
+  .meta { color:var(--muted); font-size:12px; margin-top:8px; }
+  .chart-wrap { position:relative; height:360px; }
+  table { width:100%; border-collapse:collapse; }
+  th, td { text-align:left; padding:8px; border-bottom:1px solid var(--line); vertical-align:top; }
+  th { font-size:12px; color:var(--muted); font-weight:600; }
+  .pill { display:inline-block; padding:2px 8px; border-radius:999px; font-size:12px; background:#eef2f6; }
+  .favorable { color:var(--good); } .unfavorable { color:var(--bad); } .neutral { color:var(--neutral); }
+  .sources { display:flex; flex-wrap:wrap; gap:8px; }
+  .status-ok { background:#e7f6ee; color:var(--good); } .status-stale { background:#fff4e5; color:#b54708; }
+  .status-unavailable { background:#fdecea; color:var(--bad); } .status-never_run { background:#eef2f6; color:var(--muted); }
+  .error { color:var(--bad); }
+  .method-grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(320px, 1fr)); gap:24px; }
+  .method-grid h4 { margin:0 0 6px; font-size:14px; }
+  .method-text { color:var(--ink); overflow-wrap:anywhere; }
+  .method-text p { margin:0 0 8px; }
+  .params { margin-top:10px; display:flex; flex-wrap:wrap; gap:6px; }
+  .params code { background:#eef2f6; padding:2px 6px; border-radius:4px; font-size:12px; }
+  .ise-bar { display:flex; height:14px; width:100%; max-width:260px; background:#eef2f6; border-radius:4px; overflow:hidden; }
+  .ise-bar span { display:block; height:100%; }
+  .legend { display:flex; flex-wrap:wrap; gap:12px; font-size:12px; color:var(--muted); margin:8px 0; }
+  .legend i { display:inline-block; width:10px; height:10px; border-radius:2px; margin-right:4px; vertical-align:-1px; }
+  tr.ise-row { cursor:pointer; } tr.ise-row:hover { background:#f9fafb; }
+  tr.ise-detail td { background:#f9fafb; font-size:13px; }
+  .table-scroll { overflow-x:auto; }
+  .seg { display:inline-flex; border:1px solid var(--line); border-radius:6px; overflow:hidden; }
+  .seg button { background:#fff; color:var(--ink); border-radius:0; padding:6px 12px; }
+  .seg button.active { background:var(--accent); color:#fff; }
+  .pager { display:flex; gap:8px; align-items:center; margin-top:8px; }
+  .pager button { padding:5px 10px; }
+  .pager button:disabled { opacity:.4; cursor:default; }
+  th.sortable { cursor:pointer; user-select:none; white-space:nowrap; }
+  th.sortable:hover { color:var(--ink); }
+  th.sorted { color:var(--accent); }
+  td.num { text-align:right; font-variant-numeric:tabular-nums; white-space:nowrap; }
+  .sev { display:inline-block; min-width:52px; text-align:center; padding:2px 8px; border-radius:999px; font-size:12px; }
+  .sev-high { background:#fdecea; color:var(--bad); } .sev-medium { background:#fff4e5; color:#b54708; } .sev-low { background:#eef2f6; color:var(--muted); }
+  .alert-list { list-style:none; margin:8px 0 0; padding:0; }
+  .alert-list li { display:grid; grid-template-columns:auto 1fr auto; gap:12px; padding:10px 0; border-bottom:1px solid var(--line); align-items:start; }
+  .badge { background:var(--bad); color:#fff; border-radius:999px; padding:1px 8px; font-size:12px; margin-left:6px; }
+  .em-matched { background:#e7f6ee; } .em-over { background:#fff4e5; } .em-under { background:#e8efff; }
+  .em-excluded { color:var(--muted); background:#fafafa; }
+  .em-legend { display:grid; grid-template-columns:repeat(auto-fit, minmax(230px, 1fr)); gap:8px; margin:10px 0; }
+  .em-legend > div { display:flex; gap:8px; align-items:flex-start; font-size:13px; }
+  .em-legend i { flex:none; width:18px; height:18px; border-radius:4px; border:1px solid #c9cfd8; margin-top:1px; }
+  .em-legend i.em-matched { border-color:#9fd3b4; } .em-legend i.em-over { border-color:#f0c98a; } .em-legend i.em-under { border-color:#a9c0f2; }
+  .em-legend b { display:block; }
+  .em-legend span { color:var(--muted); font-size:12px; }
+  tr.em-total td { font-weight:600; border-top:2px solid var(--line); }
+  tr.em-excl td { color:var(--muted); background:#fafafa; }
+  .em-calc { margin:10px 0; padding:10px 12px; background:#f9fafb; border-left:3px solid var(--accent); border-radius:4px; }
+  .jb-notice { background:#fff8e6; border:1px solid #f5d79e; border-radius:6px; padding:10px 12px; margin-bottom:12px; }
+  .jb-tiles { display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:12px; margin-bottom:14px; }
+  .jb-tile { border:1px solid var(--line); border-radius:8px; padding:12px; }
+  .jb-tile .label { font-size:12px; color:var(--muted); }
+  .jb-tile .value { font-size:26px; font-weight:600; margin-top:2px; }
+  .jb-tile .value.small { font-size:16px; }
+  .jb-tile .sub { font-size:12px; color:var(--muted); margin-top:2px; }
+  .jb-grid { display:grid; grid-template-columns:minmax(0, 3fr) minmax(0, 2fr); gap:16px; }
+  @media (max-width: 860px) { .jb-grid { grid-template-columns:1fr; } }
+  .jb-link { background:none; color:var(--accent); padding:0; border-radius:0; font-weight:600; }
+  .jb-cell { width:100%; min-width:46px; background:#f6f7f9; color:var(--ink); padding:6px; border-radius:4px; font-variant-numeric:tabular-nums; }
+  .jb-cell.zero { color:#b0b7c3; cursor:default; }
+  .jb-cell.active { outline:2px solid var(--ink); }
+  .jb-ramp { display:flex; align-items:center; gap:8px; font-size:12px; color:var(--muted); margin-top:8px; }
+  .jb-ramp i { display:block; width:120px; height:8px; border-radius:4px; background:linear-gradient(90deg, #f6f7f9, var(--accent)); }
+  .jb-bar { display:grid; grid-template-columns:150px 1fr 40px; gap:8px; align-items:center; font-size:13px; margin:6px 0; }
+  .jb-bar .track { background:#eef2f6; border-radius:4px; height:12px; overflow:hidden; }
+  .jb-bar .fill { background:var(--accent); height:100%; }
+  .jb-bar .val { text-align:right; font-variant-numeric:tabular-nums; }
+  .tag { font-size:11px; padding:1px 6px; border-radius:999px; background:#e8efff; color:var(--accent); margin-left:4px; }
+  @media (max-width: 640px) { main, header { padding:12px 16px; } }
+</style>
+</head>
+<body>
+<header>
+  <h1>Explorer - Observatorio de Tendencias</h1>
+  <small>Herramienta de desarrollo: muestra lo que devuelve la API (<a href="/docs">/docs</a>)</small>
+</header>
+<main>
+  <section class="card">
+    <div class="filters">
+      <label>Indicador <select id="indicator"></select></label>
+      <label>Sector <select id="sector"><option value="">Total país</option></select></label>
+      <div><div class="meta" style="margin:0 0 2px">Países</div><div class="countries" id="countries"></div></div>
+      <label>Desde <input id="from" type="number" placeholder="año"></label>
+      <label>Hasta <input id="to" type="number" placeholder="año"></label>
+      <button id="go">Ver</button>
+    </div>
+    <div class="meta" id="indicator-desc"></div>
+  </section>
+
+  <section class="card">
+    <div class="chart-wrap"><canvas id="chart"></canvas></div>
+    <div class="meta" id="chart-meta"></div>
+  </section>
+
+  <section class="card">
+    <h3 style="margin:0 0 8px;font-size:15px">Tendencia <span class="meta" id="trend-mode"></span></h3>
+    <table>
+      <thead><tr><th>País</th><th>Período</th><th>Estado</th><th>Valoración</th><th>Pendiente</th><th>Variación</th><th>Fuente</th><th>Metodología</th></tr></thead>
+      <tbody id="trends"></tbody>
+    </table>
+  </section>
+
+  <section class="card">
+    <h3 style="margin:0 0 12px;font-size:15px">¿Cómo se calcula?</h3>
+    <div class="method-grid">
+      <div><h4 id="proj-name">Proyección</h4><div class="method-text" id="proj-text"></div><div class="params" id="proj-params"></div></div>
+      <div><h4 id="trend-name">Tendencia</h4><div class="method-text" id="trend-text"></div><div class="params" id="trend-params"></div></div>
+    </div>
+    <div class="meta">Texto y parámetros vienen de <code>/methodologies</code> (config/analytics.yaml).</div>
+  </section>
+
+  <section class="card">
+    <h3 style="margin:0 0 8px;font-size:15px">Alertas <span class="badge" id="al-unread" hidden></span></h3>
+    <div class="filters">
+      <label>País <select id="al-country"><option value="">Todos</option></select></label>
+      <label>Severidad <select id="al-severity"><option value="">Todas</option><option value="high">Alta</option><option value="medium">Media</option><option value="low">Baja</option></select></label>
+      <label>Tipo <select id="al-type"><option value="">Todos</option><option value="significant_change">Variación significativa</option><option value="trend_reversal">Cambio de tendencia</option><option value="index_level_change">Cambio de nivel del ISE</option><option value="stale_source">Fuente desactualizada</option></select></label>
+    </div>
+    <div class="meta" id="al-count"></div>
+    <ul class="alert-list" id="al-list"></ul>
+    <div class="pager"><button id="al-more" hidden>Ver más</button></div>
+    <details style="margin-top:8px" open><summary class="meta">¿Cómo se generan las alertas?</summary>
+      <div class="method-text" id="al-method" style="margin-top:8px"></div>
+      <h4 style="margin:12px 0 6px;font-size:14px">Tipos de alerta y umbrales</h4>
+      <div class="table-scroll"><table>
+        <thead><tr><th>Tipo</th><th>Qué detecta</th><th>Umbrales en uso</th><th>Severidad</th></tr></thead>
+        <tbody id="al-rules"></tbody>
+      </table></div>
+      <h4 style="margin:12px 0 6px;font-size:14px">Severidad</h4>
+      <div id="al-sev"></div>
+      <div id="al-overrides" class="meta" style="margin-top:8px"></div>
+      <div class="params" id="al-params"></div>
+      <div class="meta">Textos y umbrales vienen de <code>/alerts/rules</code> (config/analytics.yaml y app.yaml).</div>
+    </details>
+  </section>
+
+  <section class="card">
+    <h3 style="margin:0 0 8px;font-size:15px">Ofertas de empleo (LinkedIn)</h3>
+    <div class="filters" style="margin-bottom:10px"><label>País <select id="jb-country"></select></label></div>
+    <div class="jb-notice" id="jb-notice"></div>
+    <div class="jb-tiles" id="jb-tiles"></div>
+    <div class="jb-grid">
+      <div>
+        <h4 style="margin:0 0 4px;font-size:14px">Ofertas por sector y provincia</h4>
+        <div class="meta" style="margin:0 0 8px">Cantidad de ofertas. Hacé clic en una celda, un sector o una provincia para filtrar el listado.</div>
+        <div class="table-scroll"><table><thead id="jb-head"></thead><tbody id="jb-matrix"></tbody></table></div>
+        <div class="jb-ramp"><span>0</span><i></i><span id="jb-max"></span></div>
+      </div>
+      <div>
+        <h4 style="margin:0 0 4px;font-size:14px">Total por sector</h4>
+        <div class="meta" style="margin:0 0 8px" id="jb-bars-desc"></div>
+        <div id="jb-bars"></div>
+      </div>
+    </div>
+    <h4 style="margin:18px 0 4px;font-size:14px">Listado de ofertas</h4>
+    <div class="meta" style="margin:0 0 8px" id="jb-list-desc"></div>
+    <div class="filters">
+      <label>Provincia <select id="jb-prov"></select></label>
+      <label>Sector <select id="jb-sector"></select></label>
+      <label>Buscar en el título <input id="jb-q" type="search" placeholder="ej. analista"></label>
+      <button id="jb-clear" hidden>Limpiar filtros</button>
+    </div>
+    <div class="table-scroll"><table>
+      <thead><tr><th>Oferta</th><th>Empresa</th><th>Provincia</th><th>Sector</th><th>Publicada</th><th>Nivel</th></tr></thead>
+      <tbody id="jb-rows"></tbody>
+    </table></div>
+    <div class="pager"><button id="jb-prev">← Anterior</button><span class="meta" id="jb-page"></span><button id="jb-next">Siguiente →</button></div>
+    <div class="meta" id="jb-foot"></div>
+  </section>
+
+  <section class="card">
+    <h3 style="margin:0 0 8px;font-size:15px">Índice de Empleabilidad (ISE)</h3>
+    <div class="filters">
+      <label>País <select id="ise-country"><option value="">Los 3 países</option></select></label>
+      <label>Sector <select id="ise-sector"><option value="">Todos</option></select></label>
+      <label>Año <select id="ise-year"></select></label>
+      <label>Buscar <input id="ise-q" placeholder="nombre o código CIUO"></label>
+      <label style="flex-direction:row;align-items:center;gap:6px;color:var(--ink)"><input type="checkbox" id="ise-featured"> Solo destacadas</label>
+      <div class="seg" id="ise-view">
+        <button data-view="top" class="active">Mejores</button><button data-view="bottom">Peores</button><button data-view="all">Todas</button>
+      </div>
+    </div>
+    <div class="meta" id="ise-count"></div>
+    <div class="em-calc" id="ise-no-source" hidden style="border-left-color:#d97706"></div>
+    <div class="legend" id="ise-legend"></div>
+    <div class="table-scroll"><table>
+      <thead id="ise-head"></thead>
+      <tbody id="ise-rows"></tbody>
+    </table></div>
+    <div class="pager" id="ise-pager" hidden>
+      <button id="ise-prev">Anterior</button><span class="meta" id="ise-page"></span><button id="ise-next">Siguiente</button>
+    </div>
+    <div class="meta">Tocá una fila para ver de dónde sale cada dimensión.</div>
+    <details style="margin-top:8px" open><summary class="meta">¿Cómo se calcula el ISE?</summary>
+      <div class="method-text" id="ise-method" style="margin-top:8px"></div>
+      <h4 style="margin:12px 0 6px;font-size:14px">Dimensiones y rangos <span class="meta" id="ise-ranges-year"></span></h4>
+      <div class="table-scroll"><table>
+        <thead><tr><th>Dimensión</th><th>Peso</th><th>Peso efectivo</th><th>Qué mide</th><th>Unidad</th><th>Rango posible</th><th>Rango observado</th><th>Con datos</th></tr></thead>
+        <tbody id="ise-ranges"></tbody>
+      </table></div>
+      <div class="meta">El rango observado es el del grupo comparado (todos los países y ocupaciones de ese año): el mínimo pasa a 0 y el máximo a 100 al escalar (al revés en las dimensiones que se invierten).</div>
+      <div class="params" id="ise-params"></div>
+    </details>
+  </section>
+
+  <section class="card">
+    <h3 style="margin:0 0 8px;font-size:15px">Brechas de habilidades</h3>
+    <div class="filters">
+      <label>País <select id="sg-country"></select></label>
+      <label>Buscar <input id="sg-q" placeholder="habilidad"></label>
+      <label>Mín. ocupaciones <input id="sg-min" type="number" min="1" style="width:70px"></label>
+      <label style="flex-direction:row;align-items:center;gap:6px;color:var(--ink)"><input type="checkbox" id="sg-emerging"> Solo emergentes</label>
+      <div class="seg" id="sg-view">
+        <button data-view="top" class="active">Mayores brechas</button><button data-view="bottom">Menores</button><button data-view="all">Todas</button>
+      </div>
+    </div>
+    <div class="meta" id="sg-count"></div>
+    <div class="meta" id="sg-warning" style="color:#b54708"></div>
+    <div class="table-scroll"><table>
+      <thead><tr><th>Habilidad</th><th>País</th><th class="sortable" data-sort="demand_growth">Demanda (%/año)</th><th class="sortable" data-sort="supply_growth">Formación (%/año)</th><th class="sortable" data-sort="gap">Brecha (pp)</th><th class="sortable" data-sort="occupations">Ocupaciones</th><th>Principales ocupaciones</th></tr></thead>
+      <tbody id="sg-rows"></tbody>
+    </table></div>
+    <div class="pager" id="sg-pager" hidden><button id="sg-prev">Anterior</button><span class="meta" id="sg-page"></span><button id="sg-next">Siguiente</button></div>
+    <details style="margin-top:8px"><summary class="meta">¿Cómo se calcula la brecha?</summary><div class="method-text" id="sg-method" style="margin-top:8px"></div></details>
+  </section>
+
+  <section class="card">
+    <h3 style="margin:0 0 8px;font-size:15px">Desajuste educación-ocupación</h3>
+    <div class="table-scroll"><table style="max-width:560px">
+      <thead><tr><th>País</th><th>Año</th><th class="num">Sobrecalificados</th><th class="num">Subcalificados</th><th class="num">Ocupados en el cálculo (miles)</th></tr></thead>
+      <tbody id="em-compare"></tbody>
+    </table></div>
+    <div class="filters" style="margin-top:14px">
+      <label>País <select id="em-country"></select></label>
+      <label>Año <select id="em-year"></select></label>
+    </div>
+    <div class="em-calc" id="em-calc"></div>
+    <div class="em-legend" id="em-legend"></div>
+    <div class="table-scroll"><table>
+      <thead id="em-head"></thead>
+      <tbody id="em-rows"></tbody>
+    </table></div>
+    <div class="pager" id="em-pager" hidden><button id="em-prev">Anterior</button><span class="meta" id="em-page"></span><button id="em-next">Siguiente</button></div>
+    <div class="meta" id="em-source"></div>
+    <details style="margin-top:8px" open><summary class="meta">¿Cómo se calcula?</summary><div class="method-text" id="em-method" style="margin-top:8px"></div></details>
+  </section>
+
+  <section class="card">
+    <h3 style="margin:0 0 8px;font-size:15px">Correspondencia carrera → ocupación (revisión)</h3>
+    <div class="filters">
+      <label>País <select id="cw-country"></select></label>
+      <label>Buscar <input id="cw-q" placeholder="carrera, ocupación o código CIUO"></label>
+      <label style="flex-direction:row;align-items:center;gap:6px;color:var(--ink)"><input type="checkbox" id="cw-generic"> Solo categorías genéricas</label>
+      <a id="cw-csv" href="#" download>Descargar CSV</a>
+    </div>
+    <div class="meta" id="cw-summary"></div>
+    <div class="meta" id="cw-help" style="margin-top:4px">El código CIUO-08 se lee de izquierda a derecha: el 1.º dígito es el gran grupo (2 = profesionales, 3 = técnicos y profesionales de nivel medio), los 2 primeros el subgrupo principal, los 3 primeros el subgrupo y los 4 la ocupación. Pasá el mouse sobre un código para ver su jerarquía.</div>
+    <div class="table-scroll" style="max-height:520px;overflow-y:auto"><table>
+      <thead><tr><th>Carrera</th><th>Área / subárea CINE-F</th><th>Titulados</th><th>Crec. anual</th><th>Ocupaciones CIUO-08 (proporción)</th></tr></thead>
+      <tbody id="cw-rows"></tbody>
+    </table></div>
+  </section>
+
+  <section class="card">
+    <h3 style="margin:0 0 8px;font-size:15px">Fuentes y archivos oficiales</h3>
+    <div class="sources" id="sources"></div>
+    <h4 style="margin:14px 0 6px;font-size:14px">Archivos leídos (descargas automáticas y cargas manuales)</h4>
+    <div class="table-scroll"><table>
+      <thead><tr><th>Fecha</th><th>Origen</th><th>Archivo</th><th>Versión</th><th>Estado</th><th>Registros</th><th>Períodos</th><th>Detalle</th></tr></thead>
+      <tbody id="ds-files"></tbody>
+    </table></div>
+    <details style="margin-top:12px"><summary class="meta">Cargar un archivo</summary>
+      <div class="filters" style="margin-top:8px">
+        <label>Perfil <select id="up-profile"></select></label>
+        <label>Archivo <input type="file" id="up-file" accept=".xlsx,.csv"></label>
+        <label>Fuente declarada <input id="up-src-name" placeholder="ej. INE Uruguay"></label>
+        <label>URL de la fuente <input id="up-src-url" placeholder="https://..."></label>
+        <label>Fecha de referencia <input type="date" id="up-date"></label>
+        <label>API key <input type="password" id="up-key" placeholder="ADMIN_API_KEY" autocomplete="off"></label>
+        <button id="up-send">Validar</button>
+      </div>
+      <div class="meta" id="up-help" style="margin-top:6px"></div>
+      <div id="up-result" style="margin-top:8px"></div>
+    </details>
+  </section>
+</main>
+
+<script>
+const API = "/api/v1";
+const COLORS = ["#2563eb", "#d97706", "#059669", "#7c3aed", "#db2777"];
+let indicators = [], chart;
+
+const $ = (id) => document.getElementById(id);
+const get = async (path, params = {}) => {
+  const url = new URL(API + path, location.origin);
+  Object.entries(params).forEach(([k, v]) => v !== "" && v != null && url.searchParams.set(k, v));
+  const r = await fetch(url);
+  if (!r.ok) throw new Error((await r.json()).detail || r.statusText);
+  return r.json();
+};
+const fmt = (v, d = 2) => v == null ? "—" : Number(v).toLocaleString("es-AR", { maximumFractionDigits: d });
+
+async function init() {
+  const [inds, countries, sectors, sources] = await Promise.all(
+    [get("/indicators"), get("/countries"), get("/sectors"), get("/sources")]);
+  indicators = inds;
+  const groups = {};
+  inds.forEach((i) => (groups[i.domain_label] ??= []).push(i));
+  $("indicator").innerHTML = Object.entries(groups).map(([g, list]) =>
+    `<optgroup label="${g}">${list.map((i) => `<option value="${i.code}">${i.name}</option>`).join("")}</optgroup>`).join("");
+  $("countries").innerHTML = countries.map((c) =>
+    `<label><input type="checkbox" value="${c.iso3}" checked> ${c.name_es}</label>`).join("");
+  $("sector").innerHTML += sectors.map((s) => `<option value="${s.sector_code}">${s.name}</option>`).join("");
+  $("sources").innerHTML = sources.filter((s) => s.has_connector).map((s) =>
+    `<span class="pill status-${s.status}" title="Última corrida: ${s.last_run?.finished_at ?? "nunca"}">${s.name}: ${s.status}</span>`).join("");
+  $("indicator").addEventListener("change", () => { syncSector(); load(); });
+  $("go").addEventListener("click", load);
+  syncSector();
+  await renderMethodologies();
+  load();
+  initEmployability(countries, sectors);
+  initAlerts(countries);
+  initDatasets();
+  initSkillGaps(countries);
+  initCrosswalk(countries);
+  initMismatch(countries);
+  initJobs(countries);
+}
+
+function setParagraphs(el, text) {
+  el.replaceChildren(...(text ?? "").split("\n").filter(Boolean).map((line) => {
+    const p = document.createElement("p"); p.textContent = line; return p;
+  }));
+}
+
+const paramChips = (m) => Object.entries(m.params).map(([k, v]) => `<code>${k} = ${v}</code>`).join("") +
+  ` <span class="meta">metodología #${m.methodology_id} · v${m.version}</span>`;
+
+async function renderMethodologies() {
+  const [proj, trend] = await Promise.all([get("/methodologies/projection"), get("/methodologies/trend")]);
+  const p = proj.find((m) => m.is_current);
+  if (p) {
+    $("proj-name").textContent = p.name ?? "Proyección";
+    setParagraphs($("proj-text"), p.description_md);
+    $("proj-params").innerHTML = paramChips(p);
+  }
+  const current = trend.filter((m) => m.is_current);
+  if (current.length) {
+    $("trend-name").textContent = current[0].name ?? "Tendencia";
+    setParagraphs($("trend-text"), current[0].description_md);
+    $("trend-params").innerHTML = current.map((m) => `<div class="params">${paramChips(m)}</div>`).join("");
+  }
+}
+
+function syncSector() {
+  const ind = indicators.find((i) => i.code === $("indicator").value);
+  $("sector").disabled = !ind.has_sector_breakdown;
+  if (!ind.has_sector_breakdown) $("sector").value = "";
+  $("indicator-desc").textContent = `${ind.description ?? ""} · Unidad: ${ind.unit} · Fuentes: ${ind.sources.map((s) => s.name).join(", ")}`;
+}
+
+async function load() {
+  const indicator = $("indicator").value;
+  const country = [...document.querySelectorAll("#countries input:checked")].map((i) => i.value).join(",");
+  const common = { indicator, country, sector: $("sector").value, from_year: $("from").value, to_year: $("to").value };
+  try {
+    const [proj, trends] = await Promise.all([get("/projections", common), get("/trends", common)]);
+    drawChart(proj);
+    drawTrends(trends);
+  } catch (e) {
+    $("chart-meta").innerHTML = `<span class="error">${e.message}</span>`;
+  }
+}
+
+function drawChart(proj) {
+  const labels = [...new Set(proj.items.flatMap((s) => [...s.observed, ...s.projected].map((p) => p.period)))].sort();
+  const datasets = [];
+  proj.items.forEach((s, i) => {
+    const color = COLORS[i % COLORS.length];
+    const byPeriod = (pts) => labels.map((l) => pts.find((p) => p.period === l)?.value ?? null);
+    datasets.push({ label: `${s.country_iso3} · observado`, data: byPeriod(s.observed), borderColor: color,
+                    backgroundColor: color, spanGaps: false, pointRadius: 2, tension: 0.2 });
+    if (s.projected.length) {
+      // connect the projection to the last observed point
+      const last = s.observed.at(-1);
+      const pts = last ? [last, ...s.projected] : s.projected;
+      datasets.push({ label: `${s.country_iso3} · proyección`, data: byPeriod(pts), borderColor: color,
+                      borderDash: [6, 4], pointRadius: 2, spanGaps: true, fill: false });
+      datasets.push({ label: `${s.country_iso3} · intervalo`, data: labels.map((l) => {
+        const p = s.projected.find((x) => x.period === l); return p ? p.upper_bound : null; }),
+        borderWidth: 0, pointRadius: 0, backgroundColor: color + "22", fill: "+1" });
+      datasets.push({ label: `${s.country_iso3} · intervalo inf`, data: labels.map((l) => {
+        const p = s.projected.find((x) => x.period === l); return p ? p.lower_bound : null; }),
+        borderWidth: 0, pointRadius: 0, fill: false });
+    }
+  });
+  chart?.destroy();
+  chart = new Chart($("chart"), {
+    type: "line", data: { labels, datasets },
+    options: { maintainAspectRatio: false, interaction: { mode: "index", intersect: false },
+      plugins: { legend: { labels: { filter: (item) => !item.text.includes("intervalo") } } },
+      scales: { y: { title: { display: true, text: proj.indicator.unit } } } },
+  });
+  const last = proj.items.flatMap((s) => s.observed).at(-1);
+  const pm = proj.items.find((s) => s.methodology)?.methodology;
+  $("chart-meta").textContent =
+    `Fuente y fecha por punto (pasá el mouse). Última actualización de la fuente: ${last?.source_updated_at ?? "—"} · ` +
+    `Descargado: ${last ? new Date(last.fetched_at).toLocaleString("es-AR") : "—"} · ` +
+    (pm ? `Proyección: ${pm.name} (metodología #${pm.methodology_id}), orientativa` : "Sin proyección (historia insuficiente)");
+}
+
+function drawTrends(trends) {
+  $("trend-mode").textContent = trends[0]?.window_mode === "range"
+    ? "· calculada sobre el período elegido" : "· última ventana guardada (sin período elegido)";
+  $("trends").innerHTML = trends.length ? trends.map((t) => `<tr>
+      <td>${t.country_iso3}</td>
+      <td>${t.window_start ?? "—"} – ${t.window_end ?? "—"} <span class="meta">(${t.n_points} pts)</span></td>
+      <td><span class="pill">${t.trend_state_label}</span>${t.previous_trend_state && t.previous_trend_state !== t.trend_state ? ` <span class="meta">antes: ${t.previous_trend_state}</span>` : ""}</td>
+      <td class="${t.assessment ?? ""}">${t.assessment_label ?? "—"}</td>
+      <td>${fmt(t.slope, 3)}</td>
+      <td>${t.pct_change == null ? "—" : fmt(t.pct_change * 100, 1) + "%"}</td>
+      <td>${t.source.name}</td>
+      <td>${t.methodology ? "#" + t.methodology.methodology_id : "—"}</td></tr>`).join("")
+    : `<tr><td colspan="8" class="meta">Sin datos para este filtro</td></tr>`;
+}
+
+const DIM_COLORS = { net_demand: "#2563eb", salary_ppp: "#059669", insertion_rate: "#d97706", automation_risk: "#7c3aed" };
+
+async function initEmployability(countries, sectors) {
+  $("ise-country").innerHTML += countries.map((c) => `<option value="${c.iso3}">${c.name_es}</option>`).join("");
+  $("ise-sector").innerHTML += sectors.map((x) => `<option value="${x.sector_code}">${x.name}</option>`).join("");
+  ["ise-country", "ise-sector", "ise-year", "ise-featured"].forEach((id) =>
+    $(id).addEventListener("change", () => { iseOffset = 0; loadEmployability(); }));
+  let t; $("ise-q").addEventListener("input", () => { clearTimeout(t); t = setTimeout(() => { iseOffset = 0; loadEmployability(); }, 300); });
+  document.querySelectorAll("#ise-view button").forEach((b) => b.addEventListener("click", () => {
+    document.querySelectorAll("#ise-view button").forEach((x) => x.classList.toggle("active", x === b));
+    iseView = b.dataset.view; iseOffset = 0;
+    if (iseView !== "all") { iseSort = "score"; iseOrder = null; }  // Mejores/Peores rank by score
+    loadEmployability();
+  }));
+  $("ise-prev").addEventListener("click", () => { iseOffset = Math.max(0, iseOffset - iseLimit); loadEmployability(); });
+  $("ise-next").addEventListener("click", () => { iseOffset += iseLimit; loadEmployability(); });
+  const m = (await get("/methodologies/employability_index")).find((x) => x.is_current);
+  if (m) {
+    setParagraphs($("ise-method"), m.description_md);
+    const { weights } = m.params;
+    $("ise-params").innerHTML = Object.entries(weights).map(([k, v]) => `<code>${k} = ${v}</code>`).join("") +
+      `<code>min_coverage = ${m.params.min_coverage}</code><code>cohort = ${m.params.cohort}</code>` +
+      ` <span class="meta">metodología #${m.methodology_id} · v${m.version}</span>`;
+  }
+  await loadEmployability();
+}
+
+let iseView = "top", iseOffset = 0, iseLimit = 20, iseSort = "score", iseOrder = null, iseDims = [];
+
+// raw value of a dimension, formatted for the table
+function dimValue(c) {
+  if (!c || c.raw == null) return "—";
+  if (c.measure === "growth") return (c.raw >= 0 ? "+" : "") + fmt(c.raw * 100, 1) + "%";
+  return fmt(c.raw, c.unit === "index_0_1" ? 2 : 0);
+}
+
+function renderIseHead() {
+  const arrow = (key) => key === iseSort ? (iseOrder === "asc" ? " ▲" : " ▼") : "";
+  const th = (key, label, title = "") => `<th class="sortable${key === iseSort ? " sorted" : ""}" data-sort="${key}" title="${title}">${label}${arrow(key)}</th>`;
+  $("ise-head").innerHTML = `<tr>${th("occupation", "Ocupación", "Orden alfabético")}${th("isco", "CIUO", "Código CIUO-08: agrupa ocupaciones relacionadas; no es un ranking")}${th("country", "País")}${th("score", "Puntaje")}` +
+    iseDims.map((d) => th(d.dimension, d.label.replace(/ \(.*\)$/, ""), `${d.label} · peso ${Math.round(d.weight * 100)}%`)).join("") +
+    `<th>Aporte por dimensión</th><th>Nivel</th>${th("coverage", "Cobertura", "Parte del peso del índice que tiene datos")}</tr>`;
+  document.querySelectorAll("#ise-head th.sortable").forEach((h) => h.addEventListener("click", () => {
+    // same column: flip the order; new column: text starts A-Z, numbers high to low
+    const text = ["occupation", "isco", "country"].includes(h.dataset.sort);
+    iseOrder = h.dataset.sort === iseSort ? (iseOrder === "asc" ? "desc" : "asc") : (text ? "asc" : "desc");
+    iseSort = h.dataset.sort; iseOffset = 0; loadEmployability();
+  }));
+}
+
+async function loadEmployability() {
+  const r = await get("/employability", {
+    country: $("ise-country").value, sector: $("ise-sector").value, year: $("ise-year").value,
+    q: $("ise-q").value.trim(), featured: $("ise-featured").checked ? "true" : "",
+    view: iseView, offset: iseOffset, sort_by: iseSort, order: iseOrder ?? "",
+  });
+  iseLimit = r.limit; iseOrder = r.order;
+  if (r.items[0]) iseDims = r.items[0].components;
+  renderIseHead();
+  const shown = r.items.length ? `${r.offset + 1}–${r.offset + r.items.length}` : "0";
+  const pool = iseView === "all" ? r.total : r.scored_total;
+  const textLabels = { score: "puntaje", coverage: "cobertura", occupation: "nombre", isco: "código CIUO", country: "país" };
+  renderRanges(r);
+  const sortLabel = textLabels[r.sort_by] ?? (iseDims.find((d) => d.dimension === r.sort_by)?.label ?? r.sort_by);
+  $("ise-count").textContent = (iseView === "all" ? `Todas: ${shown} de ${r.total}` : `${r.items.length} primeras`) +
+    ` · ordenadas por ${sortLabel} (${["occupation", "country"].includes(r.sort_by) ? (r.order === "asc" ? "A→Z" : "Z→A") : (r.order === "asc" ? "menor a mayor" : "mayor a menor")})` +
+    ` · ${r.scored_total} con puntaje de ${r.total} ocupación×país (${r.year})`;
+  $("ise-no-source").hidden = !r.no_source_note;
+  $("ise-no-source").textContent = r.no_source_note ?? "";
+  $("ise-pager").hidden = iseView !== "all";
+  $("ise-page").textContent = `${shown} de ${pool}`;
+  $("ise-prev").disabled = r.offset === 0;
+  $("ise-next").disabled = r.offset + r.items.length >= pool;
+  if (!$("ise-year").options.length) {
+    $("ise-year").innerHTML = r.available_years.slice().reverse().map((y) => `<option>${y}</option>`).join("");
+  }
+  const first = r.items[0];
+  $("ise-legend").innerHTML = first ? first.components.map((c) =>
+    `<span><i style="background:${DIM_COLORS[c.dimension] ?? "#999"}"></i>${c.label} (${Math.round(c.weight * 100)}%)</span>`).join("") : "";
+  $("ise-rows").innerHTML = r.items.length ? r.items.map((i, n) => {
+    const bars = i.components.filter((c) => c.contribution != null).map((c) =>
+      `<span title="${c.label}: ${fmt(c.contribution, 1)}" style="width:${c.contribution}%;background:${DIM_COLORS[c.dimension] ?? "#999"}"></span>`).join("");
+    return `<tr class="ise-row" data-n="${n}">
+      <td>${i.occupation.name}${i.occupation.is_featured ? '<span class="tag">destacada</span>' : ""}${i.sector_name ? `<div class="meta">${i.sector_name}</div>` : ""}${i.group_hidden ? `<div class="meta">+${i.group_hidden} más del grupo CIUO ${i.group_code} (ver "Todas")</div>` : ""}${i.occupation.is_excluded ? `<div class="meta">${i.occupation.exclusion_reason}</div>` : ""}</td>
+      <td class="num" title="${i.occupation.name_en ?? ""}">${i.occupation.isco08_code}</td>
+      <td>${i.country_iso3}</td>
+      <td class="num"><b>${i.score == null ? "—" : fmt(i.score, 1)}</b></td>
+      ${iseDims.map((d) => `<td class="num">${dimValue(i.components.find((c) => c.dimension === d.dimension))}</td>`).join("")}
+      <td>${i.score == null ? '<span class="meta">sin puntaje</span>' : `<div class="ise-bar">${bars}</div>`}</td>
+      <td><span class="pill">${i.level_label}</span></td>
+      <td>${Math.round(i.coverage_ratio * 100)}%</td></tr>
+      <tr class="ise-detail" data-for="${n}" hidden><td colspan="${7 + iseDims.length}">${detailHtml(i)}</td></tr>`;
+  }).join("") : `<tr><td colspan="${7 + iseDims.length}" class="meta">Sin resultados para este filtro</td></tr>`;
+  document.querySelectorAll("tr.ise-row").forEach((row) => row.addEventListener("click", async () => {
+    const d = document.querySelector(`tr.ise-detail[data-for="${row.dataset.n}"]`);
+    d.hidden = !d.hidden;
+    const box = d.querySelector(".ise-skills");
+    if (!d.hidden && box && !box.dataset.loaded) {
+      box.dataset.loaded = "1";
+      const sk = await get(`/occupations/${box.dataset.code}/skills`, { limit: 12 });
+      box.innerHTML = sk.total
+        ? `<b>Habilidades principales</b> <span class="meta">(${sk.total} en total · ${sk.source?.name ?? ""} · ${sk.weight_note})</span>
+           <div class="params">${sk.items.map((x) => `<code title="${x.skill_type_label ?? ""} · peso ${fmt(x.weight, 2)}">${x.name}</code>`).join("")}</div>`
+        : '<span class="meta">ESCO no tiene habilidades para este grupo CIUO</span>';
+    }
+  }));
+}
+
+function renderRanges(r) {
+  $("ise-ranges-year").textContent = r.year ? `(${r.year})` : "";
+  const val = (d, v) => v == null ? "—" : d.dimension === "net_demand" ? (v >= 0 ? "+" : "") + fmt(v * 100, 1) + "%"
+    : fmt(v, d.unit && d.unit.startsWith("Índice") ? 2 : 0);
+  $("ise-ranges").innerHTML = r.dimension_ranges.map((d) => `<tr>
+    <td><b>${d.label}</b>${d.higher_is_better ? "" : '<div class="meta">se invierte: menos es mejor</div>'}</td>
+    <td class="num">${Math.round(d.weight * 100)}%</td>
+    <td class="num">${d.has_source ? fmt(d.effective_weight * 100, 1) + "%" : "—"}</td>
+    <td>${d.definition ?? ""}${d.source_status ? `<div class="meta" style="color:#b54708;margin-top:4px">${d.source_status}</div>` : ""}</td><td>${d.unit ?? ""}</td><td>${d.possible_range ?? ""}</td>
+    <td class="num">${d.observed_min == null ? "sin datos" : `${val(d, d.observed_min)} a ${val(d, d.observed_max)}`}</td>
+    <td class="num">${d.with_data} de ${d.total}</td></tr>`).join("");
+}
+
+function detailHtml(i) {
+  return `<table><tr><th>Dimensión</th><th>Valor</th><th>Escalado (0-100)</th><th>Peso</th><th>Aporte</th><th>De dónde sale</th></tr>` +
+    i.components.map((c) => {
+      const d = c.detail || {};
+      const raw = c.raw == null ? "—" : c.measure === "growth" ? fmt(c.raw * 100, 1) + "% anual" : fmt(c.raw, 2) + (c.unit ? ` ${c.unit}` : "");
+      const origin = !c.available && !c.indicator ? "Sin fuente todavía"
+        : !c.available ? "Sin datos suficientes para este año"
+        : c.measure === "growth" ? `${c.indicator}: ${fmt(d.from_value, 1)} (${d.from_period}) → ${fmt(d.to_value, 1)} (${d.to_period}) · ${d.source}`
+        : `${c.indicator}: ${d.period} · ${d.source}${d.source_updated_at ? " · publicado " + d.source_updated_at : ""}`;
+      return `<tr><td>${c.label}</td><td>${raw}</td><td>${c.normalized == null ? "—" : fmt(c.normalized, 1)}</td>
+        <td>${Math.round(c.weight * 100)}%</td><td>${c.contribution == null ? "—" : fmt(c.contribution, 1)}</td><td>${origin}</td></tr>`;
+    }).join("") + `</table><div class="meta">Metodología #${i.methodology.methodology_id} · calculado ${new Date(i.computed_at).toLocaleString("es-AR")}</div>` +
+    `<div class="ise-skills" data-code="${i.occupation.occupation_code}" style="margin-top:8px"></div>`;
+}
+
+let alOffset = 0;
+
+function initAlerts(countries) {
+  $("al-country").innerHTML += countries.map((c) => `<option value="${c.iso3}">${c.name_es}</option>`).join("");
+  ["al-country", "al-severity", "al-type"].forEach((id) => $(id).addEventListener("change", () => loadAlerts(true)));
+  $("al-more").addEventListener("click", () => loadAlerts(false));
+  loadAlerts(true);
+  renderAlertRules();
+}
+
+const SCOPE_LABELS = { featured: "solo ocupaciones destacadas", all: "todas las ocupaciones", none: "sin ocupaciones" };
+const FREQ_LABELS = { daily: "diaria", weekly: "semanal", monthly: "mensual", quarterly: "trimestral", annual: "anual" };
+
+function ruleThresholds(r) {
+  const p = r.params;
+  switch (r.alert_type) {
+    case "significant_change":
+      return `Cantidades, dinero e índices: cambio de más de ${fmt(p.change_pct * 100, 1)}% (solo si el valor anterior es al menos ${p.min_base}).<br>` +
+        `Porcentajes: cambio de más de ${fmt(p.absolute_change, 1)} puntos.<br>` +
+        `Atípico: más de ${p.z_threshold} desvíos de los cambios previos (con al menos ${p.z_min_points} datos).<br>` +
+        `${p.require_consecutive ? "Solo períodos consecutivos" : "Períodos con huecos incluidos"}, datos de hasta ${p.max_age_years} años; ${SCOPE_LABELS[p.occupation_scope] ?? p.occupation_scope}.`;
+    case "trend_reversal":
+      return `Usa la clasificación de tendencias (ver "¿Cómo se calcula?" más arriba). Datos de hasta ${p.max_age_years} años; ${SCOPE_LABELS[p.occupation_scope] ?? p.occupation_scope}.`;
+    case "index_level_change":
+      return `Baja por debajo de ${p.levels.low}, Alta por encima de ${p.levels.high}, Media en el medio; ${SCOPE_LABELS[p.occupation_scope] ?? p.occupation_scope}.`;
+    case "stale_source":
+      return `Más de ${p.stale_factor} veces la frecuencia esperada: ` +
+        Object.entries(p.frequency_days).map(([k, d]) => `${FREQ_LABELS[k] ?? k} → ${fmt(d * p.stale_factor, 1)} días`).join(", ") + ".";
+    case "new_skill_gap":
+      return `Brecha de más de ${p.gap_threshold} puntos (escala 0-100).`;
+    default:
+      return Object.entries(p).map(([k, v]) => `${k} = ${v}`).join(", ");
+  }
+}
+
+async function renderAlertRules() {
+  const r = await get("/alerts/rules");
+  if (r.methodology) {
+    setParagraphs($("al-method"), r.methodology.description_md);
+    $("al-params").innerHTML = ` <span class="meta">metodología #${r.methodology.methodology_id} · v${r.methodology.version}</span>`;
+  }
+  $("al-rules").innerHTML = r.rules.map((x) => `<tr>
+    <td><b>${x.label}</b>${x.active ? "" : '<div class="meta">sin datos todavía</div>'}</td>
+    <td>${x.definition ?? ""}</td><td>${ruleThresholds(x)}</td><td>${x.severity_rule}</td></tr>`).join("");
+  $("al-sev").innerHTML = r.severities.map((x) =>
+    `<div style="margin:4px 0"><span class="sev sev-${x.code}">${x.label}</span> ${x.definition ?? ""}</div>`).join("");
+  $("al-overrides").innerHTML = r.overrides.length ? "Excepciones por indicador: " + r.overrides.map((o) =>
+    `${o.indicator.name} (${Object.entries(o.params).map(([k, v]) => k === "absolute_change" ? `${v} puntos` : `${k} = ${v}`).join(", ")})`).join("; ") : "";
+}
+
+async function loadAlerts(reset) {
+  if (reset) { alOffset = 0; $("al-list").innerHTML = ""; }
+  const r = await get("/alerts", { country: $("al-country").value, severity: $("al-severity").value,
+                                   alert_type: $("al-type").value, limit: 15, offset: alOffset });
+  $("al-unread").hidden = !r.unread; $("al-unread").textContent = `${r.unread} sin leer`;
+  const sev = Object.entries(r.by_severity).map(([k, v]) => `${v} ${k === "high" ? "alta" : k === "medium" ? "media" : "baja"}`).join(" · ");
+  $("al-count").textContent = `${r.total} alertas${sev ? " · " + sev : ""}`;
+  const fmtVal = (a, v) => v == null ? "" : a.unit === "percent" ? fmt(v, 1) + "%" : fmt(v, a.unit === "index_0_1" ? 2 : 1);
+  $("al-list").insertAdjacentHTML("beforeend", r.items.map((a) => {
+    const what = [a.indicator?.name, a.sector?.name ?? a.occupation?.name, a.source?.name].filter(Boolean).join(" · ");
+    const change = a.previous_value != null && a.current_value != null && a.alert_type === "significant_change"
+      ? `<div class="meta">${fmtVal(a, a.previous_value)} → ${fmtVal(a, a.current_value)}</div>` : "";
+    return `<li><span class="sev sev-${a.severity}">${a.severity_label}</span>
+      <div><b>${a.alert_type_label}</b> · ${a.country_iso3 ?? ""} ${what ? "· " + what : ""}<div>${a.message}</div>${change}</div>
+      <div class="meta" style="text-align:right">${a.period ?? ""}<br>${new Date(a.detected_at).toLocaleDateString("es-AR")}</div></li>`;
+  }).join("") || (reset ? '<li class="meta">Sin alertas para este filtro</li>' : ""));
+  alOffset += r.items.length;
+  $("al-more").hidden = alOffset >= r.total;
+}
+
+const DS_STATUS = { loaded: "cargado", replaced: "reemplazado", validated: "validado (sin cargar)", rejected: "rechazado",
+                    format_changed: "formato cambiado", unchanged: "sin cambios" };
+let dsProfiles = [];
+
+async function initDatasets() {
+  dsProfiles = await get("/datasets/profiles");
+  $("up-profile").innerHTML = dsProfiles.map((p) => `<option value="${p.dataset_code}">${p.title}</option>`).join("");
+  $("up-profile").addEventListener("change", uploadHelp);
+  $("up-send").addEventListener("click", sendUpload);
+  uploadHelp();
+  loadDatasetFiles();
+}
+
+function uploadHelp() {
+  const p = dsProfiles.find((x) => x.dataset_code === $("up-profile").value);
+  if (!p) return;
+  const cols = p.required_columns ? `Columnas obligatorias: ${p.required_columns.join(", ")} (opcionales: sector, ocupacion).`
+    : `Hoja "${p.sheet}" con las columnas: ${p.expected_headers.join(" · ")}.`;
+  $("up-help").innerHTML = `${cols} ${p.landing_page ? `Origen oficial: <a href="${p.landing_page}" target="_blank" rel="noopener">${p.landing_page}</a>.` : ""}` +
+    (p.automatic ? " Este dataset también se actualiza solo." : "") +
+    (p.requires_declared_source ? " Requiere declarar la fuente." : "");
+}
+
+async function loadDatasetFiles() {
+  const files = await get("/datasets", { limit: 20 });
+  $("ds-files").innerHTML = files.length ? files.map((f) => {
+    const r = f.report || {};
+    const errs = (r.errors || []).slice(0, 3).map((e) => (e.row ? `fila ${e.row}: ` : "") + e.message).join("<br>");
+    const src = f.url ? `<a href="${f.url}" target="_blank" rel="noopener">${f.file_name}</a>` : f.file_name;
+    return `<tr><td>${new Date(f.created_at).toLocaleString("es-AR")}</td>
+      <td>${f.origin === "download" ? "automático" : "carga manual"}${f.declared_source_name ? `<div class="meta">${f.declared_source_name}</div>` : ""}</td>
+      <td>${src}</td><td>${f.release ?? "—"}</td>
+      <td><span class="pill">${DS_STATUS[f.status] ?? f.status}</span></td>
+      <td class="num">${f.records}</td>
+      <td>${r.first_period ? `${r.first_period} a ${r.last_period}` : "—"}${r.provisional_periods?.length ? `<div class="meta">provisorios: ${r.provisional_periods.length}</div>` : ""}</td>
+      <td>${errs || '<span class="meta">—</span>'}</td></tr>`;
+  }).join("") : '<tr><td colspan="8" class="meta">Todavía no se leyó ningún archivo</td></tr>';
+}
+
+async function sendUpload() {
+  const file = $("up-file").files[0];
+  if (!file) { $("up-result").innerHTML = '<span class="error">Elegí un archivo</span>'; return; }
+  const form = new FormData();
+  form.append("file", file);
+  form.append("profile", $("up-profile").value);
+  if ($("up-src-name").value) form.append("declared_source_name", $("up-src-name").value);
+  if ($("up-src-url").value) form.append("declared_source_url", $("up-src-url").value);
+  if ($("up-date").value) form.append("reference_date", $("up-date").value);
+  const r = await fetch(API + "/datasets/upload", { method: "POST", body: form, headers: { "X-API-Key": $("up-key").value } });
+  const d = await r.json();
+  if (!r.ok) { $("up-result").innerHTML = `<span class="error">${d.detail}</span>`; return; }
+  const errs = d.report.errors.map((e) => `<li>${e.row ? `fila ${e.row}` : ""}${e.column ? ` (${e.column})` : ""}: ${e.message}</li>`).join("");
+  $("up-result").innerHTML = d.status === "validated"
+    ? `<b>Validado:</b> ${d.records} valores, ${d.report.first_period} a ${d.report.last_period}.
+       <div class="table-scroll"><table><tr><th>Indicador</th><th>País</th><th>Período</th><th>Valor</th><th>Sector</th><th>Ocupación</th></tr>
+       ${d.preview.map((x) => `<tr><td>${x.indicator_code}</td><td>${x.country_iso3}</td><td>${x.period}</td><td class="num">${fmt(x.value, 3)}</td><td>${x.sector_code ?? ""}</td><td>${x.occupation_code ?? ""}</td></tr>`).join("")}</table></div>
+       <button id="up-commit" style="margin-top:8px">Cargar a la base</button>`
+    : `<b class="error">Rechazado</b><ul>${errs}</ul>`;
+  loadDatasetFiles();
+  if (d.status === "validated") $("up-commit").addEventListener("click", async () => {
+    const c = await fetch(`${API}/datasets/${d.dataset_id}/commit`, { method: "POST", headers: { "X-API-Key": $("up-key").value } });
+    const cd = await c.json();
+    $("up-result").innerHTML = c.ok ? `<b>Cargado:</b> ${cd.records} valores. Tendencias, ISE y alertas recalculados.` : `<span class="error">${cd.detail}</span>`;
+    loadDatasetFiles();
+  });
+}
+
+let sgView = "top", sgSort = "gap", sgOrder = null, sgOffset = 0, sgLimit = 20;
+
+async function initSkillGaps(countries) {
+  $("sg-country").innerHTML = countries.map((c) => `<option value="${c.iso3}" ${c.iso3 === "CHL" ? "selected" : ""}>${c.name_es}</option>`).join("");
+  ["sg-country", "sg-emerging", "sg-min"].forEach((id) => $(id).addEventListener("change", () => { sgOffset = 0; loadSkillGaps(); }));
+  let t; $("sg-q").addEventListener("input", () => { clearTimeout(t); t = setTimeout(() => { sgOffset = 0; loadSkillGaps(); }, 300); });
+  document.querySelectorAll("#sg-view button").forEach((b) => b.addEventListener("click", () => {
+    document.querySelectorAll("#sg-view button").forEach((x) => x.classList.toggle("active", x === b));
+    sgView = b.dataset.view; sgSort = "gap"; sgOrder = null; sgOffset = 0; loadSkillGaps();
+  }));
+  document.querySelectorAll("#sg-rows").forEach(() => {});
+  document.querySelectorAll("th.sortable[data-sort]").forEach((h) => {
+    if (!["gap", "demand_growth", "supply_growth", "occupations"].includes(h.dataset.sort) || !h.closest("table").querySelector("#sg-rows")) return;
+    h.addEventListener("click", () => {
+      sgOrder = h.dataset.sort === sgSort ? (sgOrder === "asc" ? "desc" : "asc") : "desc";
+      sgSort = h.dataset.sort; sgOffset = 0; loadSkillGaps();
+    });
+  });
+  $("sg-prev").addEventListener("click", () => { sgOffset = Math.max(0, sgOffset - sgLimit); loadSkillGaps(); });
+  $("sg-next").addEventListener("click", () => { sgOffset += sgLimit; loadSkillGaps(); });
+  const m = (await get("/methodologies/skill_gap")).find((x) => x.is_current);
+  if (m) setParagraphs($("sg-method"), m.description_md);
+  loadSkillGaps();
+}
+
+async function loadSkillGaps() {
+  const r = await get("/skills/gaps", { country: $("sg-country").value, view: sgView, sort_by: sgSort, order: sgOrder ?? "",
+    min_occupations: $("sg-min").value, emerging: $("sg-emerging").checked ? "true" : "", q: $("sg-q").value.trim(), offset: sgOffset });
+  sgLimit = r.limit; sgOrder = r.order;
+  if (!$("sg-min").value) $("sg-min").placeholder = r.min_occupations;
+  const pct = (v) => v == null ? "—" : (v >= 0 ? "+" : "") + fmt(v * 100, 1);
+  $("sg-count").textContent = `${r.total} habilidades${sgView === "all" ? "" : ` con brecha y usadas por al menos ${r.min_occupations} ocupaciones`} · ${r.full_total} con demanda y oferta · año ${r.year ?? "—"}`;
+  const notReviewed = Object.entries(r.crosswalk_reviewed).filter(([, ok]) => !ok).map(([c]) => c);
+  $("sg-warning").textContent = notReviewed.length ? `La correspondencia carrera → ocupación (${notReviewed.join(", ")}) es un borrador sin revisar.` : "";
+  $("sg-rows").innerHTML = r.items.length ? r.items.map((i) => `<tr>
+      <td>${i.skill.name}${i.is_emerging ? '<span class="tag">emergente</span>' : ""}<div class="meta">${i.skill.skill_type_label ?? ""}</div></td>
+      <td>${i.country_iso3}</td>
+      <td class="num">${pct(i.demand_growth)}</td><td class="num">${pct(i.supply_growth)}</td>
+      <td class="num"><b>${i.gap == null ? `<span class="meta">${i.data_sufficiency_label}</span>` : pct(i.gap)}</b></td>
+      <td class="num">${i.occupations}</td>
+      <td class="meta">${i.top_occupations.slice(0, 3).map((o) => o.name).join(" · ")}</td></tr>`).join("")
+    : '<tr><td colspan="7" class="meta">Sin brechas para este filtro (Uruguay todavía no tiene datos oficiales de formación)</td></tr>';
+  const pool = r.total;
+  $("sg-pager").hidden = sgView !== "all";
+  $("sg-page").textContent = `${r.items.length ? r.offset + 1 : 0}–${r.offset + r.items.length} de ${pool}`;
+  $("sg-prev").disabled = r.offset === 0; $("sg-next").disabled = r.offset + r.items.length >= pool;
+}
+
+let cwData = null;
+
+async function initCrosswalk(countries) {
+  $("cw-country").innerHTML = countries.map((c) => `<option value="${c.iso3}">${c.name_es}</option>`).join("");
+  const load = async () => {
+    try {
+      cwData = await get("/graduates/crosswalk", { country: $("cw-country").value });
+    } catch (e) {
+      cwData = null; $("cw-summary").textContent = e.message; $("cw-rows").innerHTML = ""; return;
+    }
+    $("cw-csv").href = `${API}/graduates/crosswalk?country=${$("cw-country").value}&format=csv`;
+    renderCrosswalk();
+  };
+  $("cw-country").addEventListener("change", load);
+  $("cw-generic").addEventListener("change", renderCrosswalk);
+  let t; $("cw-q").addEventListener("input", () => { clearTimeout(t); t = setTimeout(renderCrosswalk, 200); });
+  load();
+}
+
+function renderCrosswalk() {
+  if (!cwData) return;
+  const q = $("cw-q").value.trim().toLowerCase();
+  const items = cwData.items.filter((i) => (!$("cw-generic").checked || i.is_generic) && (!q ||
+    i.career.toLowerCase().includes(q) || i.occupations.some((o) => o.occupation_code.startsWith(q) || o.name.toLowerCase().includes(q))));
+  $("cw-summary").innerHTML = `${cwData.careers} filas carrera×nivel (${cwData.levels.join(", ")}) · ${cwData.mapped} con ocupación · ${cwData.generic} genéricas sin ocupación · ` +
+    `las carreras con ocupación reúnen el ${fmt(cwData.graduates_mapped_share * 100, 1)}% de los titulados · fuente: ${cwData.source?.name ?? ""} · archivo <code>config/${cwData.file}</code>` +
+    (cwData.reviewed ? "" : ' · <b style="color:#b54708">borrador sin revisar</b>');
+  $("cw-rows").innerHTML = items.map((i) => `<tr>
+      <td>${i.career}<div class="meta">${i.level}${i.is_generic ? " · categoría genérica: sin ocupación" : ""}</div></td>
+      <td class="meta">${i.field_area ?? ""}${i.field_subarea ? " / " + i.field_subarea : ""}</td>
+      <td class="num">${i.graduates == null ? "—" : fmt(i.graduates, 0)}<div class="meta">${i.graduates_year ?? ""}</div></td>
+      <td class="num">${i.graduates_growth == null ? "—" : (i.graduates_growth >= 0 ? "+" : "") + fmt(i.graduates_growth * 100, 1) + "%"}</td>
+      <td>${i.occupations.map((o) => `<div title="${o.hierarchy.map((h) => `${h.level_label} ${h.code}: ${h.name ?? "—"}`).join("\n")}">
+        <code>${o.occupation_code}</code> ${o.name} <span class="meta">(${fmt(o.share * 100, 0)}%)</span>
+        <div class="meta">${o.hierarchy.slice(0, 3).map((h) => `${h.code} ${h.name ?? ""}`).join(" › ")}</div></div>`).join("") || "—"}</td></tr>`).join("")
+    || '<tr><td colspan="5" class="meta">Sin resultados</td></tr>';
+}
+
+// --- LinkedIn job postings (same view as the first Next.js prototype) ---------------------------
+const jb = { summary: null, prov: "", sector: "", q: "", offset: 0 };
+
+async function initJobs(countries) {
+  $("jb-country").innerHTML = countries.map((c) => `<option value="${c.iso3}">${c.name_es}</option>`).join("");
+  $("jb-country").addEventListener("change", () => { jbPick("", ""); $("jb-q").value = ""; jb.q = ""; loadJobsSummary(); });
+  $("jb-prov").addEventListener("change", () => jbPick($("jb-prov").value, jb.sector));
+  $("jb-sector").addEventListener("change", () => jbPick(jb.prov, $("jb-sector").value));
+  let t; $("jb-q").addEventListener("input", () => { clearTimeout(t); t = setTimeout(() => { jb.q = $("jb-q").value.trim(); jb.offset = 0; loadJobs(); }, 300); });
+  $("jb-clear").addEventListener("click", () => { $("jb-q").value = ""; jb.q = ""; jbPick("", ""); });
+  $("jb-prev").addEventListener("click", () => { jb.offset = Math.max(0, jb.offset - jb.summary.view.page_size); loadJobs(); });
+  $("jb-next").addEventListener("click", () => { jb.offset += jb.summary.view.page_size; loadJobs(); });
+  // country with postings first (today only Argentina has them)
+  for (const c of countries) {
+    const s = await get("/jobs/summary", { country: c.iso3 });
+    if (s.total) { $("jb-country").value = c.iso3; break; }
+  }
+  loadJobsSummary();
+}
+
+function jbPick(prov, sector) {
+  jb.prov = prov; jb.sector = sector; jb.offset = 0;
+  if (jb.summary) renderJobsSummary();
+  loadJobs();
+}
+
+async function loadJobsSummary() {
+  jb.summary = await get("/jobs/summary", { country: $("jb-country").value });
+  const v = jb.summary.view;
+  $("jb-notice").textContent = v.notice;
+  $("jb-foot").textContent = `Datos: ofertas de ${v.source_label}. ${v.footnote}`;
+  renderJobsSummary();
+  loadJobs();
+}
+
+function renderJobsSummary() {
+  const s = jb.summary, v = s.view, cells = s.por_provincia_sector;
+  const country = $("jb-country").selectedOptions[0]?.textContent ?? "";
+  const sectors = [...v.sector_order, ...[...new Set(cells.map((c) => c.sector))]
+    .filter((x) => !v.sector_order.includes(x) && x !== v.other_sector), v.other_sector];
+  const provs = [...new Set(cells.map((c) => c.provincia))].sort((a, b) => a.localeCompare(b, "es"));
+  const count = (p, x) => cells.find((c) => c.provincia === p && c.sector === x)?.n ?? 0;
+  const max = Math.max(0, ...cells.map((c) => c.n));
+  const totals = sectors.map((x) => ({ sector: x, n: cells.filter((c) => c.sector === x && (!jb.prov || c.provincia === jb.prov)).reduce((a, c) => a + c.n, 0) }));
+  const ranked = [...totals.filter((r) => r.sector !== v.other_sector).sort((a, b) => b.n - a.n), ...totals.filter((r) => r.sector === v.other_sector)];
+  const top = ranked.find((r) => r.sector !== v.other_sector && r.n > 0);
+  const when = s.scraped_at ? new Date(s.scraped_at).toLocaleString("es-AR", { dateStyle: "medium", timeStyle: "short" }) : "—";
+  $("jb-tiles").innerHTML = [
+    ["Ofertas de empleo", s.total.toLocaleString("es-AR"), `${country}, ${v.period_label}`, false],
+    ["Provincias", provs.length || "—", provs.join(", "), false],
+    ["Sector con más ofertas", top ? top.sector : "—", top ? `${top.n} ofertas${jb.prov ? ` en ${jb.prov}` : ""}` : "", true],
+    ["Recolección", when, `Fuente: ${v.source_label}`, true],
+  ].map(([l, val, sub, small]) => `<div class="jb-tile"><div class="label">${l}</div><div class="value${small ? " small" : ""}">${val}</div><div class="sub">${sub}</div></div>`).join("");
+
+  const shade = (n) => {
+    if (!n || !max) return "";
+    const pct = Math.max(8, Math.round((n / max) * 100));
+    return `background:color-mix(in srgb, var(--accent) ${pct}%, #f6f7f9);${pct >= 55 ? "color:#fff;" : ""}`;
+  };
+  const esc = (x) => x.replace(/"/g, "&quot;");
+  $("jb-head").innerHTML = `<tr><th>Sector</th>${provs.map((p) => `<th class="num"><button class="jb-link" data-prov="${esc(p)}" data-sector="">${p}</button></th>`).join("")}<th class="num">Total</th></tr>`;
+  $("jb-matrix").innerHTML = sectors.map((x) => `<tr><th><button class="jb-link" data-prov="" data-sector="${esc(x)}">${x}</button></th>` +
+    provs.map((p) => { const n = count(p, x); return `<td><button class="jb-cell${n ? "" : " zero"}${jb.prov === p && jb.sector === x ? " active" : ""}" style="${shade(n)}" title="${x} · ${p}: ${n} ofertas" ${n ? "" : "disabled"} data-prov="${esc(p)}" data-sector="${esc(x)}">${n}</button></td>`; }).join("") +
+    `<td class="num"><b>${provs.reduce((a, p) => a + count(p, x), 0)}</b></td></tr>`).join("");
+  document.querySelectorAll("#jb-head [data-prov], #jb-matrix [data-prov]").forEach((b) => b.addEventListener("click", () => jbPick(b.dataset.prov, b.dataset.sector)));
+  $("jb-max").textContent = `${max} ofertas`;
+
+  const barMax = Math.max(1, ...ranked.map((r) => r.n));
+  $("jb-bars-desc").textContent = jb.prov ? `Solo ${jb.prov}.` : provs.length === 1 ? `Solo ${provs[0]}.` : `Las ${provs.length} provincias juntas.`;
+  $("jb-bars").innerHTML = ranked.map((r) => `<div class="jb-bar" title="${r.sector}: ${r.n} ofertas"><span>${r.sector}</span><div class="track"><div class="fill" style="width:${(r.n / barMax) * 100}%"></div></div><span class="val">${r.n}</span></div>`).join("");
+
+  $("jb-prov").innerHTML = `<option value="">Todas</option>` + provs.map((p) => `<option ${p === jb.prov ? "selected" : ""}>${p}</option>`).join("");
+  $("jb-sector").innerHTML = `<option value="">Todos</option>` + sectors.map((x) => `<option ${x === jb.sector ? "selected" : ""}>${x}</option>`).join("");
+  $("jb-list-desc").textContent = `${country}. Usá los filtros o la tabla de arriba.`;
+}
+
+async function loadJobs() {
+  const v = jb.summary?.view;
+  if (!v) return;
+  const r = await get("/jobs", { country: $("jb-country").value, provincia: jb.prov, sector: jb.sector, q: jb.q, limit: v.page_size, offset: jb.offset });
+  $("jb-clear").hidden = !(jb.prov || jb.sector || jb.q);
+  $("jb-rows").innerHTML = r.items.length ? r.items.map((j) => `<tr>
+      <td><a href="${j.url}" target="_blank" rel="noreferrer">${j.titulo}</a></td>
+      <td class="meta">${j.empresa ?? "—"}</td><td class="meta">${j.provincia}</td>
+      <td><span class="pill">${j.sector}</span></td><td class="meta">${j.fecha_publicacion ?? "—"}</td>
+      <td class="meta">${!j.nivel_experiencia || j.nivel_experiencia === v.no_level ? "—" : j.nivel_experiencia}</td></tr>`).join("")
+    : '<tr><td colspan="6" class="meta">No hay ofertas con esos filtros.</td></tr>';
+  const from = r.total ? r.offset + 1 : 0, to = Math.min(r.offset + v.page_size, r.total);
+  $("jb-page").textContent = r.total ? `${from}–${to} de ${r.total}` : "0 ofertas";
+  $("jb-prev").disabled = r.offset === 0; $("jb-next").disabled = to >= r.total;
+}
+
+let emCountries = [], emAll = [], emSort = { key: null, dir: "desc" }, emOffset = 0;
+const EM_ALL = "ALL";
+
+async function initMismatch(countries) {
+  emCountries = countries;
+  $("em-country").innerHTML = `<option value="${EM_ALL}">Todos los países</option>` +
+    countries.map((c, i) => `<option value="${c.iso3}" ${i === 0 ? "selected" : ""}>${c.name_es}</option>`).join("");
+  $("em-country").addEventListener("change", () => loadMismatch(false));
+  $("em-year").addEventListener("change", () => loadMismatch(true));
+  $("em-prev").addEventListener("click", () => { emOffset = Math.max(0, emOffset - emPageSize()); renderMismatch(); });
+  $("em-next").addEventListener("click", () => { emOffset += emPageSize(); renderMismatch(); });
+  loadMismatch(false);
+}
+
+const emPageSize = () => emAll[0]?.page_size ?? 0;  // from the API (app.yaml), known once loaded
+
+async function loadMismatch(keepYear) {
+  emOffset = 0;
+  const country = $("em-country").value;
+  const year = keepYear ? $("em-year").value : "";
+  let d = null;
+  if (country !== EM_ALL) {
+    try { d = await get("/education-mismatch", { country, year }); } catch (e) {
+      $("em-calc").textContent = e.message; $("em-rows").innerHTML = ""; return;
+    }
+  }
+  // every country for the same year when it has it, otherwise its latest
+  const target = d ? d.year : (year ? Number(year) : null);
+  emAll = (await Promise.all(emCountries.map((c) => get("/education-mismatch", { country: c.iso3, year: target ?? "" })
+    .catch(() => get("/education-mismatch", { country: c.iso3 }).catch(() => null))))).filter(Boolean);
+  const years = d ? d.years : [...new Set(emAll.flatMap((x) => x.years))].sort();
+  const shownYear = d ? d.year : (target ?? Math.max(...emAll.map((x) => x.year)));
+  $("em-year").innerHTML = [...years].reverse().map((y) => `<option ${y === shownYear ? "selected" : ""}>${y}</option>`).join("");
+  renderMismatch(d, shownYear);
+}
+
+function renderMismatch(d = null, shownYear = null) {
+  if (d !== null || shownYear !== null) renderMismatch.state = { d, shownYear };
+  ({ d, shownYear } = renderMismatch.state);
+  const pct = (v) => v == null ? "—" : Number(v * 100).toLocaleString("es-AR", { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + "%";
+  const th = (v) => fmt(v, 0);
+  const inCalc = (g) => g.cells.filter((c) => c.status !== "excluded").reduce((a, c) => a + c.employed, 0);
+  const name = Object.fromEntries(emCountries.map((c) => [c.iso3, c.name_es]));
+  const datasets = d ? [d] : emAll;
+  const many = !d;
+  const ref = datasets[0];
+  if (!ref) { $("em-rows").innerHTML = ""; return; }
+
+  $("em-compare").innerHTML = emAll.map((x) => `<tr${d && x.country_iso3 === d.country_iso3 ? ' style="font-weight:600"' : ""}>
+      <td>${name[x.country_iso3] ?? x.country_iso3}</td><td>${x.year}${x.year !== shownYear ? ' <span class="meta">(último)</span>' : ""}</td>
+      <td class="num">${pct(x.over_rate)}</td><td class="num">${pct(x.under_rate)}</td><td class="num">${th(x.totals.considered)}</td></tr>`).join("");
+
+  $("em-calc").innerHTML = datasets.map((x) => { const t = x.totals; return `<div><b>${name[x.country_iso3]} ${x.year}.</b> Sobrecalificados: ${th(t.over)} mil ÷ ${th(t.considered)} mil ocupados en el cálculo = <b>${pct(x.over_rate)}</b>. ` +
+    `Subcalificados: ${th(t.under)} mil ÷ ${th(t.considered)} mil = <b>${pct(x.under_rate)}</b>. ` +
+    `<span class="meta">Con el nivel que pide su ocupación: ${th(t.matched)} mil (${pct(t.matched / t.considered)}). Fuera del cálculo: ${th(t.excluded)} mil.</span></div>`; }).join("");
+
+  $("em-legend").innerHTML = ref.statuses.map((s) =>
+    `<div><i class="em-${s.status}"></i><div><b>${s.label}</b><span>${s.description}</span></div></div>`).join("");
+  const bands = ref.bands;
+  const shown = bands.filter((b) => datasets.some((x) => x.groups.some((g) => g.cells.some((c) => c.band === b.code))));
+  const bandName = Object.fromEntries(bands.map((b) => [b.code, b.name]));
+  const notStated = bands.at(-1).code;
+  const employedIn = (g, band) => g.cells.find((c) => c.band === band)?.employed ?? null;
+
+  // rows: one per group (and country in "all"); sortable by the columns where order means something
+  let rows = datasets.flatMap((x) => x.groups.filter((g) => g.required_band).map((g) => ({ x, g })));
+  const value = {
+    group: (r) => r.g.isco_group, country: (r) => name[r.x.country_iso3] ?? r.x.country_iso3,
+    total: (r) => inCalc(r.g), over: (r) => r.g.over_share, under: (r) => r.g.under_share,
+  };
+  shown.forEach((b) => { value["band:" + b.code] = (r) => employedIn(r.g, b.code); });
+  if (emSort.key && value[emSort.key]) {
+    const f = value[emSort.key], sign = emSort.dir === "asc" ? 1 : -1;
+    rows = [...rows].sort((a, b) => {
+      const va = f(a), vb = f(b);
+      if (va == null || vb == null) return (va == null) - (vb == null);  // empty values always last
+      return (typeof va === "string" ? va.localeCompare(vb, "es") : va - vb) * sign ||
+        a.g.isco_group.localeCompare(b.g.isco_group) || a.x.country_iso3.localeCompare(b.x.country_iso3);
+    });
+  }
+  const head = (key, label, num = true) => {
+    const on = emSort.key === key;
+    return `<th class="sortable${on ? " sorted" : ""}${num ? " num" : ""}" data-em-sort="${key}">${label}${on ? (emSort.dir === "asc" ? " ▲" : " ▼") : ""}</th>`;
+  };
+  $("em-head").innerHTML = `<tr>${head("group", "Gran grupo de ocupación (CIUO-08)", false)}${many ? head("country", "País", false) : ""}<th>Nivel que pide</th>` +
+    `${shown.map((b) => head("band:" + b.code, b.name)).join("")}${head("total", "Total")}${head("over", "Sobrecalif.")}${head("under", "Subcalif.")}</tr>`;
+  document.querySelectorAll("#em-head th[data-em-sort]").forEach((h) => h.addEventListener("click", () => {
+    const key = h.dataset.emSort;
+    // text columns start ascending, numbers descending; a third click goes back to the default order
+    const first = ["group", "country"].includes(key) ? "asc" : "desc";
+    if (emSort.key !== key) emSort = { key, dir: first };
+    else if (emSort.dir === first) emSort.dir = first === "asc" ? "desc" : "asc";
+    else emSort = { key: null, dir: "desc" };
+    emOffset = 0;
+    renderMismatch();
+  }));
+
+  const cell = (g, b) => {
+    const c = g.cells.find((y) => y.band === b.code);
+    return c ? `<td class="num em-${c.status}">${th(c.employed)}</td>` : '<td class="num meta">—</td>';
+  };
+  const bandTotal = (x, b) => x.groups.filter((g) => g.required_band).reduce((s, g) =>
+    s + g.cells.filter((c) => c.band === b.code && c.status !== "excluded").reduce((a, c) => a + c.employed, 0), 0);
+  const label = (x) => many ? `<td>${name[x.country_iso3]}${x.year !== shownYear ? ` <span class="meta">${x.year}</span>` : ""}</td>` : "";
+  const size = ref.page_size, total = rows.length;
+  emOffset = Math.min(emOffset, Math.max(0, total - 1) - (Math.max(0, total - 1) % size));
+  const page = rows.slice(emOffset, emOffset + size);
+  $("em-pager").hidden = total <= size;
+  $("em-page").textContent = `${total ? emOffset + 1 : 0}–${emOffset + page.length} de ${total}`;
+  $("em-prev").disabled = emOffset === 0; $("em-next").disabled = emOffset + page.length >= total;
+  $("em-rows").innerHTML = page.map(({ x, g }) => `<tr>
+      <td><code>${g.isco_group}</code> ${g.name}</td>${label(x)}<td class="meta">${bandName[g.required_band]}</td>
+      ${shown.map((b) => cell(g, b)).join("")}<td class="num">${th(inCalc(g))}</td>
+      <td class="num">${pct(g.over_share)}</td><td class="num">${pct(g.under_share)}</td></tr>`).join("") +
+    datasets.map((x) => `<tr class="em-total"><td>Total en el cálculo</td>${label(x)}<td></td>${shown.map((b) => `<td class="num">${b.code === notStated ? "—" : th(bandTotal(x, b))}</td>`).join("")}
+      <td class="num">${th(x.totals.considered)}</td><td class="num">${pct(x.over_rate)}</td><td class="num">${pct(x.under_rate)}</td></tr>`).join("") +
+    datasets.flatMap((x) => x.groups.filter((g) => !g.required_band).map((g) => `<tr class="em-excl"><td><code>${g.isco_group}</code> ${g.name}${g.excluded_reason && g.excluded_reason !== g.name ? `<div class="meta">${g.excluded_reason}</div>` : ""}</td>${label(x)}<td>fuera del cálculo</td>
+      ${shown.map((b) => { const v = employedIn(g, b.code); return `<td class="num">${v == null ? "—" : th(v)}</td>`; }).join("")}
+      <td class="num">${th(g.total)}</td><td></td><td></td></tr>`)).join("");
+  $("em-source").textContent = `Ocupados en miles. Fuente: ${ref.source?.name ?? ""} (encuestas de hogares de cada país) · indicadores ${Object.values(ref.indicators).join(" y ")} · actualizado ${ref.fetched_at ? new Date(ref.fetched_at).toLocaleDateString("es-AR") : "—"}. El total de cada grupo no incluye "No informado" (nivel educativo), que queda fuera del cálculo. Hacé clic en un encabezado para ordenar (otro clic invierte el orden; un tercero vuelve al orden original).`;
+  if (!$("em-method").childElementCount) setParagraphs($("em-method"), ref.explanation.join("\n"));
+}
+
+init().catch((e) => { document.querySelector("main").insertAdjacentHTML("afterbegin", `<p class="error card">${e.message}</p>`); });
+</script>
+</body>
+</html>

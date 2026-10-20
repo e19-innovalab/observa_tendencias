@@ -142,7 +142,7 @@ export default function Home() {
   return (
     <main className="wrap">
       <header className="top">
-        <h1>Rumbo</h1>
+        <h1>Observa Tendencias</h1>
         <p>Observatorio laboral y educativo del Cono Sur · Argentina, Uruguay y Chile</p>
       </header>
 
@@ -474,7 +474,7 @@ export default function Home() {
       </section>
 
       <p className="foot">
-        Rumbo · Datos: ofertas de LinkedIn (Apify) y informe de cobertura. Una cifra de 200 postulantes
+        Observa Tendencias · Datos: ofertas de LinkedIn (Apify) y informe de cobertura. Una cifra de 200 postulantes
         en LinkedIn debe leerse como «200 o más».
       </p>
     </main>

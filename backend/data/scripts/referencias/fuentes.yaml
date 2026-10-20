@@ -1,0 +1,28 @@
+# Documentos oficiales de los que se generan las tablas de referencia de ocupaciones
+# (backend/backend/config/reference). Los usa generar_referencias_ciuo.py.
+
+documentos:
+  oit_wp140:
+    titulo: >-
+      Gmyrek, P. et al. (2025). Generative AI and Jobs: A Refined Global Index of Occupational
+      Exposure. ILO Working Paper 140. https://doi.org/10.54394/HETP0387
+    url: https://www.ilo.org/sites/default/files/2025-05/WP140_web.pdf
+    # Tabla del anexo con las 427 ocupaciones CIUO-08 de 4 dígitos (media, desvío, gradiente)
+    inicio_tabla: "X Table A1. ISCO-08 occupations by exposure gradient"
+    # Primera línea después de la tabla
+    fin_tabla: '^2\.\s'
+    controles:
+      ocupaciones: 427
+      gradiente_4: 13
+      expuestas: 112   # gradientes 1 a 4
+  uruguay_ciuo08:
+    titulo: >-
+      Ministerio de Economía y Finanzas de Uruguay. Códigos de ocupación (adaptación de la
+      CIUO-08), con todos los niveles hasta 4 dígitos en español.
+    url: https://www.gub.uy/ministerio-economia-finanzas/sites/ministerio-economia-finanzas/files/2021-01/codigos_ocupacion_0.pdf
+
+# Archivos que se escriben (rutas relativas a backend/backend/config)
+salidas:
+  exposicion: reference/ilo_genai_exposure.yaml
+  ocupaciones: reference/isco08_occupations.yaml
+  grupos: reference/isco08_groups.yaml

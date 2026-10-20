@@ -1,0 +1,286 @@
+# Application settings that are not secrets and do not change between environments.
+# Environment-specific values (database, CORS origins, API key) live in backend/.env.
+
+app_name: Observa Tendencias
+api_prefix: /api/v1
+version: "0.1.0"
+
+# Paths are relative to the backend/ folder (where this config/ folder lives).
+paths:
+  processed_data: ../data/processed/data_analytics
+  files:
+    coverage: informe_cobertura.csv
+    jobs: ofertas_linkedin.csv
+    graduate_trends: egresados_tendencias.csv
+    graduate_projections: egresados_proyecciones.csv
+  csv_encoding: utf-8-sig
+
+# Developer tools. explorer: page at /explorer to try indicators, trends and projections
+# visually against the API. Turn off in production.
+dev_tools:
+  explorer: true
+
+pagination:
+  default_limit: 50
+  max_limit: 500
+  observations_max_limit: 5000
+  # Size of the "top" and "bottom" rankings of the employability index.
+  ranking_size: 20
+
+cors:
+  allow_methods: [GET, POST, PATCH]
+  allow_headers: ["*"]
+
+# Dashboard tabs (mockup: Panorama regional) mapped to indicator domains.
+domains:
+  economic: Socioeconómicos
+  labor: Laborales
+  education: Educativos
+
+# Data types required by the MVP brief: every value says which one it is.
+data_types:
+  observed: Dato observado
+  calculated: Indicador calculado
+  projected: Proyección
+
+# Trend states (codes produced by app/analytics/trends.py) and how to read them given the
+# indicator's higher_is_better: favorable / unfavorable / neutral.
+trend_states:
+  growing: Crecimiento
+  stable: Estabilidad
+  declining: Disminución
+  insufficient_data: Datos insuficientes
+assessments:
+  favorable: Favorable
+  unfavorable: Desfavorable
+  neutral: Neutral
+
+# Employability index labels.
+employability:
+  levels:
+    low: Baja
+    medium: Media
+    high: Alta
+    insufficient_data: Datos insuficientes
+    not_applicable: No aplica a la región
+  # Mejores / Peores: at most max_per_group occupations of the same ISCO group (first
+  # group_digits digits), so one family does not fill the list. group_scope: all (across
+  # countries) or country (per country). Rows say how many of their group were left out.
+  ranking:
+    max_per_group: 2
+    group_digits: 2
+    group_scope: all
+  dimensions:
+    net_demand: Demanda neta
+    salary_ppp: Salario (USD PPA)
+    insertion_rate: Tasa de inserción
+    automation_risk: Riesgo de automatización (exposición a IA generativa)
+  # Shown with the ranking while some dimension has no source. {dimensions}: their names and
+  # weights; {weights}: the weights the other dimensions take; {min_coverage}: analytics.yaml.
+  no_source_note: >-
+    {dimensions} todavía no tiene fuente oficial. Mientras tanto, el ISE se calcula con las demás
+    dimensiones y ese peso se reparte entre ellas en proporción a sus pesos: {weights}. Si a una
+    ocupación le falta además otra dimensión, se hace lo mismo con las que tenga, siempre que
+    reúnan al menos el {min_coverage} del peso total.
+  # Shown next to the methodology: what each dimension measures and its possible range. The
+  # range actually observed comes from the data (/employability -> dimension_ranges).
+  dimension_info:
+    net_demand:
+      definition: >-
+        Crecimiento anual promedio del empleo del grupo ocupacional. Argentina y Uruguay: grupos
+        de 2 dígitos CIUO-08 (OIT). Chile: grandes grupos de 1 dígito CIUO-08.CL (ENE, SIMEL).
+      unit: "% anual"
+      possible_range: Sin límite fijo. Negativo si el empleo cae, positivo si crece.
+    salary_ppp:
+      definition: Ingreso laboral mensual promedio del gran grupo ocupacional (CIUO-08, 1 dígito).
+      unit: USD PPA por mes
+      possible_range: Desde 0, sin máximo.
+    insertion_rate:
+      definition: Proporción de egresados que consiguen empleo al poco tiempo de egresar.
+      unit: "%"
+      possible_range: 0 a 100 %.
+      # Shown while the dimension has no source (analytics.yaml -> indicator: null).
+      source_status: >-
+        Sin fuente oficial todavía. Chile: Mi Futuro (SIES, MINEDUC) calcula la empleabilidad al
+        primer año por carrera, pero no la publica como archivo descargable; la base se le pide
+        al SIES. Argentina y Uruguay: no se encontró una fuente oficial por carrera u ocupación.
+    automation_risk:
+      definition: >-
+        Exposición a la IA generativa (OIT, 2025). Cada tarea de la ocupación tiene un puntaje
+        de 0 (no se puede automatizar) a 1 (la IA generativa podría hacerla sola, sin una
+        persona); el valor es el promedio de las tareas.
+      unit: Índice 0 a 1
+      possible_range: 0 a 1. En el índice se invierte (menos exposición, más puntaje).
+
+# Datasets: downloaded and uploaded files. Paths are relative to the backend/ folder; every
+# file is kept (never overwritten) so each load can be traced to the exact file.
+datasets:
+  raw_dir: ../data/raw/datasets
+  uploads_dir: ../data/uploads
+  max_upload_bytes: 50000000
+  max_errors_reported: 50
+  preview_rows: 20
+  messages:
+    sheet_missing: "La hoja \"{sheet}\" no está en el archivo (hojas: {sheets})"
+    headers_changed: "Las columnas cambiaron respecto del formato validado"
+    header_missing: "Falta la columna \"{column}\""
+    header_unexpected: "Columna nueva o renombrada: \"{column}\""
+    header_order: "Las columnas están en otro orden"
+    no_periods: "No se encontró ningún período legible en la columna \"{column}\""
+    first_period: "La serie empieza en {found}; el formato validado empieza en {expected}"
+    min_periods: "Solo hay {found} períodos; se esperaban al menos {expected}"
+    period_order: "Períodos fuera de orden o repetidos cerca de {period}"
+    not_numeric: "Valor no numérico: {value!r}"
+    out_of_range: "Valor fuera de rango ({min} a {max}): {value}"
+    unknown_indicator: "Indicador desconocido: {code}"
+    unknown_country: "País fuera del catálogo: {code}"
+    unknown_sector: "Sector desconocido: {code}"
+    unknown_occupation: "Ocupación CIUO desconocida: {code}"
+    bad_frequency: "Frecuencia inválida: {value} (usar A, Q o M)"
+    bad_period: "Período ilegible para la frecuencia {frequency}: {value}"
+    missing_value: "Falta el valor de \"{column}\""
+    revision_too_large: "{count} valores de períodos ya publicados cambiaron más de {max_pct}% (ej. {example}); puede ser otra serie"
+    declared_source_required: "Esta plantilla requiere declarar la fuente (nombre y URL)"
+    unsupported_format: "Formato no soportado: {name} (usar .xlsx o .csv)"
+    too_large: "El archivo supera el tamaño máximo ({max_mb} MB)"
+    no_link: "No se encontró el enlace de descarga en la página oficial ({page})"
+    host_not_allowed: "El enlace apunta a un sitio no permitido: {host}"
+    outline_no_period: "Hoja \"{sheet}\": no se encontró el año en el título"
+    outline_periods_differ: "Las hojas no son del mismo año: {years}"
+    outline_release_differs: "El archivo es del año {found}, pero la página lo publica como {release}"
+    outline_no_total: "Hoja \"{sheet}\": no se encontró la fila de total"
+    outline_no_items: "Hoja \"{sheet}\": no se encontró ninguna fila de detalle"
+    outline_total_gap: "Hoja \"{sheet}\": las filas de detalle suman {found} y el total dice {total} (diferencia {pct}%)"
+    summary: "{errors} errores, {warnings} avisos"
+
+# Skills (ESCO). Types are the tail of ESCO's skill-type URI.
+skills:
+  types:
+    knowledge: Conocimiento
+    skill: Habilidad o competencia
+  # Skills shown in an occupation profile (the API can return more with ?limit=).
+  profile_top: 10
+  # Skill gap rankings (/skills/gaps, views top/bottom): only skills with a full gap used by
+  # at least this many occupations, so niche skills of a single occupation do not fill the list.
+  gap_ranking_min_occupations: 3
+  sufficiency:
+    full: Demanda y oferta con datos
+    partial: Datos insuficientes
+    none: Sin datos
+  weight_note: >-
+    Peso = promedio, entre las ocupaciones ESCO del grupo CIUO, de 1 si la habilidad es
+    esencial, 0,5 si es opcional y 0 si no figura.
+
+# CIUO-08 hierarchy levels, by number of digits of the code.
+isco_levels:
+  1: Gran grupo
+  2: Subgrupo principal
+  3: Subgrupo
+  4: Grupo primario (ocupación)
+
+# Alert labels (types and severities produced by app/analytics/alerts.py).
+alerts:
+  types:
+    significant_change: Variación significativa
+    trend_reversal: Cambio de tendencia
+    index_level_change: Cambio de nivel del ISE
+    new_skill_gap: Nueva brecha de habilidades
+    stale_source: Fuente desactualizada
+    source_format_changed: Formato de archivo cambiado
+  severities:
+    high: Alta
+    medium: Media
+    low: Baja
+  # Shown in "¿Cómo se generan las alertas?". Thresholds are not written here: /alerts/rules
+  # reads them from analytics.yaml so the page always shows the values in use.
+  type_info:
+    significant_change: >-
+      El último dato cambió mucho respecto del período inmediatamente anterior, o el cambio es
+      atípico comparado con los cambios previos de la misma serie.
+    trend_reversal: >-
+      La tendencia de la última ventana (crecimiento, estabilidad o disminución) es distinta de
+      la de la ventana que termina un período antes.
+    index_level_change: >-
+      Una ocupación destacada cambió de nivel del ISE (Baja, Media, Alta) respecto del año
+      anterior.
+    new_skill_gap: >-
+      La brecha entre demanda y oferta formativa de una habilidad superó el umbral por primera
+      vez. Todavía sin datos de habilidades.
+    stale_source: >-
+      La fuente no tiene una actualización exitosa hace más tiempo del esperado para su
+      frecuencia.
+    source_format_changed: >-
+      El archivo oficial descargado no coincide con el formato validado (hoja, columnas,
+      períodos, valores o revisiones de datos ya publicados). No se carga nada hasta revisarlo.
+  severity_info:
+    high: El cambio supera varias veces el umbral; conviene revisarlo primero.
+    medium: Cambio relevante que supera el umbral.
+    low: Aviso de mantenimiento (por ejemplo, una fuente sin actualizar).
+
+# How period-over-period change is expressed when the request does not say: units listed in
+# absolute_units change in their own unit (percentage points for percent); the rest as a ratio.
+comparison:
+  absolute_units: [percent]
+
+# Inicio screen cards. change: absolute (percentage points for percent units) or relative (%).
+dashboard:
+  highlights:
+    - indicator: unemployment_rate
+      change: absolute
+    - indicator: labor_force_participation
+      change: absolute
+    - indicator: lower_secondary_completion
+      change: absolute
+    - indicator: internet_users
+      change: absolute
+
+# Source status shown next to every chart.
+source_status:
+  ok: ok
+  stale: stale
+  unavailable: unavailable
+  never_run: never_run
+
+# Notices returned with datasets that are not official statistics or are processed by the team.
+notices:
+  jobs: "LinkedIn (Apify), clasificación por reglas; no es una fuente oficial"
+  graduates: >-
+    SIES (Chile) y datos.gob.ar (Argentina), procesado por el equipo de datos.
+    Las proyecciones son orientativas.
+
+# LinkedIn job postings view (same texts as the first Next.js prototype). /jobs/summary returns
+# it so any client shows the same notice, sector order and page size.
+jobs_view:
+  notice: >-
+    Las ofertas vienen de LinkedIn (recolección con Apify) y el sector se asigna por reglas según
+    la industria de la empresa. No es una fuente oficial y es una instantánea de una semana, no
+    una tendencia.
+  footnote: >-
+    Una cifra de 200 postulantes en LinkedIn debe leerse como «200 o más».
+  source_label: LinkedIn (Apify)
+  period_label: última semana
+  # Rows of the sector x province table, in this order; the rule-based "other" bucket goes last
+  # and is left out of "sector con más ofertas".
+  sector_order: [Tecnología, Economía del conocimiento, Salud, Energía, Turismo]
+  other_sector: Otros
+  # The value LinkedIn experience levels use for "no level".
+  no_level: Not Applicable
+  page_size: 25
+
+messages:
+  db_unavailable: "No se pudo conectar a la base de datos. Revisá DATABASE_URL en backend/.env"
+  invalid_api_key: "API key inválida o ausente (header X-API-Key)"
+  unknown_source: "Fuente desconocida: {code}"
+  source_without_connector: "La fuente {code} no tiene conector configurado"
+  unknown_indicator: "Indicador desconocido: {code}"
+  unknown_methodology: "Metodología desconocida: {code}"
+  invalid_year_range: "El año inicial no puede ser posterior al año final"
+  unknown_occupation: "Ocupación desconocida: {code}"
+  invalid_sort: "No se puede ordenar por {field}. Opciones: {options}"
+  unknown_alert: "Alerta desconocida: {id}"
+  unknown_profile: "Perfil de dataset desconocido: {code}"
+  unknown_dataset: "Archivo desconocido: {id}"
+  unknown_skill: "Habilidad desconocida: {code}"
+  no_crosswalk: "No hay correspondencia carrera → ocupación para {country}"
+  no_education_mismatch: "No hay datos de desajuste educación-ocupación para {country}"
+  dataset_not_committable: "El archivo no se puede cargar (estado: {status})"

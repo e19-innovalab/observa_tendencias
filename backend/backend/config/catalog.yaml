@@ -1,0 +1,99 @@
+# Catalog of the MVP: countries, sectors and occupations.
+# Loaded into the database by `python -m seeds.load` (idempotent upsert).
+
+countries:
+  - iso3: ARG
+    name_es: Argentina
+    name_en: Argentina
+  - iso3: URY
+    name_es: Uruguay
+    name_en: Uruguay
+  - iso3: CHL
+    name_es: Chile
+    name_en: Chile
+
+# isic_codes: ISIC Rev.4 divisions that define the sector (methodology reference).
+# ilostat_eco: ILOSTAT economic-activity codes (ISIC Rev.4 sections) used to fetch sector series.
+#   ILOSTAT only publishes sections, so sectors defined by divisions are approximated by their
+#   section. OPEN DECISION (plan, section 7): technology and knowledge economy overlap on J.
+sectors:
+  - sector_code: technology
+    name: Tecnología
+    isic_codes: [J62, J63]
+    ilostat_eco: [ECO_ISIC4_J]
+  - sector_code: health
+    name: Salud
+    isic_codes: [Q86, Q87, Q88]
+    ilostat_eco: [ECO_ISIC4_Q]
+  - sector_code: energy
+    name: Energía
+    isic_codes: [D35, B06, C19]
+    ilostat_eco: [ECO_ISIC4_D]
+  - sector_code: tourism
+    name: Turismo
+    isic_codes: [I55, I56, N79]
+    ilostat_eco: [ECO_ISIC4_I]
+  - sector_code: knowledge_economy
+    name: Economía del conocimiento
+    isic_codes: [J62, J63, M69, M70, M71, M72, M73, M74, M75]
+    ilostat_eco: [ECO_ISIC4_J, ECO_ISIC4_M]
+
+# Occupations: every ISCO-08 / CIUO-08 unit group (4 digits) in occupation_universe is scored.
+# The occupation code is the ISCO-08 code itself.
+occupation_universe:
+  file: reference/isco08_occupations.yaml
+  # Names of the levels above each occupation (1, 2 and 3 digits of the code).
+  groups_file: reference/isco08_groups.yaml
+
+# Display-name rules applied to the universe's Spanish names, in order (regular expressions).
+# The reference file stays as published; featured occupations keep their own names.
+occupation_name_rules:
+  # "Managers" occupations are called Gerentes, not Directores ("Directores y gerentes de..."
+  # also becomes "Gerentes de...").
+  - when_name_en_matches: "\\bManagers\\b"
+    replace: "^Directores( y gerentes)?\\b"
+    with: "Gerentes"
+
+# The same for the hierarchy groups (1 to 3 digits), listed by code because the groups file has no
+# English titles: the groups whose ISCO-08 English title says "Managers" (1 Managers,
+# 12 Administrative and commercial managers, 121, 122, 13 Production and specialised services
+# managers, 131 to 134). 11 and 112 (chief executives, senior officials) keep "Directores".
+group_name_rules:
+  - codes: ["1", "12", "121", "122", "13", "131", "132", "133", "134"]
+    replace: "^Directores( y gerentes)?\\b"
+    with: "Gerentes"
+
+# Occupations that do not apply to the region's labour markets. They stay in the catalog and
+# in "Todas", but are left out of the employability cohort (they do not distort the scaling of
+# the others) and of the rankings. Each needs a reason, shown next to the occupation.
+excluded_occupations:
+  - {isco08_code: "1113", reason: "Autoridad tradicional sin equivalente en los mercados laborales de Argentina, Uruguay y Chile"}
+  - {isco08_code: "6310", reason: "Agricultura de subsistencia: producción para consumo propio, fuera del mercado laboral"}
+  - {isco08_code: "6320", reason: "Ganadería de subsistencia: producción para consumo propio, fuera del mercado laboral"}
+  - {isco08_code: "6330", reason: "Agropecuaria de subsistencia: producción para consumo propio, fuera del mercado laboral"}
+  - {isco08_code: "6340", reason: "Pesca, caza y recolección de subsistencia: para consumo propio, fuera del mercado laboral"}
+
+# Featured occupations: the ~20 the brief asks to show by default (filters, Ocupaciones screen).
+# They are shown, not a limit: the index ranks the whole universe. Here they get a display name
+# and their strategic sector (other occupations have no sector).
+featured_occupations:
+  - {isco08_code: "2511", name: Analista de sistemas, sector_code: technology}
+  - {isco08_code: "2512", name: Desarrollador/a de software, sector_code: technology}
+  - {isco08_code: "2513", name: Desarrollador/a web y multimedia, sector_code: technology}
+  - {isco08_code: "2523", name: Profesional de redes informáticas, sector_code: technology}
+  - {isco08_code: "2211", name: Médico/a generalista, sector_code: health}
+  - {isco08_code: "2221", name: Profesional de enfermería, sector_code: health}
+  - {isco08_code: "3212", name: Técnico/a de laboratorio médico, sector_code: health}
+  - {isco08_code: "2262", name: Farmacéutico/a, sector_code: health}
+  - {isco08_code: "2151", name: Ingeniero/a electricista, sector_code: energy}
+  - {isco08_code: "3131", name: Operador/a de planta de energía, sector_code: energy}
+  - {isco08_code: "7412", name: Mecánico/a electricista, sector_code: energy}
+  - {isco08_code: "1411", name: Gerente de hotel, sector_code: tourism}
+  - {isco08_code: "5120", name: Cocinero/a, sector_code: tourism}
+  - {isco08_code: "3332", name: Organizador/a de eventos, sector_code: tourism}
+  - {isco08_code: "5113", name: Guía de turismo, sector_code: tourism}
+  - {isco08_code: "2411", name: Contador/a, sector_code: knowledge_economy}
+  - {isco08_code: "2431", name: Profesional de marketing y publicidad, sector_code: knowledge_economy}
+  - {isco08_code: "2421", name: Analista de gestión y organización, sector_code: knowledge_economy}
+  - {isco08_code: "2120", name: Estadístico/a y actuario/a, sector_code: knowledge_economy}
+  - {isco08_code: "2166", name: Diseñador/a gráfico y multimedia, sector_code: knowledge_economy}

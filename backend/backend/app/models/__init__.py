@@ -1,5 +1,6 @@
 from app.models.analytics import (  # noqa: F401
     CoverageReport,
+    Graduate,
     GraduateProjection,
     GraduateTrend,
     JobPosting,
@@ -13,4 +14,19 @@ from app.models.catalog import (  # noqa: F401
     Sector,
     Skill,
 )
-from app.models.sources import Indicator, IngestionRun, Source  # noqa: F401
+from app.models.methodology import (  # noqa: F401
+    Alert,
+    EmployabilityScore,
+    Methodology,
+    SkillGap,
+    TrendResult,
+)
+from app.models.sources import (  # noqa: F401
+    DataRevision,
+    DatasetFile,
+    EducationMismatchCell,
+    Indicator,
+    IngestionRun,
+    Observation,
+    Source,
+)

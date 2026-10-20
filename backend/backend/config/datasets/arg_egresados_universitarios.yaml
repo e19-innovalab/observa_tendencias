@@ -1,0 +1,51 @@
+# Argentina: university students and graduates by discipline ("disciplina específica", OECD
+# fields), public and private universities, 2014 onwards.
+# Publisher: Subsecretaría de Ciencia, Tecnología e Innovación (indicadores CTI), with data of the
+#   Departamento de Información Universitaria (DIU). Universities only: non-university tertiary
+#   institutes are not included.
+
+dataset_code: arg_egresados_universitarios
+source: indicadores_cti_argentina
+title: Egresados universitarios por disciplina (Argentina, datos del DIU)
+landing_page: https://www.argentina.gob.ar/ciencia/indicadores-cti/datasets/dataset-estudiantes-y-egresados-nivel-superior-por-areas-de-ocde
+target: graduates
+country: ARG
+
+download:
+  link_pattern: 'https://www\.argentina\.gob\.ar/sites/default/files/00\._educ_superior_datos\.csv'
+  allowed_hosts: [www.argentina.gob.ar]
+  max_bytes: 50000000
+  # Updated yearly under the same URL.
+  always_download: true
+
+file:
+  format: csv
+  csv_delimiter: ";"
+  csv_encoding: latin-1
+  header_row: 1
+  first_data_row: 2
+  thousands_separator: "."
+  decimal_separator: ","
+
+aggregate:
+  period_column: "ANIO"
+  period_pattern: '(?P<year>\d{4})'
+  value_column: "VALOR"
+  group_columns:
+    career: "DISCIP_ESPECIF"
+    level: "NIVEL_ACADEM"
+    field_area: "DISCIP_OCDE"
+    field_subarea: "DISCIP_ESPECIF"
+  # The file also counts students: only graduates are loaded.
+  filters:
+    "TIPO_ALUMNO": ["EGRESADOS"]
+
+expected:
+  headers: ["ANIO", "TIPO_UNIV", "NIVEL_ACADEM", "OF_ACADEM", "DISCIP_OCDE", "DISCIP_ESPECIF",
+            "TIPO_ALUMNO", "U_MED", "VALOR"]
+  first_period: "2014"
+  min_periods: 10
+  value_min: 0
+  value_max: 200000
+  max_revision: 0.10
+  revision_grace_periods: 2

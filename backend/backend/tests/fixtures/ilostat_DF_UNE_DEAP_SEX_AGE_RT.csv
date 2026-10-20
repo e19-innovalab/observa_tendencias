@@ -1,0 +1,10 @@
+DATAFLOW,REF_AREA,FREQ,MEASURE,SEX,AGE,TIME_PERIOD,OBS_VALUE,OBS_STATUS,UNIT_MEASURE_TYPE,UNIT_MEASURE,UNIT_MULT,SOURCE,NOTE_SOURCE,NOTE_INDICATOR,NOTE_CLASSIF,DECIMALS,UPPER_BOUND,LOWER_BOUND
+ILO:DF_UNE_DEAP_SEX_AGE_RT(1.0),ARG,A,UNE_DEAP_RT,SEX_T,AGE_YTHADULT_YGE15,2023,6.139,,RT,PT,0,"LFS - Encuesta Permanente de Hogares, Urbano",Repository: ILO-STATISTICS - Micro data processing | Geographical coverage: Main cities or metropolitan areas,,,1,,
+ILO:DF_UNE_DEAP_SEX_AGE_RT(1.0),ARG,A,UNE_DEAP_RT,SEX_T,AGE_YTHADULT_YGE15,2024,7.15,,RT,PT,0,"LFS - Encuesta Permanente de Hogares, Urbano",Repository: ILO-STATISTICS - Micro data processing | Geographical coverage: Main cities or metropolitan areas,,,1,,
+ILO:DF_UNE_DEAP_SEX_AGE_RT(1.0),ARG,A,UNE_DEAP_RT,SEX_T,AGE_YTHADULT_YGE15,2025,7.377,,RT,PT,0,"LFS - Encuesta Permanente de Hogares, Urbano",Repository: ILO-STATISTICS - Micro data processing | Geographical coverage: Main cities or metropolitan areas,,,1,,
+ILO:DF_UNE_DEAP_SEX_AGE_RT(1.0),CHL,A,UNE_DEAP_RT,SEX_T,AGE_YTHADULT_YGE15,2023,9.091,,RT,PT,0,LFS - Encuesta Nacional de Empleo,Repository: ILO-STATISTICS - Micro data processing,,,1,,
+ILO:DF_UNE_DEAP_SEX_AGE_RT(1.0),CHL,A,UNE_DEAP_RT,SEX_T,AGE_YTHADULT_YGE15,2024,8.756,,RT,PT,0,LFS - Encuesta Nacional de Empleo,Repository: ILO-STATISTICS - Micro data processing,,,1,,
+ILO:DF_UNE_DEAP_SEX_AGE_RT(1.0),CHL,A,UNE_DEAP_RT,SEX_T,AGE_YTHADULT_YGE15,2025,8.894,,RT,PT,0,LFS - Encuesta Nacional de Empleo,Repository: ILO-STATISTICS - Micro data processing,,,1,,
+ILO:DF_UNE_DEAP_SEX_AGE_RT(1.0),URY,A,UNE_DEAP_RT,SEX_T,AGE_YTHADULT_YGE15,2023,8.355,,RT,PT,0,LFS - Encuesta Continua de Hogares,Repository: ILO-STATISTICS - Micro data processing,,,1,,
+ILO:DF_UNE_DEAP_SEX_AGE_RT(1.0),URY,A,UNE_DEAP_RT,SEX_T,AGE_YTHADULT_YGE15,2024,8.209,,RT,PT,0,LFS - Encuesta Continua de Hogares,Repository: ILO-STATISTICS - Micro data processing,,,1,,
+ILO:DF_UNE_DEAP_SEX_AGE_RT(1.0),URY,A,UNE_DEAP_RT,SEX_T,AGE_YTHADULT_YGE15,2025,7.339,,RT,PT,0,LFS - Encuesta Continua de Hogares,Repository: ILO-STATISTICS - Micro data processing,,,1,,

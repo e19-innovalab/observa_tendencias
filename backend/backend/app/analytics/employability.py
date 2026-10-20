@@ -1,21 +1,18 @@
-"""Employability index (plan 8.1). Scores are relative to the comparison cohort."""
+"""Employability index (plan 8.1, mockup ISE). Scores are relative to the comparison cohort.
 
-DEFAULT_PARAMS = {
-    "weights": {
-        "demand": 0.30, "wages": 0.25, "stability": 0.20, "outlook": 0.15, "skills_fit": 0.10,
-    },
-    "higher_is_better": {
-        "demand": True, "wages": True, "stability": False, "outlook": True, "skills_fit": True,
-    },
-    "levels": {"low": 40, "high": 70},
-    "min_coverage": 0.6,
-}
+Dimensions, weights and levels come from config/analytics.yaml (section employability)."""
+
+from app.core.config_files import analytics_params
 
 
 def min_max_scale(
-    values: dict[str, float | None], higher_is_better: bool = True
+    values: dict[str, float | None],
+    higher_is_better: bool = True,
+    params: dict | None = None,
 ) -> dict[str, float | None]:
-    """Scale each entity's value to 0-100 within the cohort, inverting when lower is better."""
+    """Scale each entity's value to 0-scale_max within the cohort, inverting when lower is better."""
+    p = analytics_params("employability", params)
+    top = p["scale_max"]
     present = {k: v for k, v in values.items() if v is not None}
     if not present:
         return dict.fromkeys(values)
@@ -25,10 +22,10 @@ def min_max_scale(
         if v is None:
             out[k] = None
         elif hi == lo:
-            out[k] = 50.0
+            out[k] = p["flat_cohort_score"]
         else:
-            s = (v - lo) / (hi - lo) * 100
-            out[k] = s if higher_is_better else 100 - s
+            s = (v - lo) / (hi - lo) * top
+            out[k] = s if higher_is_better else top - s
     return out
 
 
@@ -49,12 +46,12 @@ def compute_employability_index(
     Missing dimensions have their weight redistributed; below min_coverage the level is
     'insufficient_data' and score is None.
     """
-    p = {**DEFAULT_PARAMS, **(params or {})}
+    p = analytics_params("employability", params)
     weights = p["weights"]
     dims = list(weights)
     scaled = {
         d: min_max_scale(
-            {occ: vals.get(d) for occ, vals in cohort.items()}, p["higher_is_better"].get(d, True)
+            {occ: vals.get(d) for occ, vals in cohort.items()}, p["higher_is_better"].get(d, True), p
         )
         for d in dims
     }

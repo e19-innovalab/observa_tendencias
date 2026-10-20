@@ -1,4 +1,4 @@
-from sqlalchemy import ARRAY, ForeignKey, Numeric, String, Text
+from sqlalchemy import ARRAY, Boolean, ForeignKey, Numeric, String, Text
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.models.base import Base
@@ -19,11 +19,18 @@ class Sector(Base):
 
 
 class Occupation(Base):
+    """ISCO-08 unit group; occupation_code is the ISCO-08 code. Featured occupations are the ones
+    shown by default and the only ones with a strategic sector."""
+
     __tablename__ = "occupations"
     occupation_code: Mapped[str] = mapped_column(Text, primary_key=True)
     name: Mapped[str] = mapped_column(Text)
+    name_en: Mapped[str | None] = mapped_column(Text, nullable=True)
     isco08_code: Mapped[str] = mapped_column(Text)
-    sector_code: Mapped[str] = mapped_column(ForeignKey("sectors.sector_code"))
+    sector_code: Mapped[str | None] = mapped_column(ForeignKey("sectors.sector_code"), nullable=True)
+    is_featured: Mapped[bool] = mapped_column(Boolean, default=False, server_default="false")
+    is_excluded: Mapped[bool] = mapped_column(Boolean, default=False, server_default="false")
+    exclusion_reason: Mapped[str | None] = mapped_column(Text, nullable=True)
 
 
 class OccupationCrosswalk(Base):

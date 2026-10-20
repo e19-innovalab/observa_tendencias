@@ -1,0 +1,447 @@
+# ISCO-08 / CIUO-08 unit groups (4 digits): the universe of occupations the index covers.
+# name_es: CIUO-08 titles as published by Uruguay (Ministerio de Economía y Finanzas,
+#   "Códigos de ocupación", CIUO-08 adaptation), https://www.gub.uy/ministerio-economia-finanzas/
+#   sites/ministerio-economia-finanzas/files/2021-01/codigos_ocupacion_0.pdf
+# name_en: ILO Working Paper 140 (2025), Annex Table A1 (see ilo_genai_exposure.yaml).
+# Codes come from the union of both lists. name_es is null where the Uruguayan list omits the
+# code; the English title is shown instead. Featured occupations (catalog.yaml) can override
+# the display name.
+# 436 codes.
+
+occupations:
+  "0110": {name_es: "Oficiales de las fuerzas armadas", name_en: null}
+  "0210": {name_es: "Suboficiales de las fuerzas armadas", name_en: null}
+  "0310": {name_es: "Otros miembros de las fuerzas armadas", name_en: null}
+  "1111": {name_es: "Miembros del poder ejecutivo y de los cuerpos legislativos", name_en: "Legislators"}
+  "1112": {name_es: "Personal directivo de la administración pública", name_en: "Senior Government Officials"}
+  "1113": {name_es: null, name_en: "Traditional Chiefs and Heads of Villages"}
+  "1114": {name_es: "Dirigentes de organizaciones que presentan un interés especial", name_en: "Senior Officials of Special-interest Organizations"}
+  "1120": {name_es: "Directores generales y gerentes generales", name_en: "Managing Directors and Chief Executives"}
+  "1211": {name_es: "Directores financieros", name_en: "Finance Managers"}
+  "1212": {name_es: "Directores de recursos humanos", name_en: "Human Resource Managers"}
+  "1213": {name_es: "Directores de políticas y planificación", name_en: "Policy and Planning Managers"}
+  "1219": {name_es: "Directores de administración y servicios no clasificados bajo otros epígrafes", name_en: "Business Services and Administration Managers Not Elsewhere Classified"}
+  "1221": {name_es: "Directores de ventas y comercialización", name_en: "Sales and Marketing Managers"}
+  "1222": {name_es: "Directores de publicidad y relaciones públicas", name_en: "Advertising and Public Relations Managers"}
+  "1223": {name_es: "Directores de investigación y desarrollo", name_en: "Research and Development Managers"}
+  "1311": {name_es: "Directores de producción agropecuaria y silvicultura", name_en: "Agricultural and Forestry Production Managers"}
+  "1312": {name_es: "Directores de producción de piscicultura y pesca", name_en: "Aquaculture and Fisheries Production Managers"}
+  "1321": {name_es: "Directores de industrias manufactureras", name_en: "Manufacturing Managers"}
+  "1322": {name_es: "Directores de explotaciones de minería", name_en: "Mining Managers"}
+  "1323": {name_es: "Directores de empresas de construcción", name_en: "Construction Managers"}
+  "1324": {name_es: "Directores de empresas de abastecimiento, distribución y afines", name_en: "Supply, Distribution and Related Managers"}
+  "1330": {name_es: "Directores de servicios de tecnología de la información y las comunicaciones", name_en: "Information and Communications Technology Service Managers"}
+  "1341": {name_es: "Directores de servicios de cuidados infantiles", name_en: "Child Care Service Managers"}
+  "1342": {name_es: "Directores de servicios de salud", name_en: "Health Service Managers"}
+  "1343": {name_es: "Directores de servicios de cuidado de las personas de edad", name_en: "Aged Care Service Managers"}
+  "1344": {name_es: "Directores de servicios de bienestar social", name_en: "Social Welfare Managers"}
+  "1345": {name_es: "Directores de servicios de educación", name_en: "Education Managers"}
+  "1346": {name_es: "Gerentes de sucursales de bancos, de servicios financieros y de seguros", name_en: "Financial and Insurance Services Branch managers"}
+  "1349": {name_es: "Directores y gerentes de servicios profesionales no clasificados bajo otros epígrafes", name_en: "Professional Services Managers Not Elsewhere Classified"}
+  "1411": {name_es: "Gerentes de hoteles", name_en: "Hotel Managers"}
+  "1412": {name_es: "Gerente de restaurantes", name_en: "Restaurant Managers"}
+  "1420": {name_es: "Gerentes de comercios al por mayor y al por menor", name_en: "Retail and Wholesale Trade Managers"}
+  "1431": {name_es: "Gerente de centros deportivos, de esparcimiento y culturales", name_en: "Sports, Recreation and Cultural Centre Managers"}
+  "1439": {name_es: "Gerentes de servicios no clasificados bajo otros epígrafes", name_en: null}
+  "2111": {name_es: "Físicos y astrónomos", name_en: "Physicists and Astronomers"}
+  "2112": {name_es: "Meteorólogos", name_en: "Meteorologists"}
+  "2113": {name_es: "Químicos", name_en: "Chemists"}
+  "2114": {name_es: "Geólogos y geofísicos", name_en: "Geologists and geophysicists"}
+  "2120": {name_es: "Matemáticos, actuarios y estadísticos", name_en: "Mathematicians, Actuaries and Statisticians"}
+  "2131": {name_es: "Biólogos, botánicos, zoólogos y afines", name_en: "Biologists, Botanists, Zoologists and Related Professionals"}
+  "2132": {name_es: "Agrónomos y afines", name_en: "Farming, Forestry and Fisheries Advisers"}
+  "2133": {name_es: "Profesionales de la protección medioambiental", name_en: "Environmental Protection Professionals"}
+  "2141": {name_es: "Ingenieros industriales y de producción", name_en: "Industrial and Production Engineers"}
+  "2142": {name_es: "Ingenieros civiles", name_en: "Civil Engineers"}
+  "2143": {name_es: "Ingenieros medioambientales", name_en: "Environmental Engineers"}
+  "2144": {name_es: "Ingenieros mecánicos", name_en: "Mechanical Engineers"}
+  "2145": {name_es: "Ingenieros químicos", name_en: "Chemical Engineers"}
+  "2146": {name_es: "Ingenieros de minas, metalúrgicos y afines", name_en: "Mining Engineers, Metallurgists and Related Professionals"}
+  "2149": {name_es: "Ingenieros no clasificados bajo otros epígrafes", name_en: "Engineering Professionals Not Elsewhere Classified"}
+  "2151": {name_es: "Ingenieros electricistas", name_en: "Electrical Engineers"}
+  "2152": {name_es: "Ingenieros electrónicos", name_en: "Electronics Engineers"}
+  "2153": {name_es: "Ingenieros en telecomunicaciones", name_en: "Telecommunications Engineers"}
+  "2161": {name_es: "Arquitectos", name_en: "Building Architects"}
+  "2162": {name_es: "Arquitectos paisajistas", name_en: "Landscape Architects"}
+  "2163": {name_es: "Diseñadores de productos y de prendas", name_en: "Product and Garment Designers"}
+  "2164": {name_es: "Urbanistas e ingenieros de tránsito", name_en: "Town and Traffic Planners"}
+  "2165": {name_es: "Cartógrafos y agrimensores", name_en: "Cartographers and Surveyors"}
+  "2166": {name_es: "Diseñadores gráficos y multimedia", name_en: "Graphic and Multimedia Designers"}
+  "2211": {name_es: "Médicos generales", name_en: "Generalist Medical Practitioners"}
+  "2212": {name_es: "Médicos especialistas", name_en: "Specialist Medical Practitioners"}
+  "2221": {name_es: "Profesionales de enfermería", name_en: "Nursing Professionals"}
+  "2222": {name_es: "Profesionales de partería", name_en: "Midwifery Professionals"}
+  "2230": {name_es: "Profesionales de medicina tradicional y alternativa", name_en: "Traditional and Complementary Medicine Professionals"}
+  "2240": {name_es: null, name_en: "Paramedical Practitioners"}
+  "2250": {name_es: "Veterinarios", name_en: "Veterinarians"}
+  "2261": {name_es: "Dentistas", name_en: "Dentists"}
+  "2262": {name_es: "Farmacéuticos", name_en: "Pharmacists"}
+  "2263": {name_es: "Profesionales de la salud y la higiene laboral y ambiental", name_en: "Environmental and Occupational Health and Hygiene Professionals"}
+  "2264": {name_es: "Fisioterapeutas", name_en: "Physiotherapists"}
+  "2265": {name_es: "Dietistas y nutricionistas", name_en: "Dieticians and Nutritionists"}
+  "2266": {name_es: "Audiólogos y logopedas", name_en: "Audiologists and Speech Therapists"}
+  "2267": {name_es: "Optometristas", name_en: "Optometrists and Ophthalmic Opticians"}
+  "2269": {name_es: "Profesionales de la salud no clasificados bajo otros epígrafes", name_en: "Health Professionals Not Elsewhere Classified"}
+  "2310": {name_es: "Profesores de universidades y de la enseñanza superior", name_en: "University and Higher Education Teachers"}
+  "2320": {name_es: "Profesores de formación profesional", name_en: "Vocational Education Teachers"}
+  "2330": {name_es: "Profesores de enseñanza secundaria", name_en: "Secondary Education Teachers"}
+  "2341": {name_es: "Maestros de enseñanza primaria", name_en: "Primary School Teachers"}
+  "2342": {name_es: "Maestros preescolares", name_en: "Early Childhood Educators"}
+  "2351": {name_es: "Especialistas en métodos pedagógicos", name_en: "Education Methods Specialists"}
+  "2352": {name_es: "Educadores para necesidades especiales", name_en: "Special Needs Teachers"}
+  "2353": {name_es: "Otros profesores de idiomas", name_en: "Other Language Teachers"}
+  "2354": {name_es: "Otros profesores de música", name_en: "Other Music Teachers"}
+  "2355": {name_es: "Otros profesores de artes", name_en: "Other Arts Teachers"}
+  "2356": {name_es: "Instructores en tecnología de la información", name_en: "Information Technology Trainers"}
+  "2359": {name_es: "Profesionales de la enseñanza no clasificados bajo otros epígrafes", name_en: "Teaching Professionals Not Elsewhere Classified"}
+  "2411": {name_es: "Contables", name_en: "Accountants"}
+  "2412": {name_es: "Asesores financieros y en inversiones", name_en: "Financial and Investment Advisers"}
+  "2413": {name_es: "Analistas financieros", name_en: "Financial Analysts"}
+  "2421": {name_es: "Analistas de gestión y organización", name_en: "Management and Organization Analysts"}
+  "2422": {name_es: "Especialistas en políticas de administración", name_en: "Policy Administration Professionals"}
+  "2423": {name_es: "Especialistas en políticas y servicios de personal y afines", name_en: "Personnel and Careers Professionals"}
+  "2424": {name_es: "Especialistas en formación del personal", name_en: "Training and Staff Development Professionals"}
+  "2431": {name_es: "Profesionales de la publicidad y la comercialización", name_en: "Advertising and Marketing Professionals"}
+  "2432": {name_es: "Profesionales de relaciones públicas", name_en: "Public Relations Professionals"}
+  "2433": {name_es: "Profesionales de ventas técnicas y médicas (excluyendo la TIC)", name_en: "Technical and Medical Sales Professionals (excluding ICT)"}
+  "2434": {name_es: "Profesionales de ventas de tecnología de la información y las comunicaciones", name_en: "Information and Communications Technology Sales Professionals"}
+  "2511": {name_es: "Analistas de sistemas", name_en: "Systems Analysts"}
+  "2512": {name_es: "Desarrolladores de software", name_en: "Software Developers"}
+  "2513": {name_es: "Desarrolladores Web y multimedia", name_en: "Web and Multimedia Developers"}
+  "2514": {name_es: "Programadores de aplicaciones", name_en: "Applications Programmers"}
+  "2519": {name_es: null, name_en: "Software and Applications Developers and Analysts Not Elsewhere Classified"}
+  "2521": {name_es: "Diseñadores y administradores de bases de datos", name_en: "Database Designers and Administrators"}
+  "2522": {name_es: "Administradores de sistemas", name_en: "Systems Aministrators"}
+  "2523": {name_es: "Profesionales en redes de computadores", name_en: "Computer Network Professionals"}
+  "2529": {name_es: "Especialistas en bases de datos y en redes de computadores no clasificados bajo otros epígrafes", name_en: "Database and Network Professionals Not Elsewhere Classified"}
+  "2611": {name_es: "Abogados", name_en: "Lawyers"}
+  "2612": {name_es: "Jueces", name_en: "Judges"}
+  "2619": {name_es: "Profesionales en derecho no clasificados bajo otros epígrafes", name_en: "Legal Professionals Not Elsewhere Classified"}
+  "2621": {name_es: "Archivistas y curadores de museos", name_en: "Archivists and Curators"}
+  "2622": {name_es: "Bibliotecarios, documentalistas y afines", name_en: "Librarians and Related Information Professionals"}
+  "2631": {name_es: "Economistas", name_en: "Economists"}
+  "2632": {name_es: "Sociólogos, antropólogos y afines", name_en: "Sociologists, Anthropologists and Related Professionals"}
+  "2633": {name_es: "Filósofos, historiadores y especialistas en ciencias políticas", name_en: "Philosophers, Historians and Political Scientists"}
+  "2634": {name_es: "Psicólogos", name_en: "Psychologists"}
+  "2635": {name_es: "Profesionales del trabajo social", name_en: "Social Work and Counselling Professionals"}
+  "2636": {name_es: "Profesionales religiosos", name_en: "Religious Professionals"}
+  "2641": {name_es: "Autores y otros escritores", name_en: "Authors and Related Writers"}
+  "2642": {name_es: "Periodistas", name_en: "Journalists"}
+  "2643": {name_es: "Traductores, intérpretes y lingüistas", name_en: "Translators, Interpreters and Other Linguists"}
+  "2651": {name_es: "Artistas de artes plásticas", name_en: "Visual Artists"}
+  "2652": {name_es: "Músicos, cantantes y compositores", name_en: "Musicians, Singers and Composers"}
+  "2653": {name_es: "Bailarines y coreógrafos", name_en: "Dancers and Choreographers"}
+  "2654": {name_es: "Directores de cine, de teatro y afines", name_en: "Film, Stage and Related Directors and Producers"}
+  "2655": {name_es: "Actores", name_en: "Actors"}
+  "2656": {name_es: "Locutores de radio, televisión y otros medios de comunicación", name_en: "Announcers on Radio, Television and Other Media"}
+  "2659": {name_es: "Artistas creativos e interpretativos no clasificados bajo otros epígrafes", name_en: "Creative and Performing Artists Not Elsewhere Classified"}
+  "3111": {name_es: "Técnicos en ciencias físicas y químicas", name_en: "Chemical and Physical Science Technicians"}
+  "3112": {name_es: "Técnicos en ingeniería civil", name_en: "Civil Engineering Technicians"}
+  "3113": {name_es: "Electrotécnicos", name_en: "Electrical Engineering Technicians"}
+  "3114": {name_es: "Técnicos en electrónica", name_en: "Electronics Engineering Technicians"}
+  "3115": {name_es: "Técnicos en ingeniería mecánica", name_en: "Mechanical Engineering Technicians"}
+  "3116": {name_es: "Técnicos en química industrial", name_en: "Chemical Engineering Technicians"}
+  "3117": {name_es: "Técnicos en ingeniería de minas y metalurgia", name_en: "Mining and metallurgical technicians"}
+  "3118": {name_es: "Delineantes y dibujantes técnicos", name_en: "Draughtspersons"}
+  "3119": {name_es: "Técnicos en ciencias físicas y en ingeniería no clasificados bajo otros epígrafes", name_en: "Physical and Engineering Science Technicians Not Elsewhere Classified"}
+  "3121": {name_es: "Supervisores en ingeniería de minas", name_en: "Mining Supervisors"}
+  "3122": {name_es: "Supervisores de industrias manufactureras", name_en: "Manufacturing Supervisors"}
+  "3123": {name_es: "Supervisores de la construcción", name_en: "Construction Supervisors"}
+  "3131": {name_es: "Operadores de instalaciones de producción de energía", name_en: "Power Production Plant Operators"}
+  "3132": {name_es: "Operadores de incineradores, instalaciones de tratamiento de agua y afines", name_en: "Incinerator and Water Treatment Plant Operators"}
+  "3133": {name_es: "Controladores de instalaciones de procesamiento de productos químicos", name_en: "Chemical Processing Plant Controllers"}
+  "3134": {name_es: "Operadores de instalaciones de refinación de petróleo y gas natural", name_en: "Petroleum and Natural Gas Refining Plant Operators"}
+  "3135": {name_es: "Controladores de procesos de producción de metales", name_en: "Metal Production Process Controllers"}
+  "3139": {name_es: "Técnicos en control de procesos no clasificados bajo otros epígrafes", name_en: null}
+  "3141": {name_es: "Técnicos en ciencias biológicas (excluyendo la medicina)", name_en: "Life Science Technicians (excluding Medical)"}
+  "3142": {name_es: "Técnicos agropecuarios", name_en: "Agricultural Technicians"}
+  "3143": {name_es: "Técnicos forestales", name_en: "Forestry Technicians"}
+  "3151": {name_es: "Oficiales maquinistas en navegación", name_en: "Ships' Engineers"}
+  "3152": {name_es: "Capitanes, oficiales de cubierta y prácticos", name_en: "Ships' Deck Officers and Pilots"}
+  "3153": {name_es: "Pilotos de aviación y afines", name_en: "Aircraft Pilots and Related Associate Professionals"}
+  "3154": {name_es: "Controladores de tráfico aéreo", name_en: "Air Traffic Controllers"}
+  "3155": {name_es: "Técnicos en seguridad aeronáutica", name_en: "Air Traffic Safety Electronics Technicians"}
+  "3211": {name_es: "Técnicos en aparatos de diagnóstico y tratamiento médico", name_en: "Medical Imaging and Therapeutic Equipment Technicians"}
+  "3212": {name_es: "Técnicos de laboratorios médicos", name_en: "Medical and Pathology Laboratory Technicians"}
+  "3213": {name_es: "Técnicos y asistentes farmacéuticos", name_en: "Pharmaceutical Technicians and Assistants"}
+  "3214": {name_es: "Técnicos de prótesis médicas y dentales", name_en: "Medical and Dental Prosthetic Technicians"}
+  "3221": {name_es: "Profesionales de nivel medio de enfermería", name_en: "Nursing Associate Professionals"}
+  "3222": {name_es: null, name_en: "Midwifery Associate Professionals"}
+  "3230": {name_es: "Profesionales de nivel medio de medicina tradicional y alternativa", name_en: "Traditional and Complementary Medicine Associate Professionals"}
+  "3240": {name_es: "Técnicos y asistentes veterinarios", name_en: "Veterinary Technicians and Assistants"}
+  "3251": {name_es: "Dentistas auxiliares y ayudantes de odontología", name_en: "Dental Assistants and Therapists"}
+  "3252": {name_es: "Técnicos en documentación sanitaria", name_en: "Medical Records and Health Information Technicians"}
+  "3253": {name_es: "Trabajadores comunitarios de la salud", name_en: "Community Health Workers"}
+  "3254": {name_es: "Técnicos en optometría y ópticos", name_en: "Dispensing Opticians"}
+  "3255": {name_es: "Técnicos y asistentes fisioterapeutas", name_en: "Physiotherapy Technicians and Assistants"}
+  "3256": {name_es: "Practicantes y asistentes médicos", name_en: "Medical Assistants"}
+  "3257": {name_es: "Inspectores de la salud laboral, medioambiental y afines", name_en: "Environmental and Occupational Health Inspectors and Associates"}
+  "3258": {name_es: null, name_en: "Ambulance Workers"}
+  "3259": {name_es: "Profesionales de la salud de nivel medio no clasificados bajo otros epígrafes", name_en: "Health Associate Professionals Not Elsewhere Classified"}
+  "3311": {name_es: "Agentes de bolsa, cambio y otros servicios financieros", name_en: "Securities and Finance Dealers and Brokers"}
+  "3312": {name_es: "Oficiales de préstamos y créditos", name_en: "Credit and Loans Officers"}
+  "3313": {name_es: "Tenedores de libros", name_en: "Accounting Associate Professionals"}
+  "3314": {name_es: "Profesionales de nivel medio de servicios estadísticos, matemáticos y afines", name_en: "Statistical, Mathematical and Related Associate Professionals"}
+  "3315": {name_es: "Tasadores", name_en: "Valuers and Loss Assessors"}
+  "3321": {name_es: "Agentes de seguros", name_en: "Insurance Representatives"}
+  "3322": {name_es: "Representantes comerciales", name_en: "Commercial Sales Representatives"}
+  "3323": {name_es: "Agentes de compras", name_en: "Buyers"}
+  "3324": {name_es: "Agentes de compras y consignatarios", name_en: "Trade Brokers"}
+  "3331": {name_es: "Declarantes o gestores de aduana", name_en: "Clearing and Forwarding Aents"}
+  "3332": {name_es: "Organizadores de conferencias y eventos", name_en: "Conference and Event Planners"}
+  "3333": {name_es: "Agentes de empleo y contratistas de mano de obra", name_en: "Employment agents and contractors"}
+  "3334": {name_es: "Agentes inmobiliarios", name_en: "Real Estate Agents and Property Managers"}
+  "3339": {name_es: "Agentes de servicios comerciales no clasificados bajo otros epígrafes", name_en: "Business Services Agents Not Elsewhere Classified"}
+  "3341": {name_es: "Supervisores de secretaría", name_en: "Office Supervisors"}
+  "3342": {name_es: "Secretarios jurídicos", name_en: "Legal Secretaries"}
+  "3343": {name_es: "Secretarios administrativos y ejecutivos", name_en: "Administrative and Executive Secretaries"}
+  "3344": {name_es: "Secretarios médicos", name_en: "Medical Secretaries"}
+  "3351": {name_es: "Agentes de aduana e inspectores de fronteras", name_en: "Customs and Border Inspectors"}
+  "3352": {name_es: "Agentes de administración tributaria", name_en: "Government Tax and Excise Officials"}
+  "3353": {name_es: "Agentes de servicios de seguridad social", name_en: "Government Social Benefits Officials"}
+  "3354": {name_es: "Agentes de servicios de expedición de licencias y permisos", name_en: "Government Licensing Officials"}
+  "3355": {name_es: "Inspectores de policía y detectives", name_en: "Police Inspectors and Detectives"}
+  "3359": {name_es: null, name_en: "Government Regulatory AssociatePprofessionals Not Elsewhere Classified"}
+  "3411": {name_es: "Profesionales de nivel medio del derecho y servicios legales y afines", name_en: "Legal and Related Associate Professionals"}
+  "3412": {name_es: "Trabajadores y asistentes sociales de nivel medio", name_en: "Social Work Associate Professionals"}
+  "3413": {name_es: "Auxiliares laicos de las religiones", name_en: "Religious Associate Professionals"}
+  "3421": {name_es: "Atletas y deportistas", name_en: "Athletes and Sports Players"}
+  "3422": {name_es: "Entrenadores, instructores y árbitros de actividades deportivas", name_en: "Sports Coaches, Instructors and Officials"}
+  "3423": {name_es: "Instructores de educación física y actividades recreativas", name_en: "Fitness and Recreation Instructors and Programme Leaders"}
+  "3431": {name_es: "Fotógrafos", name_en: "Photographers"}
+  "3432": {name_es: "Diseñadores y decoradores de interior", name_en: "Interior Designers and Decorators"}
+  "3433": {name_es: "Técnicos en galerías de arte, museos y bibliotecas", name_en: "Gallery, Museum and Library Technicians"}
+  "3434": {name_es: "Chefs", name_en: "Chefs"}
+  "3435": {name_es: "Otros profesionales de nivel medio en actividades culturales y artísticas", name_en: null}
+  "3511": {name_es: "Técnicos en operaciones de tecnología de la información y las comunicaciones", name_en: "Information and Communications Technology Operations Technicians"}
+  "3512": {name_es: "Técnicos en asistencia al usuario de tecnología de la información y las comunicaciones", name_en: "Information and Communications Technology User Support Technicians"}
+  "3513": {name_es: "Técnicos en redes y sistemas de computadores", name_en: "Computer Network and Systems Technicians"}
+  "3514": {name_es: "Técnicos de la Web", name_en: "Web Technicians"}
+  "3521": {name_es: "Técnicos de radiodifusión y grabación audio visual", name_en: "Broadcasting and Audio-visual Technicians"}
+  "3522": {name_es: "Técnicos de ingeniería de las telecomunicaciones", name_en: "Telecommunications Engineering Technicians"}
+  "4110": {name_es: "Oficinistas generales", name_en: "General Office Clerks"}
+  "4120": {name_es: "Secretarios (general)", name_en: "Secretaries (general)"}
+  "4131": {name_es: "Operadores de máquinas de procesamiento de texto y mecanógrafos", name_en: "Typists and Word Processing Operators"}
+  "4132": {name_es: "Grabadores de datos", name_en: "Data Entry Clerks"}
+  "4211": {name_es: "Cajeros de bancos y afines", name_en: "Bank Tellers and Related Clerks"}
+  "4212": {name_es: "Receptores de apuestas y afines", name_en: "Bookmakers, Croupiers and Related Gaming Workers"}
+  "4213": {name_es: "Prestamistas", name_en: "Pawnbrokers and Money-lenders"}
+  "4214": {name_es: "Cobradores y afines", name_en: "Debt Collectors and Related Workers"}
+  "4221": {name_es: "Empleados de agencias de viajes", name_en: "Travel Consultants and Clerks"}
+  "4222": {name_es: "Empleados de centros de llamadas", name_en: "Contact Centre Information Clerks"}
+  "4223": {name_es: "Telefonistas", name_en: "Telephone Switchboard Operators"}
+  "4224": {name_es: "Recepcionistas de hoteles", name_en: "Hotel Receptionists"}
+  "4225": {name_es: "Empleados de ventanillas de informaciones", name_en: "Inquiry Clerks"}
+  "4226": {name_es: "Recepcionistas (general)", name_en: "Receptionists (general)"}
+  "4227": {name_es: "Entrevistadores de encuestas y de investigaciones de mercados", name_en: "Survey and Market Research Interviewers"}
+  "4229": {name_es: "Empleados de servicios de información al cliente no clasificados bajo otros epígrafes", name_en: "Client Information Workers Not Elsewhere Classified"}
+  "4311": {name_es: "Empleados de contabilidad y cálculo de costos", name_en: "Accounting and Bookkeeping Clerks"}
+  "4312": {name_es: "Empleados de servicios estadísticos, financieros y de seguros", name_en: "Statistical, Finance and Insurance Clerks"}
+  "4313": {name_es: "Empleados encargados de las nóminas", name_en: "Payroll Clerks"}
+  "4321": {name_es: "Empleados de control de abastecimientos e inventario", name_en: "Stock Clerks"}
+  "4322": {name_es: "Empleados de servicios de apoyo a la producción", name_en: "Production Clerks"}
+  "4323": {name_es: "Empleados de servicios de transporte", name_en: "Transport Clerks"}
+  "4411": {name_es: "Empleados de bibliotecas", name_en: "Library Clerks"}
+  "4412": {name_es: "Empleados de servicios de correos", name_en: "Mail Carriers and Sorting Clerks"}
+  "4413": {name_es: "Codificadores de datos, correctores de pruebas de imprenta y afines", name_en: "Coding, Proofreading and Related Clerks"}
+  "4414": {name_es: null, name_en: "Scribes and Related Workers"}
+  "4415": {name_es: "Empleados de archivos", name_en: "Filing and Copying Clerks"}
+  "4416": {name_es: "Empleados del servicio de personal", name_en: "Personnel Clerks"}
+  "4419": {name_es: "Personal de apoyo administrativo no clasificado bajo otros epígrafes", name_en: "Clerical Support Workers Not Elsewhere Classified"}
+  "5111": {name_es: "Auxiliares de servicio de abordo", name_en: "Travel Attendants and Travel Stewards"}
+  "5112": {name_es: "Revisores y cobradores de los transportes públicos", name_en: "Transport Conductors"}
+  "5113": {name_es: "Guías de turismo", name_en: "Travel Guides"}
+  "5120": {name_es: "Cocineros", name_en: "Cooks"}
+  "5131": {name_es: "Camareros de mesas", name_en: "Waiters"}
+  "5132": {name_es: "Camareros de barra", name_en: "Bartenders"}
+  "5141": {name_es: "Peluqueros", name_en: "Hairdressers"}
+  "5142": {name_es: "Especialistas en tratamientos de belleza y afines", name_en: "Beauticians and Related Workers"}
+  "5151": {name_es: "Supervisores de mantenimiento y limpieza en oficinas, hoteles y otros establ ecimientos", name_en: "Cleaning and Housekeeping Supervisors in Offices, Hotels and Other Establishments"}
+  "5152": {name_es: "Ecónomos y mayordomos domésticos", name_en: "Domestic Housekeepers"}
+  "5153": {name_es: "Conserjes", name_en: "Building Caretakers"}
+  "5161": {name_es: "Astrólogos, adivinadores y afines", name_en: "Astrologers, Fortune-tellers and Related Workers"}
+  "5162": {name_es: "Acompañantes y ayudantes de cámara", name_en: "Companions and Valets"}
+  "5163": {name_es: "Personal de pompas fúnebres y embalsamadores", name_en: "Undertakers and Embalmers"}
+  "5164": {name_es: "Cuidadores de animales", name_en: "Pet Groomers and Animal Care Workers"}
+  "5165": {name_es: "Instructores de autoescuela", name_en: "Driving Instructors"}
+  "5169": {name_es: "Trabajadores de servicios personales no clasificados bajo otros epígrafes", name_en: "Personal Services Workers Not Elsewhere Classified"}
+  "5211": {name_es: "Vendedores de quioscos y de puestos de mercado", name_en: "Stall and Market Salespersons"}
+  "5212": {name_es: "Vendedores ambulantes de productos comestibles", name_en: "Street Food Salespersons"}
+  "5221": {name_es: "Comerciantes de tiendas", name_en: "Shopkeepers"}
+  "5222": {name_es: "Supervisores de tiendas y almacenes", name_en: "Shop Supervisors"}
+  "5223": {name_es: "Asistentes de venta de tiendas y almacenes", name_en: "Shop Sales Assistants"}
+  "5230": {name_es: "Cajeros y expendedores de billetes", name_en: "Cashiers and Ticket Clerks"}
+  "5241": {name_es: "Modelos de moda, arte y publicidad", name_en: "Fashion and Other Models"}
+  "5242": {name_es: "Demostradores de tiendas", name_en: "Sales Demonstrators"}
+  "5243": {name_es: "Vendedores puerta a puerta", name_en: "Door-to-door Salespersons"}
+  "5244": {name_es: "Vendedores por teléfono", name_en: "Contact Centre Salespersons"}
+  "5245": {name_es: "Expendedores de gasolineras", name_en: "Service Station Attendants"}
+  "5246": {name_es: "Vendedores de comidas al mostrador", name_en: "Food Service Counter Attendants"}
+  "5249": {name_es: "Vendedores no clasificados bajo otros epígrafes", name_en: null}
+  "5311": {name_es: "Cuidadores de niños", name_en: "Child Care Workers"}
+  "5312": {name_es: "Auxiliares de maestros", name_en: "Teachers' Aides"}
+  "5321": {name_es: "Trabajadores de los cuidados personales en instituciones", name_en: "Health Care Assistants"}
+  "5322": {name_es: "Trabajadores de los cuidados personales a domicilio", name_en: "Home-based Personal Care Workers"}
+  "5329": {name_es: "Trabajadores de los cuidados personales en servicios de salud no clasificados bajo otros epígrafes", name_en: "Personal Care Workers in Health Services Not Elsewhere Classified"}
+  "5411": {name_es: "Bomberos", name_en: "Fire Fighters"}
+  "5412": {name_es: "Policías", name_en: "Police Officers"}
+  "5413": {name_es: "Guardianes de prisión", name_en: "Prison Guards"}
+  "5414": {name_es: "Guardias de protección", name_en: "Security Guards"}
+  "5419": {name_es: "Personal de los servicios de protección no clasificados bajo otros epígrafes", name_en: "Protective Services Workers Not Elsewhere Classified"}
+  "6111": {name_es: "Agricultores y trabajadores calificados de cultivos extensivos", name_en: "Field Crop and Vegetable Growers"}
+  "6112": {name_es: "Agricultores y trabajadores calificados de plantaciones de árboles y arbustos", name_en: "Tree and Shrub Crop Growers"}
+  "6113": {name_es: "Agricultores y trabajadores calificados de huertas, invernaderos, viveros y jardines", name_en: "Gardeners, Horticultural and Nursery Growers"}
+  "6114": {name_es: "Agricultores y trabajadores calificados de cultivos mixtos", name_en: "Mixed Crop Growers"}
+  "6121": {name_es: "Criadores de ganado", name_en: "Livestock and Dairy Producers"}
+  "6122": {name_es: "Avicultores y trabajadores calificados de la avicultura", name_en: "Poultry Producers"}
+  "6123": {name_es: "Apicultores y sericultores y trabajadores calificados de la apicultura y la sericultura", name_en: "Apiarists and Sericulturists"}
+  "6129": {name_es: null, name_en: "Animal Producers Not Elsewhere Classified"}
+  "6130": {name_es: null, name_en: "Mixed Crop and Animal Producers"}
+  "6210": {name_es: "Trabajadores forestales calificados y afines", name_en: "Forestry and Related Workers"}
+  "6221": {name_es: "Trabajadores de explotaciones de acuicultura", name_en: "Aquaculture Workers"}
+  "6222": {name_es: "Pescadores de agua dulce y en aguas costeras", name_en: "Inland and Coastal Waters Fishery Workers"}
+  "6223": {name_es: "Pescadores de alta mar", name_en: "Deep-sea Fishery Workers"}
+  "6224": {name_es: "Cazadores y tramperos", name_en: "Hunters and Trappers"}
+  "6310": {name_es: "Trabajadores agrícolas de subsistencia", name_en: "Subsistence Crop Farmers"}
+  "6320": {name_es: "Trabajadores pecuarios de subsistencia", name_en: "Subsistence Livestock Farmers"}
+  "6330": {name_es: "Trabajadores agropecuarios de subsistencia", name_en: "Subsistence Mixed Crop and Livestock Farmers"}
+  "6340": {name_es: "Pescadores, cazadores, tramperos y recolectores de subsistencia", name_en: "Subsistence Fishers, Hunters, Trappers and Gatherers"}
+  "7111": {name_es: "Constructores de casas", name_en: "House Builders"}
+  "7112": {name_es: "Albañiles", name_en: "Bricklayers and Related Workers"}
+  "7113": {name_es: "Mamposteros, tronzadores, labrantes y grabadores de piedra", name_en: "Stonemasons, Stone Cutters, Splitters and Carvers"}
+  "7114": {name_es: "Operarios en cemento armado, enfoscadores y afines", name_en: "Concrete Placers, Concrete Finishers and Related Workers"}
+  "7115": {name_es: "Carpinteros de armar y de obra blanca", name_en: "Carpenters and Joiners"}
+  "7119": {name_es: "Oficiales y operarios de la construcción (obra gruesa) y afines no clasificados bajo otros epígrafes", name_en: "Building Frame and Related Trades Workers Not Elsewhere Classified"}
+  "7121": {name_es: "Techadores", name_en: "Roofers"}
+  "7122": {name_es: "Parqueteros y colocadores de suelos", name_en: "Floor Layers and Tile Setters"}
+  "7123": {name_es: "Revocadores", name_en: "Plasterers"}
+  "7124": {name_es: "Instaladores de material aislante y de insonorización", name_en: "Insulation Workers"}
+  "7125": {name_es: "Cristaleros", name_en: "Glaziers"}
+  "7126": {name_es: "Fontaneros e instaladores de tuberías", name_en: "Plumbers and Pipe Fitters"}
+  "7127": {name_es: "Mecánicos-montadores de instalaciones de refrigeración y climatización", name_en: "Air Conditioning and Refrigeration Mechanics"}
+  "7131": {name_es: "Pintores y empapeladores", name_en: "Painters and Related Workers"}
+  "7132": {name_es: "Barnizadores y afines", name_en: "Spray Painters and Varnishers"}
+  "7133": {name_es: "Limpiadores de fachadas y deshollinadores", name_en: "Building Structure Cleaners"}
+  "7211": {name_es: "Moldeadores y macheros", name_en: "Metal Moulders and Coremakers"}
+  "7212": {name_es: "Soldadores y oxicortadores", name_en: "Welders and Flame Cutters"}
+  "7213": {name_es: "Chapistas y caldereros", name_en: "Sheet Metal Workers"}
+  "7214": {name_es: "Montadores de estructuras metálicas", name_en: "Structural Metal Preparers and Erectors"}
+  "7215": {name_es: "Aparejadores y empalmadores de cables", name_en: "Riggers and Cable Splicers"}
+  "7221": {name_es: "Herreros y forjadores", name_en: "Blacksmiths, Hammersmiths and Forging Press Workers"}
+  "7222": {name_es: "Herramentistas y afines", name_en: "Toolmakers and Related Workers"}
+  "7223": {name_es: "Reguladores y operadores de máquinas herramientas", name_en: "Metal Working Machine Tool Setters and Operators"}
+  "7224": {name_es: "Pulidores de metales y afiladores de herramientas", name_en: "Metal Polishers, Wheel Grinders and Tool Sharpeners"}
+  "7231": {name_es: "Mecánicos y reparadores de vehículos de motor", name_en: "Motor Vehicle Mechanics and Repairers"}
+  "7232": {name_es: "Mecánicos y reparadores de motores de avión", name_en: "Aircraft Engine Mechanics and Repairers"}
+  "7233": {name_es: "Mecánicos y reparadores de máquinas agrícolas e industriales", name_en: "Agricultural and Industrial Machinery Mechanics and Repairers"}
+  "7234": {name_es: "Reparadores de bicicletas y afines", name_en: "Bicycle and Related Repairers"}
+  "7311": {name_es: "Mecánicos y reparadores de instrumentos de precisión", name_en: "Precision-instrument Makers and Repairers"}
+  "7312": {name_es: "Fabricantes y afinadores de instrumentos musicales", name_en: "Musical Instrument Makers and Tuners"}
+  "7313": {name_es: "Joyeros, orfebres y plateros", name_en: "Jewellery and Precious Metal Workers"}
+  "7314": {name_es: "Alfareros y afines (barro, arcilla y abrasivos)", name_en: "Potters and Related Workers"}
+  "7315": {name_es: "Sopladores, modeladores, laminadores, cortadores y pulidores de vidrio", name_en: "Glass Makers, Cutters, Grinders and Finishers"}
+  "7316": {name_es: "Redactores de carteles, pintores decorativos y grabadores", name_en: "Sign Writers, Decorative Painters, Engravers and Etchers"}
+  "7317": {name_es: "Artesanos en madera, cestería y materiales similares", name_en: "Handicraft Workers in Wood, Basketry and Related Materials"}
+  "7318": {name_es: "Artesanos de los tejidos, el cuero y materiales similares", name_en: "Handicraft Workers in Textile, Leather and Related Materials"}
+  "7319": {name_es: "Artesanos no clasificados bajo otros epígrafes", name_en: null}
+  "7321": {name_es: "Cajistas, tipógrafos y afines", name_en: "Pre-press Technicians"}
+  "7322": {name_es: "Impresores", name_en: "Printers"}
+  "7323": {name_es: "Encuadernadores y afines", name_en: "Print Finishing and Binding Workers"}
+  "7411": {name_es: "Electricistas de obras y afines", name_en: "Building and Related Electricians"}
+  "7412": {name_es: "Mecánicos y ajustadores electricistas", name_en: "Electrical Mechanics and Fitters"}
+  "7413": {name_es: "Instaladores y reparadores de líneas eléctricas", name_en: "Electrical Line Installers and Repairers"}
+  "7421": {name_es: "Mecánicos y reparadores en electrónica", name_en: "Electronics Mechanics and Servicers"}
+  "7422": {name_es: "Instaladores y reparadores en tecnología de la información y las comunicaciones", name_en: "Information and Communications Technology Installers and Servicers"}
+  "7511": {name_es: "Carniceros, pescaderos y afines", name_en: "Butchers, Fishmongers and Related Food Preparers"}
+  "7512": {name_es: "Panaderos, pasteleros y confiteros", name_en: "Bakers, Pastry-cooks and Confectionery Makers"}
+  "7513": {name_es: "Operarios de la elaboración de productos lácteos", name_en: "Dairy Products Makers"}
+  "7514": {name_es: "Operarios de la conservación de frutas, legumbres, verduras y afines", name_en: "Fruit, Vegetable and Related Preservers"}
+  "7515": {name_es: "Catadores y clasificadores de alimentos y bebidas", name_en: "Food and Beverage Tasters and Graders"}
+  "7516": {name_es: "Preparadores y elaboradores de tabaco y sus productos", name_en: "Tobacco Preparers and Tobacco Products Makers"}
+  "7521": {name_es: "Operarios del tratamiento de la madera", name_en: "Wood Treaters"}
+  "7522": {name_es: "Ebanistas y afines", name_en: "Cabinet-makers and Related Workers"}
+  "7523": {name_es: "Reguladores y operadores de máquinas de labrar madera", name_en: "Woodworking Machine Tool Setters and Operators"}
+  "7531": {name_es: "Sastres, modistos, peleteros y sombrereros", name_en: "Tailors, Dressmakers, Furriers and Hatters"}
+  "7532": {name_es: "Patronistas y cortadores de tela y afines", name_en: "Garment and Related Patternmakers and Cutters"}
+  "7533": {name_es: "Costureros, bordadores y afines", name_en: "Sewing, Embroidery and Related Workers"}
+  "7534": {name_es: "Tapiceros, colchoneros y afines", name_en: "Upholsterers and Related Workers"}
+  "7535": {name_es: "Apelambradores, pellejeros y curtidores", name_en: "Pelt Dressers, Tanners and Fellmongers"}
+  "7536": {name_es: "Zapateros y afines", name_en: "Shoemakers and Related Workers"}
+  "7541": {name_es: "Buzos", name_en: "Underwater Divers"}
+  "7542": {name_es: "Dinamiteros y pegadores", name_en: "Shotfirers and Blasters"}
+  "7543": {name_es: "Clasificadores y probadores de productos (excluyendo alimentos y bebidas)", name_en: "Product Graders and Testers (except Foods and Beverages)"}
+  "7544": {name_es: "Fumigadores y otros controladores de plagas y malas hierbas", name_en: "Fumigators and Other Pest and Weed Controllers"}
+  "7549": {name_es: null, name_en: "Craft and Related Workers not Elsewhere Classified"}
+  "8111": {name_es: "Mineros y operadores de instalaciones mineras", name_en: "Miners and Quarriers"}
+  "8112": {name_es: "Operadores de instalaciones de procesamiento de minerales y rocas", name_en: "Mineral and Stone Processing Plant Operators"}
+  "8113": {name_es: "Perforadores y sondistas de pozos y afines", name_en: "Well Drillers and Borers and Related Workers"}
+  "8114": {name_es: "Operadores de máquinas para fabricar cemento y otros productos minerales", name_en: "Cement, Stone and Other Mineral Products Machine Operators"}
+  "8121": {name_es: "Operadores de instalaciones de procesamiento de metales", name_en: "Metal Processing Plant Operators"}
+  "8122": {name_es: "Operadores de máquinas pulidoras, galvanizadoras y recubridoras de metales", name_en: "Metal Finishing, Plating and Coating Machine Operators"}
+  "8131": {name_es: "Operadores de plantas y máquinas de productos químicos", name_en: "Chemical Products Plant and Machine Operators"}
+  "8132": {name_es: "Operadores de máquinas para fabricar productos fotográficos", name_en: "Photographic Products Machine Operators"}
+  "8141": {name_es: "Operadores de máquinas para fabricar productos de caucho", name_en: "Rubber Products Machine Operators"}
+  "8142": {name_es: "Operadores de máquinas para fabricar productos de material plástico", name_en: "Plastic Products Machine Operators"}
+  "8143": {name_es: "Operadores de máquinas para fabricar productos de papel", name_en: "Paper Products Machine Operators"}
+  "8151": {name_es: "Operadores de máquinas de preparación de fibras, hilado y devanado", name_en: "Fibre Preparing, Spinning and Winding Machine Operators"}
+  "8152": {name_es: "Operadores de telares y otras máquinas tejedoras", name_en: "Weaving and Knitting Machine Operators"}
+  "8153": {name_es: "Operadores de máquinas de coser", name_en: "Sewing Machine Operators"}
+  "8154": {name_es: "Operadores de máquinas de blanqueamiento, teñido y limpieza de tejidos", name_en: "Bleaching, Dyeing and Fabric Cleaning Machine Operators"}
+  "8155": {name_es: "Operadores de máquinas de tratamiento de pieles y cueros", name_en: "Fur and Leather Preparing Machine Operators"}
+  "8156": {name_es: "Operadores de máquinas para la fabricación de calzado y afines", name_en: "Shoemaking and Related Machine Operators"}
+  "8157": {name_es: "Operadores de máquinas lavarropas", name_en: "Laundry Machine Operators"}
+  "8159": {name_es: null, name_en: "Textile, Fur and Leather Products Machine Operators Not Elsewhere Classified"}
+  "8160": {name_es: "Operadores de máquinas para elaborar alimentos y productos afines", name_en: "Food and Related Products Machine Operators"}
+  "8171": {name_es: "Operadores de instalaciones para la preparación de pasta para papel y papel", name_en: "Pulp and Papermaking Plant Operators"}
+  "8172": {name_es: "Operadores de instalaciones de procesamiento de la madera", name_en: "Wood Processing Plant Operators"}
+  "8181": {name_es: "Operadores de instalaciones de vidriería y cerámica", name_en: "Glass and Ceramics Plant Operators"}
+  "8182": {name_es: "Operadores de máquinas de vapor y calderas", name_en: "Steam Engine and Boiler Operators"}
+  "8183": {name_es: "Operadores de máquinas de embalaje, embotellamiento y etiquetado", name_en: "Packing, Bottling and Labelling Machine Operators"}
+  "8189": {name_es: "Operadores de máquinas y de instalaciones fijas no clasificados bajo otros epígrafes", name_en: null}
+  "8211": {name_es: "Ensambladores de maquinaria mecánica", name_en: "Mechanical Machinery Assemblers"}
+  "8212": {name_es: "Ensambladores de equipos eléctricos y electrónicos", name_en: "Electrical and Electronic Equipment Assemblers"}
+  "8219": {name_es: "Ensambladores no clasificados bajo otros epígrafes", name_en: "Assemblers Not Elsewhere Classified"}
+  "8311": {name_es: "Maquinistas de locomotoras", name_en: "Locomotive Engine Drivers"}
+  "8312": {name_es: "Guardafrenos, guardagujas y agentes de maniobras", name_en: "Railway Brake, Signal and Switch Operators"}
+  "8321": {name_es: "Conductores de motocicletas", name_en: "Motorcycle Drivers"}
+  "8322": {name_es: "Conductores de automóviles, taxis y camionetas", name_en: "Car, Taxi and Van Drivers"}
+  "8331": {name_es: "Conductores de autobuses y tranvías", name_en: "Bus and Tram Drivers"}
+  "8332": {name_es: "Conductores de camiones pesados", name_en: "Heavy Truck and Lorry Drivers"}
+  "8341": {name_es: "Operadores de maquinaria agrícola y forestal móvil", name_en: "Mobile Farm and Forestry Plant Operators"}
+  "8342": {name_es: "Operadores de máquinas de movimiento de tierras y afines", name_en: "Earthmoving and Related Plant Operators"}
+  "8343": {name_es: "Operadores de grúas, aparatos elevadores y afines", name_en: "Crane, hoist and related plant operators"}
+  "8344": {name_es: "Operadores de autoelevadoras", name_en: "Lifting Truck Operators"}
+  "8350": {name_es: "Marineros de cubierta y afines", name_en: "Ships' Deck Crews and Related Workers"}
+  "9111": {name_es: "Limpiadores y asistentes domésticos", name_en: "Domestic Cleaners and Helpers"}
+  "9112": {name_es: "Limpiadores y asistentes de oficinas, hoteles y otros establecimientos", name_en: "Cleaners and Helpers in Offices, Hotels and Other Establishments"}
+  "9121": {name_es: "Lavanderos y planchadores manuales", name_en: "Hand Launderers and Pressers"}
+  "9122": {name_es: "Lavadores de vehículos", name_en: "Vehicle Cleaners"}
+  "9123": {name_es: "Lavadores de ventanas", name_en: "Window Cleaners"}
+  "9129": {name_es: "Otro personal de limpieza", name_en: "Other Cleaning Workers"}
+  "9211": {name_es: "Peones de explotaciones agrícolas", name_en: "Crop Farm Labourers"}
+  "9212": {name_es: "Peones de explotaciones ganaderas", name_en: "Livestock Farm Labourers"}
+  "9213": {name_es: "Peones de explotaciones de cultivos mixtos y ganaderos", name_en: "Mixed Crop and Livestock Farm Labourers"}
+  "9214": {name_es: "Peones de jardinería y horticultura", name_en: "Garden and Horticultural Labourers"}
+  "9215": {name_es: "Peones forestales", name_en: "Forestry Labourers"}
+  "9216": {name_es: "Peones de pesca y acuicultura", name_en: "Fishery and Aquaculture Labourers"}
+  "9311": {name_es: "Peones de minas y canteras", name_en: "Mining and Quarrying Labourers"}
+  "9312": {name_es: "Peones de obras públicas y mantenimiento", name_en: "Civil Engineering Labourers"}
+  "9313": {name_es: "Peones de la construcción de edificios", name_en: "Building Construction Labourers"}
+  "9321": {name_es: "Empacadores manuales", name_en: "Hand Packers"}
+  "9329": {name_es: "Peones de la industria manufacturera no clasificados bajo otros epígrafes", name_en: "Manufacturing Labourers Not Elsewhere Classified"}
+  "9331": {name_es: null, name_en: "Hand and Pedal Vehicle Drivers"}
+  "9332": {name_es: "Conductores de vehículos y máquinas de tracción animal", name_en: "Drivers of Animal-drawn Vehicles and Machinery"}
+  "9333": {name_es: "Peones de carga", name_en: "Freight Handlers"}
+  "9334": {name_es: "Reponedores de estanterías", name_en: "Shelf Fillers"}
+  "9411": {name_es: "Cocineros de comidas rápidas", name_en: "Fast Food Preparers"}
+  "9412": {name_es: "Ayudantes de cocina", name_en: "Kitchen Helpers"}
+  "9510": {name_es: "Trabajadores ambulantes de servicios y afines", name_en: "Street and Related Service Workers"}
+  "9520": {name_es: "Vendedores ambulantes (excluyendo de comida)", name_en: "Street Vendors (excluding Food)"}
+  "9611": {name_es: "Recolectores de basura y material reciclable", name_en: "Garbage and Recycling Collectors"}
+  "9612": {name_es: "Clasificadores de desechos", name_en: "Refuse Sorters"}
+  "9613": {name_es: "Barrenderos y afines", name_en: "Sweepers and Related Labourers"}
+  "9621": {name_es: "Mensajeros, mandaderos, maleteros y repartidores", name_en: "Messengers, Package Deliverers and Luggage Porters"}
+  "9622": {name_es: "Personas que realizan trabajos varios", name_en: "Odd Job Persons"}
+  "9623": {name_es: "Recolectores de dinero en aparatos de venta automática y lectores de medidores", name_en: "Meter Readers and Vending-machine Collectors"}
+  "9624": {name_es: "Acarreadores de agua y recolectores de leña", name_en: "Water and Firewood Collectors"}
+  "9629": {name_es: "Ocupaciones elementales no clasificadas bajo otros epígrafes", name_en: "Elementary Workers Not Elsewhere Classified"}
