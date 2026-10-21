@@ -19,6 +19,9 @@ class Settings(BaseSettings):
     config_dir: Path = BACKEND_DIR / "config"
     bcentral_user: str = ""
     bcentral_password: str = ""
+    supabase_url: str = ""
+    supabase_anon_key: str = ""
+    supabase_redirect_url: str = ""
 
 
 settings = Settings()

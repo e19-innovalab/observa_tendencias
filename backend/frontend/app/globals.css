@@ -125,6 +125,22 @@ select, input[type="search"] {
   background: var(--surface-page); color: var(--text-primary); cursor: pointer;
 }
 .btn:disabled { opacity: 0.45; cursor: default; }
+.auth-card { max-width: 520px; margin: 24px 0; }
+.auth-form, .auth-form label { display: grid; gap: 8px; }
+.auth-form { gap: 14px; }
+.auth-form label { color: var(--text-secondary); font-size: 13px; }
+.auth-form input {
+  width: 100%; padding: 9px 10px; border: 1px solid var(--border); border-radius: 6px;
+  background: var(--surface-page); color: var(--text-primary); font: inherit;
+}
+.auth-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 14px; }
+.token-panel { margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--border); }
+.token-panel h3 { margin: 0; font-size: 16px; }
+.token-panel .notice { margin: 10px 0; }
+.token-list { display: grid; gap: 6px; }
+.token-list dt { color: var(--text-secondary); font-size: 13px; }
+.token-list dd { margin: 0 0 8px; overflow-wrap: anywhere; }
+.token-list code { font-size: 12px; user-select: all; }
 
 .jobs th, .jobs td { padding: 8px 8px; border-bottom: 1px solid var(--grid); vertical-align: top; }
 .jobs td { font-size: 14px; }

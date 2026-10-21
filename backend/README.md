@@ -77,8 +77,13 @@ python -m app.ingestion.load_analytics
 uvicorn app.main:app --reload --port 8010
 ```
 
-**Windows (PowerShell):** los mismos pasos, con `python -m venv .venv`,
-`.venv\Scripts\Activate.ps1` y `copy .env.example .env`.
+**Windows (PowerShell):** creá y activá el entorno con `python -m venv .venv`,
+`.venv\Scripts\Activate.ps1` y `copy .env.example .env`. Para evitar usar accidentalmente un
+Uvicorn global sin las dependencias del proyecto, iniciá la API explícitamente con:
+
+```powershell
+.\.venv\Scripts\python.exe -m uvicorn app.main:app --reload --port 8010
+```
 
 `.env` tiene solo secretos y valores de cada entorno; **no se sube a git**. El resto de la
 configuración está en `backend/config/`.
@@ -102,6 +107,22 @@ en vivo. Es una herramienta de desarrollo y revisión, no el diseño final. Secc
   sale cada porcentaje.
 - **Correspondencia carrera → ocupación**, para revisarla.
 - **Fuentes y archivos oficiales:** estado de las fuentes, archivos leídos y carga manual.
+
+## Dashboard y autenticación opcional
+
+La API mantiene sus direcciones en el puerto **8010**: http://localhost:8010/health,
+http://localhost:8010/docs y http://localhost:8010/explorer. Para levantar el frontend de Next.js,
+abrí otra terminal y ejecutá:
+
+```powershell
+cd backend\frontend
+npm.cmd install
+npm.cmd run dev
+```
+
+El dashboard está en http://localhost:3010. La página http://localhost:3010/auth permite probar
+registro, inicio de sesión, reenvío de confirmación y acceso con Google. La autenticación es
+opcional: no bloquea el dashboard ni los endpoints de datos.
 
 Documentación interactiva de la API: http://localhost:8010/docs · estado: http://localhost:8010/health
 

@@ -146,6 +146,12 @@ export default function Home() {
         <p>Observatorio laboral y educativo del Cono Sur · Argentina, Uruguay y Chile</p>
       </header>
 
+      <p>
+        <a className="btn" href="/auth">
+          Iniciar sesión o crear cuenta (opcional)
+        </a>
+      </p>
+
       <p className="notice">
         Las ofertas vienen de LinkedIn (recolección con Apify) y el sector se asigna por reglas según la
         industria de la empresa. <strong>No es una fuente oficial</strong> y es una instantánea de una
