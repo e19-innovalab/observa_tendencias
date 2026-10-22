@@ -1,9 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { API_URL } from "../../../lib/api";
 
 type Confirmation = {
-  kind: "loading" | "confirmed" | "expired" | "error" | "unknown";
+  kind: "loading" | "redirecting" | "confirmed" | "expired" | "error" | "unknown";
   detail?: string;
 };
 
@@ -27,9 +28,14 @@ export default function AuthCallback() {
       return;
     }
 
+    if (query.has("code")) {
+      setConfirmation({ kind: "redirecting" });
+      window.location.replace(`${API_URL}/explorer`);
+      return;
+    }
+
     if (
       fragment.has("access_token") ||
-      query.has("code") ||
       fragment.get("type") === "signup"
     ) {
       setConfirmation({ kind: "confirmed" });
@@ -43,6 +49,10 @@ export default function AuthCallback() {
     loading: {
       title: "Verificando confirmación",
       message: "Estamos revisando el resultado del enlace.",
+    },
+    redirecting: {
+      title: "Inicio de sesión exitoso",
+      message: "Redirigiendo al observatorio…",
     },
     confirmed: {
       title: "Correo confirmado",
