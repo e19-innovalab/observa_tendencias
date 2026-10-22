@@ -81,3 +81,6 @@ de la confirmación. Los enlaces de confirmación son de un solo uso y caducan; 
 
 Las variables de autenticación son opcionales para iniciar la API. Si no se configuraron, los
 endpoints de autenticación responden `503` con un mensaje claro.
+
+Después de un login exitoso, la API no devuelve ni almacena los tokens de Supabase. Solo registra
+metadatos básicos de la sesión en el log del backend.

@@ -4,7 +4,7 @@ from supabase_auth.errors import AuthApiError
 from supabase_auth.types import AuthResponse
 
 from app.core.config import settings
-from app.schemas.auth import AuthResult, AuthSession, AuthUser
+from app.schemas.auth import AuthResult, AuthUser
 
 
 def get_supabase_client() -> Client:
@@ -31,17 +31,7 @@ def auth_result(response: AuthResponse) -> AuthResult:
             email=user.email,
             username=user.user_metadata.get("username") or user.user_metadata.get("name"),
         ),
-        session=(
-            AuthSession(
-                access_token=session.access_token,
-                refresh_token=session.refresh_token,
-                token_type=session.token_type,
-                expires_in=session.expires_in,
-                expires_at=session.expires_at,
-            )
-            if session
-            else None
-        ),
+        authenticated=session is not None,
     )
 
 

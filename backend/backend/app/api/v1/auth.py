@@ -46,16 +46,21 @@ def sign_in(payload: SignInRequest):
     except AuthApiError as exc:
         raise auth_error(exc, status.HTTP_401_UNAUTHORIZED) from exc
     result = auth_result(response)
-    if result.session:
-        logger.info(
-            "Supabase login successful: user_id=%s email=%s token_received=%s "
-            "token_type=%s expires_in=%s",
-            result.user.id,
-            result.user.email,
-            bool(result.session.access_token),
-            result.session.token_type,
-            result.session.expires_in,
+    session = response.session
+    if session is None:
+        raise auth_error(
+            AuthApiError("Supabase no devolvió una sesión para el inicio de sesión.", None),
+            status.HTTP_502_BAD_GATEWAY,
         )
+    logger.info(
+        "Supabase login successful: user_id=%s email=%s token_received=%s "
+        "token_type=%s expires_in=%s",
+        result.user.id,
+        result.user.email,
+        bool(session.access_token),
+        session.token_type,
+        session.expires_in,
+    )
     return result
 
 

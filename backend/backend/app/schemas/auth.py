@@ -30,17 +30,9 @@ class AuthUser(BaseModel):
     username: str | None = None
 
 
-class AuthSession(BaseModel):
-    access_token: str
-    refresh_token: str
-    token_type: str
-    expires_in: int | None = None
-    expires_at: int | None = None
-
-
 class AuthResult(BaseModel):
     user: AuthUser
-    session: AuthSession | None
+    authenticated: bool
 
 
 class GoogleAuthUrl(BaseModel):

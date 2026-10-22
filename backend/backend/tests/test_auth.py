@@ -51,12 +51,11 @@ def test_signup_sends_email_password_and_username(client, monkeypatch):
         "email": "person@example.com",
         "username": "person",
     }
-    assert response.json()["session"] is None
+    assert response.json()["authenticated"] is False
+    assert "session" not in response.json()
 
 
-def test_login_returns_supabase_session_and_logs_redacted_token_metadata(
-    client, monkeypatch, caplog
-):
+def test_login_returns_no_tokens_to_frontend(client, monkeypatch, caplog):
     caplog.set_level(logging.INFO, logger=auth.__name__)
 
     class FakeAuth:
@@ -83,8 +82,9 @@ def test_login_returns_supabase_session_and_logs_redacted_token_metadata(
     )
 
     assert response.status_code == 200
-    assert response.json()["session"]["access_token"] == "sensitive-access-jwt"
-    assert response.json()["session"]["refresh_token"] == "refresh"
+    assert response.json()["authenticated"] is True
+    assert "session" not in response.json()
+    assert "sensitive-access-jwt" not in response.text
     assert "Supabase login successful" in caplog.text
     assert "user-id" in caplog.text
     assert "person@example.com" in caplog.text

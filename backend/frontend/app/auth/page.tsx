@@ -6,18 +6,10 @@ import { API_URL } from "../../lib/api";
 type AuthResponse = {
   auth_url?: string;
   user?: { email?: string | null; username?: string | null };
-  session?: {
-    access_token: string;
-    refresh_token: string;
-    token_type: string;
-    expires_in: number;
-    expires_at?: number | null;
-  } | null;
+  authenticated?: boolean;
   message?: string;
   detail?: string;
 };
-
-type AuthSession = NonNullable<AuthResponse["session"]>;
 
 export default function AuthPage() {
   const [mode, setMode] = useState<"login" | "signup">("login");
@@ -25,11 +17,11 @@ export default function AuthPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [message, setMessage] = useState("");
+  const [requestSucceeded, setRequestSucceeded] = useState(false);
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
   const [canResend, setCanResend] = useState(false);
-  const [session, setSession] = useState<AuthSession | null>(null);
-  const [showTokens, setShowTokens] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   async function request(path: string, body?: Record<string, string>): Promise<AuthResponse> {
     const response = await fetch(`${API_URL}/api/v1/auth/${path}`, {
@@ -49,28 +41,32 @@ export default function AuthPage() {
     setBusy(true);
     setError("");
     setMessage("");
+    setRequestSucceeded(false);
     setCanResend(false);
-    setSession(null);
-    setShowTokens(false);
 
     try {
       if (mode === "signup") {
         const data = await request("signup", { username, email, password });
-        if (data.session) {
-          setSession(data.session);
-          setMessage("Cuenta creada e iniciada. El panel de datos sigue disponible sin iniciar sesión.");
+        if (data.authenticated) {
+          setRequestSucceeded(true);
+          setMessage("Cuenta creada. El panel de datos sigue disponible sin iniciar sesión.");
         } else {
+          setRequestSucceeded(true);
           setMessage("Cuenta creada. Revisa tu correo y confirma la dirección antes de iniciar sesión.");
           setCanResend(true);
         }
       } else {
         const data = await request("login", { email, password });
-        setSession(data.session ?? null);
-        setMessage("Inicio de sesión correcto. La sesión es opcional y el panel sigue siendo público.");
+        if (!data.authenticated) {
+          throw new Error("Supabase no confirmó el inicio de sesión.");
+        }
+        setRequestSucceeded(true);
+        setMessage("Inicio de sesión exitoso. Redirigiendo al observatorio…");
+        window.setTimeout(() => window.location.assign(`${API_URL}/explorer`), 700);
       }
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : "No se pudo completar la solicitud.");
-      setSession(null);
+      setRequestSucceeded(false);
       if (mode === "login") setCanResend(true);
     } finally {
       setBusy(false);
@@ -81,9 +77,11 @@ export default function AuthPage() {
     setBusy(true);
     setError("");
     setMessage("");
+    setRequestSucceeded(false);
     try {
       const data = await request("resend-confirmation", { email });
       setMessage(data.message ?? "Si la cuenta necesita confirmación, recibirás un nuevo correo.");
+      setRequestSucceeded(true);
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : "No se pudo solicitar otro correo.");
     } finally {
@@ -94,6 +92,8 @@ export default function AuthPage() {
   async function signInWithGoogle() {
     setBusy(true);
     setError("");
+    setMessage("");
+    setRequestSucceeded(false);
     try {
       const data = await request("google");
       if (!data.auth_url) throw new Error("La API no devolvió la URL de Google.");
@@ -104,129 +104,172 @@ export default function AuthPage() {
     }
   }
 
+  function showPasswordRecoveryMessage() {
+    setError("");
+    setRequestSucceeded(false);
+    setMessage("La recuperación de contraseña todavía no está disponible.");
+  }
+
   return (
-    <main className="wrap">
-      <header className="top">
-        <h1>{mode === "login" ? "Iniciar sesión" : "Crear cuenta"}</h1>
-        <p>La autenticación es opcional; puedes usar el observatorio sin iniciar sesión.</p>
-      </header>
+    <main className="auth-layout">
+      <section className="auth-main" aria-labelledby="auth-title">
+        <div className="auth-content">
+          <a className="auth-brand" href="/" aria-label="Observa Tendencias, volver al inicio">
+            <span className="auth-brand-mark" aria-hidden="true">
+              <i />
+              <i />
+              <i />
+            </span>
+          </a>
 
-      <section className="card auth-card" aria-labelledby="auth-title">
-        <h2 id="auth-title">Acceso opcional</h2>
-        <p className="desc">
-          {mode === "login"
-            ? "Ingresa con el email y la contraseña de tu cuenta."
-            : "Regístrate con un nombre de usuario, email y contraseña."}
-        </p>
+          <h1 id="auth-title">{mode === "login" ? "Iniciar sesión" : "Crear cuenta"}</h1>
+          <p className="auth-intro">
+            {mode === "login"
+              ? "Ingresa tus datos para continuar."
+              : "Completa tus datos para crear una cuenta."}
+          </p>
 
-        <form className="auth-form" onSubmit={submit}>
-          {mode === "signup" && (
+          <form className="auth-form" onSubmit={submit}>
+            {mode === "signup" && (
+              <label>
+                Nombre de usuario
+                <input
+                  autoComplete="username"
+                  required
+                  placeholder="Tu nombre"
+                  value={username}
+                  onChange={(event) => setUsername(event.target.value)}
+                />
+              </label>
+            )}
             <label>
-              Nombre de usuario
+              Correo electrónico
               <input
-                autoComplete="username"
+                type="email"
+                autoComplete="email"
                 required
-                value={username}
-                onChange={(event) => setUsername(event.target.value)}
+                placeholder="nombre@ejemplo.com"
+                value={email}
+                onChange={(event) => setEmail(event.target.value)}
               />
             </label>
-          )}
-          <label>
-            Email
-            <input
-              type="email"
-              autoComplete="email"
-              required
-              value={email}
-              onChange={(event) => setEmail(event.target.value)}
-            />
-          </label>
-          <label>
-            Contraseña
-            <input
-              type="password"
-              autoComplete={mode === "login" ? "current-password" : "new-password"}
-              required
-              value={password}
-              onChange={(event) => setPassword(event.target.value)}
-            />
-          </label>
-          <button className="btn" type="submit" disabled={busy}>
-            {busy ? "Procesando…" : mode === "login" ? "Iniciar sesión" : "Crear cuenta"}
-          </button>
-        </form>
+            <label>
+              Contraseña
+              <span className="auth-password-field">
+                <input
+                  type={showPassword ? "text" : "password"}
+                  autoComplete={mode === "login" ? "current-password" : "new-password"}
+                  required
+                  placeholder="Ingresa tu contraseña"
+                  value={password}
+                  onChange={(event) => setPassword(event.target.value)}
+                />
+                <button
+                  className="auth-password-toggle"
+                  type="button"
+                  aria-label={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
+                  aria-pressed={showPassword}
+                  onClick={() => setShowPassword((visible) => !visible)}
+                >
+                  {showPassword ? "Ocultar" : "Ver"}
+                </button>
+              </span>
+              {mode === "login" && (
+                <span className="auth-password-hint">
+                  Ingresa la contraseña asociada a tu cuenta.
+                </span>
+              )}
+            </label>
 
-        <div className="auth-actions">
+            {mode === "login" && (
+              <div className="auth-form-options">
+                <label className="auth-checkbox">
+                  <input type="checkbox" />
+                  <span>Recordar contraseña</span>
+                </label>
+                <button
+                  className="auth-text-button"
+                  type="button"
+                  onClick={showPasswordRecoveryMessage}
+                >
+                  ¿Olvidaste tu contraseña?
+                </button>
+              </div>
+            )}
+
+            <button className="auth-submit" type="submit" disabled={busy}>
+              {busy ? "Procesando…" : mode === "login" ? "Iniciar sesión" : "Crear cuenta"}
+            </button>
+          </form>
+
           <button
-            className="btn"
+            className="auth-google"
             type="button"
             disabled={busy}
-            onClick={() => {
-              setMode(mode === "login" ? "signup" : "login");
-              setMessage("");
-              setError("");
-              setCanResend(false);
-              setSession(null);
-              setShowTokens(false);
-            }}
+            onClick={signInWithGoogle}
           >
-            {mode === "login" ? "Crear una cuenta" : "Ya tengo una cuenta"}
+            <span className="auth-google-mark" aria-hidden="true">G</span>
+            <span>Iniciar sesión con Google</span>
+            <span className="auth-google-arrow" aria-hidden="true">→</span>
           </button>
-          <button className="btn" type="button" disabled={busy} onClick={signInWithGoogle}>
-            Continuar con Google
-          </button>
-        </div>
 
-        {canResend && email && (
-          <p>
-            <button className="link-btn" type="button" disabled={busy} onClick={resendConfirmation}>
-              Reenviar correo de confirmación
-            </button>
-          </p>
-        )}
-        {message && <p role="status">{message}</p>}
-        {error && <p className="error" role="alert">{error}</p>}
-        {session && (
-          <section className="token-panel" aria-labelledby="session-tokens-title">
-            <h3 id="session-tokens-title">Tokens de Supabase recibidos</h3>
-            <p className="notice" role="note">
-              Son credenciales privadas: cualquier persona que las obtenga podría acceder a tu
-              sesión. No las compartas ni captures esta pantalla. Se muestran solo aquí y no se
-              guardan en el navegador.
+          {canResend && email && (
+            <p className="auth-feedback">
+              <button className="auth-text-button" type="button" disabled={busy} onClick={resendConfirmation}>
+                Reenviar correo de confirmación
+              </button>
             </p>
-            <button
-              className="btn"
-              type="button"
-              onClick={() => setShowTokens((visible) => !visible)}
-              aria-expanded={showTokens}
+          )}
+          {message && (
+            <p
+              className={requestSucceeded ? "auth-feedback auth-success" : "auth-feedback"}
+              role="status"
             >
-              {showTokens ? "Ocultar tokens" : "Mostrar tokens"}
+              {message}
+            </p>
+          )}
+          {error && <p className="auth-error" role="alert">{error}</p>}
+
+          <div className="auth-account-switch">
+            <span>
+              {mode === "login" ? "¿No tienes una cuenta?" : "¿Ya tienes una cuenta?"}
+            </span>
+            <button
+              className="auth-text-button"
+              type="button"
+              disabled={busy}
+              onClick={() => {
+                setMode(mode === "login" ? "signup" : "login");
+                setMessage("");
+                setRequestSucceeded(false);
+                setError("");
+                setCanResend(false);
+              }}
+            >
+              {mode === "login" ? "Crear cuenta" : "Iniciar sesión"}
             </button>
-            {showTokens && (
-              <dl className="token-list">
-                <dt>Access token (JWT)</dt>
-                <dd><code>{session.access_token}</code></dd>
-                <dt>Refresh token</dt>
-                <dd><code>{session.refresh_token}</code></dd>
-                <dt>Tipo</dt>
-                <dd>{session.token_type}</dd>
-                <dt>Expira en</dt>
-                <dd>{session.expires_in} segundos</dd>
-                {session.expires_at && (
-                  <>
-                    <dt>Expira en fecha</dt>
-                    <dd>{new Date(session.expires_at * 1000).toLocaleString()}</dd>
-                  </>
-                )}
-              </dl>
-            )}
-          </section>
-        )}
+          </div>
+        </div>
       </section>
 
-      <p>
-        <a href="/">Volver al observatorio</a>
-      </p>
+      <aside className="auth-aside">
+        <section className="auth-promo">
+          <h2>{mode === "login" ? "¿Aún no estás registrado?" : "Tu próximo paso empieza aquí"}</h2>
+          <p>
+            {mode === "login"
+              ? "Crea una cuenta para explorar las tendencias laborales y educativas de la región."
+              : "Regístrate para continuar. El acceso al observatorio sigue disponible sin iniciar sesión."}
+          </p>
+          <ul>
+            <li>Consulta información laboral y educativa del Cono Sur.</li>
+            <li>Explora indicadores, ocupaciones y tendencias por país.</li>
+            <li>La cuenta es opcional y no condiciona el uso del observatorio.</li>
+          </ul>
+          <a className="auth-promo-link" href="/">
+            Explorar el observatorio <span aria-hidden="true">→</span>
+          </a>
+        </section>
+      </aside>
     </main>
   );
 }
