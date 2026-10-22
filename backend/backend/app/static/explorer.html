@@ -99,6 +99,9 @@
 <header>
   <h1>Explorer - Observatorio de Tendencias</h1>
   <small>Herramienta de desarrollo: muestra lo que devuelve la API (<a href="/docs">/docs</a>)</small>
+  <small id="session-status" aria-live="polite">Verificando sesión…</small>
+  <a id="auth-link" href="http://localhost:3010/auth" hidden>Iniciar sesión</a>
+  <button id="logout" type="button" hidden>Cerrar sesión</button>
 </header>
 <main>
   <section class="card">
@@ -317,6 +320,35 @@ const COLORS = ["#2563eb", "#d97706", "#059669", "#7c3aed", "#db2777"];
 let indicators = [], chart;
 
 const $ = (id) => document.getElementById(id);
+async function loadSession() {
+  const status = $("session-status");
+  try {
+    const response = await fetch(`${API}/auth/me`);
+    if (response.status === 401) {
+      status.textContent = "Sin sesión iniciada";
+      $("auth-link").hidden = false;
+      return;
+    }
+    if (!response.ok) {
+      status.textContent = "No se pudo verificar la sesión";
+      return;
+    }
+    const data = await response.json();
+    status.textContent = `Sesión iniciada: ${data.user.email ?? data.user.username ?? data.user.id}`;
+    $("logout").hidden = false;
+  } catch {
+    status.textContent = "No se pudo conectar con la API para verificar la sesión";
+  }
+}
+async function logout() {
+  const response = await fetch(`${API}/auth/logout`, { method: "POST" });
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({}));
+    $("session-status").textContent = error.detail ?? "No se pudo cerrar la sesión";
+    return;
+  }
+  location.reload();
+}
 const get = async (path, params = {}) => {
   const url = new URL(API + path, location.origin);
   Object.entries(params).forEach(([k, v]) => v !== "" && v != null && url.searchParams.set(k, v));
@@ -327,6 +359,8 @@ const get = async (path, params = {}) => {
 const fmt = (v, d = 2) => v == null ? "—" : Number(v).toLocaleString("es-AR", { maximumFractionDigits: d });
 
 async function init() {
+  $("logout").addEventListener("click", logout);
+  await loadSession();
   const [inds, countries, sectors, sources] = await Promise.all(
     [get("/indicators"), get("/countries"), get("/sectors"), get("/sources")]);
   indicators = inds;

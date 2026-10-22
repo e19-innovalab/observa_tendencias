@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { API_URL } from "../../../lib/api";
+import { establishBackendSession, getSupabaseBrowserClient } from "../../../lib/supabase";
 
 type Confirmation = {
   kind: "loading" | "redirecting" | "confirmed" | "expired" | "error" | "unknown";
@@ -10,39 +11,59 @@ type Confirmation = {
 
 export default function AuthCallback() {
   const [confirmation, setConfirmation] = useState<Confirmation>({ kind: "loading" });
+  const handled = useRef(false);
 
   useEffect(() => {
-    const query = new URLSearchParams(window.location.search);
-    const fragment = new URLSearchParams(window.location.hash.slice(1));
-    const errorCode = query.get("error_code") ?? fragment.get("error_code");
-    const errorDescription =
-      query.get("error_description") ?? fragment.get("error_description");
+    if (handled.current) return;
+    handled.current = true;
 
-    if (errorCode === "otp_expired") {
-      setConfirmation({ kind: "expired" });
-      return;
+    async function handleCallback() {
+      const query = new URLSearchParams(window.location.search);
+      const fragment = new URLSearchParams(window.location.hash.slice(1));
+      const errorCode = query.get("error_code") ?? fragment.get("error_code");
+      const errorDescription =
+        query.get("error_description") ?? fragment.get("error_description");
+
+      if (errorCode === "otp_expired") {
+        setConfirmation({ kind: "expired" });
+        return;
+      }
+
+      if (errorCode || query.get("error") || fragment.get("error")) {
+        setConfirmation({ kind: "error", detail: errorDescription ?? errorCode ?? undefined });
+        return;
+      }
+
+      const code = query.get("code");
+      if (code) {
+        window.history.replaceState({}, document.title, window.location.pathname);
+        setConfirmation({ kind: "redirecting" });
+        try {
+          const { data, error } = await getSupabaseBrowserClient().auth.exchangeCodeForSession(
+            code
+          );
+          if (error) throw error;
+          if (!data.session) throw new Error("Supabase no devolvió una sesión.");
+          await establishBackendSession(data.session);
+          window.location.replace(`${API_URL}/explorer`);
+        } catch (cause) {
+          setConfirmation({
+            kind: "error",
+            detail: cause instanceof Error ? cause.message : "No se pudo validar la sesión.",
+          });
+        }
+        return;
+      }
+
+      if (fragment.has("access_token") || fragment.get("type") === "signup") {
+        setConfirmation({ kind: "confirmed" });
+        return;
+      }
+
+      setConfirmation({ kind: "unknown" });
     }
 
-    if (errorCode || query.get("error") || fragment.get("error")) {
-      setConfirmation({ kind: "error", detail: errorDescription ?? errorCode ?? undefined });
-      return;
-    }
-
-    if (query.has("code")) {
-      setConfirmation({ kind: "redirecting" });
-      window.location.replace(`${API_URL}/explorer`);
-      return;
-    }
-
-    if (
-      fragment.has("access_token") ||
-      fragment.get("type") === "signup"
-    ) {
-      setConfirmation({ kind: "confirmed" });
-      return;
-    }
-
-    setConfirmation({ kind: "unknown" });
+    void handleCallback();
   }, []);
 
   const content = {

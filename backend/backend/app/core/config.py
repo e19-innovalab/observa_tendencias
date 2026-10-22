@@ -22,6 +22,7 @@ class Settings(BaseSettings):
     supabase_url: str = ""
     supabase_anon_key: str = ""
     supabase_redirect_url: str = ""
+    auth_cookie_secure: bool = False
 
 
 settings = Settings()

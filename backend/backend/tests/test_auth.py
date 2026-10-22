@@ -3,6 +3,7 @@ from types import SimpleNamespace
 
 import pytest
 from fastapi.testclient import TestClient
+from supabase_auth.errors import AuthApiError
 
 from app.api.v1 import auth
 from app.main import app
@@ -83,6 +84,9 @@ def test_login_returns_no_tokens_to_frontend(client, monkeypatch, caplog):
 
     assert response.status_code == 200
     assert response.json()["authenticated"] is True
+    assert response.cookies.get(auth.ACCESS_COOKIE) == "sensitive-access-jwt"
+    assert response.cookies.get(auth.REFRESH_COOKIE) == "refresh"
+    assert all("HttpOnly" in cookie for cookie in response.headers.get_list("set-cookie"))
     assert "session" not in response.json()
     assert "sensitive-access-jwt" not in response.text
     assert "Supabase login successful" in caplog.text
@@ -93,6 +97,133 @@ def test_login_returns_no_tokens_to_frontend(client, monkeypatch, caplog):
     assert "expires_in=3600" in caplog.text
     assert "sensitive-access-jwt" not in caplog.text
     assert "refresh" not in caplog.text
+
+
+def test_google_session_exchange_validates_tokens_and_sets_http_only_cookies(
+    client, monkeypatch
+):
+    user = SimpleNamespace(
+        id="google-user-id",
+        email="person@example.com",
+        user_metadata={"name": "Person"},
+    )
+    class FakeAuth:
+        def get_user(self, access_token):
+            assert access_token == "google-access"
+            return SimpleNamespace(user=user)
+
+    monkeypatch.setattr(auth, "get_supabase_client", lambda: SimpleNamespace(auth=FakeAuth()))
+
+    response = client.post(
+        "/api/v1/auth/session",
+        json={"access_token": "google-access", "refresh_token": "google-refresh"},
+    )
+
+    assert response.status_code == 200
+    assert response.json() == {
+        "user": {
+            "id": "google-user-id",
+            "email": "person@example.com",
+            "username": "Person",
+        },
+        "authenticated": True,
+    }
+    assert response.cookies.get(auth.ACCESS_COOKIE) == "google-access"
+    assert response.cookies.get(auth.REFRESH_COOKIE) == "google-refresh"
+    assert all("HttpOnly" in cookie for cookie in response.headers.get_list("set-cookie"))
+    assert "google-access" not in response.text
+    assert "google-refresh" not in response.text
+
+
+def test_current_user_uses_cookie_session(client, monkeypatch):
+    user = SimpleNamespace(
+        id="user-id", email="person@example.com", user_metadata={"username": "person"}
+    )
+
+    class FakeAuth:
+        def get_user(self, access_token):
+            assert access_token == "valid-access"
+            return SimpleNamespace(user=user)
+
+    monkeypatch.setattr(auth, "get_supabase_client", lambda: SimpleNamespace(auth=FakeAuth()))
+    client.cookies.set(auth.ACCESS_COOKIE, "valid-access")
+    client.cookies.set(auth.REFRESH_COOKIE, "valid-refresh")
+
+    response = client.get("/api/v1/auth/me")
+
+    assert response.status_code == 200
+    assert response.json()["user"]["id"] == "user-id"
+    assert response.json()["authenticated"] is True
+
+
+def test_current_user_refreshes_expired_access_token(client, monkeypatch):
+    user = SimpleNamespace(
+        id="user-id", email="person@example.com", user_metadata={"username": "person"}
+    )
+    session = SimpleNamespace(
+        access_token="renewed-access", refresh_token="renewed-refresh", expires_in=3600
+    )
+
+    class FakeAuth:
+        def get_user(self, access_token):
+            assert access_token == "expired-access"
+            raise AuthApiError("Token expired", 401, "invalid_jwt")
+
+        def refresh_session(self, refresh_token):
+            assert refresh_token == "valid-refresh"
+            return SimpleNamespace(session=session, user=user)
+
+    monkeypatch.setattr(auth, "get_supabase_client", lambda: SimpleNamespace(auth=FakeAuth()))
+    client.cookies.set(auth.ACCESS_COOKIE, "expired-access")
+    client.cookies.set(auth.REFRESH_COOKIE, "valid-refresh")
+
+    response = client.get("/api/v1/auth/me")
+
+    assert response.status_code == 200
+    assert response.json()["user"]["id"] == "user-id"
+    assert response.cookies.get(auth.ACCESS_COOKIE) == "renewed-access"
+    assert response.cookies.get(auth.REFRESH_COOKIE) == "renewed-refresh"
+
+
+def test_current_user_clears_expired_session_cookies(client, monkeypatch):
+    class FakeAuth:
+        def get_user(self, access_token):
+            raise AuthApiError("Token expired", 401, "invalid_jwt")
+
+        def refresh_session(self, refresh_token):
+            raise AuthApiError("Refresh token expired", 401, "invalid_grant")
+
+    monkeypatch.setattr(auth, "get_supabase_client", lambda: SimpleNamespace(auth=FakeAuth()))
+    client.cookies.set(auth.ACCESS_COOKIE, "expired-access")
+    client.cookies.set(auth.REFRESH_COOKIE, "expired-refresh")
+
+    response = client.get("/api/v1/auth/me")
+
+    assert response.status_code == 401
+    assert response.json()["detail"] == "La sesión venció. Inicia sesión nuevamente."
+    assert all("Max-Age=0" in cookie for cookie in response.headers.get_list("set-cookie"))
+
+
+def test_logout_revokes_and_clears_cookie_session(client, monkeypatch):
+    calls = {}
+
+    class FakeAuth:
+        def set_session(self, access_token, refresh_token):
+            calls["session"] = (access_token, refresh_token)
+
+        def sign_out(self, options):
+            calls["sign_out"] = options
+
+    monkeypatch.setattr(auth, "get_supabase_client", lambda: SimpleNamespace(auth=FakeAuth()))
+    client.cookies.set(auth.ACCESS_COOKIE, "valid-access")
+    client.cookies.set(auth.REFRESH_COOKIE, "valid-refresh")
+
+    response = client.post("/api/v1/auth/logout")
+
+    assert response.status_code == 204
+    assert calls["session"] == ("valid-access", "valid-refresh")
+    assert calls["sign_out"] == {"scope": "local"}
+    assert all("Max-Age=0" in cookie for cookie in response.headers.get_list("set-cookie"))
 
 
 def test_google_sign_in_returns_oauth_url(client, monkeypatch):
@@ -140,3 +271,17 @@ def test_auth_requires_supabase_environment(client, monkeypatch):
     response = client.get("/api/v1/auth/google")
 
     assert response.status_code == 503
+
+
+def test_auth_cors_allows_credentialed_frontend_requests(client):
+    response = client.options(
+        "/api/v1/auth/me",
+        headers={
+            "Origin": "http://localhost:3010",
+            "Access-Control-Request-Method": "GET",
+        },
+    )
+
+    assert response.status_code == 200
+    assert response.headers["access-control-allow-origin"] == "http://localhost:3010"
+    assert response.headers["access-control-allow-credentials"] == "true"

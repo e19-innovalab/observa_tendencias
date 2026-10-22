@@ -24,6 +24,11 @@ class ResendConfirmationRequest(BaseModel):
     email: str = Field(min_length=3, max_length=320)
 
 
+class AuthSessionRequest(BaseModel):
+    access_token: str = Field(min_length=1, max_length=8192)
+    refresh_token: str = Field(min_length=1, max_length=8192)
+
+
 class AuthUser(BaseModel):
     id: str
     email: str | None = None

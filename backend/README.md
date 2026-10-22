@@ -44,52 +44,136 @@ backend/                   (esta carpeta)
 - Git
 - Node.js 18.18 o superior, solo para el prototipo en Next.js
 
-## Puesta en marcha
+## Puesta en marcha local
 
-Hoy se trabaja con una base **PostgreSQL local** en Docker (versión 17, la misma que Supabase).
-Pasar a Supabase más adelante solo requiere cambiar `DATABASE_URL` en `.env`.
+La aplicación completa necesita **dos servidores ejecutándose al mismo tiempo**:
 
-**macOS / Linux:**
+1. **Backend Python (FastAPI):** sirve la API y el Explorer en `http://localhost:8010`.
+2. **Frontend Next.js:** sirve el dashboard en `http://localhost:3010` y consulta la API.
+
+Abrí **dos terminales** y deja ambas abiertas mientras uses la aplicación. Si una terminal se
+cierra o detienes el proceso, ese servidor deja de estar disponible. La base de datos local es
+PostgreSQL en Docker; Supabase se usa para autenticación.
+
+### Preparación inicial (una sola vez)
+
+Los siguientes comandos parten de la raíz del repositorio. Usa la sección correspondiente a tu
+sistema operativo.
+
+**Windows (PowerShell):**
+
+```powershell
+cd backend\backend
+python -m venv .venv
+.\.venv\Scripts\python.exe -m pip install -e ".[dev]"
+copy .env.example .env
+```
+
+**macOS / Linux (bash):**
 
 ```bash
 cd backend/backend
-
-# 1. Entorno virtual y dependencias
 python3 -m venv .venv
 source .venv/bin/activate
-pip install -e ".[dev]"
-
-# 2. Variables de entorno: copiar y completar (cambiá la clave de Postgres y ADMIN_API_KEY)
+python -m pip install -e ".[dev]"
 cp .env.example .env
-
-# 3. Levantar Postgres (los datos quedan en el volumen rumbo_pgdata)
-docker compose up -d
-
-# 4. Crear las tablas y cargar catálogo, fuentes e indicadores desde config/*.yaml
-alembic upgrade head
-python -m seeds.load
-
-# 5. Traer los datos de todas las fuentes con conector y cargar los CSV del equipo de datos
-python -m app.jobs.run --all
-python -m app.ingestion.load_analytics
-
-# 6. Levantar la API
-uvicorn app.main:app --reload --port 8010
 ```
 
-**Windows (PowerShell):** creá y activá el entorno con `python -m venv .venv`,
-`.venv\Scripts\Activate.ps1` y `copy .env.example .env`. Para evitar usar accidentalmente un
-Uvicorn global sin las dependencias del proyecto, iniciá la API explícitamente con:
+En ambos casos, completa `backend/backend/.env` con la configuración de PostgreSQL y Supabase.
+Este archivo contiene valores locales y secretos; **no se sube a Git**. Inicia PostgreSQL y carga
+la base y los datos iniciales desde la carpeta `backend/backend`:
+
+**Windows (PowerShell):**
 
 ```powershell
+docker compose up -d
+.\.venv\Scripts\python.exe -m alembic upgrade head
+.\.venv\Scripts\python.exe -m seeds.load
+.\.venv\Scripts\python.exe -m app.jobs.run --all
+.\.venv\Scripts\python.exe -m app.ingestion.load_analytics
+```
+
+**macOS / Linux (bash, con `.venv` activado):**
+
+```bash
+docker compose up -d
+python -m alembic upgrade head
+python -m seeds.load
+python -m app.jobs.run --all
+python -m app.ingestion.load_analytics
+```
+
+Instala las dependencias del frontend y copia su archivo de variables desde `backend/frontend`:
+
+**Windows (PowerShell):**
+
+```powershell
+cd ..\frontend
+npm.cmd install
+copy .env.example .env.local
+```
+
+**macOS / Linux (bash):**
+
+```bash
+cd ../frontend
+npm install
+cp .env.example .env.local
+```
+
+En `backend/frontend/.env.local`, completa `NEXT_PUBLIC_SUPABASE_URL` y
+`NEXT_PUBLIC_SUPABASE_ANON_KEY` con la URL del proyecto Supabase y su clave pública anon/publishable.
+`NEXT_PUBLIC_API_URL` debe apuntar a `http://localhost:8010`. El `.env.local` está excluido de Git.
+
+### Inicio diario
+
+Abre **dos terminales** desde la raíz del repositorio. Inicia primero el backend y deja ambos
+procesos ejecutándose mientras uses la aplicación.
+
+**Terminal 1 — Backend Python / FastAPI**
+
+Windows (PowerShell):
+
+```powershell
+cd backend\backend
+docker compose up -d
 .\.venv\Scripts\python.exe -m uvicorn app.main:app --reload --port 8010
 ```
 
-`.env` tiene solo secretos y valores de cada entorno; **no se sube a git**. El resto de la
-configuración está en `backend/config/`.
+macOS / Linux (bash):
 
-Después de reiniciar la computadora: abrí Docker Desktop, corré `docker compose up -d` y volvé a
-levantar la API (paso 6).
+```bash
+cd backend/backend
+docker compose up -d
+source .venv/bin/activate
+python -m uvicorn app.main:app --reload --port 8010
+```
+
+La API está en `http://localhost:8010`; su documentación en `http://localhost:8010/docs` y el
+Explorer en `http://localhost:8010/explorer`.
+
+**Terminal 2 — Frontend Next.js**
+
+Windows (PowerShell):
+
+```powershell
+cd backend\frontend
+npm.cmd run dev
+```
+
+macOS / Linux (bash):
+
+```bash
+cd backend/frontend
+npm run dev
+```
+
+Abre `http://localhost:3010`. Para probar el acceso, visita `http://localhost:3010/auth`.
+**El frontend depende de la API; inicia primero la Terminal 1.** Si modificas `.env.local`, reinicia
+el servidor de Next.js para que cargue los nuevos valores.
+
+Después de reiniciar la computadora, vuelve a iniciar PostgreSQL, la API en la Terminal 1 y Next.js
+en la Terminal 2. No es necesario repetir la carga inicial de datos.
 
 ## Explorer
 
@@ -107,24 +191,6 @@ en vivo. Es una herramienta de desarrollo y revisión, no el diseño final. Secc
   sale cada porcentaje.
 - **Correspondencia carrera → ocupación**, para revisarla.
 - **Fuentes y archivos oficiales:** estado de las fuentes, archivos leídos y carga manual.
-
-## Dashboard y autenticación opcional
-
-La API mantiene sus direcciones en el puerto **8010**: http://localhost:8010/health,
-http://localhost:8010/docs y http://localhost:8010/explorer. Para levantar el frontend de Next.js,
-abrí otra terminal y ejecutá:
-
-```powershell
-cd backend\frontend
-npm.cmd install
-npm.cmd run dev
-```
-
-El dashboard está en http://localhost:3010. La página http://localhost:3010/auth permite probar
-registro, inicio de sesión, reenvío de confirmación y acceso con Google. La autenticación es
-opcional: no bloquea el dashboard ni los endpoints de datos.
-
-Documentación interactiva de la API: http://localhost:8010/docs · estado: http://localhost:8010/health
 
 ## Fuentes de datos
 

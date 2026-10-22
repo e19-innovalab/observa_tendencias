@@ -2,9 +2,9 @@
 
 import { FormEvent, useState } from "react";
 import { API_URL } from "../../lib/api";
+import { establishBackendSession, getSupabaseBrowserClient } from "../../lib/supabase";
 
 type AuthResponse = {
-  auth_url?: string;
   user?: { email?: string | null; username?: string | null };
   authenticated?: boolean;
   message?: string;
@@ -26,6 +26,7 @@ export default function AuthPage() {
   async function request(path: string, body?: Record<string, string>): Promise<AuthResponse> {
     const response = await fetch(`${API_URL}/api/v1/auth/${path}`, {
       method: body ? "POST" : "GET",
+      credentials: "include",
       headers: body ? { "Content-Type": "application/json" } : undefined,
       body: body ? JSON.stringify(body) : undefined,
     });
@@ -56,10 +57,13 @@ export default function AuthPage() {
           setCanResend(true);
         }
       } else {
-        const data = await request("login", { email, password });
-        if (!data.authenticated) {
+        const { data, error: authError } =
+          await getSupabaseBrowserClient().auth.signInWithPassword({ email, password });
+        if (authError) throw authError;
+        if (!data.session) {
           throw new Error("Supabase no confirmó el inicio de sesión.");
         }
+        await establishBackendSession(data.session);
         setRequestSucceeded(true);
         setMessage("Inicio de sesión exitoso. Redirigiendo al observatorio…");
         window.setTimeout(() => window.location.assign(`${API_URL}/explorer`), 700);
@@ -95,9 +99,14 @@ export default function AuthPage() {
     setMessage("");
     setRequestSucceeded(false);
     try {
-      const data = await request("google");
-      if (!data.auth_url) throw new Error("La API no devolvió la URL de Google.");
-      window.location.assign(data.auth_url);
+      const { error: authError } = await getSupabaseBrowserClient().auth.signInWithOAuth({
+        provider: "google",
+        options: {
+          redirectTo: `${window.location.origin}/auth/callback`,
+          queryParams: { prompt: "select_account" },
+        },
+      });
+      if (authError) throw authError;
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : "No se pudo iniciar con Google.");
       setBusy(false);
