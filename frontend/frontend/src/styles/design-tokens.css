@@ -1,0 +1,113 @@
+/*
+ * Tokens del Design System de UX/UI
+ * Fuente: Figma, frame "DesignSystem // UI & DataViz" (73 tokens de color).
+ * Cada línea indica el nombre original del token en Figma.
+ *
+ * Uso: al FINAL de src/app/globals.css agregar
+ *   @import "../styles/design-tokens.css";
+ * Genera clases de Tailwind como bg-brand, text-heading, border-line, bg-country-arg...
+ */
+
+@theme {
+  /* Superficies y fondos */
+  --color-canvas: #ffffff; /* --bg */
+  --color-surface-alt: #f5f7fd; /* --bg-alt */
+  --color-surface: #fafbfe; /* --surface */
+  --color-surface-2: #edf2fc; /* --surface-2 */
+
+  /* Texto */
+  --color-heading: #050c1e; /* --heading */
+  --color-body: #0f172a; /* --text */
+  --color-muted-text: #475569; /* --text-muted (4.9:1 AA) */
+
+  /* Marca y acciones */
+  --color-brand: #172bc4; /* --primary */
+  --color-brand-hover: #0f00a9; /* --primary-hover */
+  --color-brand-deep: #080067; /* --secondary */
+  --color-brand-accent: #0c0f91; /* --accent */
+  --color-brand-neutral: #1b35be; /* --neutral */
+  --color-link: #172bc4; /* --link */
+  --color-link-hover: #0f00a2; /* --link-hover */
+
+  /* Estructura y controles */
+  --color-line: #aebdde; /* --border, --input-border */
+  --color-focus: #172bc4; /* --ring */
+  --color-selection: #b1c5f3; /* --selection-bg */
+  --color-placeholder: #666e7f; /* --input-placeholder */
+  --color-code-bg: #f3f0ff; /* --code-bg */
+  --color-code-text: #6d28d9; /* --code-text */
+
+  /* Estados */
+  --color-success: #16a34a; /* --success */
+  --color-success-soft: #dcfce7; /* --success-soft */
+  --color-warning: #d97706; /* --warning */
+  --color-warning-soft: #fef3c7; /* --warning-soft */
+  --color-danger: #dc2626; /* --danger */
+  --color-danger-soft: #fee2e2; /* --danger-soft */
+  --color-info: #2563eb; /* --info */
+  --color-info-soft: #dbeafe; /* --info-soft */
+
+  /* Data viz: países */
+  --color-country-arg: #38bdf8; /* --country-arg */
+  --color-country-arg-soft: #e0f2fe; /* --country-arg-soft */
+  --color-country-chl: #b91c1c; /* --country-chl */
+  --color-country-chl-soft: #fee2e2; /* --country-chl-soft */
+  --color-country-ury: #d97706; /* --country-ury */
+  --color-country-ury-soft: #fef3c7; /* --country-ury-soft */
+
+  /* Data viz: sectores */
+  --color-sector-health: #10b981;
+  --color-sector-health-soft: #d1fae5;
+  --color-sector-energy: #eab308;
+  --color-sector-energy-soft: #fef9c3;
+  --color-sector-tourism: #06b6d4;
+  --color-sector-tourism-soft: #cffaff;
+  --color-sector-knowledge: #8b5cf6;
+  --color-sector-knowledge-soft: #ede9fe;
+  --color-sector-tech: #2563eb;
+  --color-sector-tech-soft: #dbeafe;
+
+  /* Data viz: ocupaciones (rampa de 5 niveles) */
+  --color-rank-1: #1e1b4b; /* --job-rank-1 */
+  --color-rank-2: #312e81;
+  --color-rank-3: #4338ca;
+  --color-rank-4: #6366f1;
+  --color-rank-5: #a5b4fc;
+
+  /* Data viz: alertas (crítica / aviso / positiva) */
+  --color-alert-critical-bg: #fee2e2;
+  --color-alert-critical-border: #fca5a5;
+  --color-alert-critical-text: #991b1b;
+  --color-alert-critical-icon: #ef4444;
+  --color-alert-warning-bg: #fef3c7;
+  --color-alert-warning-border: #fde047;
+  --color-alert-warning-text: #92400e;
+  --color-alert-warning-icon: #f59e0b;
+  --color-alert-positive-bg: #d1fae5;
+  --color-alert-positive-border: #86efac;
+  --color-alert-positive-text: #166534;
+  --color-alert-positive-icon: #22c55e;
+
+  /* Data viz: estructura de gráficos */
+  --color-chart-grid: #e2e8f0; /* --chart-grid-line */
+  --color-chart-tooltip-bg: #0f172a; /* --chart-tooltip-bg */
+  --color-chart-tooltip-text: #ffffff; /* --chart-tooltip-text */
+}
+
+/* Valores que no son colores simples (no generan utilidades de color) */
+:root {
+  --overlay: rgb(0 0 0 / 0.5); /* --overlay */
+  --shadow-color: rgb(0 0 0 / 0.08); /* --shadow-color */
+  --gradient-hero: linear-gradient(135deg, #5075db, #5c79c2); /* --gradient-hero */
+
+  /* Alinea los componentes de shadcn con la marca (pisa sus valores por defecto) */
+  --primary: #172bc4;
+  --primary-foreground: #ffffff; /* --on-primary */
+  --ring: #172bc4;
+  --border: #aebdde;
+  --input: #aebdde;
+}
+
+::selection {
+  background: var(--color-selection);
+}
