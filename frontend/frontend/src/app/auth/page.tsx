@@ -1,8 +1,11 @@
 "use client";
 
 import { FormEvent, useState } from "react";
-import { API_URL } from "../../lib/api";
-import { establishBackendSession, getSupabaseBrowserClient } from "../../lib/supabase";
+import "./auth.css";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { API_URL } from "@/lib/api/client";
+import { establishBackendSession, getSupabaseBrowserClient } from "@/lib/supabase";
 
 type AuthResponse = {
   user?: { email?: string | null; username?: string | null };
@@ -12,6 +15,7 @@ type AuthResponse = {
 };
 
 export default function AuthPage() {
+  const router = useRouter();
   const [mode, setMode] = useState<"login" | "signup">("login");
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
@@ -66,7 +70,7 @@ export default function AuthPage() {
         await establishBackendSession(data.session);
         setRequestSucceeded(true);
         setMessage("Inicio de sesión exitoso. Redirigiendo al observatorio…");
-        window.setTimeout(() => window.location.assign(`${API_URL}/explorer`), 700);
+        window.setTimeout(() => router.replace("/"), 700);
       }
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : "No se pudo completar la solicitud.");
@@ -123,13 +127,13 @@ export default function AuthPage() {
     <main className="auth-layout">
       <section className="auth-main" aria-labelledby="auth-title">
         <div className="auth-content">
-          <a className="auth-brand" href="/" aria-label="Observa Tendencias, volver al inicio">
+          <Link className="auth-brand" href="/" aria-label="Observa Tendencias, volver al inicio">
             <span className="auth-brand-mark" aria-hidden="true">
               <i />
               <i />
               <i />
             </span>
-          </a>
+          </Link>
 
           <h1 id="auth-title">{mode === "login" ? "Iniciar sesión" : "Crear cuenta"}</h1>
           <p className="auth-intro">
@@ -274,9 +278,9 @@ export default function AuthPage() {
             <li>Explora indicadores, ocupaciones y tendencias por país.</li>
             <li>La cuenta es opcional y no condiciona el uso del observatorio.</li>
           </ul>
-          <a className="auth-promo-link" href="/">
+          <Link className="auth-promo-link" href="/">
             Explorar el observatorio <span aria-hidden="true">→</span>
-          </a>
+          </Link>
         </section>
       </aside>
     </main>

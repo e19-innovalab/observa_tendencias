@@ -5,7 +5,7 @@ aplicación web que consume la API del backend (FastAPI + PostgreSQL) y muestra
 indicadores, tendencias, proyecciones, ocupaciones y formación.
 
 **Stack:** Next.js (App Router) · TypeScript · Tailwind CSS · shadcn/ui · Recharts · Zod ·
-TanStack Query y nuqs (instalados, aún sin usar) · lucide-react.
+TanStack Query y nuqs (instalados, aún sin usar) · lucide-react · Supabase Auth.
 
 Documentación relacionada: [`docs/api-contract.md`](../docs/api-contract.md) (endpoints y
 qué pantalla usa cada uno) y el esquema de datos en `src/lib/schemas/api.ts`.
@@ -33,7 +33,7 @@ En Windows, Docker Desktop necesita WSL 2. Si el instalador lo pide, abrí Power
 git clone <url-del-repo>
 cd observa_tendencias
 git checkout <tu-rama>          # por ejemplo frontend-main
-cd frontend
+cd frontend/frontend
 npm install
 ```
 
@@ -55,6 +55,10 @@ npm run dev
 
 Abrí <http://localhost:3000>. Sin el backend levantado, la pantalla se ve con datos
 de ejemplo.
+
+El acceso al observatorio es público y no requiere iniciar sesión. La pantalla opcional de
+login/registro está en <http://localhost:3000/auth>; después de iniciar sesión, vuelve al
+observatorio en <http://localhost:3000>.
 
 ---
 
@@ -112,24 +116,31 @@ Errores frecuentes:
 
 ### Frontend
 
-En otra terminal, desde `frontend/`, seguí los pasos de la sección 2. Con el backend
+En otra terminal, desde `frontend/frontend/`, seguí los pasos de la sección 2. Con el backend
 corriendo, el front puede apuntar a <http://localhost:8010>.
 
 ---
 
 ## 4. Variables de entorno
 
-Archivo `frontend/.env.local` (no se sube a git; el modelo es `.env.example`).
+Archivo `frontend/frontend/.env.local` (no se sube a git; el modelo es
+`frontend/frontend/.env.example`).
 
 | Variable | Valor de ejemplo | Descripción |
 |---|---|---|
 | `NEXT_PUBLIC_API_URL` | `http://localhost:8010` | URL base del backend |
+| `NEXT_PUBLIC_SUPABASE_URL` | (URL del proyecto) | URL pública del proyecto Supabase |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | (clave pública/anon) | Clave pública para Supabase Auth |
 | `NEXT_PUBLIC_USE_MOCKS` | `true` | Reservada para la capa de servicios: alterna datos de ejemplo y API real |
 | `ADMIN_API_KEY` | (la del `.env` del backend) | Solo servidor. **Nunca** con prefijo `NEXT_PUBLIC_` |
 
 Los endpoints de escritura del backend (marcar alertas, subir datasets, refrescar fuentes)
 exigen el header `x-api-key`. Esa clave no puede estar en el navegador: esas llamadas
 tienen que pasar por Route Handlers de Next.js (`src/app/api/...`).
+
+Para login, registro y Google OAuth, completá las dos variables de Supabase. En Supabase
+Auth, configurá `http://localhost:3000/auth/callback` como URL permitida de retorno. En el
+`.env` del backend, `SUPABASE_REDIRECT_URL` debe apuntar a esa misma URL.
 
 ---
 
@@ -149,7 +160,7 @@ Antes de abrir un PR, corré `npm run lint` y `npm run build`.
 ## 6. Estructura del código
 
 ```
-frontend/src/
+frontend/frontend/src/
 ├─ app/                     # rutas (App Router). Cada carpeta es una URL
 ├─ components/ui/
 │  ├─ layout/               # AppHeader, MainNav, PageHero

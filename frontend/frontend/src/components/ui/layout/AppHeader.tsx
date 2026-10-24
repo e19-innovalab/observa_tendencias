@@ -1,4 +1,5 @@
 import { Bell, ChevronDown, User } from 'lucide-react';
+import Link from 'next/link';
 
 type Props = {
   userName: string;
@@ -13,6 +14,12 @@ export function AppHeader({ userName, userRole, unreadAlerts }: Props) {
         <span className="text-2xl font-bold text-gray-700">LOGO</span>
 
         <div className="flex items-center gap-4">
+          <Link
+            href="/auth"
+            className="rounded-md px-3 py-2 text-sm font-medium text-blue-700 hover:bg-slate-100 focus-visible:outline-2 focus-visible:outline-blue-600"
+          >
+            Iniciar sesión
+          </Link>
           <button
             type="button"
             className="flex items-center gap-2 rounded-md bg-slate-100 px-4 py-2 text-sm font-medium text-gray-800 hover:bg-slate-200 focus-visible:outline-2 focus-visible:outline-blue-600"

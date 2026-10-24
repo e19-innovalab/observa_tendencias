@@ -1,8 +1,9 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { API_URL } from "../../../lib/api";
-import { establishBackendSession, getSupabaseBrowserClient } from "../../../lib/supabase";
+import "../auth.css";
+import Link from "next/link";
+import { establishBackendSession, getSupabaseBrowserClient } from "@/lib/supabase";
 
 type Confirmation = {
   kind: "loading" | "redirecting" | "confirmed" | "expired" | "error" | "unknown";
@@ -45,7 +46,7 @@ export default function AuthCallback() {
           if (error) throw error;
           if (!data.session) throw new Error("Supabase no devolvió una sesión.");
           await establishBackendSession(data.session);
-          window.location.replace(`${API_URL}/explorer`);
+          window.location.replace("/");
         } catch (cause) {
           setConfirmation({
             kind: "error",
@@ -95,14 +96,12 @@ export default function AuthCallback() {
   }[confirmation.kind];
 
   return (
-    <main className="wrap">
-      <header className="top">
+    <main className="auth-callback">
+      <section aria-live="polite">
         <h1>{content.title}</h1>
         <p>{content.message}</p>
-      </header>
-      <p>
-        <a href="/">Volver a Observa Tendencias</a>
-      </p>
+        <Link href="/">Volver a Observa Tendencias</Link>
+      </section>
     </main>
   );
 }

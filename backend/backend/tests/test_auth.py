@@ -14,7 +14,7 @@ def client(monkeypatch):
     monkeypatch.setattr(auth.settings, "supabase_url", "https://example.supabase.co")
     monkeypatch.setattr(auth.settings, "supabase_anon_key", "test-key")
     monkeypatch.setattr(
-        auth.settings, "supabase_redirect_url", "http://localhost:3010/auth/callback"
+        auth.settings, "supabase_redirect_url", "http://localhost:3000/auth/callback"
     )
     return TestClient(app)
 
@@ -44,7 +44,7 @@ def test_signup_sends_email_password_and_username(client, monkeypatch):
     assert response.status_code == 201
     assert calls["credentials"]["options"]["data"]["username"] == "person"
     assert calls["credentials"]["options"]["email_redirect_to"] == (
-        "http://localhost:3010/auth/callback"
+        "http://localhost:3000/auth/callback"
     )
     assert calls["credentials"]["password"] == " secret "
     assert response.json()["user"] == {
@@ -231,7 +231,7 @@ def test_google_sign_in_returns_oauth_url(client, monkeypatch):
         def sign_in_with_oauth(self, credentials):
             assert credentials == {
                 "provider": "google",
-                "options": {"redirect_to": "http://localhost:3010/auth/callback"},
+                "options": {"redirect_to": "http://localhost:3000/auth/callback"},
             }
             return SimpleNamespace(url="https://accounts.google.com/oauth")
 
@@ -261,7 +261,7 @@ def test_resend_confirmation_uses_signup_type_and_callback(client, monkeypatch):
     assert calls["credentials"] == {
         "type": "signup",
         "email": "person@example.com",
-        "options": {"email_redirect_to": "http://localhost:3010/auth/callback"},
+        "options": {"email_redirect_to": "http://localhost:3000/auth/callback"},
     }
 
 
@@ -277,11 +277,11 @@ def test_auth_cors_allows_credentialed_frontend_requests(client):
     response = client.options(
         "/api/v1/auth/me",
         headers={
-            "Origin": "http://localhost:3010",
+            "Origin": "http://localhost:3000",
             "Access-Control-Request-Method": "GET",
         },
     )
 
     assert response.status_code == 200
-    assert response.headers["access-control-allow-origin"] == "http://localhost:3010"
+    assert response.headers["access-control-allow-origin"] == "http://localhost:3000"
     assert response.headers["access-control-allow-credentials"] == "true"

@@ -1,5 +1,5 @@
-import { createClient, type Session, type SupabaseClient } from "@supabase/supabase-js";
-import { API_URL } from "./api";
+import { createClient, type Session, type SupabaseClient } from '@supabase/supabase-js';
+import { API_URL } from '@/lib/api/client';
 
 let browserClient: SupabaseClient | undefined;
 
@@ -7,16 +7,17 @@ export function getSupabaseBrowserClient(): SupabaseClient {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
   if (!url || !anonKey) {
-    throw new Error("Configura NEXT_PUBLIC_SUPABASE_URL y NEXT_PUBLIC_SUPABASE_ANON_KEY.");
+    throw new Error('Configura NEXT_PUBLIC_SUPABASE_URL y NEXT_PUBLIC_SUPABASE_ANON_KEY.');
   }
 
   if (!browserClient) {
-    const verifierSuffix = "-code-verifier";
+    const verifierSuffix = '-code-verifier';
     browserClient = createClient(url, anonKey, {
       auth: {
-        flowType: "pkce",
+        flowType: 'pkce',
         persistSession: true,
         autoRefreshToken: false,
+        detectSessionInUrl: false,
         storage: {
           getItem: (key) =>
             key.endsWith(verifierSuffix) ? window.sessionStorage.getItem(key) : null,
@@ -36,9 +37,9 @@ export function getSupabaseBrowserClient(): SupabaseClient {
 
 export async function establishBackendSession(session: Session): Promise<void> {
   const response = await fetch(`${API_URL}/api/v1/auth/session`, {
-    method: "POST",
-    credentials: "include",
-    headers: { "Content-Type": "application/json" },
+    method: 'POST',
+    credentials: 'include',
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       access_token: session.access_token,
       refresh_token: session.refresh_token,

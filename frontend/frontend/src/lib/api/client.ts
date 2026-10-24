@@ -1,6 +1,6 @@
 import type { ZodType } from 'zod';
 
-const BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8010';
+export const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8010';
 
 export class ApiError extends Error {
   constructor(
@@ -25,7 +25,7 @@ export async function apiGet<T>(
   params: Record<string, ParamValue> = {},
   revalidateSeconds = 300,
 ): Promise<T> {
-  const url = new URL(`/api/v1${path}`, BASE_URL);
+  const url = new URL(`/api/v1${path}`, API_URL);
   for (const [key, value] of Object.entries(params)) {
     if (value === undefined || value === null || value === '') continue;
     url.searchParams.set(key, Array.isArray(value) ? value.join(',') : String(value));
@@ -35,7 +35,7 @@ export async function apiGet<T>(
   try {
     res = await fetch(url, { next: { revalidate: revalidateSeconds } });
   } catch {
-    throw new ApiError(`No se pudo conectar con el backend (${BASE_URL}). ¿Está corriendo?`);
+    throw new ApiError(`No se pudo conectar con el backend (${API_URL}). ¿Está corriendo?`);
   }
 
   if (!res.ok) {

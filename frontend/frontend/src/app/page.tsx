@@ -11,6 +11,7 @@ import { IndicatorSidebar } from '@/components/ui/indicators/IndicatorSidebar';
 import { KpiCard } from '@/components/ui/indicators/KpiCard';
 import { PageHero } from '@/components/ui/layout/PageHero';
 import { SectionTabs } from '@/components/ui/navigation/SectionTabs';
+import { SessionControl } from '@/components/auth/SessionControl';
 import { ApiError } from '@/lib/api/client';
 import {
   getCountries,
@@ -152,6 +153,10 @@ export default async function PanoramaRegionalPage({ searchParams }: Props) {
         title="Panorama regional"
         description="Compará indicadores de Argentina, Uruguay y Chile con datos de fuentes oficiales."
       />
+
+      <div className="mx-auto max-w-7xl px-6 pt-4">
+        <SessionControl />
+      </div>
 
       <div className="mx-auto max-w-7xl space-y-8 px-6 py-6">
         <div className="space-y-6">
