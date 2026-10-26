@@ -1,44 +1,44 @@
-# Observa Tendencias: backend
+# Backend de Observa Tendencias
 
-FastAPI + PostgreSQL (Supabase). La estructura sigue `backend_plan_ES.md`.
+API FastAPI del observatorio, con PostgreSQL y autenticación Supabase.
 
-Las instrucciones completas de instalación y puesta en marcha están en
-[`../README.md`](../README.md).
+## Requisitos
 
-Resumen (desde esta carpeta, con el entorno virtual activo):
+- Python 3.11 o superior.
+- Docker Desktop para PostgreSQL local.
+
+## Puesta en marcha en Windows (PowerShell)
+
+Desde esta carpeta (`backend/backend`):
 
 ```powershell
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
 pip install -e ".[dev]"
-copy .env.example .env           # completar DATABASE_URL
+Copy-Item .env.example .env
+```
+
+Completa en `.env` los valores locales de PostgreSQL y las credenciales del proyecto Supabase.
+Para auth se requieren `SUPABASE_URL`, `SUPABASE_ANON_KEY` y
+`SUPABASE_REDIRECT_URL=http://localhost:3010/auth/callback`. Configura también
+`CORS_ORIGINS=["http://localhost:3010"]`; deja `AUTH_COOKIE_SECURE=false` en desarrollo local.
+El archivo `.env` contiene datos privados y no debe subirse al repositorio.
+
+Luego, levanta la base de datos y la API:
+
+```powershell
+docker compose up -d
 alembic upgrade head
 python -m seeds.load
-uvicorn app.main:app --reload    # http://localhost:8000/docs
-pytest
+uvicorn app.main:app --reload --port 8010
 ```
 
-## Estructura del proyecto
+La documentación interactiva de la API está en http://localhost:8010/docs.
+Ejecuta las pruebas desde esta carpeta con `pytest`.
+El Explorer del backend, con el estado de sesión, está disponible en http://localhost:8010/explorer.
 
-```
-backend/
-├── app/
-│   ├── main.py              # punto de entrada FastAPI
-│   ├── api/v1/              # routers: alerts, catalog, coverage, datasets,
-│   │                        #   employability, indicators, jobs, skills,
-│   │                        #   sources, trends
-│   ├── core/                # config.py, database.py
-│   ├── models/              # modelos SQLAlchemy: analytics, base, catalog, sources
-│   ├── schemas/             # esquemas de respuesta (analytics.py)
-│   ├── connectors/          # conectores a fuentes externas (base, registry)
-│   ├── ingestion/           # pipeline, uploads, load_analytics
-│   ├── normalization/       # crosswalks, normalizer, periods, units
-│   ├── analytics/           # alerts, employability, projections, skill_gaps, trends
-│   ├── jobs/                # scheduler.py
-│   └── services/
-├── migrations/              # Alembic
-├── seeds/                   # catalog.py, load.py
-├── tests/                   # test_api, test_analytics_api, test_catalog_seed
-├── alembic.ini
-├── pyproject.toml
-├── .env.example
-└── backend_plan_ES.md       # plan de arquitectura
-```
+## Proveedor Google
+
+En Supabase, habilita Google en **Authentication → Sign In / Providers** y configura las
+credenciales OAuth de Google. En **Authentication → URL Configuration**, permite
+`http://localhost:3010/auth/callback` como URL de redirección.

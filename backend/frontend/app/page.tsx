@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import Link from "next/link";
 import {
   type Coverage,
   type GraduateProjection,
@@ -8,6 +9,7 @@ import {
   type GraduateTrends,
   type JobsPage,
   type Summary,
+  type AuthUser,
   API_URL,
   getJson,
 } from "../lib/api";
@@ -60,12 +62,29 @@ export default function Home() {
   const [projections, setProjections] = useState<GraduateProjection[]>([]);
   const [gradCountry, setGradCountry] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [user, setUser] = useState<AuthUser | null>(null);
+  const [sessionReady, setSessionReady] = useState(false);
+  const [signOutError, setSignOutError] = useState<string | null>(null);
 
   const [provincia, setProvincia] = useState("");
   const [sector, setSector] = useState("");
   const [text, setText] = useState("");
   const [q, setQ] = useState("");
   const [offset, setOffset] = useState(0);
+
+  useEffect(() => {
+    fetch(`${API_URL}/api/v1/auth/me`, { credentials: "include" })
+      .then(async (response) => {
+        if (response.ok) {
+          const result = (await response.json()) as { user: AuthUser };
+          setUser(result.user);
+        } else if (response.status !== 401) {
+          throw new Error(`No se pudo consultar la sesión (HTTP ${response.status}).`);
+        }
+      })
+      .catch((sessionError: Error) => setSignOutError(sessionError.message))
+      .finally(() => setSessionReady(true));
+  }, []);
 
   useEffect(() => {
     Promise.all([
@@ -139,13 +158,47 @@ export default function Home() {
   const from = total === 0 ? 0 : offset + 1;
   const to = Math.min(offset + PAGE_SIZE, total);
 
+  async function signOut() {
+    setSignOutError(null);
+    try {
+      const response = await fetch(`${API_URL}/api/v1/auth/logout`, {
+        method: "POST",
+        credentials: "include",
+      });
+      if (!response.ok) {
+        const body = (await response.json().catch(() => ({}))) as { detail?: string };
+        throw new Error(body.detail ?? `No se pudo cerrar sesión (HTTP ${response.status}).`);
+      }
+      setUser(null);
+    } catch (logoutError) {
+      setSignOutError(
+        logoutError instanceof Error ? logoutError.message : "No se pudo cerrar sesión.",
+      );
+    }
+  }
+
   return (
     <main className="wrap">
       <header className="top">
-        <h1>Observa Tendencias</h1>
-        <p>Observatorio laboral y educativo del Cono Sur · Argentina, Uruguay y Chile</p>
+        <div className="top-row">
+          <div>
+            <h1>Observa Tendencias</h1>
+            <p>Observatorio laboral y educativo del Cono Sur · Argentina, Uruguay y Chile</p>
+          </div>
+          <nav className="session-nav" aria-label="Sesión">
+            {sessionReady && user ? (
+              <>
+                <span className="session-email">{user.email}</span>
+                <button className="btn" onClick={signOut}>Cerrar sesión</button>
+              </>
+            ) : (
+              <Link className="btn" href="/auth">Iniciar sesión</Link>
+            )}
+          </nav>
+        </div>
       </header>
 
+      {signOutError && <p className="error" role="alert">{signOutError}</p>}
       <p className="notice">
         Las ofertas vienen de LinkedIn (recolección con Apify) y el sector se asigna por reglas según la
         industria de la empresa. <strong>No es una fuente oficial</strong> y es una instantánea de una

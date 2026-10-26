@@ -16,7 +16,7 @@ backend/                   (esta carpeta)
 │   ├── seeds/             carga del catálogo, fuentes e indicadores desde config/
 │   ├── tests/             tests (no necesitan base de datos)
 │   └── docker-compose.yml Postgres local
-├── frontend/              primer prototipo en Next.js (puerto 3010)
+├── frontend/              dashboard y autenticación opcional en Next.js (puerto 3010)
 ├── data/
 │   ├── raw/               archivos originales: ofertas de LinkedIn, egresados y archivos oficiales descargados
 │   ├── processed/         archivos limpios o derivados (CSV del equipo de datos)
@@ -180,19 +180,25 @@ Desde `backend/backend`, con el entorno virtual activado:
 
 No guardes el token de Apify en el repositorio ni lo compartas en chats.
 
-## Prototipo en Next.js (frontend)
+## Frontend: dashboard y autenticación
 
-Con la API corriendo en el puerto 8010:
+Con la API corriendo en el puerto 8010 y las variables de Supabase configuradas en
+`backend/.env` y `frontend/.env.local`:
 
 ```bash
 cd backend/frontend
 npm install
-cp .env.example .env.local     # NEXT_PUBLIC_API_URL=http://localhost:8010
+cp .env.example .env.local
 npm run dev
 ```
 
-Abrí http://localhost:3010. Fue la primera vista (ofertas de LinkedIn, egresados y cobertura); el
-Explorer ya incluye la misma vista de ofertas.
+Abrí http://localhost:3010/auth para iniciar sesión o registrarte; el acceso es opcional.
+Después de autenticarte, se abre el Explorer del backend en http://localhost:8010/explorer, donde
+se muestran los datos y el correo de la sesión activa y se puede cerrar sesión. Habilita Google en
+Supabase y permite `http://localhost:3010/auth/callback` como URL de redirección; ese callback
+completa la validación antes de enviar al Explorer. Si vuelves a `/auth` mientras la cookie de sesión
+siga activa, se te redirigirá al Explorer en lugar de permitir otro inicio de sesión; cierra sesión
+desde el Explorer para volver a autenticarte.
 
 ## Estado actual
 
@@ -219,7 +225,7 @@ Explorer ya incluye la misma vista de ofertas.
   `docker compose up -d` en `backend/backend`.
 - **`Cannot connect to the Docker daemon`:** Docker Desktop no está abierto.
 - **`Field required ... database_url` al iniciar:** falta `backend/backend/.env` (copiá `.env.example`).
-- **El puerto 8010 está ocupado:** usá otro, por ejemplo `--port 8011`.
+- **El puerto 8010 está ocupado:** usá otro puerto y actualizá `NEXT_PUBLIC_API_URL` para que apunte a la API.
 - **Windows: no se puede ejecutar `Activate.ps1`:** ejecutá una vez
   `Set-ExecutionPolicy -Scope CurrentUser RemoteSigned`.
 - **Cambié un YAML y la API no lo toma:** la configuración se lee al arrancar; reiniciá la API.

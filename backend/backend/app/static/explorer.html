@@ -10,9 +10,15 @@
           --accent:#2563eb; --good:#16794c; --bad:#b42318; --neutral:#667085; }
   * { box-sizing: border-box; }
   body { margin:0; font:14px/1.45 system-ui,-apple-system,"Segoe UI",sans-serif; background:var(--bg); color:var(--ink); }
-  header { padding:16px 24px; background:var(--card); border-bottom:1px solid var(--line); display:flex; gap:16px; align-items:baseline; flex-wrap:wrap; }
+  header { padding:16px 24px; background:var(--card); border-bottom:1px solid var(--line); display:flex; gap:16px; align-items:center; flex-wrap:wrap; }
   header h1 { font-size:18px; margin:0; }
   header small { color:var(--muted); }
+  .session-controls { display:flex; flex-direction:column; align-items:flex-end; gap:3px; margin-left:auto; }
+  .session-email { color:var(--muted); font-size:11px; overflow-wrap:anywhere; }
+  .session-controls a { color:var(--accent); font-weight:600; text-decoration:none; }
+  .session-controls a:hover { text-decoration:underline; }
+  .session-controls button { padding:6px 10px; }
+  .session-status { color:var(--bad); font-size:12px; }
   main { padding:16px 24px; display:grid; gap:16px; max-width:1200px; margin:0 auto; }
   .card { background:var(--card); border:1px solid var(--line); border-radius:8px; padding:16px; }
   .filters { display:flex; flex-wrap:wrap; gap:12px; align-items:end; }
@@ -99,6 +105,12 @@
 <header>
   <h1>Explorer - Observatorio de Tendencias</h1>
   <small>Herramienta de desarrollo: muestra lo que devuelve la API (<a href="/docs">/docs</a>)</small>
+  <nav class="session-controls" aria-label="Sesión">
+    <a id="session-login" href="http://localhost:3010/auth">Iniciar sesión</a>
+    <button id="session-logout" type="button" hidden>Cerrar sesión</button>
+    <span class="session-email" id="session-email" hidden></span>
+    <span class="session-status" id="session-status" role="status"></span>
+  </nav>
 </header>
 <main>
   <section class="card">
@@ -317,6 +329,45 @@ const COLORS = ["#2563eb", "#d97706", "#059669", "#7c3aed", "#db2777"];
 let indicators = [], chart;
 
 const $ = (id) => document.getElementById(id);
+async function loadSession() {
+  const login = $("session-login");
+  const email = $("session-email");
+  const logout = $("session-logout");
+  const status = $("session-status");
+  try {
+    const response = await fetch(`${API}/auth/me`, { credentials: "same-origin" });
+    if (response.status === 401) return;
+    if (!response.ok) throw new Error(`No se pudo consultar la sesión (HTTP ${response.status}).`);
+    const result = await response.json();
+    email.textContent = result.user.email || "Usuario conectado";
+    email.hidden = false;
+    login.hidden = true;
+    logout.hidden = false;
+  } catch (error) {
+    status.textContent = error instanceof Error ? error.message : "No se pudo consultar la sesión.";
+  }
+}
+async function logout() {
+  const status = $("session-status");
+  status.textContent = "";
+  try {
+    const response = await fetch(`${API}/auth/logout`, {
+      method: "POST",
+      credentials: "same-origin",
+    });
+    if (!response.ok) {
+      const result = await response.json().catch(() => ({}));
+      throw new Error(result.detail || `No se pudo cerrar sesión (HTTP ${response.status}).`);
+    }
+    $("session-email").hidden = true;
+    $("session-login").hidden = false;
+    $("session-logout").hidden = true;
+  } catch (error) {
+    status.textContent = error instanceof Error ? error.message : "No se pudo cerrar sesión.";
+  }
+}
+$("session-logout").addEventListener("click", logout);
+loadSession();
 const get = async (path, params = {}) => {
   const url = new URL(API + path, location.origin);
   Object.entries(params).forEach(([k, v]) => v !== "" && v != null && url.searchParams.set(k, v));

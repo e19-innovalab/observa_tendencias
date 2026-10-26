@@ -5,6 +5,7 @@ from sqlalchemy.exc import OperationalError
 
 from app.api.v1 import (
     alerts,
+    auth,
     catalog,
     coverage,
     datasets,
@@ -28,9 +29,10 @@ app.add_middleware(
     allow_origins=settings.cors_origins,
     allow_methods=conf.cors.allow_methods,
     allow_headers=conf.cors.allow_headers,
+    allow_credentials=True,
 )
 
-for module in (catalog, indicators, employability, trends, skills, alerts, datasets, sources,
+for module in (auth, catalog, indicators, employability, trends, skills, alerts, datasets, sources,
                coverage, jobs, graduates, education):
     app.include_router(module.router, prefix=conf.api_prefix)
 

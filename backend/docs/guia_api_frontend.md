@@ -6,7 +6,7 @@ qué devuelve y qué convenciones seguir. Estado al 18/10/2026.
 - **Base URL (local):** `http://localhost:8010/api/v1`. La URL de despliegue se define más adelante, junto con Supabase.
 - **Documentación interactiva** (todos los parámetros y esquemas): http://localhost:8010/docs. Se puede importar en Postman desde `http://localhost:8010/openapi.json`.
 - **Implementación de referencia:** el Explorer (http://localhost:8010/explorer, código en `backend/backend/app/static/explorer.html`) usa todos estos endpoints. Si hay dudas de cómo llamar a uno, está ahí.
-- **CORS:** los orígenes permitidos se configuran en `backend/.env` (`CORS_ORIGINS`). Por defecto, `http://localhost:3000` y `http://localhost:3010`.
+- **CORS:** los orígenes permitidos se configuran en `backend/.env` (`CORS_ORIGINS`). Para el frontend local, permite `http://localhost:3010`.
 
 ---
 

@@ -1,5 +1,22 @@
 export const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8010";
 
+export type AuthUser = { id: string; email: string | null; username: string | null };
+export type AuthResult = { user: AuthUser; authenticated: boolean };
+
+export async function postAuth<T>(path: string, body?: unknown): Promise<T> {
+  const response = await fetch(`${API_URL}/api/v1/auth/${path}`, {
+    method: "POST",
+    credentials: "include",
+    headers: body === undefined ? undefined : { "Content-Type": "application/json" },
+    body: body === undefined ? undefined : JSON.stringify(body),
+  });
+  if (!response.ok) {
+    const result = (await response.json().catch(() => ({}))) as { detail?: string };
+    throw new Error(result.detail ?? `Error de autenticación (HTTP ${response.status}).`);
+  }
+  return response.status === 204 ? (undefined as T) : ((await response.json()) as T);
+}
+
 export type SummaryCell = { provincia: string; sector: string; n: number };
 export type Summary = {
   total: number;
