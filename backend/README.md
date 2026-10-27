@@ -49,9 +49,10 @@ backend/                   (esta carpeta)
 Hoy se trabaja con una base **PostgreSQL local** en Docker (versión 17, la misma que Supabase).
 Pasar a Supabase más adelante solo requiere cambiar `DATABASE_URL` en `.env`.
 
-**macOS / Linux:**
+**macOS / Linux (Bash):**
 
 ```bash
+# Ejecuta desde la raíz del repositorio:
 cd backend/backend
 
 # 1. Entorno virtual y dependencias
@@ -59,32 +60,105 @@ python3 -m venv .venv
 source .venv/bin/activate
 pip install -e ".[dev]"
 
-# 2. Variables de entorno: copiar y completar (cambiá la clave de Postgres y ADMIN_API_KEY)
-cp .env.example .env
+# 2. Variables de entorno: crea .env solo si todavía no existe.
+if [ ! -f .env ]; then cp .env.example .env; else echo ".env ya existe; se conserva."; fi
+# Edita .env antes de continuar. Cambia, como mínimo, la contraseña de Postgres
+# y ADMIN_API_KEY; DATABASE_URL debe coincidir con las credenciales de Postgres.
 
-# 3. Levantar Postgres (los datos quedan en el volumen rumbo_pgdata)
+# 3. Comprueba que Docker Desktop o Docker Engine esté iniciado.
+# Levanta Postgres en segundo plano. Los datos persisten en el volumen rumbo_pgdata.
 docker compose up -d
 
-# 4. Crear las tablas y cargar catálogo, fuentes e indicadores desde config/*.yaml
+# 4. Crear/actualizar las tablas y cargar catálogo, fuentes e indicadores.
 alembic upgrade head
 python -m seeds.load
 
-# 5. Traer los datos de todas las fuentes con conector y cargar los CSV del equipo de datos
+# 5. Opcional: primera descarga de datos y carga de archivos de analítica.
+# Puede tardar porque consulta las fuentes configuradas.
 python -m app.jobs.run --all
 python -m app.ingestion.load_analytics
 
-# 6. Levantar la API
+# 6. Levanta la API y deja esta terminal abierta.
 uvicorn app.main:app --reload --port 8010
 ```
 
-**Windows (PowerShell):** los mismos pasos, con `python -m venv .venv`,
-`.venv\Scripts\Activate.ps1` y `copy .env.example .env`.
+**Windows (PowerShell):**
+
+Abre PowerShell en la raíz del repositorio y ejecuta los pasos en orden. Los comandos de
+migraciones, carga y API deben ejecutarse desde `backend/backend`.
+
+```powershell
+# 1. Entra en la carpeta del backend.
+Set-Location .\backend\backend
+
+# 2. Crea y activa el entorno virtual.
+python -m venv .venv
+Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope Process
+.\.venv\Scripts\Activate.ps1
+python -m pip install --upgrade pip
+pip install -e ".[dev]"
+
+# 3. Crea .env solo si todavía no existe, para conservar los valores locales.
+if (-not (Test-Path .env)) {
+    Copy-Item .env.example .env
+} else {
+    Write-Output ".env ya existe; se conserva."
+}
+
+# Abre .env y completa los valores antes de iniciar Docker.
+# Cambia, como mínimo, POSTGRES_PASSWORD y ADMIN_API_KEY.
+# DATABASE_URL debe coincidir con las credenciales de Postgres.
+notepad .env
+
+# 4. Abre Docker Desktop y espera a que indique que el motor está iniciado.
+# Puedes comprobar la conexión desde PowerShell:
+docker info
+
+# 5. Inicia Postgres en segundo plano.
+docker compose up -d
+
+# 6. Crea/actualiza las tablas y carga catálogo, fuentes e indicadores.
+alembic upgrade head
+python -m seeds.load
+
+# 7. Opcional: primera descarga de datos y carga de archivos de analítica.
+# Puede tardar porque consulta las fuentes configuradas.
+python -m app.jobs.run --all
+python -m app.ingestion.load_analytics
+
+# 8. Levanta la API y deja esta terminal abierta.
+uvicorn app.main:app --reload --port 8010
+```
+
+Si PowerShell no permite activar el entorno virtual, el comando
+`Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope Process` habilita los scripts
+solo en esa ventana de PowerShell; no cambia la política permanente del equipo.
 
 `.env` tiene solo secretos y valores de cada entorno; **no se sube a git**. El resto de la
-configuración está en `backend/config/`.
+configuración está en `backend/config/`. Para autenticación local también completa
+`SUPABASE_URL`, `SUPABASE_ANON_KEY`, `SUPABASE_REDIRECT_URL` y `CORS_ORIGINS` en `backend/.env`;
+los valores de ejemplo permiten el frontend en `http://localhost:3010`.
 
-Después de reiniciar la computadora: abrí Docker Desktop, corré `docker compose up -d` y volvé a
-levantar la API (paso 6).
+### Docker: detener y volver a iniciar Postgres
+
+El servicio `db` del archivo `backend/backend/docker-compose.yml` usa `postgres:17`, publica el
+puerto configurado en `POSTGRES_PORT` (por defecto, `5432`) y guarda la base en el volumen
+nombrado `rumbo_pgdata`. Por eso, detener el contenedor no elimina los datos.
+
+Desde `backend/backend`, tanto en Bash como en PowerShell:
+
+```text
+docker compose stop       # Detiene Postgres y conserva el contenedor y los datos.
+docker compose start      # Vuelve a iniciar el contenedor detenido.
+docker compose up -d      # Crea o inicia el servicio en segundo plano.
+docker compose logs -f db # Sigue los registros; Ctrl+C sale del seguimiento.
+docker compose down       # Elimina el contenedor y la red, pero conserva rumbo_pgdata.
+```
+
+Después de reiniciar la computadora, abre Docker Desktop y espera a que el motor esté iniciado.
+Desde `backend/backend`, ejecuta `docker compose up -d` y vuelve a levantar la API (paso 6 en Bash
+o paso 8 en PowerShell). No hace falta repetir las migraciones ni la carga inicial mientras se
+conserve el volumen.
 
 ## Explorer
 
