@@ -38,6 +38,11 @@ def main():
         choices=[1, 2, 3],
         help='Ejecutar solo una etapa especifica (1: Ingesta, 2: Limpieza, 3: Indicadores). Por defecto ejecuta todas en orden.'
     )
+    parser.add_argument(
+        '--force', '-f',
+        action='store_true',
+        help='Forzar la reconstruccion de caches en la etapa de limpieza.'
+    )
     args = parser.parse_args()
 
     tiempo_inicio = time.time()
@@ -54,7 +59,7 @@ def main():
 
         if args.etapa is None or args.etapa == 2:
             t0 = time.time()
-            ejecutar_limpieza(base_dir=BASE_DIR)
+            ejecutar_limpieza(base_dir=BASE_DIR, force_rebuild=args.force)
             print(f"⏱️ Tiempo Etapa 02: {round(time.time() - t0, 2)}s\n")
 
         if args.etapa is None or args.etapa == 3:

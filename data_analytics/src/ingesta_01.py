@@ -120,6 +120,19 @@ def descargar_cepalstat(indicadores, paises, dir_raw):
     headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'}
 
     for ind_id, desc in indicadores.items():
+        url_dim = f"{cepal_base}/indicator/{ind_id}/dimensions"
+        mapa_anios = {}
+        try:
+            r_dim = requests.get(url_dim, headers=headers, timeout=15)
+            if r_dim.status_code == 200:
+                for d in r_dim.json().get('body', {}).get('dimensions', []):
+                    if 'year' in d.get('name', '').lower() or d.get('id') == 29117:
+                        for m in d.get('members', []):
+                            if str(m.get('name', '')).isdigit():
+                                mapa_anios[m['id']] = int(m['name'])
+        except Exception:
+            pass
+
         url = f"{cepal_base}/indicator/{ind_id}/data?format=json&lang=es"
         try:
             r = requests.get(url, headers=headers, timeout=25)
@@ -130,12 +143,17 @@ def descargar_cepalstat(indicadores, paises, dir_raw):
 
                 for f in filtrados:
                     val = f.get('value')
-                    anio_cands = [f.get('dim_1401'), f.get('dim_29117'), f.get('year'), f.get('anio'), f.get('period')]
                     anio_val = None
-                    for c in anio_cands:
-                        if c is not None and str(c).isdigit() and 2000 <= int(c) <= 2030:
-                            anio_val = int(c)
-                            break
+                    dim_yr = f.get('dim_29117')
+                    if dim_yr in mapa_anios:
+                        anio_val = mapa_anios[dim_yr]
+
+                    if anio_val is None:
+                        anio_cands = [f.get('dim_1401'), f.get('dim_29117'), f.get('year'), f.get('anio'), f.get('period')]
+                        for c in anio_cands:
+                            if c is not None and str(c).isdigit() and 2000 <= int(c) <= 2030:
+                                anio_val = int(c)
+                                break
 
                     if val is not None:
                         try:
@@ -170,10 +188,11 @@ def descargar_ilostat_indicador(indicador_id, paises, dir_raw):
     carpeta_ilo.mkdir(parents=True, exist_ok=True)
 
     ind_clean = indicador_id.replace('DF_', '')
+    headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) ObservatorioPredictivo/1.0'}
     for p in paises:
         url = f"https://rplumber.ilo.org/data/indicator/?id={ind_clean}&ref_area={p}&format=.csv"
         try:
-            r = requests.get(url, timeout=15)
+            r = requests.get(url, headers=headers, timeout=25)
             if r.status_code == 200 and len(r.text) > 80:
                 archivo_salida = carpeta_ilo / f"{ind_clean}_{p}.csv"
                 with open(archivo_salida, 'w', encoding='utf-8') as f:
@@ -183,6 +202,89 @@ def descargar_ilostat_indicador(indicador_id, paises, dir_raw):
                 print(f"  [ILOSTAT] {ind_clean} ({p}): HTTP {r.status_code} (Serie no disponible por rplumber directo).")
         except Exception as e:
             print(f"  [ILOSTAT] {ind_clean} ({p}): Omitido ({e}).")
+
+
+def descargar_spu_anuarios(dir_raw):
+    """
+    Intenta descargar conjuntos de datos abiertos de los Anuarios Estadisticos Universitarios SPU
+    (Ministerio de Capital Humano / Datos Argentina) para anos faltantes (ej. 2019, 2018).
+    Si los servidores oficiales se encuentran temporalmente inaccesibles (404/502), reporta
+    el estado y continua con los anuarios consolidados ya existentes en el repositorio.
+    """
+    dir_arg = dir_raw / 'argentina'
+    dir_arg.mkdir(parents=True, exist_ok=True)
+
+    headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) ObservatorioPredictivo/1.0'}
+    urls_candidatas = [
+        ('2019', 'https://www.argentina.gob.ar/sites/default/files/anuario_csv_2019.zip'),
+        ('2018', 'https://www.argentina.gob.ar/sites/default/files/anuario_csv_2018.zip'),
+    ]
+
+    for anio_tag, url in urls_candidatas:
+        target_zip = dir_arg / f"anuario_csv_{anio_tag}.zip"
+        if target_zip.exists():
+            print(f"  ✅ [SPU Anuarios] Anuario {anio_tag} ya disponible en: {target_zip.name}")
+            continue
+        try:
+            r = requests.get(url, headers=headers, timeout=10, stream=True)
+            if r.status_code == 200 and int(r.headers.get('content-length', 0)) > 10000:
+                with open(target_zip, 'wb') as f:
+                    for chunk in r.iter_content(chunk_size=8192):
+                        f.write(chunk)
+                print(f"  ✅ [SPU Anuarios] Descargado anuario {anio_tag}: {target_zip.name}")
+            else:
+                print(f"  ℹ️ [SPU Anuarios] Anuario {anio_tag}: Endpoint oficial no disponible (HTTP {r.status_code}). Se utilizan anuarios locales consolidados.")
+        except Exception as e:
+            print(f"  ℹ️ [SPU Anuarios] Anuario {anio_tag}: Reintento omitido ({e}). Se utilizan anuarios locales consolidados.")
+
+
+def descargar_indec_ipc(dir_raw):
+    """
+    Descarga la serie oficial observada de IPC Nacional del INDEC desde la API de Datos Abiertos
+    de la Republica Argentina (serie 145.3_INGNACNAL_DICI_M_15, base dic-2016=100).
+    Permite armonizar el IPC de Argentina con Chile y Uruguay sin lagunas ni NaN.
+    """
+    dir_arg = dir_raw / 'argentina'
+    dir_arg.mkdir(parents=True, exist_ok=True)
+    archivo_json = dir_arg / 'indec_ipc_nacional.json'
+    archivo_csv = dir_arg / 'indec_ipc_nacional.csv'
+    url = "https://apis.datos.gob.ar/series/api/series/?ids=145.3_INGNACNAL_DICI_M_15&limit=1000"
+    headers = {'User-Agent': 'ObservatorioPredictivo/1.0'}
+
+    try:
+        r = requests.get(url, headers=headers, timeout=20)
+        if r.status_code == 200:
+            data = r.json()
+            if 'data' in data and data['data']:
+                with open(archivo_json, 'w', encoding='utf-8') as f:
+                    json.dump(data, f, ensure_ascii=False, indent=2)
+                registros = []
+                for fila in data['data']:
+                    fecha_str = fila[0]
+                    val = float(fila[1])
+                    anio = int(fecha_str.split('-')[0])
+                    registros.append({'pais': 'ARG', 'fecha': fecha_str, 'anio': anio, 'ipc_indec': val})
+                df_indec = pd.DataFrame(registros)
+                df_indec.to_csv(archivo_csv, index=False, encoding='utf-8')
+                print(f"  ✅ [INDEC] IPC Nacional descargado: {len(df_indec)} meses ({df_indec['anio'].min()}-{df_indec['anio'].max()}).")
+                return df_indec
+    except Exception as e:
+        print(f"  ⚠️ [INDEC] Error al consultar API de INDEC ({e}). Se utilizara cache local si existe.")
+
+    if archivo_csv.exists():
+        try:
+            return pd.read_csv(archivo_csv)
+        except Exception:
+            pass
+    elif archivo_json.exists():
+        try:
+            with open(archivo_json, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+            registros = [{'pais': 'ARG', 'fecha': r[0], 'anio': int(r[0].split('-')[0]), 'ipc_indec': float(r[1])} for r in data.get('data', [])]
+            return pd.DataFrame(registros)
+        except Exception:
+            pass
+    return pd.DataFrame()
 
 
 def inspeccionar_fuentes_locales(dir_raw):
@@ -240,6 +342,11 @@ def inspeccionar_fuentes_locales(dir_raw):
     print("--- URUGUAY ---")
     verificar('uruguay/00._educ_superior_datos.csv', 'URY', 'Educacion Superior Uruguay (Egresados)', True, ['**/*educ_superior_datos*.csv'])
     verificar('uruguay/Anuario Estadístico de Educación 2024.xlsx', 'URY', 'MEC Anuario Estadistico de Educacion', False, ['**/*Anuario*Educaci*.xlsx'])
+    verificar('uruguay/10235_distribucion_porcentual_de_las_personas_ocupadas_segun_sexo_por_rama_de_actividad_en_ocupa.csv', 'URY', 'INE Uruguay Empleo por Sexo y Rama', False, ['**/*distribucion*ocupadas*sexo*.csv'])
+
+    print("--- REGIONAL / ILOSTAT ---")
+    for p in ['ARG', 'CHL', 'URY']:
+        verificar(f'ilostat/EAR_EMTA_SEX_ECO_NB_{p}.csv', p, f'ILOSTAT Salarios Medios por Rama y Sexo ({p})', False, [f'**/EAR_EMTA_SEX_ECO_NB_{p}.csv'])
 
     return pd.DataFrame(archivos_detectados)
 
@@ -297,6 +404,16 @@ def ejecutar_ingesta(base_dir=None):
     # C. ILOSTAT
     print("  • Consultando API ILOSTAT...")
     descargar_ilostat_indicador('EAP_TEAP_SEX_AGE_EDU_NB', paises_iso3, paths['data_raw'])
+    descargar_ilostat_indicador('EAR_EMTA_SEX_ECO_NB', paises_iso3, paths['data_raw'])
+    descargar_ilostat_indicador('EMP_TEMP_SEX_ECO_NB', paises_iso3, paths['data_raw'])
+
+    # D. SPU Anuarios (Argentina - descarga de paquetes abiertos complementarios)
+    print("  • Verificando paquetes abiertos SPU Anuarios...")
+    descargar_spu_anuarios(paths['data_raw'])
+
+    # E. INDEC IPC Nacional (Argentina - serie oficial observada)
+    print("  • Consultando API INDEC (IPC Nacional Argentina)...")
+    descargar_indec_ipc(paths['data_raw'])
 
     # 3. Inspeccionar fuentes manuales
     print("\n[Paso 3/4] Inspeccion de archivos manuales y locales...")
