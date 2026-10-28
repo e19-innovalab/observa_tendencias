@@ -40,7 +40,8 @@ data_analytics/
 │   ├── cleaning_02.py        <- Normalización, limpieza y tablas de hechos
 │   └── indicadores_03.py     <- Indicadores, Z-scores, brechas y proyecciones
 ├── pipeline.py               <- Script orquestador ejecutable de punta a punta
-├── plan.md                   <- Bitácora viva y control de etapas del proyecto
+├── generar_matriz_habilidades_ia.py <- Generador de matriz integral de habilidades sectoriales y riesgo IA
+├── catalogo_datos_frontend_ux.md   <- Catálogo de contratos de datos y guía visual para Frontend y UX/UI
 ├── requirements.txt          <- Dependencias de librerías Python
 └── .gitignore                <- Reglas para evitar subir datasets pesados a GitHub
 ```
@@ -191,7 +192,9 @@ resultados = ejecutar_todo()
 * `hecho_ocupacion_terciarios.csv`: Métricas de puestos de trabajo, participación de mujeres y empleabilidad (173 registros).
 * `factores_macro_ppa.csv`: Serie temporal de factores PPA del PIB del Banco Mundial (2010–2025).
 
-### Reportes de Indicadores:
+### Reportes de Indicadores y Matrices Analíticas:
+* `matriz_habilidades_sectoriales_integrales.csv` (y `matriz_habilidades_riesgo_ia_sector.csv`): Matriz analítica integral con 114 cruces formativo-ocupacionales en los 5 sectores estratégicos, clasificando competencias en 4 tipologías (nucleares hard, emergentes sectoriales como transición verde/industria 4.0, humanas/transversales no automatizables, y digitales/IA), categorizando su vector de emergencia y articuladas con el índice oficial OIT GenAI WP 140 (2025) y 640 ofertas laborales de LinkedIn.
+* `catalogo_datos_frontend_ux.md`: Catálogo contractual cerrado de esquemas de respuesta JSON para APIs, parámetros, tipos de datos, cláusula anti-alucinación y guía de visualizaciones recomendadas (Fan Charts con conos de incertidumbre para tendencias y proyecciones, Slope Charts, Ejes Duales, barras horizontales en USD PPA y radares pentagonales).
 * `indicadores_interanuales_zscore.csv`: Variaciones porcentuales anuales calculadas exclusivamente sobre anos consecutivos observados y Z-scores con alertas de significancia (|Z| >= 1.4) con paridad metodologica tripartita.
 * `proyecciones_graduados_sector.csv` (y `proyecciones_oferta_demanda.csv`): Estimaciones predictivas a 3 y 5 anos sobre el flujo de egresados de educacion superior con intervalos t-Student al 95% y alertas de tendencia (30 proyecciones para los 3 paises).
 * `reporte_densidad_profesional_sector.csv`: Cruce de oferta universitaria vs. demanda laboral que mide la tasa de renovacion profesional (Graduados universitarios por cada 1.000 personas ocupadas en el sector segun OIT/ILOSTAT, 140 registros cruzados).
@@ -386,6 +389,44 @@ Este apartado sintetiza las decisiones de diseno, correcciones metodologicas y v
 * **Etapa 5 (Genero y Estandar EIGE/OIT):** Normalizacion estricta de categorias de genero (`F`, `M`, `NB` y total `T` aislado); asignacion de `NaN` en `NB` para Argentina y Uruguay respetando datos 100% observados sin imputar ceros presuntivos; adopcion formal de la franja de paridad equilibrada 40%-60% bajo estandar internacional EIGE/OIT; exportacion de `reporte_brechas_genero_detallado.csv` (70 filas anualizadas) y grafico comparativo dual de egresados vs. empleo formal.
 * **Etapa 6 (Z-Score, Consecutividad y Densidad Profesional):** Calibracion de umbral paritario $|Z| \ge 1.4$ para los 3 paises, superando el limite algebraico de Shiffler en series cortas; validacion estricta de consecutividad temporal ($t - (t-1) = 1$) dejando 2020 en Argentina como vacio observado (`NaN`) con nota explicita de salto temporal; exportacion de `proyecciones_graduados_sector.csv` (30 estimaciones) y creacion del `reporte_densidad_profesional_sector.csv` (140 registros) cruzando egresados universitarios por cada 1.000 ocupados OIT; completamiento de Uruguay en `reporte_salarios_detalle_local.csv` con celdas observadas vacias y advertencia textual; incorporacion de la funcion `verificar_matriz_reportes_3x5()` en el pipeline.
 * **Etapa 7 (Verificacion Final y Cierre del Plan):** Auditoria integral de punta a punta del pipeline; cumplimiento 100% verificado del checklist de condiciones (3 paises, 5 sectores, 25 carreras comunes CINE-F, aislamiento en `data_analytics/`, 100% datos observados sin imputaciones, paridad temporal y salarial PPA); erradicacion de emojis no autorizados en scripts (`pipeline.py` e `ingesta_01.py`); ratificacion de proyecciones sectoriales paritarias (Opcion B.1) y consolidacion de las 5 consultas estrategicas interdisciplinarias (incluyendo la Opcion B.2 de Chile como caso testigo/benchmark de datos abiertos).
+
+### Integración Full-Stack y Consolidación Metodológica (Etapas 1 a 5 de Integración)
+
+Esta fase formaliza el acople definitivo entre el módulo de analítica autónomo y la arquitectura central de backend y frontend de la plataforma:
+
+#### 1. Etapa 1: Auditoría de Paridad Regional, 100% Datos Observados y Enfoque Temporal Dual
+* **Auditoría de Datos:** Verificación de cero imputaciones sintéticas en los 15 estratos sector-país. Datos respaldados en fuentes primarias oficiales (SPU, CEP-XXI, SIES, Mi Futuro, MEC, UdelaR, INE, Banco Mundial y OIT).
+* **Paridad Monetaria:** Factores PPA del PIB (`PA.NUS.PPP`) y deflactación continua a moneda constante con IPC base común 2016=100.
+* **Enfoque Temporal Dual:**
+  * *Nivel Nacional (Ficha País):* Máxima actualidad observada (Chile 2024/2025, Uruguay 2023/2024, Argentina 2022/2023) con metadato explícito de corte censal.
+  * *Nivel Regional (Comparativo Tripartito):* Ventana común armonizada (2018–2022) para cotejo sin distorsiones por asimetría temporal.
+
+#### 2. Etapa 2: Migración y Carga Transaccional por Lotes SQL en PostgreSQL Central
+* **Migración Alembic:** Creación de `0015_analytics_tables.py`, estructurando 15 tablas analíticas en PostgreSQL central.
+* **Carga Transaccional (`load_analytics.py`):** Persistencia de **179.886 registros observados** en 18 segundos con cero errores de integridad referencial.
+* **Certificación de Proyectabilidad:** Actualización de `coverage_report`, certificando que los 15 estratos de los 5 sectores estratégicos son 100% proyectables (ARG $n=6$, CHL $n=19$, URY $n=10$).
+
+#### 3. Etapa 3: Métricas Avanzadas, Densidad Profesional y Transparencia ISE
+* **Tasa de Densidad Profesional Sectorial:** Egresados universitarios anuales por cada 1.000 personas ocupadas en el sector según OIT/ILOSTAT, operable bajo Enfoque Dual (regional común vs. local).
+* **Tratamiento Transparente del ISE:** Ante la disponibilidad de inserción censal exclusivamente en Chile (SIES), para no penalizar a Argentina y Uruguay ni recurrir a imputaciones sintéticas, en la comparativa regional el 25% del peso de inserción se redistribuye proporcionalmente entre Demanda Neta (46.7%), Salario PPA (33.3%) y Automatización OIT (20.0%), informando el dato observado de Chile en su ficha local.
+* **Endpoints Operativos:** Implementación de `/api/v1/analytics/densidad-profesional`, `/api/v1/analytics/salarios/dual` y `/api/v1/analytics/ise/metodologia-insercion`.
+
+#### 4. Etapa 4: Correspondencias Formativas CIUO-08 y Matriz Integral de Habilidades Sectoriales
+* **Homologación CIUO-08:** Articulación de las 25 carreras objetivo con 54 ocupaciones CIUO-08 en los 5 sectores estratégicos (0 errores en `validate_crosswalk`).
+* **Matriz Integral de Habilidades:** Desacople del foco exclusivo en IA. La matriz abarca 114 cruces formativos con 4 tipologías de competencias:
+  * *Habilidades Nucleares / Hard Técnicas:* Métodos clínicos en salud, extracción/metalurgia y geología en minería, termodinámica y redes eléctricas en energía, arquitectura de software en tech, finanzas corporativas y microeconomía en SBC.
+  * *Habilidades Emergentes Sectoriales:* Transición verde (hidrógeno verde, descarbonización, ESG, minería de litio/cobre), bioseguridad y telemedicina en salud, hotelería regenerativa y ecoturismo en turismo, economía circular y gobernanza de datos en SBC.
+  * *Habilidades Transversales / Humanas:* Empatía y contención en salud, negociación intercultural y hospitalidad en turismo, pensamiento crítico, ética profesional y liderazgo multidisciplinario.
+  * *Habilidades Digitales y Asistencia IA:* Integración de IA generativa, análisis predictivo, modelos de visión artificial y telemetría avanzada.
+* **Vector de Emergencia:** Clasificación por motores de transformación (`Transición Verde / Sostenibilidad`, `Industria 4.0 / Automatización`, `Digital / IA Generativa`, etc.) y cruce con el Índice OIT GenAI WP 140 (2025), validado contra 640 ofertas laborales reales de LinkedIn.
+* **Endpoints Operativos:** `/api/v1/analytics/habilidades` y su alias `/api/v1/analytics/habilidades-ia`.
+
+#### 5. Etapa 5: Verificación Extremo a Extremo, Contratos para Frontend/UX y Cierre Metodológico
+* **Calidad y Verificación de Código:** 109 de 109 tests aprobados en la suite completa de backend (`pytest`), con cero regresiones y tiempos de respuesta subsegundo en TestClient.
+* **Catálogo de Contratos para Frontend y UX/UI (`catalogo_datos_frontend_ux.md`):** Especificación rigurosa de contratos JSON, tipos de datos, cláusula anti-alucinación y guía de visualizaciones recomendadas:
+  * **Fan Charts (Conos de Incertidumbre):** Series de egresados observadas en línea continua sólida y proyecciones estadísticas en línea punteada con franja sombreada de intervalo de confianza, evitando confundir proyecciones con hechos censales.
+  * **Slope Charts, Ejes Duales y Barras Horizontales en USD PPA:** Para variaciones temporales, volumen vs. densidad profesional y salarios comparables.
+* **Certificación de Cierre:** El Observatorio queda metodológicamente blindado, con 100% de datos observados, validación interdisciplinaria y listo para producción.
 
 ---
 

@@ -30,3 +30,20 @@ from app.models.sources import (  # noqa: F401
     Observation,
     Source,
 )
+from app.models.analytics_dm import (  # noqa: F401
+    AnalisisGeneroIntegral,
+    DimCarrera,
+    DimPais,
+    DimSector,
+    DimSexo,
+    DimTiempo,
+    FactEgresados,
+    FactInstitucionesEgresados,
+    FactOcupacionTerciarios,
+    FactSalario,
+    FactoresMacroPPA,
+    ProyeccionesGraduadosSector,
+    RankingUniversidadesNacional,
+    RankingUniversidadesRegional,
+    ReporteDensidadProfesional,
+)
