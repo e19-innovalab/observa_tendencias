@@ -1,0 +1,68 @@
+# ==========================================
+# Data Analytics - Git Ignore Rules
+# ==========================================
+
+# 1. Datasets y Archivos de Datos (Raw y Processed)
+data/raw/*
+!data/raw/.gitkeep
+data/raw/**/*
+!data/raw/**/.gitkeep
+
+data/processed/*
+!data/processed/.gitkeep
+data/processed/**/*
+!data/processed/**/.gitkeep
+
+# 2. Archivos masivos o descargados por extensión
+*.csv
+*.tsv
+*.xlsx
+*.xls
+*.xlsm
+*.ods
+*.zip
+*.tar
+*.gz
+*.rar
+*.7z
+*.parquet
+*.feather
+*.h5
+*.hdf5
+*.pkl
+*.pickle
+*.sqlite
+*.db
+
+# 3. Archivos generados en output (mantener solo .gitkeep)
+output/*
+!output/.gitkeep
+output/**/*
+!output/**/.gitkeep
+
+# 4. Entornos virtuales y dependencias de Python
+.venv/
+venv/
+env/
+ENV/
+env.bak/
+venv.bak/
+
+# 5. Caché de Python y compilación
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.pytest_cache/
+.mypy_cache/
+
+# 6. Puntos de control de Jupyter y Colab
+.ipynb_checkpoints/
+*/.ipynb_checkpoints/*
+
+# 7. Archivos de sistema operativo e IDEs
+.DS_Store
+Thumbs.db
+desktop.ini
+.vscode/
+.idea/
