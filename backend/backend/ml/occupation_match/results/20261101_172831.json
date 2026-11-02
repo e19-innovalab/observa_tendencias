@@ -1,0 +1,5367 @@
+{
+ "run_at": "2026-11-01T17:27:34",
+ "labels": 15788,
+ "queries": 86,
+ "test_phrases_hidden": true,
+ "testset_reviewed": true,
+ "methods": {
+  "lexical_ciuo": {
+   "accuracy": {
+    "top1": 0.233,
+    "top3": 0.244,
+    "top5": 0.244
+   },
+   "ms_per_query": 0.3,
+   "answers": [
+    {
+     "q": "chofer de camión",
+     "expected": [
+      "8332"
+     ],
+     "got": [],
+     "rank": null
+    },
+    {
+     "q": "camionero",
+     "expected": [
+      "8332"
+     ],
+     "got": [],
+     "rank": null
+    },
+    {
+     "q": "colectivero",
+     "expected": [
+      "8331"
+     ],
+     "got": [],
+     "rank": null
+    },
+    {
+     "q": "micrero",
+     "expected": [
+      "8331"
+     ],
+     "got": [],
+     "rank": null
+    },
+    {
+     "q": "taxista",
+     "expected": [
+      "8322"
+     ],
+     "got": [],
+     "rank": null
+    },
+    {
+     "q": "remisero",
+     "expected": [
+      "8322"
+     ],
+     "got": [],
+     "rank": null
+    },
+    {
+     "q": "motoquero",
+     "expected": [
+      "8321"
+     ],
+     "got": [],
+     "rank": null
+    },
+    {
+     "q": "repartidor de delivery",
+     "expected": [
+      "9621",
+      "8321"
+     ],
+     "got": [],
+     "rank": null
+    },
+    {
+     "q": "cadete",
+     "expected": [
+      "9621"
+     ],
+     "got": [],
+     "rank": null
+    },
+    {
+     "q": "maquinista de tren",
+     "expected": [
+      "8311"
+     ],
+     "got": [],
+     "rank": null
+    },
+    {
+     "q": "piloto de avión",
+     "expected": [
+      "3153"
+     ],
+     "got": [],
+     "rank": null
+    },
+    {
+     "q": "azafata",
+     "expected": [
+      "5111"
+     ],
+     "got": [],
+     "rank": null
+    },
+    {
+     "q": "mozo",
+     "expected": [
+      "5131"
+     ],
+     "got": [],
+     "rank": null
+    },
+    {
+     "q": "garzón",
+     "expected": [
+      "5131"
+     ],
+     "got": [],
+     "rank": null
+    },
+    {
+     "q": "bartender",
+     "expected": [
+      "5132"
+     ],
+     "got": [],
+     "rank": null
+    },
+    {
+     "q": "cocinero",
+     "expected": [
+      "5120"
+     ],
+     "got": [
+      "5120",
+      "9411"
+     ],
+     "rank": 1
+    },
+    {
+     "q": "chef",
+     "expected": [
+      "3434"
+     ],
+     "got": [
+      "3434"
+     ],
+     "rank": 1
+    },
+    {
+     "q": "panadero",
+     "expected": [
+      "7512"
+     ],
+     "got": [
+      "7512"
+     ],
+     "rank": 1
+    },
+    {
+     "q": "almacenero",
+     "expected": [
+      "5221"
+     ],
+     "got": [],
+     "rank": null
+    },
+    {
+     "q": "cajero de supermercado",
+     "expected": [
+      "5230"
+     ],
+     "got": [],
+     "rank": null
+    },
+    {
+     "q": "repositor",
+     "expected": [
+      "9334"
+     ],
+     "got": [],
+     "rank": null
+    },
+    {
+     "q": "vendedor ambulante",
+     "expected": [
+      "5211",
+      "9520"
+     ],
+     "got": [
+      "5212",
+      "9520"
+     ],
+     "rank": 2
+    },
+    {
+     "q": "feriante",
+     "expected": [
+      "5211"
+     ],
+     "got": [],
+     "rank": null
+    },
+    {
+     "q": "agente inmobiliario",
+     "expected": [
+      "3334"
+     ],
+     "got": [
+      "3334"
+     ],
+     "rank": 1
+    },
+    {
+     "q": "corredor de seguros",
+     "expected": [
+      "3321"
+     ],
+     "got": [],
+     "rank": null
+    },
+    {
+     "q": "albañil",
+     "expected": [
+      "7112"
+     ],
+     "got": [
+      "7112"
+     ],
+     "rank": 1
+    },
+    {
+     "q": "gasfíter",
+     "expected": [
+      "7126"
+     ],
+     "got": [],
+     "rank": null
+    },
+    {
+     "q": "plomero",
+     "expected": [
+      "7126"
+     ],
+     "got": [],
+     "rank": null
+    },
+    {
+     "q": "sanitarista",
+     "expected": [
+      "7126"
+     ],
+     "got": [],
+     "rank": null
+    },
+    {
+     "q": "electricista de obra",
+     "expected": [
+      "7411"
+     ],
+     "got": [
+      "7411"
+     ],
+     "rank": 1
+    },
+    {
+     "q": "pintor de obra",
+     "expected": [
+      "7131"
+     ],
+     "got": [],
+     "rank": null
+    },
+    {
+     "q": "carpintero",
+     "expected": [
+      "7115"
+     ],
+     "got": [
+      "7115"
+     ],
+     "rank": 1
+    },
+    {
+     "q": "soldador",
+     "expected": [
+      "7212"
+     ],
+     "got": [
+      "7212"
+     ],
+     "rank": 1
+    },
+    {
+     "q": "tornero",
+     "expected": [
+      "7223"
+     ],
+     "got": [],
+     "rank": null
+    },
+    {
+     "q": "mecánico de autos",
+     "expected": [
+      "7231"
+     ],
+     "got": [],
+     "rank": null
+    },
+    {
+     "q": "operario de fábrica",
+     "expected": [
+      "9329"
+     ],
+     "got": [],
+     "rank": null
+    },
+    {
+     "q": "minero",
+     "expected": [
+      "8111"
+     ],
+     "got": [
+      "8111"
+     ],
+     "rank": 1
+    },
+    {
+     "q": "peón rural",
+     "expected": [
+      "9211",
+      "9212",
+      "9213"
+     ],
+     "got": [],
+     "rank": null
+    },
+    {
+     "q": "tambero",
+     "expected": [
+      "6121",
+      "9212"
+     ],
+     "got": [],
+     "rank": null
+    },
+    {
+     "q": "temporero de la fruta",
+     "expected": [
+      "9211"
+     ],
+     "got": [],
+     "rank": null
+    },
+    {
+     "q": "jardinero",
+     "expected": [
+      "6113",
+      "9214"
+     ],
+     "got": [],
+     "rank": null
+    },
+    {
+     "q": "pescador artesanal",
+     "expected": [
+      "6222"
+     ],
+     "got": [],
+     "rank": null
+    },
+    {
+     "q": "agrónomo",
+     "expected": [
+      "2132"
+     ],
+     "got": [
+      "2132"
+     ],
+     "rank": 1
+    },
+    {
+     "q": "kinesiólogo",
+     "expected": [
+      "2264"
+     ],
+     "got": [],
+     "rank": null
+    },
+    {
+     "q": "médico de guardia",
+     "expected": [
+      "2211",
+      "2212"
+     ],
+     "got": [],
+     "rank": null
+    },
+    {
+     "q": "auxiliar de enfermería",
+     "expected": [
+      "3221",
+      "5321"
+     ],
+     "got": [],
+     "rank": null
+    },
+    {
+     "q": "odontólogo",
+     "expected": [
+      "2261"
+     ],
+     "got": [],
+     "rank": null
+    },
+    {
+     "q": "farmacéutico",
+     "expected": [
+      "2262"
+     ],
+     "got": [
+      "2262",
+      "3213"
+     ],
+     "rank": 1
+    },
+    {
+     "q": "veterinario",
+     "expected": [
+      "2250"
+     ],
+     "got": [
+      "2250",
+      "3240"
+     ],
+     "rank": 1
+    },
+    {
+     "q": "cuidador de ancianos",
+     "expected": [
+      "5322",
+      "5321"
+     ],
+     "got": [],
+     "rank": null
+    },
+    {
+     "q": "niñera",
+     "expected": [
+      "5311"
+     ],
+     "got": [],
+     "rank": null
+    },
+    {
+     "q": "nana",
+     "expected": [
+      "9111",
+      "5311"
+     ],
+     "got": [],
+     "rank": null
+    },
+    {
+     "q": "empleada doméstica",
+     "expected": [
+      "9111"
+     ],
+     "got": [],
+     "rank": null
+    },
+    {
+     "q": "peluquera",
+     "expected": [
+      "5141"
+     ],
+     "got": [],
+     "rank": null
+    },
+    {
+     "q": "manicura",
+     "expected": [
+      "5142"
+     ],
+     "got": [],
+     "rank": null
+    },
+    {
+     "q": "maestra jardinera",
+     "expected": [
+      "2342"
+     ],
+     "got": [],
+     "rank": null
+    },
+    {
+     "q": "docente de primaria",
+     "expected": [
+      "2341"
+     ],
+     "got": [],
+     "rank": null
+    },
+    {
+     "q": "profe de educación física",
+     "expected": [
+      "2330",
+      "2341"
+     ],
+     "got": [],
+     "rank": null
+    },
+    {
+     "q": "profesor universitario",
+     "expected": [
+      "2310"
+     ],
+     "got": [],
+     "rank": null
+    },
+    {
+     "q": "psicopedagoga",
+     "expected": [
+      "2352",
+      "2634",
+      "2359"
+     ],
+     "got": [],
+     "rank": null
+    },
+    {
+     "q": "trabajador social",
+     "expected": [
+      "2635"
+     ],
+     "got": [
+      "3412"
+     ],
+     "rank": null
+    },
+    {
+     "q": "asistente social",
+     "expected": [
+      "2635"
+     ],
+     "got": [
+      "3412"
+     ],
+     "rank": null
+    },
+    {
+     "q": "contador público",
+     "expected": [
+      "2411"
+     ],
+     "got": [],
+     "rank": null
+    },
+    {
+     "q": "liquidador de sueldos",
+     "expected": [
+      "4313"
+     ],
+     "got": [],
+     "rank": null
+    },
+    {
+     "q": "abogado laboralista",
+     "expected": [
+      "2611"
+     ],
+     "got": [],
+     "rank": null
+    },
+    {
+     "q": "despachante de aduana",
+     "expected": [
+      "3331"
+     ],
+     "got": [],
+     "rank": null
+    },
+    {
+     "q": "tasador",
+     "expected": [
+      "3315"
+     ],
+     "got": [
+      "3315"
+     ],
+     "rank": 1
+    },
+    {
+     "q": "secretaria",
+     "expected": [
+      "4120"
+     ],
+     "got": [
+      "3341"
+     ],
+     "rank": null
+    },
+    {
+     "q": "asistente administrativo",
+     "expected": [
+      "4110",
+      "3343"
+     ],
+     "got": [],
+     "rank": null
+    },
+    {
+     "q": "operador de call center",
+     "expected": [
+      "4222"
+     ],
+     "got": [],
+     "rank": null
+    },
+    {
+     "q": "telefonista",
+     "expected": [
+      "4223"
+     ],
+     "got": [
+      "4223"
+     ],
+     "rank": 1
+    },
+    {
+     "q": "recepcionista de hotel",
+     "expected": [
+      "4224"
+     ],
+     "got": [
+      "4224"
+     ],
+     "rank": 1
+    },
+    {
+     "q": "programador de apps",
+     "expected": [
+      "2514",
+      "2512"
+     ],
+     "got": [],
+     "rank": null
+    },
+    {
+     "q": "científico de datos",
+     "expected": [
+      "2120",
+      "2511",
+      "2519"
+     ],
+     "got": [],
+     "rank": null
+    },
+    {
+     "q": "devops",
+     "expected": [
+      "2522",
+      "2512",
+      "2523"
+     ],
+     "got": [],
+     "rank": null
+    },
+    {
+     "q": "soporte técnico informático",
+     "expected": [
+      "3512"
+     ],
+     "got": [],
+     "rank": null
+    },
+    {
+     "q": "diseñador ux",
+     "expected": [
+      "2166",
+      "2513",
+      "2512"
+     ],
+     "got": [],
+     "rank": null
+    },
+    {
+     "q": "community manager",
+     "expected": [
+      "2431",
+      "2432"
+     ],
+     "got": [],
+     "rank": null
+    },
+    {
+     "q": "periodista",
+     "expected": [
+      "2642"
+     ],
+     "got": [
+      "2642"
+     ],
+     "rank": 1
+    },
+    {
+     "q": "traductor",
+     "expected": [
+      "2643"
+     ],
+     "got": [
+      "2643"
+     ],
+     "rank": 1
+    },
+    {
+     "q": "ingeniero civil",
+     "expected": [
+      "2142"
+     ],
+     "got": [
+      "2142"
+     ],
+     "rank": 1
+    },
+    {
+     "q": "arquitecto",
+     "expected": [
+      "2161"
+     ],
+     "got": [
+      "2161",
+      "2162"
+     ],
+     "rank": 1
+    },
+    {
+     "q": "guardia de seguridad",
+     "expected": [
+      "5414"
+     ],
+     "got": [],
+     "rank": null
+    },
+    {
+     "q": "patovica",
+     "expected": [
+      "5414"
+     ],
+     "got": [],
+     "rank": null
+    },
+    {
+     "q": "barrendero",
+     "expected": [
+      "9613"
+     ],
+     "got": [
+      "9613"
+     ],
+     "rank": 1
+    },
+    {
+     "q": "basurero",
+     "expected": [
+      "9611"
+     ],
+     "got": [],
+     "rank": null
+    }
+   ]
+  },
+  "lexical_all": {
+   "accuracy": {
+    "top1": 0.395,
+    "top3": 0.488,
+    "top5": 0.488
+   },
+   "ms_per_query": 8.04,
+   "answers": [
+    {
+     "q": "chofer de camión",
+     "expected": [
+      "8332"
+     ],
+     "got": [],
+     "rank": null
+    },
+    {
+     "q": "camionero",
+     "expected": [
+      "8332"
+     ],
+     "got": [],
+     "rank": null
+    },
+    {
+     "q": "colectivero",
+     "expected": [
+      "8331"
+     ],
+     "got": [],
+     "rank": null
+    },
+    {
+     "q": "micrero",
+     "expected": [
+      "8331"
+     ],
+     "got": [],
+     "rank": null
+    },
+    {
+     "q": "taxista",
+     "expected": [
+      "8322"
+     ],
+     "got": [],
+     "rank": null
+    },
+    {
+     "q": "remisero",
+     "expected": [
+      "8322"
+     ],
+     "got": [],
+     "rank": null
+    },
+    {
+     "q": "motoquero",
+     "expected": [
+      "8321"
+     ],
+     "got": [],
+     "rank": null
+    },
+    {
+     "q": "repartidor de delivery",
+     "expected": [
+      "9621",
+      "8321"
+     ],
+     "got": [],
+     "rank": null
+    },
+    {
+     "q": "cadete",
+     "expected": [
+      "9621"
+     ],
+     "got": [],
+     "rank": null
+    },
+    {
+     "q": "maquinista de tren",
+     "expected": [
+      "8311"
+     ],
+     "got": [
+      "8311"
+     ],
+     "rank": 1
+    },
+    {
+     "q": "piloto de avión",
+     "expected": [
+      "3153"
+     ],
+     "got": [
+      "3153"
+     ],
+     "rank": 1
+    },
+    {
+     "q": "azafata",
+     "expected": [
+      "5111"
+     ],
+     "got": [
+      "4221",
+      "5111"
+     ],
+     "rank": 2
+    },
+    {
+     "q": "mozo",
+     "expected": [
+      "5131"
+     ],
+     "got": [
+      "5111",
+      "5132",
+      "5163",
+      "9112",
+      "9212"
+     ],
+     "rank": null
+    },
+    {
+     "q": "garzón",
+     "expected": [
+      "5131"
+     ],
+     "got": [
+      "5131"
+     ],
+     "rank": 1
+    },
+    {
+     "q": "bartender",
+     "expected": [
+      "5132"
+     ],
+     "got": [],
+     "rank": null
+    },
+    {
+     "q": "cocinero",
+     "expected": [
+      "5120"
+     ],
+     "got": [
+      "5120",
+      "9411",
+      "3434",
+      "9412"
+     ],
+     "rank": 1
+    },
+    {
+     "q": "chef",
+     "expected": [
+      "3434"
+     ],
+     "got": [
+      "3434",
+      "5120"
+     ],
+     "rank": 1
+    },
+    {
+     "q": "panadero",
+     "expected": [
+      "7512"
+     ],
+     "got": [
+      "7512"
+     ],
+     "rank": 1
+    },
+    {
+     "q": "almacenero",
+     "expected": [
+      "5221"
+     ],
+     "got": [
+      "4321"
+     ],
+     "rank": null
+    },
+    {
+     "q": "cajero de supermercado",
+     "expected": [
+      "5230"
+     ],
+     "got": [],
+     "rank": null
+    },
+    {
+     "q": "repositor",
+     "expected": [
+      "9334"
+     ],
+     "got": [
+      "9334"
+     ],
+     "rank": 1
+    },
+    {
+     "q": "vendedor ambulante",
+     "expected": [
+      "5211",
+      "9520"
+     ],
+     "got": [
+      "5212",
+      "9520"
+     ],
+     "rank": 2
+    },
+    {
+     "q": "feriante",
+     "expected": [
+      "5211"
+     ],
+     "got": [],
+     "rank": null
+    },
+    {
+     "q": "agente inmobiliario",
+     "expected": [
+      "3334"
+     ],
+     "got": [
+      "3334"
+     ],
+     "rank": 1
+    },
+    {
+     "q": "corredor de seguros",
+     "expected": [
+      "3321"
+     ],
+     "got": [
+      "3321"
+     ],
+     "rank": 1
+    },
+    {
+     "q": "albañil",
+     "expected": [
+      "7112"
+     ],
+     "got": [
+      "7112",
+      "7121",
+      "9313",
+      "7111",
+      "3123"
+     ],
+     "rank": 1
+    },
+    {
+     "q": "gasfíter",
+     "expected": [
+      "7126"
+     ],
+     "got": [],
+     "rank": null
+    },
+    {
+     "q": "plomero",
+     "expected": [
+      "7126"
+     ],
+     "got": [],
+     "rank": null
+    },
+    {
+     "q": "sanitarista",
+     "expected": [
+      "7126"
+     ],
+     "got": [],
+     "rank": null
+    },
+    {
+     "q": "electricista de obra",
+     "expected": [
+      "7411"
+     ],
+     "got": [
+      "7411"
+     ],
+     "rank": 1
+    },
+    {
+     "q": "pintor de obra",
+     "expected": [
+      "7131"
+     ],
+     "got": [
+      "7131"
+     ],
+     "rank": 1
+    },
+    {
+     "q": "carpintero",
+     "expected": [
+      "7115"
+     ],
+     "got": [
+      "7115",
+      "7214",
+      "3123"
+     ],
+     "rank": 1
+    },
+    {
+     "q": "soldador",
+     "expected": [
+      "7212"
+     ],
+     "got": [
+      "7212",
+      "8212",
+      "3123"
+     ],
+     "rank": 1
+    },
+    {
+     "q": "tornero",
+     "expected": [
+      "7223"
+     ],
+     "got": [
+      "7223",
+      "7523",
+      "8121"
+     ],
+     "rank": 1
+    },
+    {
+     "q": "mecánico de autos",
+     "expected": [
+      "7231"
+     ],
+     "got": [],
+     "rank": null
+    },
+    {
+     "q": "operario de fábrica",
+     "expected": [
+      "9329"
+     ],
+     "got": [
+      "8131",
+      "8142",
+      "8159",
+      "8160",
+      "8171"
+     ],
+     "rank": null
+    },
+    {
+     "q": "minero",
+     "expected": [
+      "8111"
+     ],
+     "got": [
+      "8111",
+      "7233",
+      "2165",
+      "3324",
+      "5411"
+     ],
+     "rank": 1
+    },
+    {
+     "q": "peón rural",
+     "expected": [
+      "9211",
+      "9212",
+      "9213"
+     ],
+     "got": [],
+     "rank": null
+    },
+    {
+     "q": "tambero",
+     "expected": [
+      "6121",
+      "9212"
+     ],
+     "got": [],
+     "rank": null
+    },
+    {
+     "q": "temporero de la fruta",
+     "expected": [
+      "9211"
+     ],
+     "got": [],
+     "rank": null
+    },
+    {
+     "q": "jardinero",
+     "expected": [
+      "6113",
+      "9214"
+     ],
+     "got": [
+      "6113"
+     ],
+     "rank": 1
+    },
+    {
+     "q": "pescador artesanal",
+     "expected": [
+      "6222"
+     ],
+     "got": [],
+     "rank": null
+    },
+    {
+     "q": "agrónomo",
+     "expected": [
+      "2132"
+     ],
+     "got": [
+      "2132",
+      "3142"
+     ],
+     "rank": 1
+    },
+    {
+     "q": "kinesiólogo",
+     "expected": [
+      "2264"
+     ],
+     "got": [
+      "2269"
+     ],
+     "rank": null
+    },
+    {
+     "q": "médico de guardia",
+     "expected": [
+      "2211",
+      "2212"
+     ],
+     "got": [],
+     "rank": null
+    },
+    {
+     "q": "auxiliar de enfermería",
+     "expected": [
+      "3221",
+      "5321"
+     ],
+     "got": [
+      "3256",
+      "3344",
+      "5321",
+      "5329",
+      "2320"
+     ],
+     "rank": 3
+    },
+    {
+     "q": "odontólogo",
+     "expected": [
+      "2261"
+     ],
+     "got": [
+      "2261"
+     ],
+     "rank": 1
+    },
+    {
+     "q": "farmacéutico",
+     "expected": [
+      "2262"
+     ],
+     "got": [
+      "2262",
+      "3213",
+      "8131",
+      "2145",
+      "3324"
+     ],
+     "rank": 1
+    },
+    {
+     "q": "veterinario",
+     "expected": [
+      "2250"
+     ],
+     "got": [
+      "2250",
+      "3240",
+      "4226",
+      "3255"
+     ],
+     "rank": 1
+    },
+    {
+     "q": "cuidador de ancianos",
+     "expected": [
+      "5322",
+      "5321"
+     ],
+     "got": [],
+     "rank": null
+    },
+    {
+     "q": "niñera",
+     "expected": [
+      "5311"
+     ],
+     "got": [
+      "5164",
+      "5311"
+     ],
+     "rank": 2
+    },
+    {
+     "q": "nana",
+     "expected": [
+      "9111",
+      "5311"
+     ],
+     "got": [],
+     "rank": null
+    },
+    {
+     "q": "empleada doméstica",
+     "expected": [
+      "9111"
+     ],
+     "got": [],
+     "rank": null
+    },
+    {
+     "q": "peluquera",
+     "expected": [
+      "5141"
+     ],
+     "got": [
+      "5141",
+      "5164",
+      "5142"
+     ],
+     "rank": 1
+    },
+    {
+     "q": "manicura",
+     "expected": [
+      "5142"
+     ],
+     "got": [
+      "5142"
+     ],
+     "rank": 1
+    },
+    {
+     "q": "maestra jardinera",
+     "expected": [
+      "2342"
+     ],
+     "got": [],
+     "rank": null
+    },
+    {
+     "q": "docente de primaria",
+     "expected": [
+      "2341"
+     ],
+     "got": [],
+     "rank": null
+    },
+    {
+     "q": "profe de educación física",
+     "expected": [
+      "2330",
+      "2341"
+     ],
+     "got": [
+      "2320",
+      "2330"
+     ],
+     "rank": 2
+    },
+    {
+     "q": "profesor universitario",
+     "expected": [
+      "2310"
+     ],
+     "got": [
+      "2310"
+     ],
+     "rank": 1
+    },
+    {
+     "q": "psicopedagoga",
+     "expected": [
+      "2352",
+      "2634",
+      "2359"
+     ],
+     "got": [],
+     "rank": null
+    },
+    {
+     "q": "trabajador social",
+     "expected": [
+      "2635"
+     ],
+     "got": [
+      "3412",
+      "2635",
+      "3253",
+      "2422",
+      "1344"
+     ],
+     "rank": 2
+    },
+    {
+     "q": "asistente social",
+     "expected": [
+      "2635"
+     ],
+     "got": [
+      "3412",
+      "2635"
+     ],
+     "rank": 2
+    },
+    {
+     "q": "contador público",
+     "expected": [
+      "2411"
+     ],
+     "got": [],
+     "rank": null
+    },
+    {
+     "q": "liquidador de sueldos",
+     "expected": [
+      "4313"
+     ],
+     "got": [],
+     "rank": null
+    },
+    {
+     "q": "abogado laboralista",
+     "expected": [
+      "2611"
+     ],
+     "got": [],
+     "rank": null
+    },
+    {
+     "q": "despachante de aduana",
+     "expected": [
+      "3331"
+     ],
+     "got": [],
+     "rank": null
+    },
+    {
+     "q": "tasador",
+     "expected": [
+      "3315"
+     ],
+     "got": [
+      "3315",
+      "2412",
+      "3339"
+     ],
+     "rank": 1
+    },
+    {
+     "q": "secretaria",
+     "expected": [
+      "4120"
+     ],
+     "got": [
+      "1111",
+      "1112",
+      "1349",
+      "2621",
+      "3343"
+     ],
+     "rank": null
+    },
+    {
+     "q": "asistente administrativo",
+     "expected": [
+      "4110",
+      "3343"
+     ],
+     "got": [
+      "3343"
+     ],
+     "rank": 1
+    },
+    {
+     "q": "operador de call center",
+     "expected": [
+      "4222"
+     ],
+     "got": [],
+     "rank": null
+    },
+    {
+     "q": "telefonista",
+     "expected": [
+      "4223"
+     ],
+     "got": [
+      "4223"
+     ],
+     "rank": 1
+    },
+    {
+     "q": "recepcionista de hotel",
+     "expected": [
+      "4224"
+     ],
+     "got": [
+      "4224"
+     ],
+     "rank": 1
+    },
+    {
+     "q": "programador de apps",
+     "expected": [
+      "2514",
+      "2512"
+     ],
+     "got": [],
+     "rank": null
+    },
+    {
+     "q": "científico de datos",
+     "expected": [
+      "2120",
+      "2511",
+      "2519"
+     ],
+     "got": [
+      "2511"
+     ],
+     "rank": 1
+    },
+    {
+     "q": "devops",
+     "expected": [
+      "2522",
+      "2512",
+      "2523"
+     ],
+     "got": [],
+     "rank": null
+    },
+    {
+     "q": "soporte técnico informático",
+     "expected": [
+      "3512"
+     ],
+     "got": [],
+     "rank": null
+    },
+    {
+     "q": "diseñador ux",
+     "expected": [
+      "2166",
+      "2513",
+      "2512"
+     ],
+     "got": [],
+     "rank": null
+    },
+    {
+     "q": "community manager",
+     "expected": [
+      "2431",
+      "2432"
+     ],
+     "got": [],
+     "rank": null
+    },
+    {
+     "q": "periodista",
+     "expected": [
+      "2642"
+     ],
+     "got": [
+      "2642"
+     ],
+     "rank": 1
+    },
+    {
+     "q": "traductor",
+     "expected": [
+      "2643"
+     ],
+     "got": [
+      "2643"
+     ],
+     "rank": 1
+    },
+    {
+     "q": "ingeniero civil",
+     "expected": [
+      "2142"
+     ],
+     "got": [
+      "2141",
+      "2142",
+      "3112",
+      "3113",
+      "3115"
+     ],
+     "rank": 2
+    },
+    {
+     "q": "arquitecto",
+     "expected": [
+      "2161"
+     ],
+     "got": [
+      "2161",
+      "2162",
+      "2149",
+      "2359",
+      "2511"
+     ],
+     "rank": 1
+    },
+    {
+     "q": "guardia de seguridad",
+     "expected": [
+      "5414"
+     ],
+     "got": [],
+     "rank": null
+    },
+    {
+     "q": "patovica",
+     "expected": [
+      "5414"
+     ],
+     "got": [],
+     "rank": null
+    },
+    {
+     "q": "barrendero",
+     "expected": [
+      "9613"
+     ],
+     "got": [
+      "9613"
+     ],
+     "rank": 1
+    },
+    {
+     "q": "basurero",
+     "expected": [
+      "9611"
+     ],
+     "got": [
+      "9611"
+     ],
+     "rank": 1
+    }
+   ]
+  },
+  "intfloat/multilingual-e5-small": {
+   "accuracy": {
+    "top1": 0.605,
+    "top3": 0.802,
+    "top5": 0.872
+   },
+   "ms_per_query": 9.32,
+   "answers": [
+    {
+     "q": "chofer de camión",
+     "expected": [
+      "8332"
+     ],
+     "got": [
+      "8331",
+      "8322",
+      "8332",
+      "8343",
+      "8211"
+     ],
+     "rank": 3
+    },
+    {
+     "q": "camionero",
+     "expected": [
+      "8332"
+     ],
+     "got": [
+      "7231",
+      "8211",
+      "5249",
+      "5132",
+      "8332"
+     ],
+     "rank": 5
+    },
+    {
+     "q": "colectivero",
+     "expected": [
+      "8331"
+     ],
+     "got": [
+      "8331",
+      "9520",
+      "7534",
+      "8159",
+      "5132"
+     ],
+     "rank": 1
+    },
+    {
+     "q": "micrero",
+     "expected": [
+      "8331"
+     ],
+     "got": [
+      "8331",
+      "5132",
+      "7312",
+      "2131",
+      "7113"
+     ],
+     "rank": 1
+    },
+    {
+     "q": "taxista",
+     "expected": [
+      "8322"
+     ],
+     "got": [
+      "7121",
+      "8322",
+      "3433",
+      "4323",
+      "3153"
+     ],
+     "rank": 2
+    },
+    {
+     "q": "remisero",
+     "expected": [
+      "8322"
+     ],
+     "got": [
+      "7318",
+      "7312",
+      "1211",
+      "8322",
+      "7214"
+     ],
+     "rank": 4
+    },
+    {
+     "q": "motoquero",
+     "expected": [
+      "8321"
+     ],
+     "got": [
+      "6210",
+      "8211",
+      "8321",
+      "7231",
+      "5165"
+     ],
+     "rank": 3
+    },
+    {
+     "q": "repartidor de delivery",
+     "expected": [
+      "9621",
+      "8321"
+     ],
+     "got": [
+      "8322",
+      "4412",
+      "9510",
+      "2166",
+      "8321"
+     ],
+     "rank": 5
+    },
+    {
+     "q": "cadete",
+     "expected": [
+      "9621"
+     ],
+     "got": [
+      "2310",
+      "3118",
+      "2222",
+      "3222",
+      "8182"
+     ],
+     "rank": null
+    },
+    {
+     "q": "maquinista de tren",
+     "expected": [
+      "8311"
+     ],
+     "got": [
+      "8311",
+      "9112",
+      "5112",
+      "3435",
+      "5111"
+     ],
+     "rank": 1
+    },
+    {
+     "q": "piloto de avión",
+     "expected": [
+      "3153"
+     ],
+     "got": [
+      "3153",
+      "0310",
+      "7132",
+      "0110",
+      "3152"
+     ],
+     "rank": 1
+    },
+    {
+     "q": "azafata",
+     "expected": [
+      "5111"
+     ],
+     "got": [
+      "4221",
+      "5111",
+      "7536",
+      "2269",
+      "3259"
+     ],
+     "rank": 2
+    },
+    {
+     "q": "mozo",
+     "expected": [
+      "5131"
+     ],
+     "got": [
+      "5131",
+      "5163",
+      "9112",
+      "9333",
+      "9212"
+     ],
+     "rank": 1
+    },
+    {
+     "q": "garzón",
+     "expected": [
+      "5131"
+     ],
+     "got": [
+      "5131",
+      "7126",
+      "7212",
+      "6121",
+      "9412"
+     ],
+     "rank": 1
+    },
+    {
+     "q": "bartender",
+     "expected": [
+      "5132"
+     ],
+     "got": [
+      "5132",
+      "8111",
+      "2359",
+      "2652",
+      "9333"
+     ],
+     "rank": 1
+    },
+    {
+     "q": "cocinero",
+     "expected": [
+      "5120"
+     ],
+     "got": [
+      "5120",
+      "3434",
+      "9412",
+      "7511",
+      "7115"
+     ],
+     "rank": 1
+    },
+    {
+     "q": "chef",
+     "expected": [
+      "3434"
+     ],
+     "got": [
+      "3434",
+      "5120",
+      "5131",
+      "3514",
+      "2211"
+     ],
+     "rank": 1
+    },
+    {
+     "q": "panadero",
+     "expected": [
+      "7512"
+     ],
+     "got": [
+      "7512",
+      "4321",
+      "1420",
+      "5132",
+      "8182"
+     ],
+     "rank": 1
+    },
+    {
+     "q": "almacenero",
+     "expected": [
+      "5221"
+     ],
+     "got": [
+      "9333",
+      "1324",
+      "4321",
+      "7514",
+      "1420"
+     ],
+     "rank": null
+    },
+    {
+     "q": "cajero de supermercado",
+     "expected": [
+      "5230"
+     ],
+     "got": [
+      "5222",
+      "1420",
+      "4211",
+      "5230",
+      "3312"
+     ],
+     "rank": 4
+    },
+    {
+     "q": "repositor",
+     "expected": [
+      "9334"
+     ],
+     "got": [
+      "7512",
+      "3434",
+      "9334",
+      "2652",
+      "8172"
+     ],
+     "rank": 3
+    },
+    {
+     "q": "vendedor ambulante",
+     "expected": [
+      "5211",
+      "9520"
+     ],
+     "got": [
+      "9520",
+      "5212",
+      "3322",
+      "5223",
+      "5243"
+     ],
+     "rank": 1
+    },
+    {
+     "q": "feriante",
+     "expected": [
+      "5211"
+     ],
+     "got": [
+      "5211",
+      "7511",
+      "7222",
+      "2342",
+      "7412"
+     ],
+     "rank": 1
+    },
+    {
+     "q": "agente inmobiliario",
+     "expected": [
+      "3334"
+     ],
+     "got": [
+      "3334",
+      "3315",
+      "1323",
+      "4312",
+      "3321"
+     ],
+     "rank": 1
+    },
+    {
+     "q": "corredor de seguros",
+     "expected": [
+      "3321"
+     ],
+     "got": [
+      "3321",
+      "3315",
+      "3334",
+      "3311",
+      "4214"
+     ],
+     "rank": 1
+    },
+    {
+     "q": "albañil",
+     "expected": [
+      "7112"
+     ],
+     "got": [
+      "7111",
+      "7112",
+      "9313",
+      "7121",
+      "3123"
+     ],
+     "rank": 2
+    },
+    {
+     "q": "gasfíter",
+     "expected": [
+      "7126"
+     ],
+     "got": [
+      "7126",
+      "7212",
+      "5245",
+      "4323",
+      "2114"
+     ],
+     "rank": 1
+    },
+    {
+     "q": "plomero",
+     "expected": [
+      "7126"
+     ],
+     "got": [
+      "5245",
+      "7312",
+      "7231",
+      "4321",
+      "9121"
+     ],
+     "rank": null
+    },
+    {
+     "q": "sanitarista",
+     "expected": [
+      "7126"
+     ],
+     "got": [
+      "5329",
+      "3252",
+      "2422",
+      "2212",
+      "5419"
+     ],
+     "rank": null
+    },
+    {
+     "q": "electricista de obra",
+     "expected": [
+      "7411"
+     ],
+     "got": [
+      "7411",
+      "7412",
+      "7413",
+      "8212",
+      "3131"
+     ],
+     "rank": 1
+    },
+    {
+     "q": "pintor de obra",
+     "expected": [
+      "7131"
+     ],
+     "got": [
+      "7131",
+      "3123",
+      "2651",
+      "7316",
+      "3339"
+     ],
+     "rank": 1
+    },
+    {
+     "q": "carpintero",
+     "expected": [
+      "7115"
+     ],
+     "got": [
+      "7214",
+      "7115",
+      "7215",
+      "3123",
+      "8111"
+     ],
+     "rank": 2
+    },
+    {
+     "q": "soldador",
+     "expected": [
+      "7212"
+     ],
+     "got": [
+      "7212",
+      "2144",
+      "3115",
+      "0310",
+      "8212"
+     ],
+     "rank": 1
+    },
+    {
+     "q": "tornero",
+     "expected": [
+      "7223"
+     ],
+     "got": [
+      "7223",
+      "8113",
+      "2659",
+      "3116",
+      "7522"
+     ],
+     "rank": 1
+    },
+    {
+     "q": "mecánico de autos",
+     "expected": [
+      "7231"
+     ],
+     "got": [
+      "7231",
+      "2144",
+      "3115",
+      "7234",
+      "8211"
+     ],
+     "rank": 1
+    },
+    {
+     "q": "operario de fábrica",
+     "expected": [
+      "9329"
+     ],
+     "got": [
+      "9329",
+      "8114",
+      "8131",
+      "8160",
+      "8142"
+     ],
+     "rank": 1
+    },
+    {
+     "q": "minero",
+     "expected": [
+      "8111"
+     ],
+     "got": [
+      "7233",
+      "2165",
+      "8111",
+      "3116",
+      "0310"
+     ],
+     "rank": 3
+    },
+    {
+     "q": "peón rural",
+     "expected": [
+      "9211",
+      "9212",
+      "9213"
+     ],
+     "got": [
+      "8113",
+      "9215",
+      "9211",
+      "9214",
+      "2133"
+     ],
+     "rank": 3
+    },
+    {
+     "q": "tambero",
+     "expected": [
+      "6121",
+      "9212"
+     ],
+     "got": [
+      "8122",
+      "9211",
+      "5132",
+      "8181",
+      "7531"
+     ],
+     "rank": null
+    },
+    {
+     "q": "temporero de la fruta",
+     "expected": [
+      "9211"
+     ],
+     "got": [
+      "9211",
+      "8160",
+      "6113",
+      "3324",
+      "7514"
+     ],
+     "rank": 1
+    },
+    {
+     "q": "jardinero",
+     "expected": [
+      "6113",
+      "9214"
+     ],
+     "got": [
+      "6113",
+      "2131",
+      "9214",
+      "9211",
+      "9213"
+     ],
+     "rank": 1
+    },
+    {
+     "q": "pescador artesanal",
+     "expected": [
+      "6222"
+     ],
+     "got": [
+      "6222",
+      "8350",
+      "6223",
+      "7233",
+      "2132"
+     ],
+     "rank": 1
+    },
+    {
+     "q": "agrónomo",
+     "expected": [
+      "2132"
+     ],
+     "got": [
+      "2132",
+      "3142",
+      "2144",
+      "3359",
+      "9213"
+     ],
+     "rank": 1
+    },
+    {
+     "q": "kinesiólogo",
+     "expected": [
+      "2264"
+     ],
+     "got": [
+      "2269",
+      "2264",
+      "2634",
+      "2131",
+      "2212"
+     ],
+     "rank": 2
+    },
+    {
+     "q": "médico de guardia",
+     "expected": [
+      "2211",
+      "2212"
+     ],
+     "got": [
+      "5414",
+      "5419",
+      "5412",
+      "6210",
+      "2433"
+     ],
+     "rank": null
+    },
+    {
+     "q": "auxiliar de enfermería",
+     "expected": [
+      "3221",
+      "5321"
+     ],
+     "got": [
+      "3256",
+      "5321",
+      "5329",
+      "3222",
+      "3213"
+     ],
+     "rank": 2
+    },
+    {
+     "q": "odontólogo",
+     "expected": [
+      "2261"
+     ],
+     "got": [
+      "3251",
+      "2261",
+      "2310",
+      "8212",
+      "3214"
+     ],
+     "rank": 2
+    },
+    {
+     "q": "farmacéutico",
+     "expected": [
+      "2262"
+     ],
+     "got": [
+      "2262",
+      "2131",
+      "2145",
+      "3213",
+      "3324"
+     ],
+     "rank": 1
+    },
+    {
+     "q": "veterinario",
+     "expected": [
+      "2250"
+     ],
+     "got": [
+      "2250",
+      "3240",
+      "4226",
+      "2310",
+      "3255"
+     ],
+     "rank": 1
+    },
+    {
+     "q": "cuidador de ancianos",
+     "expected": [
+      "5322",
+      "5321"
+     ],
+     "got": [
+      "3412",
+      "5321",
+      "5322",
+      "1343",
+      "5162"
+     ],
+     "rank": 2
+    },
+    {
+     "q": "niñera",
+     "expected": [
+      "5311"
+     ],
+     "got": [
+      "5311",
+      "5164",
+      "3412",
+      "7317",
+      "2131"
+     ],
+     "rank": 1
+    },
+    {
+     "q": "nana",
+     "expected": [
+      "9111",
+      "5311"
+     ],
+     "got": [
+      "2149",
+      "8122",
+      "2111",
+      "2133",
+      "2131"
+     ],
+     "rank": null
+    },
+    {
+     "q": "empleada doméstica",
+     "expected": [
+      "9111"
+     ],
+     "got": [
+      "5152",
+      "4213",
+      "2635",
+      "7411",
+      "9111"
+     ],
+     "rank": 5
+    },
+    {
+     "q": "peluquera",
+     "expected": [
+      "5141"
+     ],
+     "got": [
+      "5141",
+      "5164",
+      "5142",
+      "7317",
+      "3123"
+     ],
+     "rank": 1
+    },
+    {
+     "q": "manicura",
+     "expected": [
+      "5142"
+     ],
+     "got": [
+      "5142",
+      "5241",
+      "2269",
+      "2359",
+      "7531"
+     ],
+     "rank": 1
+    },
+    {
+     "q": "maestra jardinera",
+     "expected": [
+      "2342"
+     ],
+     "got": [
+      "6113",
+      "8131",
+      "7111",
+      "6112",
+      "2131"
+     ],
+     "rank": null
+    },
+    {
+     "q": "docente de primaria",
+     "expected": [
+      "2341"
+     ],
+     "got": [
+      "2341",
+      "5312",
+      "1345",
+      "2342",
+      "2352"
+     ],
+     "rank": 1
+    },
+    {
+     "q": "profe de educación física",
+     "expected": [
+      "2330",
+      "2341"
+     ],
+     "got": [
+      "2320",
+      "2330",
+      "3423",
+      "2310",
+      "2352"
+     ],
+     "rank": 2
+    },
+    {
+     "q": "profesor universitario",
+     "expected": [
+      "2310"
+     ],
+     "got": [
+      "2310",
+      "2352",
+      "2359",
+      "2330",
+      "3422"
+     ],
+     "rank": 1
+    },
+    {
+     "q": "psicopedagoga",
+     "expected": [
+      "2352",
+      "2634",
+      "2359"
+     ],
+     "got": [
+      "2634",
+      "2635",
+      "2342",
+      "5161",
+      "2352"
+     ],
+     "rank": 1
+    },
+    {
+     "q": "trabajador social",
+     "expected": [
+      "2635"
+     ],
+     "got": [
+      "1344",
+      "2422",
+      "2635",
+      "3412",
+      "2632"
+     ],
+     "rank": 3
+    },
+    {
+     "q": "asistente social",
+     "expected": [
+      "2635"
+     ],
+     "got": [
+      "3412",
+      "2635",
+      "3314",
+      "1344",
+      "2422"
+     ],
+     "rank": 2
+    },
+    {
+     "q": "contador público",
+     "expected": [
+      "2411"
+     ],
+     "got": [
+      "2411",
+      "2643",
+      "2412",
+      "2250",
+      "2432"
+     ],
+     "rank": 1
+    },
+    {
+     "q": "liquidador de sueldos",
+     "expected": [
+      "4313"
+     ],
+     "got": [
+      "3353",
+      "3315",
+      "4214",
+      "4312",
+      "3312"
+     ],
+     "rank": null
+    },
+    {
+     "q": "abogado laboralista",
+     "expected": [
+      "2611"
+     ],
+     "got": [
+      "2611",
+      "2619",
+      "3339",
+      "2643",
+      "3333"
+     ],
+     "rank": 1
+    },
+    {
+     "q": "despachante de aduana",
+     "expected": [
+      "3331"
+     ],
+     "got": [
+      "3331",
+      "3351",
+      "4323",
+      "3123",
+      "7119"
+     ],
+     "rank": 1
+    },
+    {
+     "q": "tasador",
+     "expected": [
+      "3315"
+     ],
+     "got": [
+      "3315",
+      "2412",
+      "3339",
+      "7317",
+      "3435"
+     ],
+     "rank": 1
+    },
+    {
+     "q": "secretaria",
+     "expected": [
+      "4120"
+     ],
+     "got": [
+      "1112",
+      "3343",
+      "1111",
+      "1349",
+      "3411"
+     ],
+     "rank": null
+    },
+    {
+     "q": "asistente administrativo",
+     "expected": [
+      "4110",
+      "3343"
+     ],
+     "got": [
+      "3343",
+      "3344",
+      "3341",
+      "2422",
+      "4110"
+     ],
+     "rank": 1
+    },
+    {
+     "q": "operador de call center",
+     "expected": [
+      "4222"
+     ],
+     "got": [
+      "4222",
+      "3341",
+      "3511",
+      "4223",
+      "8122"
+     ],
+     "rank": 1
+    },
+    {
+     "q": "telefonista",
+     "expected": [
+      "4223"
+     ],
+     "got": [
+      "4223",
+      "7121",
+      "5244",
+      "7222",
+      "7531"
+     ],
+     "rank": 1
+    },
+    {
+     "q": "recepcionista de hotel",
+     "expected": [
+      "4224"
+     ],
+     "got": [
+      "4224",
+      "5131",
+      "5169",
+      "4226",
+      "4120"
+     ],
+     "rank": 1
+    },
+    {
+     "q": "programador de apps",
+     "expected": [
+      "2514",
+      "2512"
+     ],
+     "got": [
+      "2514",
+      "2512",
+      "2513",
+      "2149",
+      "1330"
+     ],
+     "rank": 1
+    },
+    {
+     "q": "científico de datos",
+     "expected": [
+      "2120",
+      "2511",
+      "2519"
+     ],
+     "got": [
+      "2511",
+      "2120",
+      "2519",
+      "2521",
+      "1330"
+     ],
+     "rank": 1
+    },
+    {
+     "q": "devops",
+     "expected": [
+      "2522",
+      "2512",
+      "2523"
+     ],
+     "got": [
+      "2512",
+      "1219",
+      "3341",
+      "1345",
+      "1349"
+     ],
+     "rank": 1
+    },
+    {
+     "q": "soporte técnico informático",
+     "expected": [
+      "3512"
+     ],
+     "got": [
+      "3512",
+      "2511",
+      "3114",
+      "7421",
+      "3222"
+     ],
+     "rank": 1
+    },
+    {
+     "q": "diseñador ux",
+     "expected": [
+      "2166",
+      "2513",
+      "2512"
+     ],
+     "got": [
+      "2513",
+      "7531",
+      "2359",
+      "3432",
+      "2512"
+     ],
+     "rank": 1
+    },
+    {
+     "q": "community manager",
+     "expected": [
+      "2431",
+      "2432"
+     ],
+     "got": [
+      "2431",
+      "2432",
+      "3334",
+      "2422",
+      "3222"
+     ],
+     "rank": 1
+    },
+    {
+     "q": "periodista",
+     "expected": [
+      "2642"
+     ],
+     "got": [
+      "2642",
+      "3431",
+      "2431",
+      "2656",
+      "2310"
+     ],
+     "rank": 1
+    },
+    {
+     "q": "traductor",
+     "expected": [
+      "2643"
+     ],
+     "got": [
+      "2643",
+      "2152",
+      "1349",
+      "2656",
+      "3343"
+     ],
+     "rank": 1
+    },
+    {
+     "q": "ingeniero civil",
+     "expected": [
+      "2142"
+     ],
+     "got": [
+      "3112",
+      "3113",
+      "2141",
+      "2142",
+      "3123"
+     ],
+     "rank": 4
+    },
+    {
+     "q": "arquitecto",
+     "expected": [
+      "2161"
+     ],
+     "got": [
+      "2149",
+      "3112",
+      "2161",
+      "2523",
+      "2162"
+     ],
+     "rank": 3
+    },
+    {
+     "q": "guardia de seguridad",
+     "expected": [
+      "5414"
+     ],
+     "got": [
+      "5414",
+      "5412",
+      "5419",
+      "1219",
+      "6210"
+     ],
+     "rank": 1
+    },
+    {
+     "q": "patovica",
+     "expected": [
+      "5414"
+     ],
+     "got": [
+      "2619",
+      "2250",
+      "5163",
+      "8131",
+      "3212"
+     ],
+     "rank": null
+    },
+    {
+     "q": "barrendero",
+     "expected": [
+      "9613"
+     ],
+     "got": [
+      "9613",
+      "8111",
+      "7522",
+      "0310",
+      "8350"
+     ],
+     "rank": 1
+    },
+    {
+     "q": "basurero",
+     "expected": [
+      "9611"
+     ],
+     "got": [
+      "9611",
+      "7531",
+      "7533",
+      "8111",
+      "6222"
+     ],
+     "rank": 1
+    }
+   ]
+  },
+  "intfloat/multilingual-e5-base": {
+   "accuracy": {
+    "top1": 0.616,
+    "top3": 0.791,
+    "top5": 0.884
+   },
+   "ms_per_query": 14.41,
+   "answers": [
+    {
+     "q": "chofer de camión",
+     "expected": [
+      "8332"
+     ],
+     "got": [
+      "8331",
+      "8332",
+      "9332",
+      "8343",
+      "8211"
+     ],
+     "rank": 2
+    },
+    {
+     "q": "camionero",
+     "expected": [
+      "8332"
+     ],
+     "got": [
+      "5132",
+      "8211",
+      "7231",
+      "7312",
+      "8332"
+     ],
+     "rank": 5
+    },
+    {
+     "q": "colectivero",
+     "expected": [
+      "8331"
+     ],
+     "got": [
+      "7534",
+      "8159",
+      "7312",
+      "8331",
+      "9612"
+     ],
+     "rank": 4
+    },
+    {
+     "q": "micrero",
+     "expected": [
+      "8331"
+     ],
+     "got": [
+      "7113",
+      "8114",
+      "7211",
+      "7223",
+      "2145"
+     ],
+     "rank": null
+    },
+    {
+     "q": "taxista",
+     "expected": [
+      "8322"
+     ],
+     "got": [
+      "3433",
+      "7121",
+      "3311",
+      "7321",
+      "8322"
+     ],
+     "rank": 5
+    },
+    {
+     "q": "remisero",
+     "expected": [
+      "8322"
+     ],
+     "got": [
+      "7318",
+      "9334",
+      "7311",
+      "7214",
+      "8172"
+     ],
+     "rank": null
+    },
+    {
+     "q": "motoquero",
+     "expected": [
+      "8321"
+     ],
+     "got": [
+      "6210",
+      "8211",
+      "8321",
+      "8342",
+      "3119"
+     ],
+     "rank": 3
+    },
+    {
+     "q": "repartidor de delivery",
+     "expected": [
+      "9621",
+      "8321"
+     ],
+     "got": [
+      "8322",
+      "4412",
+      "9510",
+      "8321",
+      "2166"
+     ],
+     "rank": 4
+    },
+    {
+     "q": "cadete",
+     "expected": [
+      "9621"
+     ],
+     "got": [
+      "5161",
+      "3152",
+      "0110",
+      "2310",
+      "0210"
+     ],
+     "rank": null
+    },
+    {
+     "q": "maquinista de tren",
+     "expected": [
+      "8311"
+     ],
+     "got": [
+      "8311",
+      "3435",
+      "9112",
+      "5112",
+      "7132"
+     ],
+     "rank": 1
+    },
+    {
+     "q": "piloto de avión",
+     "expected": [
+      "3153"
+     ],
+     "got": [
+      "3153",
+      "0310",
+      "3152",
+      "0110",
+      "8211"
+     ],
+     "rank": 1
+    },
+    {
+     "q": "azafata",
+     "expected": [
+      "5111"
+     ],
+     "got": [
+      "5111",
+      "4221",
+      "9329",
+      "7536",
+      "7514"
+     ],
+     "rank": 1
+    },
+    {
+     "q": "mozo",
+     "expected": [
+      "5131"
+     ],
+     "got": [
+      "5131",
+      "9212",
+      "5132",
+      "9333",
+      "5163"
+     ],
+     "rank": 1
+    },
+    {
+     "q": "garzón",
+     "expected": [
+      "5131"
+     ],
+     "got": [
+      "5131",
+      "2222",
+      "3222",
+      "8113",
+      "9412"
+     ],
+     "rank": 1
+    },
+    {
+     "q": "bartender",
+     "expected": [
+      "5132"
+     ],
+     "got": [
+      "5132",
+      "8111",
+      "5131",
+      "9613",
+      "2145"
+     ],
+     "rank": 1
+    },
+    {
+     "q": "cocinero",
+     "expected": [
+      "5120"
+     ],
+     "got": [
+      "3434",
+      "5120",
+      "9412",
+      "7511",
+      "5132"
+     ],
+     "rank": 2
+    },
+    {
+     "q": "chef",
+     "expected": [
+      "3434"
+     ],
+     "got": [
+      "3434",
+      "5120",
+      "5131",
+      "9412",
+      "1412"
+     ],
+     "rank": 1
+    },
+    {
+     "q": "panadero",
+     "expected": [
+      "7512"
+     ],
+     "got": [
+      "7512",
+      "9621",
+      "4321",
+      "6121",
+      "1420"
+     ],
+     "rank": 1
+    },
+    {
+     "q": "almacenero",
+     "expected": [
+      "5221"
+     ],
+     "got": [
+      "7514",
+      "9333",
+      "7314",
+      "1324",
+      "7312"
+     ],
+     "rank": null
+    },
+    {
+     "q": "cajero de supermercado",
+     "expected": [
+      "5230"
+     ],
+     "got": [
+      "5230",
+      "1420",
+      "4211",
+      "4212",
+      "5222"
+     ],
+     "rank": 1
+    },
+    {
+     "q": "repositor",
+     "expected": [
+      "9334"
+     ],
+     "got": [
+      "9334",
+      "7512",
+      "5112",
+      "2652",
+      "7311"
+     ],
+     "rank": 1
+    },
+    {
+     "q": "vendedor ambulante",
+     "expected": [
+      "5211",
+      "9520"
+     ],
+     "got": [
+      "9520",
+      "5212",
+      "5223",
+      "5211",
+      "3322"
+     ],
+     "rank": 1
+    },
+    {
+     "q": "feriante",
+     "expected": [
+      "5211"
+     ],
+     "got": [
+      "5211",
+      "7511",
+      "6113",
+      "3112",
+      "3118"
+     ],
+     "rank": 1
+    },
+    {
+     "q": "agente inmobiliario",
+     "expected": [
+      "3334"
+     ],
+     "got": [
+      "3334",
+      "1323",
+      "4312",
+      "7111",
+      "3315"
+     ],
+     "rank": 1
+    },
+    {
+     "q": "corredor de seguros",
+     "expected": [
+      "3321"
+     ],
+     "got": [
+      "3321",
+      "4212",
+      "3315",
+      "3311",
+      "1346"
+     ],
+     "rank": 1
+    },
+    {
+     "q": "albañil",
+     "expected": [
+      "7112"
+     ],
+     "got": [
+      "9313",
+      "7112",
+      "7111",
+      "3411",
+      "3123"
+     ],
+     "rank": 2
+    },
+    {
+     "q": "gasfíter",
+     "expected": [
+      "7126"
+     ],
+     "got": [
+      "7126",
+      "9329",
+      "7212",
+      "5245",
+      "8121"
+     ],
+     "rank": 1
+    },
+    {
+     "q": "plomero",
+     "expected": [
+      "7126"
+     ],
+     "got": [
+      "7231",
+      "5221",
+      "7113",
+      "8114",
+      "4321"
+     ],
+     "rank": null
+    },
+    {
+     "q": "sanitarista",
+     "expected": [
+      "7126"
+     ],
+     "got": [
+      "2212",
+      "7121",
+      "2120",
+      "5161",
+      "3311"
+     ],
+     "rank": null
+    },
+    {
+     "q": "electricista de obra",
+     "expected": [
+      "7411"
+     ],
+     "got": [
+      "7411",
+      "7413",
+      "2151",
+      "3131",
+      "7412"
+     ],
+     "rank": 1
+    },
+    {
+     "q": "pintor de obra",
+     "expected": [
+      "7131"
+     ],
+     "got": [
+      "7131",
+      "7122",
+      "7316",
+      "3123",
+      "2651"
+     ],
+     "rank": 1
+    },
+    {
+     "q": "carpintero",
+     "expected": [
+      "7115"
+     ],
+     "got": [
+      "7115",
+      "7214",
+      "7215",
+      "3521",
+      "5412"
+     ],
+     "rank": 1
+    },
+    {
+     "q": "soldador",
+     "expected": [
+      "7212"
+     ],
+     "got": [
+      "7212",
+      "0310",
+      "2144",
+      "7114",
+      "7211"
+     ],
+     "rank": 1
+    },
+    {
+     "q": "tornero",
+     "expected": [
+      "7223"
+     ],
+     "got": [
+      "7223",
+      "8113",
+      "2659",
+      "7523",
+      "8121"
+     ],
+     "rank": 1
+    },
+    {
+     "q": "mecánico de autos",
+     "expected": [
+      "7231"
+     ],
+     "got": [
+      "7231",
+      "2144",
+      "3115",
+      "8211",
+      "7412"
+     ],
+     "rank": 1
+    },
+    {
+     "q": "operario de fábrica",
+     "expected": [
+      "9329"
+     ],
+     "got": [
+      "9329",
+      "8131",
+      "8343",
+      "8114",
+      "7211"
+     ],
+     "rank": 1
+    },
+    {
+     "q": "minero",
+     "expected": [
+      "8111"
+     ],
+     "got": [
+      "2165",
+      "7233",
+      "8111",
+      "2146",
+      "2143"
+     ],
+     "rank": 3
+    },
+    {
+     "q": "peón rural",
+     "expected": [
+      "9211",
+      "9212",
+      "9213"
+     ],
+     "got": [
+      "8113",
+      "2133",
+      "9215",
+      "9211",
+      "9214"
+     ],
+     "rank": 4
+    },
+    {
+     "q": "tambero",
+     "expected": [
+      "6121",
+      "9212"
+     ],
+     "got": [
+      "8322",
+      "1211",
+      "3116",
+      "7231",
+      "8122"
+     ],
+     "rank": null
+    },
+    {
+     "q": "temporero de la fruta",
+     "expected": [
+      "9211"
+     ],
+     "got": [
+      "8160",
+      "9211",
+      "7514",
+      "1420",
+      "1324"
+     ],
+     "rank": 2
+    },
+    {
+     "q": "jardinero",
+     "expected": [
+      "6113",
+      "9214"
+     ],
+     "got": [
+      "2131",
+      "6113",
+      "9214",
+      "5312",
+      "5223"
+     ],
+     "rank": 2
+    },
+    {
+     "q": "pescador artesanal",
+     "expected": [
+      "6222"
+     ],
+     "got": [
+      "6222",
+      "8350",
+      "7541",
+      "5120",
+      "6223"
+     ],
+     "rank": 1
+    },
+    {
+     "q": "agrónomo",
+     "expected": [
+      "2132"
+     ],
+     "got": [
+      "2132",
+      "3142",
+      "2263",
+      "2165",
+      "3112"
+     ],
+     "rank": 1
+    },
+    {
+     "q": "kinesiólogo",
+     "expected": [
+      "2264"
+     ],
+     "got": [
+      "2269",
+      "2264",
+      "2131",
+      "3259",
+      "2212"
+     ],
+     "rank": 2
+    },
+    {
+     "q": "médico de guardia",
+     "expected": [
+      "2211",
+      "2212"
+     ],
+     "got": [
+      "2211",
+      "2433",
+      "3252",
+      "2619",
+      "2221"
+     ],
+     "rank": 1
+    },
+    {
+     "q": "auxiliar de enfermería",
+     "expected": [
+      "3221",
+      "5321"
+     ],
+     "got": [
+      "3256",
+      "5321",
+      "5329",
+      "2221",
+      "3259"
+     ],
+     "rank": 2
+    },
+    {
+     "q": "odontólogo",
+     "expected": [
+      "2261"
+     ],
+     "got": [
+      "3251",
+      "2261",
+      "2310",
+      "8212",
+      "2114"
+     ],
+     "rank": 2
+    },
+    {
+     "q": "farmacéutico",
+     "expected": [
+      "2262"
+     ],
+     "got": [
+      "2262",
+      "2131",
+      "2145",
+      "3324",
+      "3213"
+     ],
+     "rank": 1
+    },
+    {
+     "q": "veterinario",
+     "expected": [
+      "2250"
+     ],
+     "got": [
+      "2250",
+      "3240",
+      "3255",
+      "4226",
+      "5164"
+     ],
+     "rank": 1
+    },
+    {
+     "q": "cuidador de ancianos",
+     "expected": [
+      "5322",
+      "5321"
+     ],
+     "got": [
+      "5321",
+      "5322",
+      "5162",
+      "3412",
+      "1343"
+     ],
+     "rank": 1
+    },
+    {
+     "q": "niñera",
+     "expected": [
+      "5311"
+     ],
+     "got": [
+      "5311",
+      "5164",
+      "3435",
+      "2145",
+      "5414"
+     ],
+     "rank": 1
+    },
+    {
+     "q": "nana",
+     "expected": [
+      "9111",
+      "5311"
+     ],
+     "got": [
+      "2149",
+      "2519",
+      "3151",
+      "5131",
+      "3118"
+     ],
+     "rank": null
+    },
+    {
+     "q": "empleada doméstica",
+     "expected": [
+      "9111"
+     ],
+     "got": [
+      "5152",
+      "4213",
+      "9111",
+      "2635",
+      "3412"
+     ],
+     "rank": 3
+    },
+    {
+     "q": "peluquera",
+     "expected": [
+      "5141"
+     ],
+     "got": [
+      "5141",
+      "5142",
+      "5164",
+      "7317",
+      "2269"
+     ],
+     "rank": 1
+    },
+    {
+     "q": "manicura",
+     "expected": [
+      "5142"
+     ],
+     "got": [
+      "5142",
+      "2269",
+      "5241",
+      "7522",
+      "7316"
+     ],
+     "rank": 1
+    },
+    {
+     "q": "maestra jardinera",
+     "expected": [
+      "2342"
+     ],
+     "got": [
+      "6113",
+      "2131",
+      "9214",
+      "8131",
+      "2341"
+     ],
+     "rank": null
+    },
+    {
+     "q": "docente de primaria",
+     "expected": [
+      "2341"
+     ],
+     "got": [
+      "2341",
+      "1345",
+      "5312",
+      "2342",
+      "1341"
+     ],
+     "rank": 1
+    },
+    {
+     "q": "profe de educación física",
+     "expected": [
+      "2330",
+      "2341"
+     ],
+     "got": [
+      "2320",
+      "3423",
+      "2330",
+      "2352",
+      "3422"
+     ],
+     "rank": 3
+    },
+    {
+     "q": "profesor universitario",
+     "expected": [
+      "2310"
+     ],
+     "got": [
+      "2310",
+      "1345",
+      "2330",
+      "2352",
+      "2641"
+     ],
+     "rank": 1
+    },
+    {
+     "q": "psicopedagoga",
+     "expected": [
+      "2352",
+      "2634",
+      "2359"
+     ],
+     "got": [
+      "2634",
+      "2310",
+      "5161",
+      "2212",
+      "2352"
+     ],
+     "rank": 1
+    },
+    {
+     "q": "trabajador social",
+     "expected": [
+      "2635"
+     ],
+     "got": [
+      "3412",
+      "1344",
+      "2422",
+      "2635",
+      "3353"
+     ],
+     "rank": 4
+    },
+    {
+     "q": "asistente social",
+     "expected": [
+      "2635"
+     ],
+     "got": [
+      "3412",
+      "2635",
+      "1344",
+      "5321",
+      "2422"
+     ],
+     "rank": 2
+    },
+    {
+     "q": "contador público",
+     "expected": [
+      "2411"
+     ],
+     "got": [
+      "2411",
+      "2432",
+      "9623",
+      "3313",
+      "2643"
+     ],
+     "rank": 1
+    },
+    {
+     "q": "liquidador de sueldos",
+     "expected": [
+      "4313"
+     ],
+     "got": [
+      "4214",
+      "8160",
+      "3312",
+      "4313",
+      "3315"
+     ],
+     "rank": 4
+    },
+    {
+     "q": "abogado laboralista",
+     "expected": [
+      "2611"
+     ],
+     "got": [
+      "2611",
+      "3339",
+      "3411",
+      "2619",
+      "2423"
+     ],
+     "rank": 1
+    },
+    {
+     "q": "despachante de aduana",
+     "expected": [
+      "3331"
+     ],
+     "got": [
+      "3331",
+      "4323",
+      "3351",
+      "7214",
+      "3117"
+     ],
+     "rank": 1
+    },
+    {
+     "q": "tasador",
+     "expected": [
+      "3315"
+     ],
+     "got": [
+      "3315",
+      "7317",
+      "3435",
+      "7121",
+      "7123"
+     ],
+     "rank": 1
+    },
+    {
+     "q": "secretaria",
+     "expected": [
+      "4120"
+     ],
+     "got": [
+      "4120",
+      "1349",
+      "3411",
+      "1112",
+      "1111"
+     ],
+     "rank": 1
+    },
+    {
+     "q": "asistente administrativo",
+     "expected": [
+      "4110",
+      "3343"
+     ],
+     "got": [
+      "3343",
+      "3344",
+      "3252",
+      "3342",
+      "4110"
+     ],
+     "rank": 1
+    },
+    {
+     "q": "operador de call center",
+     "expected": [
+      "4222"
+     ],
+     "got": [
+      "4222",
+      "3341",
+      "7223",
+      "3412",
+      "4223"
+     ],
+     "rank": 1
+    },
+    {
+     "q": "telefonista",
+     "expected": [
+      "4223"
+     ],
+     "got": [
+      "4223",
+      "7121",
+      "5244",
+      "3435",
+      "7215"
+     ],
+     "rank": 1
+    },
+    {
+     "q": "recepcionista de hotel",
+     "expected": [
+      "4224"
+     ],
+     "got": [
+      "4224",
+      "4226",
+      "5131",
+      "9621",
+      "4120"
+     ],
+     "rank": 1
+    },
+    {
+     "q": "programador de apps",
+     "expected": [
+      "2514",
+      "2512"
+     ],
+     "got": [
+      "2514",
+      "2512",
+      "1330",
+      "2149",
+      "2519"
+     ],
+     "rank": 1
+    },
+    {
+     "q": "científico de datos",
+     "expected": [
+      "2120",
+      "2511",
+      "2519"
+     ],
+     "got": [
+      "2511",
+      "2120",
+      "2519",
+      "2131",
+      "2521"
+     ],
+     "rank": 1
+    },
+    {
+     "q": "devops",
+     "expected": [
+      "2522",
+      "2512",
+      "2523"
+     ],
+     "got": [
+      "7119",
+      "2512",
+      "2120",
+      "7214",
+      "4323"
+     ],
+     "rank": 2
+    },
+    {
+     "q": "soporte técnico informático",
+     "expected": [
+      "3512"
+     ],
+     "got": [
+      "3512",
+      "2511",
+      "3114",
+      "4110",
+      "7421"
+     ],
+     "rank": 1
+    },
+    {
+     "q": "diseñador ux",
+     "expected": [
+      "2166",
+      "2513",
+      "2512"
+     ],
+     "got": [
+      "2513",
+      "7531",
+      "2512",
+      "3432",
+      "2163"
+     ],
+     "rank": 1
+    },
+    {
+     "q": "community manager",
+     "expected": [
+      "2431",
+      "2432"
+     ],
+     "got": [
+      "3311",
+      "2432",
+      "2431",
+      "3334",
+      "1219"
+     ],
+     "rank": 2
+    },
+    {
+     "q": "periodista",
+     "expected": [
+      "2642"
+     ],
+     "got": [
+      "2642",
+      "3431",
+      "2431",
+      "9213",
+      "9215"
+     ],
+     "rank": 1
+    },
+    {
+     "q": "traductor",
+     "expected": [
+      "2643"
+     ],
+     "got": [
+      "2643",
+      "1349",
+      "8181",
+      "3343",
+      "2152"
+     ],
+     "rank": 1
+    },
+    {
+     "q": "ingeniero civil",
+     "expected": [
+      "2142"
+     ],
+     "got": [
+      "3112",
+      "3113",
+      "2141",
+      "3123",
+      "2142"
+     ],
+     "rank": 5
+    },
+    {
+     "q": "arquitecto",
+     "expected": [
+      "2161"
+     ],
+     "got": [
+      "2161",
+      "2164",
+      "2162",
+      "2149",
+      "3112"
+     ],
+     "rank": 1
+    },
+    {
+     "q": "guardia de seguridad",
+     "expected": [
+      "5414"
+     ],
+     "got": [
+      "5414",
+      "1219",
+      "5412",
+      "3411",
+      "3315"
+     ],
+     "rank": 1
+    },
+    {
+     "q": "patovica",
+     "expected": [
+      "5414"
+     ],
+     "got": [
+      "2250",
+      "7536",
+      "7534",
+      "2619",
+      "2267"
+     ],
+     "rank": null
+    },
+    {
+     "q": "barrendero",
+     "expected": [
+      "9613"
+     ],
+     "got": [
+      "9613",
+      "8111",
+      "5120",
+      "5221",
+      "9621"
+     ],
+     "rank": 1
+    },
+    {
+     "q": "basurero",
+     "expected": [
+      "9611"
+     ],
+     "got": [
+      "9611",
+      "7531",
+      "7533",
+      "8111",
+      "9412"
+     ],
+     "rank": 1
+    }
+   ]
+  },
+  "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2": {
+   "accuracy": {
+    "top1": 0.465,
+    "top3": 0.767,
+    "top5": 0.802
+   },
+   "ms_per_query": 8.62,
+   "answers": [
+    {
+     "q": "chofer de camión",
+     "expected": [
+      "8332"
+     ],
+     "got": [
+      "8332",
+      "8211",
+      "7231",
+      "8343",
+      "8331"
+     ],
+     "rank": 1
+    },
+    {
+     "q": "camionero",
+     "expected": [
+      "8332"
+     ],
+     "got": [
+      "8211",
+      "8332",
+      "7231",
+      "8343",
+      "8331"
+     ],
+     "rank": 2
+    },
+    {
+     "q": "colectivero",
+     "expected": [
+      "8331"
+     ],
+     "got": [
+      "3331",
+      "2611",
+      "2659",
+      "7111",
+      "6113"
+     ],
+     "rank": null
+    },
+    {
+     "q": "micrero",
+     "expected": [
+      "8331"
+     ],
+     "got": [
+      "5142",
+      "7511",
+      "7125",
+      "3435",
+      "7531"
+     ],
+     "rank": null
+    },
+    {
+     "q": "taxista",
+     "expected": [
+      "8322"
+     ],
+     "got": [
+      "3433",
+      "8322",
+      "4323",
+      "3153",
+      "3255"
+     ],
+     "rank": 2
+    },
+    {
+     "q": "remisero",
+     "expected": [
+      "8322"
+     ],
+     "got": [
+      "7223",
+      "9334",
+      "1211",
+      "7311",
+      "8113"
+     ],
+     "rank": null
+    },
+    {
+     "q": "motoquero",
+     "expected": [
+      "8321"
+     ],
+     "got": [
+      "8211",
+      "8321",
+      "7234",
+      "6210",
+      "5165"
+     ],
+     "rank": 2
+    },
+    {
+     "q": "repartidor de delivery",
+     "expected": [
+      "9621",
+      "8321"
+     ],
+     "got": [
+      "1324",
+      "3323",
+      "1346",
+      "3343",
+      "4321"
+     ],
+     "rank": null
+    },
+    {
+     "q": "cadete",
+     "expected": [
+      "9621"
+     ],
+     "got": [
+      "9412",
+      "3153",
+      "8113",
+      "0210",
+      "2341"
+     ],
+     "rank": null
+    },
+    {
+     "q": "maquinista de tren",
+     "expected": [
+      "8311"
+     ],
+     "got": [
+      "8311",
+      "8211",
+      "5111",
+      "8312",
+      "3115"
+     ],
+     "rank": 1
+    },
+    {
+     "q": "piloto de avión",
+     "expected": [
+      "3153"
+     ],
+     "got": [
+      "3153",
+      "3152",
+      "0310",
+      "0110",
+      "8211"
+     ],
+     "rank": 1
+    },
+    {
+     "q": "azafata",
+     "expected": [
+      "5111"
+     ],
+     "got": [
+      "5161",
+      "5111",
+      "2611",
+      "7115",
+      "7522"
+     ],
+     "rank": 2
+    },
+    {
+     "q": "mozo",
+     "expected": [
+      "5131"
+     ],
+     "got": [
+      "9412",
+      "9212",
+      "9621",
+      "9520",
+      "3153"
+     ],
+     "rank": null
+    },
+    {
+     "q": "garzón",
+     "expected": [
+      "5131"
+     ],
+     "got": [
+      "5131",
+      "7533",
+      "8113",
+      "7534",
+      "8159"
+     ],
+     "rank": 1
+    },
+    {
+     "q": "bartender",
+     "expected": [
+      "5132"
+     ],
+     "got": [
+      "5132",
+      "5131",
+      "8160",
+      "2145",
+      "5223"
+     ],
+     "rank": 1
+    },
+    {
+     "q": "cocinero",
+     "expected": [
+      "5120"
+     ],
+     "got": [
+      "3434",
+      "5120",
+      "9412",
+      "8160",
+      "7115"
+     ],
+     "rank": 2
+    },
+    {
+     "q": "chef",
+     "expected": [
+      "3434"
+     ],
+     "got": [
+      "8113",
+      "7221",
+      "3434",
+      "9412",
+      "5112"
+     ],
+     "rank": 3
+    },
+    {
+     "q": "panadero",
+     "expected": [
+      "7512"
+     ],
+     "got": [
+      "7512",
+      "4321",
+      "3116",
+      "5245",
+      "7534"
+     ],
+     "rank": 1
+    },
+    {
+     "q": "almacenero",
+     "expected": [
+      "5221"
+     ],
+     "got": [
+      "4412",
+      "3331",
+      "7536",
+      "2641",
+      "5230"
+     ],
+     "rank": null
+    },
+    {
+     "q": "cajero de supermercado",
+     "expected": [
+      "5230"
+     ],
+     "got": [
+      "1420",
+      "3323",
+      "1324",
+      "5246",
+      "5222"
+     ],
+     "rank": null
+    },
+    {
+     "q": "repositor",
+     "expected": [
+      "9334"
+     ],
+     "got": [
+      "9334",
+      "7512",
+      "2513",
+      "2621",
+      "2642"
+     ],
+     "rank": 1
+    },
+    {
+     "q": "vendedor ambulante",
+     "expected": [
+      "5211",
+      "9520"
+     ],
+     "got": [
+      "9520",
+      "5223",
+      "3322",
+      "3324",
+      "3432"
+     ],
+     "rank": 1
+    },
+    {
+     "q": "feriante",
+     "expected": [
+      "5211"
+     ],
+     "got": [
+      "8122",
+      "5414",
+      "7214",
+      "5211",
+      "7531"
+     ],
+     "rank": 4
+    },
+    {
+     "q": "agente inmobiliario",
+     "expected": [
+      "3334"
+     ],
+     "got": [
+      "3334",
+      "1323",
+      "3315",
+      "4312",
+      "3321"
+     ],
+     "rank": 1
+    },
+    {
+     "q": "corredor de seguros",
+     "expected": [
+      "3321"
+     ],
+     "got": [
+      "3321",
+      "3315",
+      "4214",
+      "3314",
+      "1223"
+     ],
+     "rank": 1
+    },
+    {
+     "q": "albañil",
+     "expected": [
+      "7112"
+     ],
+     "got": [
+      "7111",
+      "7112",
+      "7121",
+      "7115",
+      "7522"
+     ],
+     "rank": 2
+    },
+    {
+     "q": "gasfíter",
+     "expected": [
+      "7126"
+     ],
+     "got": [
+      "7212",
+      "7126",
+      "5245",
+      "3133",
+      "3134"
+     ],
+     "rank": 2
+    },
+    {
+     "q": "plomero",
+     "expected": [
+      "7126"
+     ],
+     "got": [
+      "7522",
+      "5120",
+      "7534",
+      "8159",
+      "3422"
+     ],
+     "rank": null
+    },
+    {
+     "q": "sanitarista",
+     "expected": [
+      "7126"
+     ],
+     "got": [
+      "5329",
+      "5419",
+      "7516",
+      "2269",
+      "2211"
+     ],
+     "rank": null
+    },
+    {
+     "q": "electricista de obra",
+     "expected": [
+      "7411"
+     ],
+     "got": [
+      "7411",
+      "7412",
+      "2151",
+      "3131",
+      "3123"
+     ],
+     "rank": 1
+    },
+    {
+     "q": "pintor de obra",
+     "expected": [
+      "7131"
+     ],
+     "got": [
+      "2651",
+      "7131",
+      "3432",
+      "8122",
+      "7316"
+     ],
+     "rank": 2
+    },
+    {
+     "q": "carpintero",
+     "expected": [
+      "7115"
+     ],
+     "got": [
+      "7214",
+      "7115",
+      "3123",
+      "7317",
+      "7523"
+     ],
+     "rank": 2
+    },
+    {
+     "q": "soldador",
+     "expected": [
+      "7212"
+     ],
+     "got": [
+      "0310",
+      "7212",
+      "0110",
+      "0210",
+      "2144"
+     ],
+     "rank": 2
+    },
+    {
+     "q": "tornero",
+     "expected": [
+      "7223"
+     ],
+     "got": [
+      "7223",
+      "8113",
+      "2659",
+      "1211",
+      "4213"
+     ],
+     "rank": 1
+    },
+    {
+     "q": "mecánico de autos",
+     "expected": [
+      "7231"
+     ],
+     "got": [
+      "7231",
+      "8211",
+      "3115",
+      "7125",
+      "7543"
+     ],
+     "rank": 1
+    },
+    {
+     "q": "operario de fábrica",
+     "expected": [
+      "9329"
+     ],
+     "got": [
+      "9329",
+      "2141",
+      "7212",
+      "8160",
+      "8343"
+     ],
+     "rank": 1
+    },
+    {
+     "q": "minero",
+     "expected": [
+      "8111"
+     ],
+     "got": [
+      "8111",
+      "9311",
+      "1322",
+      "3435",
+      "5142"
+     ],
+     "rank": 1
+    },
+    {
+     "q": "peón rural",
+     "expected": [
+      "9211",
+      "9212",
+      "9213"
+     ],
+     "got": [
+      "8113",
+      "9212",
+      "9333",
+      "3315",
+      "9313"
+     ],
+     "rank": 2
+    },
+    {
+     "q": "tambero",
+     "expected": [
+      "6121",
+      "9212"
+     ],
+     "got": [
+      "8322",
+      "3315",
+      "5230",
+      "7511",
+      "8113"
+     ],
+     "rank": null
+    },
+    {
+     "q": "temporero de la fruta",
+     "expected": [
+      "9211"
+     ],
+     "got": [
+      "8160",
+      "3324",
+      "9211",
+      "7514",
+      "1324"
+     ],
+     "rank": 3
+    },
+    {
+     "q": "jardinero",
+     "expected": [
+      "6113",
+      "9214"
+     ],
+     "got": [
+      "2131",
+      "6113",
+      "9214",
+      "5312",
+      "3142"
+     ],
+     "rank": 2
+    },
+    {
+     "q": "pescador artesanal",
+     "expected": [
+      "6222"
+     ],
+     "got": [
+      "6222",
+      "8350",
+      "6223",
+      "7511",
+      "8160"
+     ],
+     "rank": 1
+    },
+    {
+     "q": "agrónomo",
+     "expected": [
+      "2132"
+     ],
+     "got": [
+      "3142",
+      "2132",
+      "3435",
+      "8172",
+      "7523"
+     ],
+     "rank": 2
+    },
+    {
+     "q": "kinesiólogo",
+     "expected": [
+      "2264"
+     ],
+     "got": [
+      "2269",
+      "2264",
+      "7318",
+      "7322",
+      "4131"
+     ],
+     "rank": 2
+    },
+    {
+     "q": "médico de guardia",
+     "expected": [
+      "2211",
+      "2212"
+     ],
+     "got": [
+      "2619",
+      "2211",
+      "2212",
+      "3259",
+      "1342"
+     ],
+     "rank": 2
+    },
+    {
+     "q": "auxiliar de enfermería",
+     "expected": [
+      "3221",
+      "5321"
+     ],
+     "got": [
+      "2221",
+      "3256",
+      "5321",
+      "5329",
+      "3221"
+     ],
+     "rank": 3
+    },
+    {
+     "q": "odontólogo",
+     "expected": [
+      "2261"
+     ],
+     "got": [
+      "3251",
+      "2261",
+      "2619",
+      "2310",
+      "3315"
+     ],
+     "rank": 2
+    },
+    {
+     "q": "farmacéutico",
+     "expected": [
+      "2262"
+     ],
+     "got": [
+      "2262",
+      "2131",
+      "3324",
+      "3213",
+      "2145"
+     ],
+     "rank": 1
+    },
+    {
+     "q": "veterinario",
+     "expected": [
+      "2250"
+     ],
+     "got": [
+      "2250",
+      "3240",
+      "2310",
+      "4226",
+      "5164"
+     ],
+     "rank": 1
+    },
+    {
+     "q": "cuidador de ancianos",
+     "expected": [
+      "5322",
+      "5321"
+     ],
+     "got": [
+      "5321",
+      "5322",
+      "3412",
+      "1343",
+      "2635"
+     ],
+     "rank": 1
+    },
+    {
+     "q": "niñera",
+     "expected": [
+      "5311"
+     ],
+     "got": [
+      "5311",
+      "3435",
+      "0310",
+      "8111",
+      "3116"
+     ],
+     "rank": 1
+    },
+    {
+     "q": "nana",
+     "expected": [
+      "9111",
+      "5311"
+     ],
+     "got": [
+      "7531",
+      "3435",
+      "2659",
+      "0310",
+      "7126"
+     ],
+     "rank": null
+    },
+    {
+     "q": "empleada doméstica",
+     "expected": [
+      "9111"
+     ],
+     "got": [
+      "5152",
+      "9111",
+      "4213",
+      "2635",
+      "5322"
+     ],
+     "rank": 2
+    },
+    {
+     "q": "peluquera",
+     "expected": [
+      "5141"
+     ],
+     "got": [
+      "5141",
+      "2269",
+      "5142",
+      "9333",
+      "8113"
+     ],
+     "rank": 1
+    },
+    {
+     "q": "manicura",
+     "expected": [
+      "5142"
+     ],
+     "got": [
+      "5241",
+      "2642",
+      "4213",
+      "7511",
+      "7213"
+     ],
+     "rank": null
+    },
+    {
+     "q": "maestra jardinera",
+     "expected": [
+      "2342"
+     ],
+     "got": [
+      "6113",
+      "2131",
+      "9214",
+      "5312",
+      "5223"
+     ],
+     "rank": null
+    },
+    {
+     "q": "docente de primaria",
+     "expected": [
+      "2341"
+     ],
+     "got": [
+      "2341",
+      "1345",
+      "2330",
+      "5312",
+      "2342"
+     ],
+     "rank": 1
+    },
+    {
+     "q": "profe de educación física",
+     "expected": [
+      "2330",
+      "2341"
+     ],
+     "got": [
+      "2320",
+      "2330",
+      "3423",
+      "0110",
+      "3422"
+     ],
+     "rank": 2
+    },
+    {
+     "q": "profesor universitario",
+     "expected": [
+      "2310"
+     ],
+     "got": [
+      "2310",
+      "2359",
+      "3423",
+      "6112",
+      "1345"
+     ],
+     "rank": 1
+    },
+    {
+     "q": "psicopedagoga",
+     "expected": [
+      "2352",
+      "2634",
+      "2359"
+     ],
+     "got": [
+      "2634",
+      "3255",
+      "5161",
+      "3259",
+      "2212"
+     ],
+     "rank": 1
+    },
+    {
+     "q": "trabajador social",
+     "expected": [
+      "2635"
+     ],
+     "got": [
+      "1344",
+      "2422",
+      "2635",
+      "3412",
+      "2632"
+     ],
+     "rank": 3
+    },
+    {
+     "q": "asistente social",
+     "expected": [
+      "2635"
+     ],
+     "got": [
+      "3412",
+      "1344",
+      "2422",
+      "2635",
+      "5329"
+     ],
+     "rank": 4
+    },
+    {
+     "q": "contador público",
+     "expected": [
+      "2411"
+     ],
+     "got": [
+      "5112",
+      "2411",
+      "9623",
+      "3342",
+      "2432"
+     ],
+     "rank": 2
+    },
+    {
+     "q": "liquidador de sueldos",
+     "expected": [
+      "4313"
+     ],
+     "got": [
+      "4313",
+      "4214",
+      "3315",
+      "5230",
+      "1346"
+     ],
+     "rank": 1
+    },
+    {
+     "q": "abogado laboralista",
+     "expected": [
+      "2611"
+     ],
+     "got": [
+      "2611",
+      "2619",
+      "3411",
+      "3342",
+      "2643"
+     ],
+     "rank": 1
+    },
+    {
+     "q": "despachante de aduana",
+     "expected": [
+      "3331"
+     ],
+     "got": [
+      "5243",
+      "4412",
+      "9629",
+      "5223",
+      "5249"
+     ],
+     "rank": null
+    },
+    {
+     "q": "tasador",
+     "expected": [
+      "3315"
+     ],
+     "got": [
+      "8181",
+      "2519",
+      "2131",
+      "3435",
+      "7533"
+     ],
+     "rank": null
+    },
+    {
+     "q": "secretaria",
+     "expected": [
+      "4120"
+     ],
+     "got": [
+      "4120",
+      "3343",
+      "3435",
+      "1323",
+      "2166"
+     ],
+     "rank": 1
+    },
+    {
+     "q": "asistente administrativo",
+     "expected": [
+      "4110",
+      "3343"
+     ],
+     "got": [
+      "3343",
+      "3344",
+      "4110",
+      "2422",
+      "4416"
+     ],
+     "rank": 1
+    },
+    {
+     "q": "operador de call center",
+     "expected": [
+      "4222"
+     ],
+     "got": [
+      "3341",
+      "4222",
+      "8343",
+      "4223",
+      "3412"
+     ],
+     "rank": 2
+    },
+    {
+     "q": "telefonista",
+     "expected": [
+      "4223"
+     ],
+     "got": [
+      "4223",
+      "7422",
+      "8343",
+      "3341",
+      "5244"
+     ],
+     "rank": 1
+    },
+    {
+     "q": "recepcionista de hotel",
+     "expected": [
+      "4224"
+     ],
+     "got": [
+      "4224",
+      "4226",
+      "4120",
+      "5169",
+      "5152"
+     ],
+     "rank": 1
+    },
+    {
+     "q": "programador de apps",
+     "expected": [
+      "2514",
+      "2512"
+     ],
+     "got": [
+      "2514",
+      "2512",
+      "2519",
+      "1330",
+      "2149"
+     ],
+     "rank": 1
+    },
+    {
+     "q": "científico de datos",
+     "expected": [
+      "2120",
+      "2511",
+      "2519"
+     ],
+     "got": [
+      "2511",
+      "2120",
+      "2519",
+      "3511",
+      "4132"
+     ],
+     "rank": 1
+    },
+    {
+     "q": "devops",
+     "expected": [
+      "2522",
+      "2512",
+      "2523"
+     ],
+     "got": [
+      "2512",
+      "7213",
+      "2411",
+      "2269",
+      "5142"
+     ],
+     "rank": 1
+    },
+    {
+     "q": "soporte técnico informático",
+     "expected": [
+      "3512"
+     ],
+     "got": [
+      "3512",
+      "2511",
+      "3114",
+      "7421",
+      "2356"
+     ],
+     "rank": 1
+    },
+    {
+     "q": "diseñador ux",
+     "expected": [
+      "2166",
+      "2513",
+      "2512"
+     ],
+     "got": [
+      "7531",
+      "2513",
+      "2359",
+      "2163",
+      "2166"
+     ],
+     "rank": 2
+    },
+    {
+     "q": "community manager",
+     "expected": [
+      "2431",
+      "2432"
+     ],
+     "got": [
+      "3334",
+      "2432",
+      "3341",
+      "2359",
+      "1431"
+     ],
+     "rank": 2
+    },
+    {
+     "q": "periodista",
+     "expected": [
+      "2642"
+     ],
+     "got": [
+      "2642",
+      "3431",
+      "2310",
+      "2632",
+      "2656"
+     ],
+     "rank": 1
+    },
+    {
+     "q": "traductor",
+     "expected": [
+      "2643"
+     ],
+     "got": [
+      "2643",
+      "1349",
+      "2152",
+      "2659",
+      "4413"
+     ],
+     "rank": 1
+    },
+    {
+     "q": "ingeniero civil",
+     "expected": [
+      "2142"
+     ],
+     "got": [
+      "3112",
+      "3113",
+      "2141",
+      "3123",
+      "2142"
+     ],
+     "rank": 5
+    },
+    {
+     "q": "arquitecto",
+     "expected": [
+      "2161"
+     ],
+     "got": [
+      "2161",
+      "2149",
+      "3112",
+      "2162",
+      "3118"
+     ],
+     "rank": 1
+    },
+    {
+     "q": "guardia de seguridad",
+     "expected": [
+      "5414"
+     ],
+     "got": [
+      "5414",
+      "5419",
+      "1219",
+      "5412",
+      "2529"
+     ],
+     "rank": 1
+    },
+    {
+     "q": "patovica",
+     "expected": [
+      "5414"
+     ],
+     "got": [
+      "9520",
+      "2131",
+      "4213",
+      "1112",
+      "7214"
+     ],
+     "rank": null
+    },
+    {
+     "q": "barrendero",
+     "expected": [
+      "9613"
+     ],
+     "got": [
+      "9613",
+      "8111",
+      "9520",
+      "2652",
+      "7214"
+     ],
+     "rank": 1
+    },
+    {
+     "q": "basurero",
+     "expected": [
+      "9611"
+     ],
+     "got": [
+      "9611",
+      "7531",
+      "4321",
+      "8113",
+      "9411"
+     ],
+     "rank": 1
+    }
+   ]
+  }
+ }
+}

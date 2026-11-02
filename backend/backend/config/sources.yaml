@@ -149,6 +149,19 @@ sources:
       relation_weights:
         hasEssentialSkill: 1.0
         hasOptionalSkill: 0.5
+      # Category stored for each group and skill: the strongest relation found in any of the
+      # group's ESCO occupations (listed strongest first). A skill belongs to a sector when it is
+      # essential for one of the sector's occupations (app.yaml -> skills.sector_relation).
+      relation_categories:
+        hasEssentialSkill: essential
+        hasOptionalSkill: optional
+      # Skill hierarchy and definitions (GET /resource/skill?uris=...): skills per request. Each
+      # definition keeps ESCO's English original; the Spanish shown is ESCO's own Spanish or,
+      # when ESCO has none, the translation in translations_file (English original next to it).
+      hierarchy_batch: 50
+      display_language: es
+      original_language: en
+      translations_file: reference/esco_traducciones_es.yaml
       # Skills below this weight for a group are not stored.
       min_weight: 0.0
       # Some ESCO records answer with a server error every time (e.g. occupation
@@ -199,6 +212,83 @@ sources:
     connector: dataset_download
     series_fields: []
     options: {}
+
+  - source_code: anuario_diu_argentina
+    name: Anuario Estadístico del Sistema Universitario Argentino (Departamento de Información Universitaria)
+    kind: dataset
+    base_url: https://www.argentina.gob.ar/educacion/universidades/informacion/publicaciones/anuarios
+    expected_frequency: annual
+    # One yearbook a year, sometimes first as a partial "adelanto": checked weekly; a file is only
+    # downloaded when its link changes.
+    schedule: "0 6 * * 4"
+    connector: dataset_download
+    series_fields: []
+    options: {}
+
+  # Skill profiles over time (Reina Roja): every version is kept, never replaced.
+  - source_code: onet_technology
+    name: O*NET · Technology Skills por versión de la base (O*NET Resource Center, EE. UU.)
+    kind: dataset
+    base_url: https://www.onetcenter.org/db_releases.html
+    expected_frequency: annual
+    # O*NET publishes four releases a year; the August one is used. Checked monthly: a release
+    # listed below is only downloaded once (files are kept under datasets.raw_dir/onet).
+    schedule: "0 5 2 * *"
+    connector: skill_versions
+    series_fields: []
+    options:
+      kind: onet
+      # Releases compared, oldest first. 25.1 is the first with the O*NET-SOC 2019 taxonomy,
+      # the one the ESCO crosswalk uses; releases before it are not comparable.
+      releases:
+        - {version: "25.1", released: "2020-11-01"}
+        - {version: "26.0", released: "2021-08-01"}
+        - {version: "27.0", released: "2022-08-01"}
+        - {version: "28.0", released: "2023-08-01"}
+        - {version: "29.0", released: "2024-08-01"}
+        - {version: "30.0", released: "2025-08-01"}
+        # 31.0 renamed the file and the column (same content: one row per occupation and product).
+        - {version: "31.0", released: "2026-08-01", member: "db_{tag}_text/Software Skills.txt",
+           item_column: Workplace Example}
+      url_template: https://www.onetcenter.org/dl_files/database/db_{tag}_text.zip
+      # Defaults; a release can override member and item_column.
+      member: "db_{tag}_text/Technology Skills.txt"
+      code_column: O*NET-SOC Code
+      item_column: Example
+      # ESCO occupations (ISCO-08 code + ESCO suffix) to O*NET-SOC 2019, O*NET Resource Center.
+      crosswalk:
+        url: https://www.onetcenter.org/crosswalks/esco/ESCO_to_ONET-SOC.xlsx
+        header_row: 4
+        isco_column: ESCO/ISCO Code
+        onet_column: O*NET-SOC 2019 Code
+      raw_subdir: onet
+
+  - source_code: esco_versions
+    name: ESCO · habilidades por ocupación en cada versión (Comisión Europea)
+    kind: api
+    base_url: https://ec.europa.eu/esco/api
+    expected_frequency: annual
+    schedule: "0 5 3 * *"
+    connector: skill_versions
+    series_fields: []
+    options:
+      kind: esco
+      # Versions compared (the API answers from v1.0.9 on), oldest first. A version already
+      # stored is not fetched again.
+      releases:
+        - {version: v1.0.9, released: "2021-11-01"}
+        - {version: v1.1.1, released: "2022-09-01"}
+        - {version: v1.2.0, released: "2024-05-01"}
+        - {version: v1.2.1, released: "2025-12-01"}
+      language: en
+      concurrency: 8
+      relation_weights:
+        hasEssentialSkill: 1.0
+        hasOptionalSkill: 0.5
+      relation_categories:
+        hasEssentialSkill: essential
+        hasOptionalSkill: optional
+      max_failed_share: 0.02
 
   - source_code: manual_upload
     name: Carga manual

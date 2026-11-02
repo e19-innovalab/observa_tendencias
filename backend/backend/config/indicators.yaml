@@ -4,6 +4,9 @@
 # domain maps to the dashboard tabs: economic -> Socioeconómicos, labor -> Laborales,
 # education -> Educativos (labels in app.yaml).
 #
+# value_range: [min, max] the indicator can take (null = unbounded). Projections and their
+# intervals are clipped to it, so a rate is never projected below 0% or above 100%.
+#
 # Series fields by source:
 #   world_bank: id                       World Bank indicator code
 #   ilostat:    dataflow, key            SDMX dataflow and key; {countries} is replaced by the
@@ -51,6 +54,7 @@ indicators:
     domain: labor
     higher_is_better: false
     description: Desocupados como porcentaje de la fuerza de trabajo, 15 años y más.
+    value_range: [0, 100]
     series:
       - source: ilostat
         dataflow: DF_UNE_DEAP_SEX_AGE_RT
@@ -65,6 +69,7 @@ indicators:
     description: Encuesta Permanente de Hogares, total de aglomerados urbanos (INDEC).
     trend:
       window_points: 8
+    value_range: [0, 100]
     series:
       - source: datos_argentina
         id: 42.3_EPH_PUNTUATAL_0_M_30
@@ -79,6 +84,7 @@ indicators:
     description: Encuesta Permanente de Hogares, total de aglomerados urbanos (INDEC).
     trend:
       window_points: 8
+    value_range: [0, 100]
     series:
       - source: datos_argentina
         id: 43.2_ECTAT_0_T_33
@@ -96,6 +102,7 @@ indicators:
       sector solo Turismo, Salud y Energía, que coinciden con una sección de Rev.3.
     trend:
       window_points: 12
+    value_range: [0, null]
     series:
       - source: sipa_argentina
         profile: sipa_asalariados_por_rama
@@ -107,9 +114,27 @@ indicators:
     domain: labor
     higher_is_better: false
     description: Estimación modelada de la OIT publicada por el Banco Mundial.
+    value_range: [0, 100]
     series:
       - source: world_bank
         id: SL.UEM.1524.ZS
+        frequency: A
+
+  - code: youth_unemployment_rate_survey
+    name: Desocupación juvenil (15 a 24 años, encuestas)
+    unit: percent
+    domain: labor
+    higher_is_better: false
+    description: >-
+      Desocupados de 15 a 24 años como porcentaje de la fuerza de trabajo de esa edad, de las
+      encuestas de hogares de cada país vía ILOSTAT: la misma fuente y serie que la tasa de
+      desocupación general, para poder compararlas (la de 15 a 24 años del Banco Mundial es una
+      estimación modelada de la OIT).
+    value_range: [0, 100]
+    series:
+      - source: ilostat
+        dataflow: DF_UNE_DEAP_SEX_AGE_RT
+        key: "{countries}.A..SEX_T.AGE_YTHADULT_Y15-24"
         frequency: A
 
   - code: labor_force_participation
@@ -118,6 +143,7 @@ indicators:
     domain: labor
     higher_is_better: true
     description: Población económicamente activa como porcentaje de la población de 15 años y más.
+    value_range: [0, 100]
     series:
       - source: world_bank
         id: SL.TLF.CACT.ZS
@@ -129,6 +155,7 @@ indicators:
     domain: labor
     higher_is_better: null
     description: Trabajadores independientes como porcentaje del empleo total.
+    value_range: [0, 100]
     series:
       - source: world_bank
         id: SL.EMP.SELF.ZS
@@ -144,6 +171,7 @@ indicators:
       por grupos de 2 dígitos CIUO-08 (OIT); Chile por grandes grupos CIUO-08.CL (1 dígito) de
       la Encuesta Nacional de Empleo vía SIMEL, promedio anual de los 4 trimestres calendario.
       Las ocupaciones del mismo grupo comparten el valor.
+    value_range: [0, null]
     series:
       - source: ilostat
         dataflow: DF_EMP_TEMP_SEX_ECO_NB
@@ -182,6 +210,7 @@ indicators:
       Ingreso mensual promedio de los asalariados en dólares a paridad de poder adquisitivo.
       En sectores que abarcan varias secciones CIIU se usa el promedio simple de las secciones.
       Por ocupación se usa el gran grupo CIUO-08 (1 dígito), que comparten varias ocupaciones.
+    value_range: [0, null]
     series:
       - source: ilostat
         dataflow: DF_EAR_EMTA_SEX_ECO_CUR_NB
@@ -198,6 +227,94 @@ indicators:
         occupation_isco_digits: 1
         frequency: A
 
+  # Same ILOSTAT series in U.S. dollars at market exchange rates: the salary shown to users. The
+  # ISE keeps using the PPP series (comparable purchasing power across countries).
+  - code: mean_monthly_earnings_usd
+    name: Ingreso laboral mensual promedio (USD)
+    unit: usd_month
+    domain: labor
+    higher_is_better: true
+    description: >-
+      Ingreso mensual promedio de los asalariados en dólares estadounidenses al tipo de cambio de
+      mercado (OIT). Es la misma serie que la de USD PPA, sin ajustar por poder de compra.
+      Por ocupación se usa el gran grupo CIUO-08 (1 dígito), que comparten varias ocupaciones.
+    value_range: [0, null]
+    series:
+      - source: ilostat
+        dataflow: DF_EAR_EMTA_SEX_ECO_CUR_NB
+        key: "{countries}.A..SEX_T..CUR_TYPE_USD"
+        sector_dimension: ECO
+        total_code: ECO_ISIC4_TOTAL
+        sector_aggregation: mean
+        frequency: A
+      - source: ilostat
+        dataflow: DF_EAR_EMTA_SEX_OCU_CUR_NB
+        key: "{countries}.A..SEX_T..CUR_TYPE_USD"
+        occupation_dimension: OCU
+        occupation_code_prefix: OCU_ISCO08_
+        occupation_isco_digits: 1
+        frequency: A
+
+  - code: earnings_tertiary_ppp
+    name: Ingreso laboral mensual con educación superior (USD PPA)
+    unit: ppp_usd_month
+    domain: labor
+    higher_is_better: true
+    description: >-
+      Ingreso mensual promedio de los asalariados con nivel avanzado: terciaria, CINE 5 o más (agregado de la OIT), en dólares a paridad de poder adquisitivo. Nacional.
+      Con el de educación secundaria da la prima salarial de la educación.
+    value_range: [0, null]
+    series:
+      - source: ilostat
+        dataflow: DF_EAR_EMTA_SEX_EDU_CUR_NB
+        key: "{countries}.A..SEX_T.EDU_AGGREGATE_ADV.CUR_TYPE_PPP"
+        frequency: A
+
+  - code: earnings_tertiary_usd
+    name: Ingreso laboral mensual con educación superior (USD)
+    unit: usd_month
+    domain: labor
+    higher_is_better: true
+    description: >-
+      Ingreso mensual promedio de los asalariados con nivel avanzado: terciaria, CINE 5 o más (agregado de la OIT), en dólares al tipo de cambio de mercado. Nacional.
+      Con el de educación secundaria da la prima salarial de la educación.
+    value_range: [0, null]
+    series:
+      - source: ilostat
+        dataflow: DF_EAR_EMTA_SEX_EDU_CUR_NB
+        key: "{countries}.A..SEX_T.EDU_AGGREGATE_ADV.CUR_TYPE_USD"
+        frequency: A
+
+  - code: earnings_secondary_ppp
+    name: Ingreso laboral mensual con educación secundaria (USD PPA)
+    unit: ppp_usd_month
+    domain: labor
+    higher_is_better: true
+    description: >-
+      Ingreso mensual promedio de los asalariados con nivel intermedio: secundaria completa o postsecundaria no terciaria (agregado de la OIT), en dólares a paridad de poder adquisitivo. Nacional.
+      Con el de educación superior da la prima salarial de la educación.
+    value_range: [0, null]
+    series:
+      - source: ilostat
+        dataflow: DF_EAR_EMTA_SEX_EDU_CUR_NB
+        key: "{countries}.A..SEX_T.EDU_AGGREGATE_INT.CUR_TYPE_PPP"
+        frequency: A
+
+  - code: earnings_secondary_usd
+    name: Ingreso laboral mensual con educación secundaria (USD)
+    unit: usd_month
+    domain: labor
+    higher_is_better: true
+    description: >-
+      Ingreso mensual promedio de los asalariados con nivel intermedio: secundaria completa o postsecundaria no terciaria (agregado de la OIT), en dólares al tipo de cambio de mercado. Nacional.
+      Con el de educación superior da la prima salarial de la educación.
+    value_range: [0, null]
+    series:
+      - source: ilostat
+        dataflow: DF_EAR_EMTA_SEX_EDU_CUR_NB
+        key: "{countries}.A..SEX_T.EDU_AGGREGATE_INT.CUR_TYPE_USD"
+        frequency: A
+
   - code: genai_exposure
     name: Exposición a la IA generativa
     unit: index_0_1
@@ -206,6 +323,7 @@ indicators:
     description: >-
       Puntaje medio de exposición de las tareas de la ocupación a la IA generativa (0 a 1),
       OIT 2025. Incluye tareas que la IA podría automatizar o complementar. No varía por país.
+    value_range: [0, 1]
     series:
       - source: ilo_genai_exposure
         file: reference/ilo_genai_exposure.yaml
@@ -298,6 +416,7 @@ indicators:
     domain: economic
     higher_is_better: true
     description: PBI por habitante a paridad de poder adquisitivo, dólares internacionales constantes de 2021.
+    value_range: [0, null]
     series:
       - source: world_bank
         id: NY.GDP.PCAP.PP.KD
@@ -310,6 +429,7 @@ indicators:
     domain: education
     higher_is_better: true
     description: Matrícula terciaria total como porcentaje de la población en edad teórica.
+    value_range: [0, null]
     series:
       - source: world_bank
         id: SE.TER.ENRR
@@ -321,6 +441,7 @@ indicators:
     domain: education
     higher_is_better: true
     description: Tasa de finalización del primer ciclo de educación secundaria.
+    value_range: [0, 100]
     series:
       - source: world_bank
         id: SE.SEC.CMPT.LO.ZS
@@ -332,6 +453,7 @@ indicators:
     domain: education
     higher_is_better: true
     description: Personas que usaron internet en los últimos tres meses, como porcentaje de la población.
+    value_range: [0, 100]
     series:
       - source: world_bank
         id: IT.NET.USER.ZS
@@ -348,6 +470,7 @@ indicators:
       la OIT: grupos 1 a 3 piden educación terciaria, 4 a 8 secundaria y 9 primaria). Por gran
       grupo de ocupación: las ocupaciones del mismo grupo comparten el valor. Encuestas de hogares
       de cada país vía ILOSTAT; solo desde el último quiebre de serie (Uruguay desde 2022).
+    value_range: [0, 100]
     series:
       - source: ilostat
         dataflow: DF_EMP_TEMP_SEX_OCU_EDU_NB
@@ -364,6 +487,7 @@ indicators:
       Ocupados con un nivel educativo inferior al que requiere su gran grupo de ocupación, como
       porcentaje de los ocupados con ocupación y nivel educativo informados (mismo enfoque y
       fuente que la sobrecalificación).
+    value_range: [0, 100]
     series:
       - source: ilostat
         dataflow: DF_EMP_TEMP_SEX_OCU_EDU_NB

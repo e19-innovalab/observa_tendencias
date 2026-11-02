@@ -1,0 +1,93 @@
+# Historical comparison of the Ludita indicator: employment in occupations a technology displaced
+# or transformed. value: thousands of workers. base_year: the year indexed to 100 (the first
+# value at or just before the technology's arrival_year). Values are as published by each
+# source; approximate figures carry approx: true.
+
+cases:
+  weaver:
+    label: Tejedores manuales de algodón (Gran Bretaña)
+    technology: Telar mecánico
+    arrival_year: 1813
+    arrival_note: >-
+      1813: primeros tejidos en fábricas con telares mecánicos (unos 2.400 telares); se
+      difunden en la década de 1820.
+    base_year: 1813
+    path: weaver
+    series:
+      - [1788, 108]
+      - [1801, 164]
+      - [1806, 184]
+      - [1813, 212]
+      - [1817, 228]
+      - [1820, 240]
+      - [1823, 240]
+      - [1825, 240]
+      - [1831, 240]
+      - [1832, 227]
+      - [1833, 213]
+      - [1835, 188]
+      - [1839, 135]
+      - [1847, 53]
+      - [1850, 40]
+      - [1856, 23]
+      - [1862, 3]
+    source_short: Wood (1910) vía Acemoglu y Johnson (2024)
+    sources:
+      - label: >-
+          Acemoglu y Johnson (2024), "Learning from Ricardo and Thompson: Machinery and Labor in
+          the Early Industrial Revolution, and in the Age of AI", MIT, tabla 2
+        detail: Reproduce la serie de G. H. Wood (1910), History of Wages in the Cotton Trade, tabla 40.
+        url: https://shapingwork.mit.edu/wp-content/uploads/2024/04/Acemoglu_Johnson_April-2024.pdf
+
+  telephone_operator:
+    label: Operadoras telefónicas (Estados Unidos)
+    technology: Conmutación automática (discado)
+    arrival_year: 1921
+    arrival_note: >-
+      Diciembre de 1921: primera central del sistema Bell totalmente automática. En 1930 un
+      tercio de las centrales Bell ya eran automáticas.
+    base_year: 1920
+    path: weaver
+    series:
+      - [1920, 178]
+      - [1950, 342]
+      - [1960, 250, {approx: true, note: "menos de 250.000"}]
+      - [1984, 40]
+      - [2019, 1.46]
+    source_short: Fed de Richmond (2019)
+    sources:
+      - label: 'Price (2019), "Goodbye, Operator", Econ Focus, Federal Reserve Bank of Richmond'
+        detail: Cifras de 1920 a 1984; la de 2019 es de la Oficina de Estadísticas Laborales (BLS).
+        url: https://www.richmondfed.org/publications/research/econ_focus/2019/q4/economic_history
+
+  teller:
+    label: Cajeros de banco (Estados Unidos)
+    technology: Cajero automático
+    arrival_year: 1970
+    arrival_note: >-
+      El primer cajero automático de Estados Unidos se instaló en 1969; se difundieron desde los
+      años setenta y masivamente desde mediados de los noventa.
+    base_year: 1970
+    path: teller
+    series:
+      - [1970, 300, {approx: true}]
+      - [2006, 608]
+      - [2010, 600, {approx: true}]
+      - [2022, 364.1]
+      - [2024, 347.4]
+    source_short: BLS y Bessen (2015)
+    sources:
+      - label: Bessen (2015), "Toil and Technology", Finance & Development, FMI
+        detail: >-
+          Los cajeros por sucursal bajaron de 20 a 13 entre 1988 y 2004, pero las sucursales
+          urbanas aumentaron 43 % y el empleo total de cajeros no cayó.
+        url: https://www.imf.org/external/pubs/ft/fandd/2015/03/bessen.htm
+      - label: Wikipedia, "Bank teller"
+        detail: Unos 300.000 cajeros en 1970 y unos 600.000 en 2010 (cifras redondas).
+        url: https://en.wikipedia.org/wiki/Bank_teller
+      - label: BLS, Occupational Outlook Handbook, "Tellers" (edición 2006, archivada)
+        detail: 608.000 empleos en 2006.
+        url: https://web.archive.org/web/20080516200541/http://www.bls.gov/oco/ocos126.htm
+      - label: BLS, Occupational Outlook Handbook, "Tellers"
+        detail: 364.100 empleos en 2022 y 347.400 en 2024; proyecta una caída de 13 % hasta 2034.
+        url: https://www.bls.gov/ooh/office-and-administrative-support/tellers.htm

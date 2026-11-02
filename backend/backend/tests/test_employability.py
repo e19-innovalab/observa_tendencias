@@ -71,6 +71,9 @@ def client():
             rows.append(_obs(1, "mean_monthly_earnings_ppp", "ARG", occ, 2025, salary[occ],
                              "ppp_usd_month"))
             rows.append(_obs(2, "genai_exposure", "ARG", occ, 2025, risk[occ], "index_0_1"))
+        # salary in USD (shown, not scored): only 2512, and one year that the index did not use
+        rows.append(_obs(1, "mean_monthly_earnings_usd", "ARG", "2512", 2025, 1300, "usd_month"))
+        rows.append(_obs(1, "mean_monthly_earnings_usd", "ARG", "2221", 2024, 900, "usd_month"))
         upsert_observations(s, rows)
         s.commit()
         recompute(s)
@@ -270,3 +273,43 @@ def test_rankings_cap_occupations_per_isco_group(client, monkeypatch):
     full = c.get("/api/v1/employability", params={"view": "all", "country": "ARG",
                                                   "limit": 500}).json()
     assert {"2512", "2221", "5120"} <= {i["occupation"]["occupation_code"] for i in full["items"]}
+
+
+def test_sector_summary_averages_its_occupations(client):
+    c, _ = client
+    page = c.get("/api/v1/employability", params={"country": "ARG", "view": "all", "limit": 500}).json()
+    score = {i["occupation"]["occupation_code"]: i["score"] for i in page["items"] if i["score"] is not None}
+    r = c.get("/api/v1/employability/sectors", params={"country": "ARG"}).json()
+    sectors = {s["sector_code"]: s for s in r["items"]}
+    assert [s["sector_code"] for s in r["items"]] == [s.sector_code for s in catalog().sectors]
+    tech = sectors["technology"]
+    # only 2512 has data in technology: the sector average is its score
+    assert tech["scored"] == 1 and tech["average_score"] == pytest.approx(score["2512"])
+    assert tech["top_occupation"]["occupation_code"] == "2512"
+    assert tech["salary_ppp_average"] == 2500 and tech["automation_average"] == pytest.approx(0.53)
+    assert tech["level_label"] and set(tech["dimensions"]) == set(analytics_params("employability")["weights"])
+    assert sectors["health"]["top_occupation"]["occupation_code"] == "2221"
+    assert sectors["energy"]["average_score"] is None and sectors["energy"]["top_occupation"] is None
+    scored = [score[o] for o in ("2512", "2221", "5120") if o in score]
+    assert r["regional_average"] == pytest.approx(sum(scored) / len(scored))
+    assert r["no_source_note"]  # insertion rate has no source yet
+
+
+def test_salary_shown_in_usd_for_the_same_period(client):
+    c, _ = client
+    comps = {e["occupation"]["occupation_code"]: {x["dimension"]: x for x in e["components"]}
+             for e in c.get("/api/v1/employability", params={"country": "ARG", "view": "all"}).json()["items"]}
+    usd = comps["2512"]["salary_ppp"]["display"]
+    assert usd["value"] == 1300 and usd["period"] == "2025" and usd["unit"] == "usd_month" and usd["note"]
+    assert comps["2512"]["salary_ppp"]["raw"] == 2500  # the index still uses PPP
+    assert comps["2221"]["salary_ppp"]["display"] is None  # USD only for another year
+    assert comps["2512"]["net_demand"]["display"] is None
+    profile = c.get("/api/v1/occupations/2512").json()
+    assert any(x["display"] and x["display"]["value"] == 1300 for x in profile["employability"][0]["components"])
+    sectors = {s["sector_code"]: s for s in c.get("/api/v1/employability/sectors", params={"country": "ARG"}).json()["items"]}
+    assert sectors["technology"]["salary_usd_average"] == 1300 and sectors["health"]["salary_usd_average"] is None
+    # the wording comes from app.yaml (employability), not from the frontend
+    texts = profile["texts"]
+    assert texts["terms"]["normalized"] and texts["terms"]["contribution"]
+    assert "{value}" in texts["unit_formats"]["usd_month"] and texts["display"]["salary_ppp"]["note"]
+    assert c.get("/api/v1/employability/sectors").json()["texts"] == texts

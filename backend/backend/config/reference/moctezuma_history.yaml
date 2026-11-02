@@ -1,0 +1,119 @@
+# Illustrative historical version of the Moctezuma indicator: central Mexico, 1518-1605.
+# Not observatory data. Served by /moctezuma/reference; the indicator uses the side weights of
+# config/analytics.yaml (section moctezuma).
+#
+# Capacidad de respuesta: population of the year / population of base_year x 100.
+# Ritmo del cambio: an assumption, pace.before until pace.full_from and pace.full from then on
+# (the fall of Tenochtitlan).
+
+region: Centro de México
+contact_year: 1519
+pace:
+  before: 0
+  full: 100
+  full_from: 1521
+  note: >-
+    Se asume 0 antes del contacto y 100 desde 1521, con la caída de Tenochtitlan. Es un supuesto,
+    no una medición.
+population_unit: millones
+base_year: 1518
+# Cook and Borah's series (the highest estimates in the literature, debated; see sources).
+population:
+  - [1518, 25.2]
+  - [1532, 16.8]
+  - [1548, 6.3]
+  - [1568, 2.65]
+  - [1585, 1.9]
+  - [1595, 1.375]
+  - [1605, 1.075]
+# Events marked on the time chart (not data points: there is no population estimate for those
+# years) and listed in the chronology, with what happened up to each data point.
+events:
+  - year: 1519
+    label: Llegada de Cortés
+    detail: >-
+      Hernán Cortés desembarca en la costa del Golfo en abril y entra en Tenochtitlan en noviembre,
+      recibido por Moctezuma.
+  - year: 1520
+    label: Epidemia de viruela
+    detail: >-
+      La viruela llega con la expedición de Pánfilo de Narváez y se extiende hasta Tenochtitlan;
+      entre sus víctimas está Cuitláhuac, el sucesor de Moctezuma.
+  - year: 1521
+    label: Caída de Tenochtitlan
+    detail: >-
+      Tras un sitio que empezó en mayo, la ciudad se rinde el 13 de agosto. Desde acá el ritmo del
+      cambio se toma como máximo.
+  - year: 1531
+    label: Epidemia de sarampión
+    detail: >-
+      La segunda gran epidemia después de la viruela, llegada también con los españoles; murieron
+      muchos, aunque menos que por la viruela. Los nahuas la llamaron záhuatl tepiton ("lepra
+      chica"). Ocurre justo antes de la primera cifra de población posterior a la conquista.
+# Short label shown next to a population figure on the time chart (its point_note is the
+# explanation on hover).
+point_labels:
+  1532: Primera cifra tras la conquista
+# What happened up to each population figure (shown with the figure in the chronology).
+point_notes:
+  1518: Antes del contacto. Es la base del índice (capacidad = 100).
+  1532: >-
+    Primera cifra después de la conquista. Entre medio: la guerra, la viruela de 1520, el
+    sarampión de 1531, y la reorganización de los pueblos en encomiendas que debían tributo a los
+    españoles. Cook y Borah la calculan a partir de los registros de tributarios de esos años; es
+    de sus cifras menos firmes (la más sólida es la de 1568, con datos de casi todos los pueblos).
+  1568: La estimación más firme de la serie, con registros de alrededor del 90 % de los pueblos.
+event_sources:
+  - label: Wikipedia, "History of smallpox in Mexico"
+    detail: La viruela de 1520, su llegada con Narváez y la muerte de Cuitláhuac.
+    url: https://en.wikipedia.org/wiki/History_of_smallpox_in_Mexico
+  - label: >-
+      Mandujano Sánchez, Camarillo Solache y Mandujano (2003), "Historia de las epidemias en el
+      México antiguo. Algunos aspectos biológicos y sociales", revista Tiempo, UAM, abril de 2003
+    detail: >-
+      La epidemia de sarampión de 1531 (záhuatl tepiton, "lepra chica"), la segunda después de la
+      viruela: llegó también con los españoles y mató a muchos, aunque menos que la viruela.
+    url: https://www.uam.mx/difusion/revista/abr2003/mandujano.pdf
+  - label: Wikipedia, "Fall of Tenochtitlan"
+    detail: El sitio desde el 22 de mayo y la rendición del 13 de agosto de 1521.
+    url: https://en.wikipedia.org/wiki/Fall_of_Tenochtitlan
+  - label: Wikipedia, "Spanish conquest of the Aztec Empire"
+    detail: La llegada de Cortés en 1519 y su entrada en Tenochtitlan.
+    url: https://en.wikipedia.org/wiki/Spanish_conquest_of_the_Aztec_Empire
+# Year used for the worked example in "Cómo se calcula".
+example_year: 1548
+# A lower estimate to show how much the curve depends on the source.
+alternative:
+  label: Rosenblat
+  base: [1519, 4.5]
+  compare: [1595, 3.5]
+sources:
+  series:
+    - label: 'Cook y Borah (1979), Essays in Population History: Mexico and California, vol. III'
+      detail: >-
+        Cap. I: la serie completa que usa el indicador. University of California Press.
+      url: https://publishing.cdlib.org/ucpressebooks/public/book/essays-in-population-history-vol-iii-mexico-and-california.html
+    - label: 'Borah y Cook (1963), The Aboriginal Population of Central Mexico on the Eve of the Spanish Conquest'
+      detail: >-
+        Ibero-Americana 45: la estimación para 1518. El libro no está en línea; el enlace lleva a la
+        bibliografía de Woodrow Borah.
+      url: https://en.wikipedia.org/wiki/Woodrow_Borah
+    - label: 'Cook y Borah (1960), The Indian Population of Central Mexico, 1531–1610'
+      detail: "Ibero-Americana 44: las cifras de 1532 a 1605 (ficha de biblioteca)."
+      url: https://baul.fahho.mx/Record/27341
+    - label: 'Borah y Cook (1960), The Population of Central Mexico in 1548'
+      detail: "Ibero-Americana 43: la cifra de 1548, a partir de la Suma de visitas de pueblos (ficha de biblioteca)."
+      url: https://baul.fahho.mx/Record/27340
+  debate:
+    - label: 'McCaa, "Demographic Disaster in Mexico, 1519–1595" (Universidad de Minnesota)'
+      detail: >-
+        Tabla comparativa: para 1519, Rosenblat 4,5 M, Zambardino 5 a 10 M, Mendizábal 8,2 M, Cook y
+        Simpson 10,5 M, Cook y Borah 18 a 30 M; también Sanders, Whitmore y Gibson para regiones
+        más chicas.
+      url: https://users.pop.umn.edu/~rmccaa/mxpoprev/table2.htm
+    - label: 'McCaa, "Was the 16th century a demographic catastrophe for Mexico?"'
+      detail: >-
+        Resume el debate entre maximalistas (Cook y Borah) y minimalistas (Rosenblat) y aclara que
+        la estimación de Cook y Borah se refiere a un área de alrededor de medio millón de km², sin
+        Yucatán, Chiapas ni el norte.
+      url: https://users.pop.umn.edu/~rmccaa/noncuant/democat2.htm

@@ -86,10 +86,20 @@ class GraduateTrends(BaseModel):
     source: str = NOTICES["graduates"]
 
 
+class JobsCompetition(BaseModel):
+    """Applicants per posting in a sector (None: all postings)."""
+    sector: str | None
+    ofertas: int
+    con_postulantes: int  # postings with applicant data
+    mediana_postulantes: float | None  # None with fewer than jobs_view.competition_min_postings
+    en_tope: float | None  # share of postings at the cap (LinkedIn's "200+")
+
+
 class JobsSummary(BaseModel):
     total: int
     scraped_at: datetime | None
     por_provincia_sector: list[JobsSummaryCell]
+    competencia: list[JobsCompetition] = []  # overall first, then by sector, most competed first
     source: str = NOTICES["jobs"]
     # how to show it (app.yaml -> jobs_view): notice, sector order with "other" last, page size
     view: JobsView = app_config().jobs_view

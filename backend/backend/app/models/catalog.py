@@ -1,4 +1,5 @@
-from sqlalchemy import ARRAY, Boolean, ForeignKey, Numeric, String, Text
+from sqlalchemy import ARRAY, JSON, Boolean, ForeignKey, Numeric, String, Text
+from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.models.base import Base
@@ -47,6 +48,29 @@ class Skill(Base):
     name: Mapped[str] = mapped_column(Text)
     skill_type: Mapped[str | None] = mapped_column(Text)
     esco_uri: Mapped[str | None] = mapped_column(Text)
+    description: Mapped[str | None] = mapped_column(Text)  # definition shown (Spanish)
+    description_en: Mapped[str | None] = mapped_column(Text)  # ESCO's English original
+    # where the Spanish comes from: esco (ESCO's own Spanish) | translation
+    # (config/reference/esco_traducciones_es.yaml, kept next to the English original)
+    description_origin: Mapped[str | None] = mapped_column(Text)
+    # ESCO hierarchy group at analytics.yaml -> skill_gaps.group_level (e.g. S2.2.1, or a CINE-F
+    # detailed field such as 0412 for knowledge)
+    group_code: Mapped[str | None] = mapped_column(Text)
+
+
+class SkillGroup(Base):
+    """A concept of the ESCO skills hierarchy (skills S, attitudes A, languages L, transversal T;
+    knowledge follows CINE-F/ISCED-F fields). Parents are kept so groups can be rolled up."""
+
+    __tablename__ = "skill_groups"
+    group_code: Mapped[str] = mapped_column(Text, primary_key=True)
+    name: Mapped[str] = mapped_column(Text)
+    description: Mapped[str | None] = mapped_column(Text)  # shown (Spanish)
+    description_en: Mapped[str | None] = mapped_column(Text)  # ESCO's English original
+    description_origin: Mapped[str | None] = mapped_column(Text)  # esco | translation
+    level: Mapped[int] = mapped_column()
+    parent_code: Mapped[str | None] = mapped_column(Text)
+    esco_uri: Mapped[str | None] = mapped_column(Text)
 
 
 class OccupationSkill(Base):
@@ -55,4 +79,10 @@ class OccupationSkill(Base):
     skill_code: Mapped[str] = mapped_column(ForeignKey("skills.skill_code"), primary_key=True)
     country_iso3: Mapped[str] = mapped_column(ForeignKey("countries.iso3"), primary_key=True)
     weight: Mapped[float | None] = mapped_column(Numeric)
+    # ESCO category for the group: "essential" if essential for at least one of the group's ESCO
+    # occupations, otherwise "optional" (sources.yaml -> esco.options.relation_categories)
+    relation: Mapped[str | None] = mapped_column(String(16))
+    # The group's ESCO occupations that use the skill and how: [{"name", "relation"}], strongest
+    # first (e.g. 7515 food tasters, via "controlador de leche de granja", essential)
+    via: Mapped[list | None] = mapped_column(JSON().with_variant(JSONB, "postgresql"))
     source_id: Mapped[int | None] = mapped_column(ForeignKey("sources.source_id"))

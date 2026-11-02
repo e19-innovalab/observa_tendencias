@@ -1,0 +1,129 @@
+# CINE-F 2013 detailed field -> CIUO-08 (ISCO-08) unit groups the field mainly trains for. One table
+# shared by Argentina, Chile and Uruguay: each country's careers are first assigned a detailed field
+# (carreras_<country>_cine.yaml) and their graduates reach occupations through this table.
+#
+# STATUS: draft, NOT REVIEWED (reviewed: false). There is no official CINE-F -> CIUO correspondence.
+# Criteria (same as the per-country crosswalks it replaces, data/scripts/referencias/README.md, 5):
+# - the occupations a graduate of the field is mainly trained for, not every possible job;
+# - "*": university and professional degrees (CIUO major groups 1-2 mostly);
+#   "tecnico": technical degrees (técnico, tecnólogo, tecnicatura...), mostly major group 3. A field
+#   without "tecnico" uses "*" for both.
+# - [] : generic or interdisciplinary fields that do not train for a specific occupation; their
+#   graduates count for no occupation.
+# Graduates of a field are split equally among its codes.
+
+reviewed: false
+# Field names (CINE-F 2013), shown next to each career in the review view.
+classification: reference/cine_f_2013.yaml
+
+fields:
+  # 00 Programas y certificaciones genéricos
+  "0011": []
+  "0021": []
+  "0031": []
+  # 01 Educación
+  "0111": {"*": [2351, 2359], tecnico: [2359]}
+  "0112": {"*": [2342], tecnico: [5311]}
+  "0113": {"*": [2341], tecnico: [5312]}
+  "0114": {"*": [2330, 2320], tecnico: [5312]}
+  "0119": []
+  # 02 Artes y humanidades
+  "0211": {"*": [2654, 2642], tecnico: [3521, 3431]}
+  "0212": {"*": [2163, 2166], tecnico: [3432, 3118]}
+  "0213": [2651]
+  "0214": [7314, 7318]
+  "0215": {"*": [2652, 2653, 2655], tecnico: [3435]}
+  "0219": []
+  "0221": [2636]
+  "0222": [2633]
+  "0223": [2633]
+  "0229": [2633]
+  "0231": {"*": [2643], tecnico: [2643]}
+  "0232": [2641, 2643]
+  "0239": [2643]
+  # 03 Ciencias sociales, periodismo e información
+  "0311": [2631]
+  "0312": [2633, 2422]
+  "0313": [2634]
+  "0314": [2632]
+  "0319": [2632]
+  "0321": {"*": [2642, 2432], tecnico: [3521]}
+  "0322": {"*": [2622, 2621], tecnico: [4411]}
+  "0329": [2642]
+  # 04 Administración de empresas y derecho
+  "0411": {"*": [2411], tecnico: [3313]}
+  "0412": {"*": [2412, 2413], tecnico: [3311, 3312]}
+  "0413": {"*": [2421, 1219], tecnico: [3343, 3339]}
+  "0414": {"*": [2431], tecnico: [3322, 3339]}
+  "0415": [3343, 4120]
+  "0416": {"*": [1420, 2433], tecnico: [3322, 5223]}
+  "0417": []
+  "0419": {"*": [2421], tecnico: [3343]}
+  "0421": {"*": [2611, 2619], tecnico: [3411]}
+  # 05 Ciencias naturales, matemáticas y estadística
+  "0511": {"*": [2131], tecnico: [3141]}
+  "0512": {"*": [2131], tecnico: [3141]}
+  "0519": [2131]
+  "0521": {"*": [2133], tecnico: [3141]}
+  "0522": {"*": [2133], tecnico: [3143]}
+  "0529": [2133]
+  "0531": {"*": [2113], tecnico: [3111]}
+  "0532": {"*": [2114], tecnico: [3111]}
+  "0533": [2111]
+  "0539": [2111]
+  "0541": [2120]
+  "0542": {"*": [2120], tecnico: [3314]}
+  # 06 TIC
+  "0611": [3512, 3514]
+  "0612": {"*": [2522, 2523, 2521], tecnico: [3513, 3511]}
+  "0613": {"*": [2511, 2512, 2514, 2519], tecnico: [3512, 2512]}
+  "0619": {"*": [2511, 2512], tecnico: [3512]}
+  # 07 Ingeniería, industria y construcción
+  "0711": {"*": [2145], tecnico: [3111, 3133]}
+  "0712": {"*": [2143], tecnico: [3141]}
+  "0713": {"*": [2151], tecnico: [3113]}
+  "0714": {"*": [2152, 2153], tecnico: [3114, 3522]}
+  "0715": {"*": [2144], tecnico: [3115]}
+  "0716": {"*": [2144], tecnico: [3115, 7231]}
+  "0719": {"*": [2141, 2149], tecnico: [3119]}
+  "0721": {"*": [2145], tecnico: [3139, 7512]}
+  "0722": {"*": [2145], tecnico: [3119]}
+  "0723": {"*": [2163], tecnico: [7531]}
+  "0724": {"*": [2146], tecnico: [3117]}
+  "0729": {"*": [2141], tecnico: [3119]}
+  "0731": {"*": [2161, 2164], tecnico: [3112, 3118]}
+  "0732": {"*": [2142], tecnico: [3112, 3123]}
+  # 08 Agricultura, silvicultura, pesca y veterinaria
+  "0811": {"*": [2132], tecnico: [3142]}
+  "0812": {"*": [2132], tecnico: [3142]}
+  "0819": {"*": [2132], tecnico: [3142]}
+  "0821": {"*": [2132], tecnico: [3143]}
+  "0831": {"*": [2132], tecnico: [3142]}
+  "0841": {"*": [2250], tecnico: [3240]}
+  # 09 Salud y bienestar
+  "0911": {"*": [2261], tecnico: [3251, 3214]}
+  "0912": {"*": [2211, 2212], tecnico: [3256]}
+  "0913": {"*": [2221, 2222], tecnico: [3221, 3222]}
+  "0914": {"*": [2269], tecnico: [3211, 3212]}
+  "0915": {"*": [2264, 2266, 2269], tecnico: [3255, 3259]}
+  "0916": {"*": [2262], tecnico: [3213]}
+  "0917": [2230, 3230]
+  "0919": {"*": [2265, 2263], tecnico: [3259, 3257]}
+  "0921": {"*": [2635], tecnico: [5322]}
+  "0922": {"*": [2635], tecnico: [5311]}
+  "0923": {"*": [2635], tecnico: [3412]}
+  "0929": {"*": [2635], tecnico: [3412]}
+  # 10 Servicios
+  "1011": [5152]
+  "1012": [5141, 5142]
+  "1013": {"*": [1411, 1412], tecnico: [3434, 5120]}
+  "1014": {"*": [3422, 2330], tecnico: [3422, 3423]}
+  "1015": {"*": [1431, 3332], tecnico: [4221, 5113]}
+  "1019": []
+  "1021": {"*": [2263], tecnico: [3257]}
+  "1022": {"*": [2263], tecnico: [3257]}
+  "1029": [3257]
+  "1031": ["0110"]
+  "1032": [5412, 5419]
+  "1039": [5419]
+  "1041": {"*": [3153, 1324], tecnico: [8322, 3152]}

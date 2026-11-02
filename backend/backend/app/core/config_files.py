@@ -5,7 +5,7 @@ from pathlib import Path
 from typing import Any, Literal
 
 import yaml
-from pydantic import BaseModel, Field, model_validator
+from pydantic import BaseModel, Field, field_validator, model_validator
 
 from app.core.config import BACKEND_DIR, settings
 
@@ -53,6 +53,8 @@ class FeaturedOccupationConf(BaseModel):
 class UniverseConf(BaseModel):
     file: str
     groups_file: str | None = None
+    # ISCO group prefixes -> sector, for occupations that are not featured (longest prefix wins)
+    sectors_file: str | None = None
 
 
 class NameRuleConf(BaseModel):
@@ -84,6 +86,8 @@ class CatalogConf(BaseModel):
     featured_occupations: list[FeaturedOccupationConf]
     occupations: list[OccupationConf] = []
     groups: dict[str, str] = {}
+    group_definitions: dict[str, str] = {}  # what each major group includes (ILO)
+    group_definitions_source: dict[str, str] = {}  # label, url
 
     def occupation(self, code: str) -> OccupationConf | None:
         return next((o for o in self.occupations if o.occupation_code == code), None)
@@ -172,6 +176,8 @@ class IndicatorConf(BaseModel):
     domain: Domain
     higher_is_better: bool | None = None
     description: str | None = None
+    # Values the indicator can take ([min, max], null = unbounded): projections are clipped to it.
+    value_range: tuple[float | None, float | None] | None = None
     trend: dict[str, Any] = {}
     alerts: dict[str, Any] = {}
     series: list[SeriesConf] = []
@@ -239,12 +245,107 @@ class RankingConf(BaseModel):
     group_scope: Literal["all", "country"]
 
 
+class DisplayValueConf(BaseModel):
+    indicator: str
+    label: str
+    note: str | None = None
+
+
 class EmployabilityLabels(BaseModel):
     levels: dict[str, str]
     dimensions: dict[str, str]
     dimension_info: dict[str, DimensionInfo] = {}
+    display_values: dict[str, DisplayValueConf] = {}
+    terms: dict[str, str] = {}
+    unit_formats: dict[str, str] = {}
     no_source_note: str | None = None
     ranking: RankingConf
+
+
+class MoctezumaLabels(BaseModel):
+    levels: dict[str, str]
+    sides: dict[str, str]
+    dimensions: dict[str, str]
+    side_info: dict[str, str] = {}
+    dimension_info: dict[str, DimensionInfo] = {}
+    history_file: str | None = None
+    example_occupation: str | None = None
+    side_history: dict[str, str] = {}
+
+
+class RedQueenLabels(BaseModel):
+    levels: dict[str, str]
+    dimensions: dict[str, str]
+    dimension_info: dict[str, DimensionInfo] = {}
+
+
+class SisyphusLabels(MoctezumaLabels):
+    quadrants: dict[str, "PathInfo"]
+
+
+class PathInfo(BaseModel):
+    label: str
+    short: str
+    description: str
+
+
+class LuditaToday(BaseModel):
+    label: str
+    technology: str
+    arrival_year: int
+    arrival_note: str
+    indicator: str
+    group_digits: int
+    groups: list[str]
+    source_short: str
+
+
+class LuditaHistoryConf(BaseModel):
+    file: str
+    zoom_years: int
+    today: LuditaToday
+
+
+class LuditaLabels(MoctezumaLabels):
+    paths: dict[str, PathInfo]
+    history: LuditaHistoryConf
+
+
+class GenerationalGapConf(BaseModel):
+    title: str
+    youth_indicator: str
+    total_indicator: str
+    description: str
+    headline: str
+
+
+class MotionAxis(BaseModel):
+    label: str
+    short_label: str | None = None  # selector of the vertical axis
+    indicator: str | None = None
+    methodology: str | None = None
+    aggregate: Literal["sum", "mean"] = "mean"
+    measure: Literal["level", "yoy"] = "level"
+    applies_to_all_years: bool = False
+    scale: Literal["linear", "log"] = "linear"
+    description: str | None = None
+    reference: float | None = None
+    domain: tuple[float, float] | None = None
+    min_base: float = 0
+
+
+class MotionConf(BaseModel):
+    title: str
+    description: str | None = None
+    group_digits: int
+    first_year: int
+    max_carry_years: int
+    x: MotionAxis
+    x_secondary: MotionAxis | None = None
+    size: MotionAxis
+    default_y: str
+    y: dict[str, MotionAxis]
+    notes: list[str] = []
 
 
 class AlertLabels(BaseModel):
@@ -254,12 +355,30 @@ class AlertLabels(BaseModel):
     severity_info: dict[str, str] = {}
 
 
+class DatasetTemplateConf(BaseModel):
+    file_name: str
+    sheets: dict[str, str]
+    instructions: list[str]
+    examples_title: str
+    examples: list[dict[str, Any]]
+    headers: dict[str, str]
+
+
 class DatasetsConf(BaseModel):
     raw_dir: Path
     uploads_dir: Path
     max_upload_bytes: int
     max_errors_reported: int
     preview_rows: int
+    max_rows: int
+    max_unzipped_bytes: int
+    group_rows_shown: int
+    group_values_shown: int
+    group_titles: dict[str, str]
+    group_hints: dict[str, str]
+    overlap_examples: int
+    template: DatasetTemplateConf
+    example_files: dict[str, dict[str, str]] = {}
     messages: dict[str, str]
 
     def path(self, relative: Path) -> Path:
@@ -271,6 +390,10 @@ class SkillsConf(BaseModel):
     profile_top: int
     weight_note: str
     gap_ranking_min_occupations: int
+    sector_relation: str
+    relations: dict[str, str]
+    no_sector_label: str
+    supply_notes: dict[str, str] = {}
     sufficiency: dict[str, str]
 
 
@@ -283,6 +406,114 @@ class JobsView(BaseModel):
     other_sector: str
     no_level: str
     page_size: int
+    applicants_cap: int
+    competition_min_postings: int
+
+
+class RoleConf(BaseModel):
+    label: str
+    permissions: list[str]
+
+
+class AuthConf(BaseModel):
+    token_ttl_hours: float
+    password_min_length: int
+    default_role: str
+    roles: dict[str, RoleConf]
+    statuses: dict[str, str]
+    messages: dict[str, str]
+
+
+class AssistantProviderConf(BaseModel):
+    model: str
+    max_tokens: int
+    timeout_seconds: float
+    base_url: str | None = None  # local: OpenAI-compatible server
+    temperature: float | None = None  # local only
+    effort: str | None = None  # anthropic only
+    fallbacks: str | None = None  # anthropic only; "default" or empty
+
+
+class AssistantToolParam(BaseModel):
+    type: str
+    description: str = ""
+    required: bool = False
+    enum: list[str] | None = None
+    # Only values already known in the conversation are accepted (see AssistantTool.provides).
+    must_be_known: bool = False
+
+
+class AssistantToolLink(BaseModel):
+    path: str
+    label: str
+    query: list[str] = []
+
+
+class AssistantTool(BaseModel):
+    name: str
+    description: str
+    path: str
+    params: dict[str, AssistantToolParam] = {}
+    fixed: dict[str, str | int | bool] = {}
+    link: AssistantToolLink | None = None
+    # Key in this tool's results whose values become known codes (e.g. occupation_code).
+    provides: str | None = None
+
+
+class AssistantLimits(BaseModel):
+    questions_per_user_per_day: int
+    questions_per_day: int
+
+
+class NumbersCheckConf(BaseModel):
+    enabled: bool
+    tolerance: float
+    ignore_up_to: float
+    year_range: tuple[int, int]
+    on_unverified: Literal["warn", "block"]
+
+
+class ScriptedConf(BaseModel):
+    enabled: bool
+    intent_words: dict[str, list[str]]
+    stopwords: list[str]
+    country_words: dict[str, list[str]]
+    max_options: int
+    ranking_size: int
+    skills_size: int
+    decimals: int
+    model_label: str
+    templates: dict[str, str]
+
+
+class AssistantConf(BaseModel):
+    enabled: bool
+    permission: str
+    provider: str
+    providers: dict[str, AssistantProviderConf]
+    max_tool_calls: int
+    max_question_chars: int
+    history_turns: int
+    limits: AssistantLimits
+    tool_result_max_items: int
+    tool_result_max_chars: int
+    tool_result_drop_keys: list[str] = []
+    numbers_check: NumbersCheckConf
+    system_prompt: str
+    context_template: str
+    context_fields: dict[str, str]
+    # Known codes also come from the question, the history and the context: words of this shape.
+    known_code_pattern: str
+    final_round_note: str
+    tools: list[AssistantTool]
+    messages: dict[str, str]
+    texts: dict[str, str]
+    examples: list[str] = []
+    scripted: ScriptedConf
+
+
+class SearchConf(BaseModel):
+    aliases_file: str
 
 
 class AppConf(BaseModel):
@@ -300,6 +531,12 @@ class AppConf(BaseModel):
     trend_states: dict[str, str]
     isco_levels: dict[int, str]
     employability: EmployabilityLabels
+    moctezuma: MoctezumaLabels
+    ludita: LuditaLabels
+    red_queen: RedQueenLabels
+    sisyphus: SisyphusLabels
+    motion: MotionConf
+    generational_gap: GenerationalGapConf
     alerts: AlertLabels
     skills: SkillsConf
     assessments: dict[str, str]
@@ -307,6 +544,9 @@ class AppConf(BaseModel):
     source_status: dict[str, str]
     notices: dict[str, str]
     jobs_view: JobsView
+    auth: AuthConf
+    search: SearchConf
+    assistant: AssistantConf
     messages: dict[str, str]
 
 
@@ -357,6 +597,14 @@ def _read(name: str, config_dir: Path | None = None) -> dict:
         return yaml.safe_load(f)
 
 
+def _sector_by_prefix(code: str, prefixes: dict[str, str]) -> str | None:
+    """Sector of the longest prefix of the ISCO code listed in the sectors file."""
+    for length in range(len(code), 0, -1):
+        if code[:length] in prefixes:
+            return prefixes[code[:length]]
+    return None
+
+
 @lru_cache
 def catalog() -> CatalogConf:
     """Countries, sectors and the occupation universe (ISCO-08 unit groups), with the featured
@@ -366,7 +614,10 @@ def catalog() -> CatalogConf:
         universe = yaml.safe_load(f)["occupations"]
     if conf.occupation_universe.groups_file:
         with (settings.config_dir / conf.occupation_universe.groups_file).open(encoding="utf-8") as f:
-            conf.groups = {str(k): v for k, v in yaml.safe_load(f)["groups"].items()}
+            groups_file = yaml.safe_load(f)
+            conf.groups = {str(k): v for k, v in groups_file["groups"].items()}
+            conf.group_definitions = {str(k): v for k, v in (groups_file.get("definitions") or {}).items()}
+            conf.group_definitions_source = groups_file.get("definitions_source") or {}
         for rule in conf.group_name_rules:
             for code in rule.codes:
                 if code in conf.groups:
@@ -379,6 +630,13 @@ def catalog() -> CatalogConf:
     if set(featured) & set(excluded):
         raise ValueError(f"occupations both featured and excluded: {sorted(set(featured) & set(excluded))}")
     sectors = {s.sector_code for s in conf.sectors}
+    sector_prefixes: dict[str, str] = {}
+    if conf.occupation_universe.sectors_file:
+        with (settings.config_dir / conf.occupation_universe.sectors_file).open(encoding="utf-8") as f:
+            sector_prefixes = {str(k): v for k, v in yaml.safe_load(f)["prefixes"].items()}
+        unknown_sectors = set(sector_prefixes.values()) - sectors
+        if unknown_sectors:
+            raise ValueError(f"sectors_file uses unknown sectors: {sorted(unknown_sectors)}")
     conf.occupations = []
     for code, names in sorted(universe.items()):
         f = featured.get(code)
@@ -392,7 +650,8 @@ def catalog() -> CatalogConf:
         conf.occupations.append(OccupationConf(
             occupation_code=code, isco08_code=code,
             name=f.name if f else (name_es or names.get("name_en") or code),
-            name_en=names.get("name_en"), sector_code=f.sector_code if f else None,
+            name_en=names.get("name_en"),
+            sector_code=f.sector_code if f else _sector_by_prefix(code, sector_prefixes),
             is_featured=f is not None, is_excluded=code in excluded,
             exclusion_reason=excluded.get(code),
         ))
@@ -424,9 +683,116 @@ def education_requirements(file: str) -> EducationRequirementsConf:
         return EducationRequirementsConf.model_validate(yaml.safe_load(f))
 
 
+# --- reference/ludita_history.yaml ------------------------------------------------
+class HistoryPoint(BaseModel):
+    year: int
+    value: float
+    approx: bool = False
+    note: str | None = None
+
+
+class HistorySource(BaseModel):
+    label: str
+    detail: str | None = None
+    url: str
+
+
+class HistoryCase(BaseModel):
+    label: str
+    technology: str
+    arrival_year: int
+    arrival_note: str
+    base_year: int
+    path: str
+    source_short: str
+    series: list[HistoryPoint]
+    sources: list[HistorySource]
+
+    @field_validator("series", mode="before")
+    @classmethod
+    def _rows(cls, rows):
+        """[year, value] or [year, value, {approx, note}]."""
+        return [r if isinstance(r, dict) else {"year": r[0], "value": r[1], **(r[2] if len(r) > 2 else {})}
+                for r in rows]
+
+
+@lru_cache
+def ludita_history(file: str) -> dict[str, HistoryCase]:
+    with (settings.config_dir / file).open(encoding="utf-8") as f:
+        cases = yaml.safe_load(f)["cases"]
+    return {k: HistoryCase.model_validate(v) for k, v in cases.items()}
+
+
+class MoctezumaPace(BaseModel):
+    before: float
+    full: float
+    full_from: int
+    note: str
+
+
+class MoctezumaAlternative(BaseModel):
+    label: str
+    base: tuple[int, float]
+    compare: tuple[int, float]
+
+
+class HistoryEvent(BaseModel):
+    year: int
+    label: str
+    detail: str
+
+
+class MoctezumaHistoryConf(BaseModel):
+    region: str
+    contact_year: int
+    pace: MoctezumaPace
+    population_unit: str
+    base_year: int
+    population: list[tuple[int, float]]
+    example_year: int
+    alternative: MoctezumaAlternative
+    sources: dict[str, list[HistorySource]]  # series | debate
+    events: list[HistoryEvent] = []
+    point_notes: dict[int, str] = {}
+    point_labels: dict[int, str] = {}
+    event_sources: list[HistorySource] = []
+
+
+@lru_cache
+def moctezuma_history(file: str) -> MoctezumaHistoryConf:
+    with (settings.config_dir / file).open(encoding="utf-8") as f:
+        return MoctezumaHistoryConf.model_validate(yaml.safe_load(f))
+
+
+class OccupationAlias(BaseModel):
+    term: str
+    code: str
+    countries: list[str] = []
+    also: list[str] = []
+    note: str | None = None
+
+
+@lru_cache
+def occupation_aliases() -> list[OccupationAlias]:
+    """Local names of occupations (app.yaml -> search.aliases_file)."""
+    with (settings.config_dir / app_config().search.aliases_file).open(encoding="utf-8") as f:
+        return [OccupationAlias.model_validate(e) for e in yaml.safe_load(f)["entries"]]
+
+
 @lru_cache
 def app_config() -> AppConf:
-    return AppConf.model_validate(_read("app"))
+    conf = AppConf.model_validate(_read("app"))
+    # per environment (.env): e.g. in the cloud there is no Ollama, so provider local points to a
+    # hosted OpenAI-compatible API
+    a = conf.assistant
+    if settings.assistant_provider:
+        a.provider = settings.assistant_provider
+    active = a.providers.get(a.provider)
+    if active and settings.assistant_base_url:
+        active.base_url = settings.assistant_base_url
+    if active and settings.assistant_model:
+        active.model = settings.assistant_model
+    return conf
 
 
 @lru_cache

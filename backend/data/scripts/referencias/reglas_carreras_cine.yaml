@@ -1,0 +1,151 @@
+# Reglas para asignar a cada carrera su campo detallado CINE-F 2013 (4 dígitos), compartidas por
+# Argentina, Chile y Uruguay. generar_correspondencia_cine.py las aplica a las carreras cargadas de
+# cada país y escribe config/reference/carreras_<país>_cine.yaml. Las ocupaciones salen después de
+# una sola tabla común: config/reference/cine_f_ciuo.yaml.
+#
+# - El patrón es una expresión regular sobre el nombre normalizado (minúsculas, sin tildes, espacios
+#   simples). Gana la PRIMERA regla que coincide: las más específicas van antes.
+# - cine: null marca una carrera genérica (plan común, bachillerato, "otros..."), sin campo ni
+#   ocupación.
+# - Chile publica el campo específico (3 dígitos) de cada carrera: el script avisa cuando la regla
+#   asigna un campo detallado de otro campo específico.
+# - Es un borrador sin revisar (mismos criterios que data/scripts/referencias/README.md, sección 5).
+
+# Pasar a true cuando Data Analytics termine la revisión (se copia a los archivos generados).
+revisada: false
+
+# Carreras técnicas (CINE 5: técnico, tecnólogo, tecnicatura...): usan las ocupaciones "tecnico" de
+# cine_f_ciuo.yaml. Se reconocen por el nombre, o por el nivel en los países donde el nivel lo dice
+# (niveles_tecnicos).
+patron_tecnico: '^(tecnic|tecnologo|tecnologa|tecnologo/a|analista|asistente|auxiliar|laboratorista|higienista|perito|operador|otros tecnicos|escalonada)|tecnicatura'
+niveles_tecnicos:
+  ARG: [Pregrado]
+
+reglas:
+  # --- Genéricas ------------------------------------------------------------------------------
+  - {patron: '^ciclo |^cio |ciclo (inicial|basico|unico)|plan comun|^bachillerato|^otras ciencias|^otros profesionales de (administracion|arte|ciencias|educacion|humanidades|salud|tecnologia)|^otros tecnicos de (administracion|arte|ciencias|educacion|humanidades|salud|tecnologia)|^otras ingenierias', cine: null}
+
+  # --- Casos que otras reglas confundirían (van primero) --------------------------------------
+  # Chile (Mi Futuro) los ubica en estos campos específicos.
+  - {patron: 'gastronom|cocina|hoteler', cine: "1013"}
+  - {patron: 'turis|eventos y hospitalidad', cine: "1015"}
+  - {patron: 'preparacion fisica|deporte|deportiv|fitness|futbol', cine: "1014"}
+  - {patron: 'dibujo arquitectonico|dibujo tecnico|proyectos de ingenieria', cine: "0732"}
+  - {patron: 'ingenieria (civil )?(en )?(medio )?ambient|tecnico en medio ambiente', cine: "0712"}
+  - {patron: 'ingenieria (civil )?(en )?sonido', cine: "0714"}
+  - {patron: 'ingenieria (civil )?(en )?(biotecnolog|bioquimica)|bioingenieria|biotecnologia industrial', cine: "0711"}
+  - {patron: 'geomensura|geomatica|cartografia|agrimens', cine: "0532"}
+  - {patron: 'vitivinicultura|enologia', cine: "0811"}
+  - {patron: 'marina y maritimo|maritimo portuaria', cine: "1041"}
+  - {patron: 'procesos industriales', cine: "0729"}
+  - {patron: 'prevencion y rehabilitacion', cine: "0929"}
+  - {patron: 'orientacion familiar', cine: "0923"}
+  - {patron: 'relaciones institucionales|gestion cultural', cine: "0413"}
+  - {patron: 'derecho|abogac|escriban|notariado', cine: "0421"}
+  - {patron: 'paramedicas', cine: "0913"}
+  # Argentina: la disciplina "Educación" son sobre todo profesorados universitarios.
+  - {patron: '^educacion$', cine: "0114"}
+  # Argentina: la disciplina reúne contadores, administradores y economistas; la mayoría son
+  # contadores (Contador Público es la carrera con más egresados). A revisar.
+  - {patron: '^economia y administracion$', cine: "0411"}
+
+  # --- 01 Educación ---------------------------------------------------------------------------
+  - {patron: 'educador de parvulos|educacion de parvulos|primera infancia|educacion inicial|preescolar', cine: "0112"}
+  - {patron: 'educacion basica|magisterio|maestro|educacion primaria', cine: "0113"}
+  - {patron: 'pedagogia en educacion diferencial|educador diferencial|educacion especial', cine: "0114"}
+  - {patron: 'pedagogia en educacion fisica|profesor de educacion fisica', cine: "0114"}
+  - {patron: '^pedagogia|profesorado|profesor de|formacion pedagogica', cine: "0114"}
+  - {patron: 'psicopedagog', cine: "0111"}
+  - {patron: 'educacion fisica', cine: "1014"}
+  - {patron: '^educacion$|ciencias de la educacion|licenciad[oa] en educacion|licenciatura en educacion|acompanamiento pedagogico', cine: "0111"}
+
+  # --- 02 Artes y humanidades -----------------------------------------------------------------
+  - {patron: 'animacion|videojuego|multimedia|comunicacion audiovisual|audiovisual|realizador de cine|cine|fotograf|sonido|imagen fotografica|produccion grafica', cine: "0211"}
+  - {patron: 'diseno de (ambientes|interiores)|ambientes e interiores|diseno de vestuario|vestuario|indumentaria|modas?\b|textil y moda|diseno industrial|diseno teatral|^diseno$|diseno integrado|diseno aplicado', cine: "0212"}
+  - {patron: 'diseno grafico|comunicacion visual|arte digital|diseno, arte', cine: "0212"}
+  - {patron: 'actuacion|teatro|artes escenicas|dramaturgia|danza|music|canto|jazz|interpretacion musical|interpretacion instrumental|composicion|coral|coros', cine: "0215"}
+  - {patron: 'artes?\b|plastic|dibujo|pintura|ceramica|escultura|creador', cine: "0213"}
+  - {patron: 'teolog|religio', cine: "0221"}
+  - {patron: 'arqueolog|historia|historicas', cine: "0222"}
+  - {patron: 'filosofia', cine: "0223"}
+  - {patron: 'traduc|interpreta|lengua de senas|lsu', cine: "0231"}
+  - {patron: 'letras|literatura|linguistica|correccion de estilo|idiomas', cine: "0232"}
+  - {patron: 'humanidades', cine: "0229"}
+
+  # --- 03 Ciencias sociales, periodismo e información ----------------------------------------
+  - {patron: 'econom', cine: "0311"}
+  - {patron: 'ciencia politica|ciencias politicas|relaciones internacionales|estudios internacionales|diplomacia|politica, filosofia', cine: "0312"}
+  - {patron: 'psicolog|psicomotric', cine: "0313"}
+  - {patron: 'sociolog|antropolog|ciencias sociales|demografia|geografia|desarrollo regional|licenciatura en desarrollo|licenciado en desarrollo', cine: "0314"}
+  - {patron: 'periodismo|comunicacion social|ciencias de la informacion y de la comunicacion|comunicacion$|^lic\. en comunicacion|licenciatura en comunicacion|licenciado en comunicacion|ciencias de la comunicacion|comunicacion global|comunicacion orientacion', cine: "0321"}
+  - {patron: 'bibliotec|archivolog|archivologo|museolog|bienes culturales|centros de documentacion', cine: "0322"}
+
+  # --- 04 Administración de empresas y derecho ------------------------------------------------
+  - {patron: 'contador|contabilidad|auditor|tributari', cine: "0411"}
+  - {patron: 'finanzas|financier|previsional', cine: "0412"}
+  - {patron: 'marketing|publicidad|relaciones publicas|comercializacion|comunicacion empresarial|comunicacion y marketing', cine: "0414"}
+  - {patron: 'secretariado', cine: "0415"}
+  - {patron: 'ventas|visitador medico|comercio exterior', cine: "0416"}
+  - {patron: 'recursos humanos|relaciones laborales|gestion humana|relaciones humanas', cine: "0413"}
+  - {patron: 'derecho|abogac|juridic|criminalist|forense', cine: "0421"}
+  - {patron: 'ciencias? de datos|datos y negocios|business analytics|analisis de datos|inteligencia artificial', cine: "0542"}
+  - {patron: 'administracion|adminsitracion|gerencia|gestion de empresas|direccion de empresas|direccion y administracion|ingenieria comercial|control de gestion|gestion publica|gestion y control de calidad|control de calidad|logistica|negocios|produccion de eventos|economia y administracion|gestion universitaria', cine: "0413"}
+
+  # --- 05 Ciencias naturales, matemáticas y estadística --------------------------------------
+  - {patron: 'bioquimica clinica|bioquimico clinico', cine: "0914"}
+  - {patron: 'bioquimica y farmacia|quimica y farmacia|quimico farmaceutico|farmacia', cine: "0916"}
+  - {patron: 'ingenieria civil bioquimica|biotecnolog|bioingenieria|ingenieria biologica', cine: "0512"}
+  - {patron: 'bioquimica', cine: "0512"}
+  - {patron: 'biolog', cine: "0511"}
+  - {patron: 'quimica ambiental|medio ambiente|ambiental|recursos renovables|recursos naturales|recursos hidricos|desarrollo sustentable|efluentes|agua y desarrollo', cine: "0521"}
+  - {patron: 'ingenieria (civil )?quimica|ingeniero quimico|quimica industrial|ingenieria en quimica', cine: "0711"}
+  - {patron: 'quimic', cine: "0531"}
+  - {patron: 'geolog|geominer|ciencias del suelo|meteorolog|atmosfera', cine: "0532"}
+  - {patron: 'fisica medica', cine: "0914"}
+  - {patron: 'fisicas?\b|\bastronom|fisico-matematica', cine: "0533"}
+  - {patron: 'estadistic', cine: "0542"}
+  - {patron: 'matematic', cine: "0541"}
+
+  # --- 06 TIC ---------------------------------------------------------------------------------
+  - {patron: 'redes|conectividad|infraestructura informatica|soporte', cine: "0612"}
+  - {patron: 'computacion|informatica|sistemas$|ingenieria en sistemas|licenciatura en sistemas|software|desarrollador|analisis de sistemas|desarrollo de sistemas|diseno web|tecnologias de la informacion', cine: "0613"}
+
+  # --- 07 Ingeniería, industria y construcción ------------------------------------------------
+  - {patron: 'prevencion de riesgos|salud ocupacional|seguridad y salud', cine: "1022"}
+  - {patron: 'electric|energia|sistemas electricos', cine: "0713"}
+  - {patron: 'electronic|automatizacion|instrumentacion, automatizacion|telecomunicacion|telematica|sistemas de comunicacion|control y automatica|mecatronica|mectronica|sonido y acustica', cine: "0714"}
+  - {patron: 'mecanica automotriz|automotriz|naval|marina y maritimo', cine: "0716"}
+  - {patron: 'mecanic|electromecanic|matriceria|metalurg|refrigeracion|mantenimiento industrial|materiales', cine: "0715"}
+  - {patron: 'biomedic', cine: "0719"}
+  - {patron: 'alimentos|alimentari|analisis alimentario|lacteos|carnico|vitivinicultura|enologia|agroindustria', cine: "0721"}
+  - {patron: 'madera|forestales', cine: "0722"}
+  - {patron: 'textil', cine: "0723"}
+  - {patron: 'minas|mineria|minero', cine: "0724"}
+  - {patron: 'industrial|de produccion|procesos industriales|proyectos de ingenieria|ingenieria civil, plan|^ingenieria$|ingenieria civil$|^industrias$', cine: "0719"}
+  - {patron: 'arquitect|paisaj|areas verdes|urbanismo|dibujo arquitectonico', cine: "0731"}
+  - {patron: 'construccion|obras civiles|ingenieria civil|ingeniero civil|proyectos estructurales|topografia|geomensura|geomatica|cartografia|agrimens|dibujo tecnico', cine: "0732"}
+
+  # --- 08 Agricultura, silvicultura, pesca y veterinaria --------------------------------------
+  - {patron: 'veterinari', cine: "0841"}
+  - {patron: 'forestal|silvicultura', cine: "0821"}
+  - {patron: 'acuicultura|pesca', cine: "0831"}
+  - {patron: 'agronom|agricola|agropecuari|agroambiental|ganadera|produccion lechera|produccion equina|ciencias agropecuarias', cine: "0811"}
+
+  # --- 09 Salud y bienestar -------------------------------------------------------------------
+  - {patron: 'odontolog|dental|higienista', cine: "0911"}
+  - {patron: 'medicina transfusional|hemoterapia|laboratorio clinico|anatomia patologica|imagenolog|radiolog|radioterapia|radioisotopos|tecnologia medica|neumocardiolog|neurofisiologia|registros medicos|optica|oftalmolog', cine: "0914"}
+  - {patron: 'naturopatia|terapias naturales|masoterapia', cine: "0917"}
+  - {patron: 'medicina|^medico', cine: "0912"}
+  - {patron: 'enfermeria|emfermeria|obstetr|partera|ginecologia', cine: "0913"}
+  - {patron: 'kinesiolog|fisioterap|fonoaudiolog|terapia ocupacional|musicoterapia|podologia|rehabilitacion|instrumentacion quirurgica|arsenaleria|acompanamiento terapeutico', cine: "0915"}
+  - {patron: 'nutricion|dietetica|nutricionista|salud publica|sanidad|paramedicas', cine: "0919"}
+  - {patron: 'trabajo social|servicio social|asistente social|orientacion familiar|sociologia, antropologia y servicio social', cine: "0923"}
+
+  # --- 10 Servicios ---------------------------------------------------------------------------
+  - {patron: 'cosmetologia|peluqueria|estetica', cine: "1012"}
+  - {patron: 'gastronom|cocina|hoteler', cine: "1013"}
+  - {patron: 'deporte|deportiv|fitness|futbol|preparacion fisica|recreacion|tiempo libre', cine: "1014"}
+  - {patron: 'turis|eventos y hospitalidad', cine: "1015"}
+  - {patron: 'ciencias militares', cine: "1031"}
+  - {patron: 'seguridad privada|seguridad y orden publico', cine: "1032"}
+  - {patron: 'transporte|transito|puertos', cine: "1041"}

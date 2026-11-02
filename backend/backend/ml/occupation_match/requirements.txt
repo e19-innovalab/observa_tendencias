@@ -1,0 +1,7 @@
+# CPU / Apple: pip install -r requirements.txt
+# GPU NVIDIA (Alienware): instalar antes torch con CUDA desde https://pytorch.org/get-started/locally/
+sentence-transformers>=5
+datasets
+accelerate
+pyyaml
+httpx

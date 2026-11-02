@@ -280,9 +280,9 @@
       <a id="cw-csv" href="#" download>Descargar CSV</a>
     </div>
     <div class="meta" id="cw-summary"></div>
-    <div class="meta" id="cw-help" style="margin-top:4px">El código CIUO-08 se lee de izquierda a derecha: el 1.º dígito es el gran grupo (2 = profesionales, 3 = técnicos y profesionales de nivel medio), los 2 primeros el subgrupo principal, los 3 primeros el subgrupo y los 4 la ocupación. Pasá el mouse sobre un código para ver su jerarquía.</div>
+    <div class="meta" id="cw-help" style="margin-top:4px">Cada carrera tiene un campo detallado de la CINE-F 2013 (UNESCO), la misma clave para los tres países; las ocupaciones salen de una tabla común campo → ocupación, con ocupaciones de nivel técnico para las carreras técnicas. El código CIUO-08 se lee de izquierda a derecha: el 1.º dígito es el gran grupo (2 = profesionales, 3 = técnicos y profesionales de nivel medio), los 2 primeros el subgrupo principal, los 3 primeros el subgrupo y los 4 la ocupación. Pasá el mouse sobre un código para ver su jerarquía.</div>
     <div class="table-scroll" style="max-height:520px;overflow-y:auto"><table>
-      <thead><tr><th>Carrera</th><th>Área / subárea CINE-F</th><th>Titulados</th><th>Crec. anual</th><th>Ocupaciones CIUO-08 (proporción)</th></tr></thead>
+      <thead><tr><th>Carrera</th><th>Campo CINE-F 2013</th><th>Titulados</th><th>Crec. anual</th><th>Ocupaciones CIUO-08 (proporción)</th></tr></thead>
       <tbody id="cw-rows"></tbody>
     </table></div>
   </section>
@@ -794,13 +794,16 @@ function renderCrosswalk() {
   if (!cwData) return;
   const q = $("cw-q").value.trim().toLowerCase();
   const items = cwData.items.filter((i) => (!$("cw-generic").checked || i.is_generic) && (!q ||
-    i.career.toLowerCase().includes(q) || i.occupations.some((o) => o.occupation_code.startsWith(q) || o.name.toLowerCase().includes(q))));
+    i.career.toLowerCase().includes(q) || (i.cine_f ?? "").startsWith(q) || (i.cine_f_name ?? "").toLowerCase().includes(q) ||
+    i.occupations.some((o) => o.occupation_code.startsWith(q) || o.name.toLowerCase().includes(q))));
   $("cw-summary").innerHTML = `${cwData.careers} filas carrera×nivel (${cwData.levels.join(", ")}) · ${cwData.mapped} con ocupación · ${cwData.generic} genéricas sin ocupación · ` +
     `las carreras con ocupación reúnen el ${fmt(cwData.graduates_mapped_share * 100, 1)}% de los titulados · fuente: ${cwData.source?.name ?? ""} · archivo <code>config/${cwData.file}</code>` +
+    (cwData.via ? ` · carrera → campo CINE-F → ocupaciones con la tabla común <code>config/${cwData.via}</code>` : "") +
     (cwData.reviewed ? "" : ' · <b style="color:#b54708">borrador sin revisar</b>');
   $("cw-rows").innerHTML = items.map((i) => `<tr>
       <td>${i.career}<div class="meta">${i.level}${i.is_generic ? " · categoría genérica: sin ocupación" : ""}</div></td>
-      <td class="meta">${i.field_area ?? ""}${i.field_subarea ? " / " + i.field_subarea : ""}</td>
+      <td>${i.cine_f ? `<code>${i.cine_f}</code> ${i.cine_f_name ?? ""}${i.technical ? ' <span class="tag">técnica</span>' : ""}` : (i.is_generic ? '<span class="meta">sin campo</span>' : "")}
+        <div class="meta">${i.field_area ?? ""}${i.field_subarea ? " / " + i.field_subarea : ""}</div></td>
       <td class="num">${i.graduates == null ? "—" : fmt(i.graduates, 0)}<div class="meta">${i.graduates_year ?? ""}</div></td>
       <td class="num">${i.graduates_growth == null ? "—" : (i.graduates_growth >= 0 ? "+" : "") + fmt(i.graduates_growth * 100, 1) + "%"}</td>
       <td>${i.occupations.map((o) => `<div title="${o.hierarchy.map((h) => `${h.level_label} ${h.code}: ${h.name ?? "—"}`).join("\n")}">

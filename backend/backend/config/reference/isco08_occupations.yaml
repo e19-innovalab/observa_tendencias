@@ -4,8 +4,10 @@
 #   sites/ministerio-economia-finanzas/files/2021-01/codigos_ocupacion_0.pdf
 # name_en: ILO Working Paper 140 (2025), Annex Table A1 (see ilo_genai_exposure.yaml).
 # Codes come from the union of both lists. name_es is null where the Uruguayan list omits the
-# code; the English title is shown instead. Featured occupations (catalog.yaml) can override
-# the display name.
+# code. Those codes take the title from INDEC's CIUO-08 for Argentina (name_es_origin: indec),
+#   https://www.indec.gob.ar/ftp/cuadros/menusuperior/eph/CIUO-08.pdf
+# or a title written by the team (name_es_origin: translation); incluye lists the typical
+# occupations of the group where given. Featured occupations (catalog.yaml) can override the display name.
 # 436 codes.
 
 occupations:
@@ -14,7 +16,11 @@ occupations:
   "0310": {name_es: "Otros miembros de las fuerzas armadas", name_en: null}
   "1111": {name_es: "Miembros del poder ejecutivo y de los cuerpos legislativos", name_en: "Legislators"}
   "1112": {name_es: "Personal directivo de la administración pública", name_en: "Senior Government Officials"}
-  "1113": {name_es: null, name_en: "Traditional Chiefs and Heads of Villages"}
+  "1113":
+    name_es: "Jefes de pequeñas poblaciones o Jefes de comunidades étnicas"
+    # INDEC title: "Jefes de pequeñas poblaciones"; the team adds the second part
+    name_es_origin: translation
+    name_en: "Traditional Chiefs and Heads of Villages"
   "1114": {name_es: "Dirigentes de organizaciones que presentan un interés especial", name_en: "Senior Officials of Special-interest Organizations"}
   "1120": {name_es: "Directores generales y gerentes generales", name_en: "Managing Directors and Chief Executives"}
   "1211": {name_es: "Directores financieros", name_en: "Finance Managers"}
@@ -72,7 +78,7 @@ occupations:
   "2221": {name_es: "Profesionales de enfermería", name_en: "Nursing Professionals"}
   "2222": {name_es: "Profesionales de partería", name_en: "Midwifery Professionals"}
   "2230": {name_es: "Profesionales de medicina tradicional y alternativa", name_en: "Traditional and Complementary Medicine Professionals"}
-  "2240": {name_es: null, name_en: "Paramedical Practitioners"}
+  "2240": {name_es: "Practicantes paramédicos", name_es_origin: indec, name_en: "Paramedical Practitioners"}
   "2250": {name_es: "Veterinarios", name_en: "Veterinarians"}
   "2261": {name_es: "Dentistas", name_en: "Dentists"}
   "2262": {name_es: "Farmacéuticos", name_en: "Pharmacists"}
@@ -109,7 +115,7 @@ occupations:
   "2512": {name_es: "Desarrolladores de software", name_en: "Software Developers"}
   "2513": {name_es: "Desarrolladores Web y multimedia", name_en: "Web and Multimedia Developers"}
   "2514": {name_es: "Programadores de aplicaciones", name_en: "Applications Programmers"}
-  "2519": {name_es: null, name_en: "Software and Applications Developers and Analysts Not Elsewhere Classified"}
+  "2519": {name_es: "Desarrolladores y analistas de software y multimedia y analistas no clasificados bajo otros epígrafes", name_es_origin: indec, name_en: "Software and Applications Developers and Analysts Not Elsewhere Classified"}
   "2521": {name_es: "Diseñadores y administradores de bases de datos", name_en: "Database Designers and Administrators"}
   "2522": {name_es: "Administradores de sistemas", name_en: "Systems Aministrators"}
   "2523": {name_es: "Profesionales en redes de computadores", name_en: "Computer Network Professionals"}
@@ -166,7 +172,7 @@ occupations:
   "3213": {name_es: "Técnicos y asistentes farmacéuticos", name_en: "Pharmaceutical Technicians and Assistants"}
   "3214": {name_es: "Técnicos de prótesis médicas y dentales", name_en: "Medical and Dental Prosthetic Technicians"}
   "3221": {name_es: "Profesionales de nivel medio de enfermería", name_en: "Nursing Associate Professionals"}
-  "3222": {name_es: null, name_en: "Midwifery Associate Professionals"}
+  "3222": {name_es: "Profesionales de nivel medio de partería", name_es_origin: indec, name_en: "Midwifery Associate Professionals"}
   "3230": {name_es: "Profesionales de nivel medio de medicina tradicional y alternativa", name_en: "Traditional and Complementary Medicine Associate Professionals"}
   "3240": {name_es: "Técnicos y asistentes veterinarios", name_en: "Veterinary Technicians and Assistants"}
   "3251": {name_es: "Dentistas auxiliares y ayudantes de odontología", name_en: "Dental Assistants and Therapists"}
@@ -176,7 +182,7 @@ occupations:
   "3255": {name_es: "Técnicos y asistentes fisioterapeutas", name_en: "Physiotherapy Technicians and Assistants"}
   "3256": {name_es: "Practicantes y asistentes médicos", name_en: "Medical Assistants"}
   "3257": {name_es: "Inspectores de la salud laboral, medioambiental y afines", name_en: "Environmental and Occupational Health Inspectors and Associates"}
-  "3258": {name_es: null, name_en: "Ambulance Workers"}
+  "3258": {name_es: "Ayudantes de ambulancias", name_es_origin: indec, name_en: "Ambulance Workers"}
   "3259": {name_es: "Profesionales de la salud de nivel medio no clasificados bajo otros epígrafes", name_en: "Health Associate Professionals Not Elsewhere Classified"}
   "3311": {name_es: "Agentes de bolsa, cambio y otros servicios financieros", name_en: "Securities and Finance Dealers and Brokers"}
   "3312": {name_es: "Oficiales de préstamos y créditos", name_en: "Credit and Loans Officers"}
@@ -201,7 +207,15 @@ occupations:
   "3353": {name_es: "Agentes de servicios de seguridad social", name_en: "Government Social Benefits Officials"}
   "3354": {name_es: "Agentes de servicios de expedición de licencias y permisos", name_en: "Government Licensing Officials"}
   "3355": {name_es: "Inspectores de policía y detectives", name_en: "Police Inspectors and Detectives"}
-  "3359": {name_es: null, name_en: "Government Regulatory AssociatePprofessionals Not Elsewhere Classified"}
+  "3359":
+    name_es: "Agentes de la administración pública para la aplicación de la ley y afines no clasificados en otros apartados"
+    name_es_origin: translation
+    name_en: "Government Regulatory AssociatePprofessionals Not Elsewhere Classified"
+    incluye:
+      - Inspectores agrícolas, de pesos y medidas, o de precios
+      - Inspectores de fronteras, aduanas o migración
+      - Inspectores de patentes, licencias, permisos y derechos de propiedad
+      - Inspectores de transporte y seguridad vial
   "3411": {name_es: "Profesionales de nivel medio del derecho y servicios legales y afines", name_en: "Legal and Related Associate Professionals"}
   "3412": {name_es: "Trabajadores y asistentes sociales de nivel medio", name_en: "Social Work Associate Professionals"}
   "3413": {name_es: "Auxiliares laicos de las religiones", name_en: "Religious Associate Professionals"}
@@ -244,7 +258,7 @@ occupations:
   "4411": {name_es: "Empleados de bibliotecas", name_en: "Library Clerks"}
   "4412": {name_es: "Empleados de servicios de correos", name_en: "Mail Carriers and Sorting Clerks"}
   "4413": {name_es: "Codificadores de datos, correctores de pruebas de imprenta y afines", name_en: "Coding, Proofreading and Related Clerks"}
-  "4414": {name_es: null, name_en: "Scribes and Related Workers"}
+  "4414": {name_es: "Escribientes públicos y afines", name_es_origin: indec, name_en: "Scribes and Related Workers"}
   "4415": {name_es: "Empleados de archivos", name_en: "Filing and Copying Clerks"}
   "4416": {name_es: "Empleados del servicio de personal", name_en: "Personnel Clerks"}
   "4419": {name_es: "Personal de apoyo administrativo no clasificado bajo otros epígrafes", name_en: "Clerical Support Workers Not Elsewhere Classified"}
@@ -295,8 +309,8 @@ occupations:
   "6121": {name_es: "Criadores de ganado", name_en: "Livestock and Dairy Producers"}
   "6122": {name_es: "Avicultores y trabajadores calificados de la avicultura", name_en: "Poultry Producers"}
   "6123": {name_es: "Apicultores y sericultores y trabajadores calificados de la apicultura y la sericultura", name_en: "Apiarists and Sericulturists"}
-  "6129": {name_es: null, name_en: "Animal Producers Not Elsewhere Classified"}
-  "6130": {name_es: null, name_en: "Mixed Crop and Animal Producers"}
+  "6129": {name_es: "Criadores y trabajadores pecuarios calificados de la cría de animales no clasificados bajo otros epígrafes", name_es_origin: indec, name_en: "Animal Producers Not Elsewhere Classified"}
+  "6130": {name_es: "Productores y trabajadores calificados de explotaciones agropecuarias mixtas cuya producción se destina al mercado", name_es_origin: indec, name_en: "Mixed Crop and Animal Producers"}
   "6210": {name_es: "Trabajadores forestales calificados y afines", name_en: "Forestry and Related Workers"}
   "6221": {name_es: "Trabajadores de explotaciones de acuicultura", name_en: "Aquaculture Workers"}
   "6222": {name_es: "Pescadores de agua dulce y en aguas costeras", name_en: "Inland and Coastal Waters Fishery Workers"}
@@ -371,7 +385,7 @@ occupations:
   "7542": {name_es: "Dinamiteros y pegadores", name_en: "Shotfirers and Blasters"}
   "7543": {name_es: "Clasificadores y probadores de productos (excluyendo alimentos y bebidas)", name_en: "Product Graders and Testers (except Foods and Beverages)"}
   "7544": {name_es: "Fumigadores y otros controladores de plagas y malas hierbas", name_en: "Fumigators and Other Pest and Weed Controllers"}
-  "7549": {name_es: null, name_en: "Craft and Related Workers not Elsewhere Classified"}
+  "7549": {name_es: "Oficiales, operarios y artesanos de artes mecánicas y de otros oficios no clasificados bajo otros epígrafes", name_es_origin: indec, name_en: "Craft and Related Workers not Elsewhere Classified"}
   "8111": {name_es: "Mineros y operadores de instalaciones mineras", name_en: "Miners and Quarriers"}
   "8112": {name_es: "Operadores de instalaciones de procesamiento de minerales y rocas", name_en: "Mineral and Stone Processing Plant Operators"}
   "8113": {name_es: "Perforadores y sondistas de pozos y afines", name_en: "Well Drillers and Borers and Related Workers"}
@@ -390,7 +404,7 @@ occupations:
   "8155": {name_es: "Operadores de máquinas de tratamiento de pieles y cueros", name_en: "Fur and Leather Preparing Machine Operators"}
   "8156": {name_es: "Operadores de máquinas para la fabricación de calzado y afines", name_en: "Shoemaking and Related Machine Operators"}
   "8157": {name_es: "Operadores de máquinas lavarropas", name_en: "Laundry Machine Operators"}
-  "8159": {name_es: null, name_en: "Textile, Fur and Leather Products Machine Operators Not Elsewhere Classified"}
+  "8159": {name_es: "Operadores de máquinas para fabricar productos textiles y artículos de piel y cuero no clasificados bajo otros epígrafes", name_es_origin: indec, name_en: "Textile, Fur and Leather Products Machine Operators Not Elsewhere Classified"}
   "8160": {name_es: "Operadores de máquinas para elaborar alimentos y productos afines", name_en: "Food and Related Products Machine Operators"}
   "8171": {name_es: "Operadores de instalaciones para la preparación de pasta para papel y papel", name_en: "Pulp and Papermaking Plant Operators"}
   "8172": {name_es: "Operadores de instalaciones de procesamiento de la madera", name_en: "Wood Processing Plant Operators"}
@@ -429,7 +443,7 @@ occupations:
   "9313": {name_es: "Peones de la construcción de edificios", name_en: "Building Construction Labourers"}
   "9321": {name_es: "Empacadores manuales", name_en: "Hand Packers"}
   "9329": {name_es: "Peones de la industria manufacturera no clasificados bajo otros epígrafes", name_en: "Manufacturing Labourers Not Elsewhere Classified"}
-  "9331": {name_es: null, name_en: "Hand and Pedal Vehicle Drivers"}
+  "9331": {name_es: "Conductores de vehículos accionados a pedal o a brazo", name_es_origin: indec, name_en: "Hand and Pedal Vehicle Drivers"}
   "9332": {name_es: "Conductores de vehículos y máquinas de tracción animal", name_en: "Drivers of Animal-drawn Vehicles and Machinery"}
   "9333": {name_es: "Peones de carga", name_en: "Freight Handlers"}
   "9334": {name_es: "Reponedores de estanterías", name_en: "Shelf Fillers"}

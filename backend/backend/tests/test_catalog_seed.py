@@ -9,7 +9,12 @@ def test_featured_occupations_have_known_sectors():
     sectors = {s.sector_code for s in catalog().sectors}
     featured = [o for o in catalog().occupations if o.is_featured]
     assert len(featured) == 20 and all(o.sector_code in sectors for o in featured)
-    assert all(o.sector_code is None for o in catalog().occupations if not o.is_featured)
+    # the rest take the sector of their longest listed ISCO prefix (reference/isco_sectors.yaml)
+    by_code = {o.occupation_code: o for o in catalog().occupations}
+    assert by_code["2152"].sector_code == "technology"  # 4 digits listed
+    assert by_code["2146"].sector_code == "energy"  # beats its group 214 (knowledge economy)
+    assert by_code["2142"].sector_code == "knowledge_economy"  # group 214
+    assert by_code["2330"].sector_code is None  # teachers: no strategic sector
 
 
 def test_occupation_universe_is_isco08_unit_groups():

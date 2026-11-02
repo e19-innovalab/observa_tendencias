@@ -6,9 +6,9 @@ from sqlalchemy.orm import Session
 
 from app.analytics.recompute import params_digest
 from app.api.v1.indicators import _country_list
+from app.core.auth import require_permission
 from app.core.config_files import analytics_params, app_config, catalog, indicators, sources
 from app.core.database import get_session
-from app.core.security import require_api_key
 from app.models import Alert, Methodology
 from app.schemas.observatory import (
     AlertItem,
@@ -157,7 +157,7 @@ def alert_rules(session: Session = Depends(get_session)):
     )
 
 
-@router.patch("/{alert_id}", response_model=AlertItem, dependencies=[Depends(require_api_key)])
+@router.patch("/{alert_id}", response_model=AlertItem, dependencies=[Depends(require_permission("manage_data"))])
 def mark_alert(alert_id: int, body: AlertReadUpdate, session: Session = Depends(get_session)):
     alert = session.get(Alert, alert_id)
     if alert is None:
@@ -168,7 +168,7 @@ def mark_alert(alert_id: int, body: AlertReadUpdate, session: Session = Depends(
     return _item(alert, source_refs(session))
 
 
-@router.post("/read-all", dependencies=[Depends(require_api_key)])
+@router.post("/read-all", dependencies=[Depends(require_permission("manage_data"))])
 def mark_all_read(session: Session = Depends(get_session)):
     result = session.execute(update(Alert).where(Alert.is_read.is_(False)).values(is_read=True))
     session.commit()
