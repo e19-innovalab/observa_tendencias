@@ -159,7 +159,8 @@ async def ask(session: Session, user: User, req: AskRequest, authorization: str 
             for r in runs:
                 if r.ok:
                     numbers.data_values(r.data, values)
-            asked = " ".join([question, *(t.content for t in req.history)])
+            # numbers the person wrote, or that the instructions themselves give (e.g. "0 a 100")
+            asked = " ".join([question, *(t.content for t in req.history), conf.system_prompt])
             bad = numbers.unverified(answer, values, check, also_allowed=asked)
         if bad and check.on_unverified == "block":
             log.status, answer = "blocked", _msg("blocked" if _links(conf, runs) else "blocked_no_links")

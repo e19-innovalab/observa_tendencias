@@ -762,7 +762,7 @@ assistant:
     questions_per_day: 500
   # Tool results are trimmed before the model reads them: lists to this many items, then the
   # whole text to this many characters; keys listed here are removed (texts for screens).
-  tool_result_max_items: 10
+  tool_result_max_items: 30
   tool_result_max_chars: 16000
   tool_result_drop_keys: [texts]
   # Numbers check: every number in the answer must appear in what the tools returned (or in the
@@ -791,6 +791,12 @@ assistant:
     - El ISE (Índice Sintético de Empleabilidad) va de 0 a 100. Los salarios en USD PPA sirven
       para comparar países; en USD son al tipo de cambio de mercado.
     - No des consejos personales de carrera; describí lo que muestran los datos.
+    - Además del ISE, el observatorio tiene cuatro índices con nombre propio, cada uno con sus
+      herramientas (las definiciones vienen en los resultados): Moctezuma (ritmo del cambio
+      tecnológico frente a la capacidad de respuesta), Ludita (exposición a la IA generativa
+      frente a la vitalidad del empleo y la formación), Reina Roja (qué tan rápido cambian las
+      tecnologías y habilidades de una ocupación) y Sísifo (estudios de sobra frente a lo que
+      paga el puesto).
   # Line added to the question with what the user is looking at (only the fields sent).
   context_template: "La persona está mirando: {fields}."
   context_fields:
@@ -871,6 +877,49 @@ assistant:
           description: "employability_index: ISE · skill_gap: brechas · trend: tendencias · projection: proyecciones"
           required: true
       link: {path: "/metodologia", label: "Metodología"}
+    # The observatory's named indices (Moctezuma, Ludita, Reina Roja, Sísifo). Per-country
+    # summaries and per-occupation detail; results include each index's official definitions.
+    - name: moctezuma_paises
+      description: Índice Moctezuma por país y año (0 a 100), con sus dos lados (ritmo del cambio tecnológico y capacidad de respuesta) y su nivel.
+      path: /moctezuma/countries
+      params:
+        country: {type: string, description: "ARG, CHL o URY (vacío: los tres)"}
+      link: {path: "/moctezuma", label: "Moctezuma"}
+    - name: moctezuma_ocupacion
+      description: Índice Moctezuma de una ocupación (código CIUO), con el ritmo del cambio, la capacidad de respuesta y sus dimensiones.
+      path: /moctezuma
+      params:
+        occupation: {type: string, description: "Código CIUO-08 de 4 dígitos (de buscar_ocupacion)", required: true, must_be_known: true}
+        country: {type: string, description: "ARG, CHL o URY (vacío: los tres)"}
+      fixed: {limit: 3}
+      link: {path: "/moctezuma", label: "Moctezuma"}
+    - name: ludita_paises
+      description: Índice Ludita por país y año (0 a 100), con exposición a la IA generativa, vitalidad y cuántas ocupaciones siguen cada camino (tejedor, cajero…).
+      path: /ludita/countries
+      params:
+        country: {type: string, description: "ARG, CHL o URY (vacío: los tres)"}
+      link: {path: "/ludita", label: "Ludita"}
+    - name: ludita_ocupacion
+      description: Índice Ludita de una ocupación (código CIUO), con exposición, vitalidad y su camino.
+      path: /ludita
+      params:
+        occupation: {type: string, description: "Código CIUO-08 de 4 dígitos (de buscar_ocupacion)", required: true, must_be_known: true}
+        country: {type: string, description: "ARG, CHL o URY (vacío: los tres)"}
+      fixed: {limit: 3}
+      link: {path: "/ludita", label: "Ludita"}
+    - name: reina_roja_ocupacion
+      description: Índice Reina Roja de una ocupación (código CIUO), qué tan rápido cambian sus tecnologías (O*NET) y habilidades (ESCO), con su vida media.
+      path: /red-queen
+      params:
+        occupation: {type: string, description: "Código CIUO-08 de 4 dígitos (de buscar_ocupacion)", required: true, must_be_known: true}
+      fixed: {limit: 1}
+      link: {path: "/reina-roja", label: "Reina Roja"}
+    - name: sisifo_paises
+      description: Índice Sísifo por país y año, con la proporción de gente con más estudios de los que pide el puesto y lo que paga frente a un título superior.
+      path: /sisyphus/countries
+      params:
+        country: {type: string, description: "ARG, CHL o URY (vacío: los tres)"}
+      link: {path: "/sisifo", label: "Sísifo"}
   # Scripted answers: frequent questions are answered from templates with the API's data, without a
   # model (exact numbers, instant, no cost). The question type comes from the words below; the
   # occupation from a CIUO code, a local name (search.aliases_file) or the search; the country from
