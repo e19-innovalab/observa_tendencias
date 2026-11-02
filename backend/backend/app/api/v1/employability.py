@@ -5,23 +5,30 @@ from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from app.analytics.employability import level_for
 from app.analytics.employability_run import NOT_APPLICABLE
 from app.analytics.recompute import params_digest
 from app.api.v1.indicators import _country_list
 from app.core.config_files import analytics_params, app_config, catalog, indicators
 from app.core.database import get_session
-from app.models import EmployabilityScore, Methodology
+from app.models import EmployabilityScore, Methodology, Observation
+from app.normalization.periods import period_label
 from app.schemas.observatory import (
     DimensionRange,
+    DisplayValue,
     EmployabilityComponent,
     EmployabilityHistory,
     EmployabilityHistoryPoint,
     EmployabilityItem,
     EmployabilityPage,
+    EmployabilityTexts,
     MethodologyRef,
     OccupationGroup,
     OccupationItem,
     OccupationProfile,
+    SectorsPage,
+    SectorSummary,
+    SectorTopOccupation,
 )
 from app.services.observations import latest_pair, query_points
 
@@ -81,8 +88,50 @@ def _cap_per_group(rows: list[EmployabilityScore]) -> tuple[list[EmployabilitySc
     return kept, per_row
 
 
+def _texts() -> EmployabilityTexts:
+    labels = app_config().employability
+    return EmployabilityTexts(terms=labels.terms, unit_formats=labels.unit_formats,
+                              display={d: {"label": v.label, "note": v.note}
+                                       for d, v in labels.display_values.items()})
+
+
+DisplayLookup = dict[tuple[str, str, str, str], float]
+
+
+def _display_lookup(session: Session, rows: list[EmployabilityScore]) -> DisplayLookup:
+    """Values of app.yaml employability.display_values for these rows, keyed by (dimension,
+    country, occupation, period): one query for the whole page."""
+    shown = app_config().employability.display_values
+    if not shown or not rows:
+        return {}
+    by_indicator: dict[str, list[str]] = {}
+    for dim, conf in shown.items():
+        by_indicator.setdefault(conf.indicator, []).append(dim)
+    stmt = select(Observation).where(
+        Observation.indicator_code.in_(list(by_indicator)),
+        Observation.country_iso3.in_({s.country_iso3 for s in rows}),
+        Observation.occupation_code.in_({s.occupation_code for s in rows}),
+        Observation.sector_code.is_(None), Observation.data_type == "observed")
+    out: DisplayLookup = {}
+    for o in session.scalars(stmt).all():
+        for dim in by_indicator[o.indicator_code]:
+            out[(dim, o.country_iso3, o.occupation_code, period_label(o.period_start, o.frequency))] = o.value
+    return out
+
+
+def _display(dim: str, s: EmployabilityScore, c: dict, lookup: DisplayLookup) -> DisplayValue | None:
+    """The display value for the same period the index used for this dimension."""
+    conf = app_config().employability.display_values.get(dim)
+    period = (c.get("detail") or {}).get("period")
+    value = lookup.get((dim, s.country_iso3, s.occupation_code, period)) if conf and period else None
+    if value is None:
+        return None
+    return DisplayValue(indicator=conf.indicator, label=conf.label, unit=indicators().get(conf.indicator).unit,
+                        value=value, period=period, note=conf.note)
+
+
 def _item(s: EmployabilityScore, method: Methodology,
-          group_hidden: int | None = None) -> EmployabilityItem:
+          group_hidden: int | None = None, lookup: DisplayLookup | None = None) -> EmployabilityItem:
     conf = app_config()
     occ = _occupation(s.occupation_code)
     components = []
@@ -93,6 +142,7 @@ def _item(s: EmployabilityScore, method: Methodology,
             raw=c["raw"], normalized=c["normalized"], contribution=c.get("contribution"),
             indicator=c.get("indicator"), unit=ind.unit if ind else None, measure=c["measure"],
             detail=c.get("detail") or {}, available=c["normalized"] is not None,
+            display=_display(dim, s, c, lookup or {}),
         ))
     return EmployabilityItem(
         occupation=OccupationItem.model_validate(occ.model_dump()), sector_name=_sector_name(occ),
@@ -195,13 +245,14 @@ def employability(
                      key=lambda s: (s.country_iso3, s.occupation_code))
     ordered = with_value + without if view == "all" else with_value
     page = ordered[offset:offset + page_size]
+    lookup = _display_lookup(session, page)
     cohort = [s for s in session.scalars(stmt).all() if s.level != NOT_APPLICABLE]
     ranges = _dimension_ranges(cohort)
     return EmployabilityPage(
         year=year, available_years=years, view=view, sort_by=sort_by, order=order,
         total=len(rows), scored_total=sum(s.score is not None for s in rows), limit=page_size,
         offset=offset, dimension_ranges=ranges, no_source_note=_no_source_note(ranges),
-        items=[_item(s, method, hidden.get(s.score_id)) for s in page])
+        items=[_item(s, method, hidden.get(s.score_id), lookup) for s in page])
 
 
 def _pct(share: float) -> str:
@@ -241,6 +292,75 @@ def _dimension_ranges(cohort: list[EmployabilityScore]) -> list[DimensionRange]:
             effective_weight=weight / sourced_weight if dim in sourced and sourced_weight else 0.0,
         ))
     return out
+
+
+def _mean(values) -> float | None:
+    values = [v for v in values if v is not None]
+    return sum(values) / len(values) if values else None
+
+
+@router.get("/employability/sectors", response_model=SectorsPage)
+def employability_sectors(
+    country: str | None = Query(None, description="ISO3; varios separados por coma (default: los 3)"),
+    year: int | None = Query(None, description="Año de referencia (default: el último)"),
+    session: Session = Depends(get_session),
+):
+    """The index by strategic sector: average score of the sector's occupations, the leading
+    occupation, average salary and AI exposure, and the average of each dimension (0-100), with
+    the change from the previous year. Occupations are placed in sectors by
+    config/reference/isco_sectors.yaml (featured ones by catalog.yaml)."""
+    method = _current_method(session)
+    countries = _country_list(country)
+    if method is None:
+        return SectorsPage(year=None, available_years=[], countries=countries, regional_average=None,
+                           dimension_ranges=[], no_source_note=None, items=[])
+    years = sorted(set(session.scalars(select(EmployabilityScore.year).where(
+        EmployabilityScore.methodology_id == method.methodology_id)).all()))
+    year = year or (years[-1] if years else None)
+    previous = max((y for y in years if year is not None and y < year), default=None)
+    rows = session.scalars(select(EmployabilityScore).where(
+        EmployabilityScore.methodology_id == method.methodology_id,
+        EmployabilityScore.year.in_([y for y in (year, previous) if y is not None]),
+        EmployabilityScore.country_iso3.in_(countries))).all()
+    p = analytics_params("employability")
+    labels = app_config().employability.levels
+    by_sector: dict[str, list[str]] = {}
+    for occ in catalog().occupations:
+        if occ.sector_code and not occ.is_excluded:
+            by_sector.setdefault(occ.sector_code, []).append(occ.occupation_code)
+    items, sector_rows = [], []
+    lookup = _display_lookup(session, [s for s in rows if s.year == year])
+    for sector in catalog().sectors:
+        codes = set(by_sector.get(sector.sector_code, []))
+        current = [s for s in rows if s.year == year and s.occupation_code in codes
+                   and s.score is not None and s.level != NOT_APPLICABLE]
+        before = [s.score for s in rows if s.year == previous and s.occupation_code in codes
+                  and s.score is not None and s.level != NOT_APPLICABLE]
+        sector_rows += current
+        avg, prev = _mean(s.score for s in current), _mean(before)
+        best = max(current, key=lambda s: s.score, default=None)
+        level = level_for(avg, p["levels"]) if avg is not None else None
+        items.append(SectorSummary(
+            sector_code=sector.sector_code, name=sector.name, occupations=len(codes),
+            scored=len(current), average_score=avg, previous_average=prev,
+            change=avg - prev if avg is not None and prev is not None else None,
+            level=level, level_label=labels.get(level) if level else None,
+            top_occupation=SectorTopOccupation(
+                occupation_code=best.occupation_code, name=catalog().occupation(best.occupation_code).name,
+                country_iso3=best.country_iso3, score=best.score) if best else None,
+            salary_ppp_average=_mean((s.components.get("salary_ppp") or {}).get("raw") for s in current),
+            salary_usd_average=_mean(d.value for s in current
+                                     if (d := _display("salary_ppp", s, s.components.get("salary_ppp") or {}, lookup))),
+            automation_average=_mean((s.components.get("automation_risk") or {}).get("raw") for s in current),
+            dimensions={d: _mean((s.components.get(d) or {}).get("normalized") for s in current)
+                        for d in p["weights"]},
+        ))
+    cohort = [s for s in rows if s.year == year and s.level != NOT_APPLICABLE]
+    ranges = _dimension_ranges(cohort)
+    return SectorsPage(year=year, available_years=years, countries=countries,
+                       regional_average=_mean(s.score for s in sector_rows),
+                       dimension_ranges=ranges, no_source_note=_no_source_note(ranges), items=items,
+                       texts=_texts())
 
 
 @router.get("/employability/history", response_model=list[EmployabilityHistory])
@@ -299,7 +419,8 @@ def occupation_profile(code: str, session: Session = Depends(get_session)):
             EmployabilityScore.methodology_id == method.methodology_id,
             EmployabilityScore.occupation_code == code, EmployabilityScore.year == latest_year,
         ).order_by(EmployabilityScore.country_iso3)).all()
-        employability_items = [_item(s, method) for s in rows]
+        lookup = _display_lookup(session, rows)
+        employability_items = [_item(s, method, lookup=lookup) for s in rows]
     dims = analytics_params("employability")["dimensions"]
     latest = []
     for ind_code in [d["indicator"] for d in dims.values() if d.get("indicator")]:
@@ -315,4 +436,4 @@ def occupation_profile(code: str, session: Session = Depends(get_session)):
     return OccupationProfile(occupation=OccupationItem.model_validate(occ.model_dump()),
                              sector_name=_sector_name(occ), groups=groups,
                              employability=employability_items, latest=latest,
-                             top_skills=top_skills, hierarchy=isco_levels(code))
+                             top_skills=top_skills, hierarchy=isco_levels(code), texts=_texts())

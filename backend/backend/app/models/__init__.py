@@ -5,6 +5,7 @@ from app.models.analytics import (  # noqa: F401
     GraduateTrend,
     JobPosting,
 )
+from app.models.assistant import AssistantLog  # noqa: F401
 from app.models.base import Base  # noqa: F401
 from app.models.catalog import (  # noqa: F401
     Country,
@@ -13,12 +14,18 @@ from app.models.catalog import (  # noqa: F401
     OccupationSkill,
     Sector,
     Skill,
+    SkillGroup,
 )
 from app.models.methodology import (  # noqa: F401
     Alert,
     EmployabilityScore,
+    LuditaScore,
     Methodology,
+    MoctezumaScore,
+    RedQueenScore,
     SkillGap,
+    SkillGroupGap,
+    SkillProfile,
     TrendResult,
 )
 from app.models.sources import (  # noqa: F401
@@ -30,6 +37,7 @@ from app.models.sources import (  # noqa: F401
     Observation,
     Source,
 )
+from app.models.users import User  # noqa: F401
 from app.models.analytics_dm import (  # noqa: F401
     AnalisisGeneroIntegral,
     DimCarrera,

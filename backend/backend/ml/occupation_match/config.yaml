@@ -1,0 +1,48 @@
+# Prototipo: búsqueda por significado (frase → código CIUO-08). No forma parte de la app todavía.
+# Rutas relativas a esta carpeta; las del backend, relativas a backend_app_test/backend.
+
+paths:
+  isco_reference: ../../config/reference/isco08_occupations.yaml
+  sources_config: ../../config/sources.yaml   # de acá sale la URL de la API de ESCO
+  labels: data/labels_es.jsonl                # nombres por código (CIUO + ESCO), generado
+  esco_cache: data/esco_raw                   # respuestas de ESCO guardadas, para no repetir pedidos
+  testset: testset.yaml
+  local_names: ../../config/reference/ocupaciones_nombres_locales.yaml  # nombres locales (ARG, CHL, URY), revisados
+  results: results                            # un archivo por evaluación, con fecha (se guardan todos)
+  trained_model: models/occupation-match-es   # salida de train.py (fuera de git)
+
+esco:
+  language: es
+  concurrency: 6
+  timeout_seconds: 30
+
+# Modelos a comparar en evaluate.py (Hugging Face). "query_prefix"/"passage_prefix": algunos
+# modelos (familia e5) esperan un prefijo delante del texto.
+models:
+  - name: intfloat/multilingual-e5-small
+    query_prefix: "query: "
+    passage_prefix: "passage: "
+  - name: intfloat/multilingual-e5-base
+    query_prefix: "query: "
+    passage_prefix: "passage: "
+  - name: sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2
+    query_prefix: ""
+    passage_prefix: ""
+
+evaluate:
+  top_k: [1, 3, 5]
+  # Hide from the index every name equal to a test phrase (after removing accents and case), so
+  # the score measures unseen words. --with-test-phrases turns it off (what the app would see).
+  hide_test_phrases: true
+
+train:
+  base_model: intfloat/multilingual-e5-base
+  query_prefix: "query: "
+  passage_prefix: "passage: "
+  epochs: 2
+  batch_size: 64
+  learning_rate: 2.0e-5
+  # Share of codes whose ESCO alternative names are held out from training, to check that the
+  # model generalises (the test set is always held out entirely).
+  holdout_share: 0.1
+  seed: 7

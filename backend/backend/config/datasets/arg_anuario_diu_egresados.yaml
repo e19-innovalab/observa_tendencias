@@ -1,0 +1,48 @@
+# Argentina: university graduates by discipline from the DIU statistical yearbook (Anuario
+# Estadístico del Sistema Universitario Argentino), public and private institutions, pregrado and
+# grado together. Same disciplines and the same figures as the CTI file (arg_egresados_universitarios,
+# checked for 2023: identical in every discipline), but the yearbook is published earlier, so it
+# supplies the years the CTI file does not have yet (analytics.yaml -> skill_gaps.supply_supplements).
+# Publisher: Departamento de Información Universitaria (DIU), Secretaría de Educación.
+# Universities only: non-university tertiary institutes are not included.
+# Each yearbook is a zip of workbooks; "Pregrado y Grado Gestión Estatal/Privada" hold one table
+# per field of study (cuadros 2.1.14-2.1.18a and 2.2.14-2.2.18a) with students (EST), new entrants
+# (NI), re-enrolled (RE) and graduates (EGR in 2023, EGRE in 2024) per discipline.
+# First file loaded: adelanto_anuario_24_14-08.zip, a partial preview of the 2024 yearbook whose
+# workbooks are dated 14/08/2026 (server last-modified 18/08/2026). The page note shown with the
+# 2024 gaps is app.yaml -> skills.supply_notes.
+
+dataset_code: arg_anuario_diu_egresados
+source: anuario_diu_argentina
+title: Egresados universitarios por disciplina (Anuario Estadístico del DIU, Argentina)
+landing_page: https://www.argentina.gob.ar/educacion/universidades/informacion/publicaciones/anuarios
+target: graduates
+target_scope: period
+country: ARG
+
+download:
+  # Yearbooks from 2024 on ("adelanto_anuario_24_...", "anuario_2025..."): earlier years are in
+  # the CTI file. The latest release linked on the page is downloaded.
+  link_pattern: '/sites/default/files/(?:\d{4}/\d{2}/)?(?:adelanto_)?anuario_(?:20)?(?P<release>2[4-9])[^"/<>]*\.zip'
+  release_prefix: "20"
+  allowed_hosts: [www.argentina.gob.ar]
+  max_bytes: 80000000
+
+file:
+  format: zip
+
+discipline_tables:
+  members_pattern: 'Pregrado y Grado Gesti'
+  title_pattern: 'egresados de t[ií]tulos de pregrado y grado por disciplina seg[uú]n instituci[oó]n'
+  period_pattern: 'A[nñ]o\s+(?P<year>\d{4})'
+  value_kinds: [EGRE, EGR]
+  skip_names_pattern: '^Total'
+  level: Pregrado y grado
+  totals_title_pattern: 'Egresados de t[ií]tulos de pregrado y grado y tasa'
+  totals_row_pattern: '^Total Instituciones'
+  # "Sin rama" graduates appear in the institution totals but in no discipline table.
+  max_total_gap: 0.01
+
+expected:
+  value_min: 0
+  value_max: 100000

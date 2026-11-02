@@ -7,6 +7,7 @@ from sqlalchemy import (
     DateTime,
     Float,
     ForeignKey,
+    Index,
     Integer,
     String,
     Text,
@@ -86,6 +87,97 @@ class EmployabilityScore(Base):
     computed_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
 
 
+class MoctezumaScore(Base):
+    """Moctezuma indicator per country, occupation and reference year: technological pace vs
+    capacity to respond (both 0-100 within the cohort). gap = pace − readiness. components holds,
+    per dimension, its side, raw and scaled value, weight and where it came from."""
+
+    __tablename__ = "moctezuma_scores"
+    __table_args__ = (
+        UniqueConstraint("country_iso3", "occupation_code", "year", "methodology_id",
+                         name="uq_moctezuma_scores_key"),
+    )
+    score_id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    country_iso3: Mapped[str] = mapped_column(String(3), ForeignKey("countries.iso3"))
+    occupation_code: Mapped[str] = mapped_column(ForeignKey("occupations.occupation_code"))
+    year: Mapped[int] = mapped_column(Integer)
+    score: Mapped[float | None] = mapped_column(Float)
+    level: Mapped[str] = mapped_column(Text)
+    pace: Mapped[float | None] = mapped_column(Float)
+    readiness: Mapped[float | None] = mapped_column(Float)
+    gap: Mapped[float | None] = mapped_column(Float)
+    pace_coverage: Mapped[float] = mapped_column(Float)
+    readiness_coverage: Mapped[float] = mapped_column(Float)
+    components: Mapped[dict] = mapped_column(JsonType)
+    methodology_id: Mapped[int] = mapped_column(ForeignKey("methodologies.methodology_id"))
+    computed_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+
+
+class LuditaScore(Base):
+    """Ludita indicator per country, occupation and reference year: exposure to generative AI vs
+    vitality (employment and training growth), both 0-100 within the cohort. path is the
+    quadrant (weaver, teller, other_causes, out_of_reach). components as in MoctezumaScore."""
+
+    __tablename__ = "ludita_scores"
+    __table_args__ = (
+        UniqueConstraint("country_iso3", "occupation_code", "year", "methodology_id",
+                         name="uq_ludita_scores_key"),
+    )
+    score_id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    country_iso3: Mapped[str] = mapped_column(String(3), ForeignKey("countries.iso3"))
+    occupation_code: Mapped[str] = mapped_column(ForeignKey("occupations.occupation_code"))
+    year: Mapped[int] = mapped_column(Integer)
+    score: Mapped[float | None] = mapped_column(Float)
+    level: Mapped[str] = mapped_column(Text)
+    path: Mapped[str | None] = mapped_column(Text)
+    exposure: Mapped[float | None] = mapped_column(Float)
+    vitality: Mapped[float | None] = mapped_column(Float)
+    exposure_coverage: Mapped[float] = mapped_column(Float)
+    vitality_coverage: Mapped[float] = mapped_column(Float)
+    components: Mapped[dict] = mapped_column(JsonType)
+    methodology_id: Mapped[int] = mapped_column(ForeignKey("methodologies.methodology_id"))
+    computed_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+
+
+class SkillProfile(Base):
+    """What one source lists for an ISCO-08 unit group in one of its versions (O*NET technologies,
+    ESCO skills). Every version is kept: the Reina Roja indicator compares them."""
+
+    __tablename__ = "skill_profiles"
+    __table_args__ = (
+        UniqueConstraint("source_code", "version", "occupation_code", name="uq_skill_profiles_key"),
+    )
+    profile_id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    source_code: Mapped[str] = mapped_column(ForeignKey("sources.source_code"))
+    version: Mapped[str] = mapped_column(Text)
+    released: Mapped[date] = mapped_column(Date)
+    occupation_code: Mapped[str] = mapped_column(ForeignKey("occupations.occupation_code"))
+    items: Mapped[dict] = mapped_column(JsonType)  # {item key: display name}
+    fetched_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+
+
+class RedQueenScore(Base):
+    """Reina Roja indicator per occupation and reference year: how much of its profile changes per
+    year (not country-specific). components holds, per source, the pair of versions compared,
+    the annual turnover, the half-life and examples of what entered and left."""
+
+    __tablename__ = "red_queen_scores"
+    __table_args__ = (
+        UniqueConstraint("occupation_code", "year", "methodology_id", name="uq_red_queen_scores_key"),
+    )
+    score_id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    occupation_code: Mapped[str] = mapped_column(ForeignKey("occupations.occupation_code"))
+    year: Mapped[int] = mapped_column(Integer)
+    score: Mapped[float | None] = mapped_column(Float)
+    level: Mapped[str] = mapped_column(Text)
+    turnover: Mapped[float | None] = mapped_column(Float)  # weighted mean annual turnover
+    half_life: Mapped[float | None] = mapped_column(Float)  # years, from turnover
+    coverage: Mapped[float] = mapped_column(Float)
+    components: Mapped[dict] = mapped_column(JsonType)
+    methodology_id: Mapped[int] = mapped_column(ForeignKey("methodologies.methodology_id"))
+    computed_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+
+
 class Alert(Base):
     """Relevant change detected after an update (plan 4.4). dedupe_key makes each event unique:
     re-running the evaluation never records the same alert twice."""
@@ -120,6 +212,7 @@ class SkillGap(Base):
     __table_args__ = (
         UniqueConstraint("country_iso3", "skill_code", "year", "methodology_id",
                          name="uq_skill_gaps_key"),
+        Index("ix_skill_gaps_method_country_year", "methodology_id", "country_iso3", "year"),
     )
     gap_id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     country_iso3: Mapped[str] = mapped_column(String(3), ForeignKey("countries.iso3"))
@@ -133,6 +226,34 @@ class SkillGap(Base):
     demand_coverage: Mapped[float] = mapped_column(Float)
     supply_coverage: Mapped[float] = mapped_column(Float)
     occupations: Mapped[int] = mapped_column(Integer)
+    details: Mapped[dict] = mapped_column(JsonType)
+    methodology_id: Mapped[int] = mapped_column(ForeignKey("methodologies.methodology_id"))
+    computed_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+
+
+class SkillGroupGap(Base):
+    """Gap per country, ESCO skill group and year: same method as SkillGap, over the occupations
+    that use any skill of the group (each occupation weighs as its strongest skill of the group)."""
+
+    __tablename__ = "skill_group_gaps"
+    __table_args__ = (
+        UniqueConstraint("country_iso3", "group_code", "year", "methodology_id",
+                         name="uq_skill_group_gaps_key"),
+        Index("ix_skill_group_gaps_method_country_year", "methodology_id", "country_iso3", "year"),
+    )
+    gap_id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    country_iso3: Mapped[str] = mapped_column(String(3), ForeignKey("countries.iso3"))
+    group_code: Mapped[str] = mapped_column(ForeignKey("skill_groups.group_code"))
+    year: Mapped[int] = mapped_column(Integer)
+    demand_growth: Mapped[float | None] = mapped_column(Float)
+    supply_growth: Mapped[float | None] = mapped_column(Float)
+    gap: Mapped[float | None] = mapped_column(Float)
+    is_emerging: Mapped[bool] = mapped_column(Boolean, default=False)
+    data_sufficiency: Mapped[str] = mapped_column(Text)
+    demand_coverage: Mapped[float] = mapped_column(Float)
+    supply_coverage: Mapped[float] = mapped_column(Float)
+    occupations: Mapped[int] = mapped_column(Integer)
+    skills: Mapped[int] = mapped_column(Integer)  # member skills used by at least one occupation
     details: Mapped[dict] = mapped_column(JsonType)
     methodology_id: Mapped[int] = mapped_column(ForeignKey("methodologies.methodology_id"))
     computed_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))

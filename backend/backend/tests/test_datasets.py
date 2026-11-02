@@ -11,7 +11,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy.pool import StaticPool
 
 from app.core import config as core_config
-from app.core.config_files import catalog, indicators, sources
+from app.core.config_files import app_config, catalog, indicators, sources
 from app.core.database import get_session
 from app.datasets import ingest
 from app.datasets.profiles import profiles
@@ -301,3 +301,155 @@ def test_extra_intermediate_certificates_are_loaded():
     subjects = {dict(x[0] for x in c["subject"]).get("commonName") for c in ctx.get_ca_certs()}
     assert "Sectigo Public Server Authentication CA DV R36" in subjects
     assert ctx.verify_mode.name == "CERT_REQUIRED"
+
+
+def _diu_workbook(year: int, label: str, disciplines: dict[str, int], total: int) -> bytes:
+    """A yearbook workbook: one field-of-study table and the institutions' totals table."""
+    import io
+
+    from openpyxl import Workbook
+
+    wb = Workbook()
+    ws = wb.active
+    ws.title = "C 2.1.14"
+    ws.append([])
+    ws.append([None, f"Cuadro 2.1.14 - Estudiantes, nuevos inscriptos, reinscriptos y egresados de "
+                     f"títulos de pregrado y grado por disciplina según institución. Año {year}"])
+    ws.append([])
+    names, kinds, totals = [None, "Instituciones"], [None, None], [None, "Total general"]
+    for name, grads in {"Total Rama": sum(disciplines.values()), **disciplines}.items():
+        names += [name, None, None, None]
+        kinds += ["EST", "NI", "RE", label]
+        totals += [grads * 10, grads * 3, grads * 7, grads]
+    ws.append(names)
+    ws.append(kinds)
+    ws.append(totals)
+    t = wb.create_sheet("C 2.1.4")
+    t.append([None, f"Cuadro 2.1.4 - Egresados de títulos de pregrado y grado y tasa de crecimiento "
+                    f"promedio anual según institución. Período 2014 - {year}"])
+    t.append([None, "Instituciones", "Años"])
+    t.append([None, None, year - 1, year])
+    t.append([None, "Total Instituciones Estatales", total - 5, total])
+    buf = io.BytesIO()
+    wb.save(buf)
+    return buf.getvalue()
+
+
+def test_diu_yearbook_discipline_tables(tmp_path):
+    import zipfile
+    from pathlib import Path
+
+    from app.datasets.profiles import profiles
+    from app.datasets.reader import read_dataset
+
+    path = Path(tmp_path) / "anuario.zip"
+    with zipfile.ZipFile(path, "w") as z:
+        z.writestr("Z 2.1 Pregrado y Grado Gestión Estatal 24.xlsx",
+                   _diu_workbook(2024, "EGRE", {"Informática": 300, "Ingeniería": 200}, 500))
+        z.writestr("Z 2.2 Pregrado y Grado Gestión Privada 24.xlsx",
+                   _diu_workbook(2024, "EGR", {"Informática": 100}, 100))  # 2023 wording
+        z.writestr("Z 4. RHUN 24.xlsx", b"not a workbook we read")
+    report = read_dataset(path, profiles()["arg_anuario_diu_egresados"])
+    assert report.ok and report.periods == ["2024"]
+    rows = {r["career"]: r["value"] for r in report.rows}
+    assert rows == {"Informática": 400, "Ingeniería": 200}  # subtotal column left out
+    assert {r["level"] for r in report.rows} == {"Pregrado y grado"}
+    # the disciplines must add up to the yearbook's own total
+    with zipfile.ZipFile(path, "w") as z:
+        z.writestr("Z 2.1 Pregrado y Grado Gestión Estatal 24.xlsx",
+                   _diu_workbook(2024, "EGRE", {"Informática": 300}, 900))
+    assert not read_dataset(path, profiles()["arg_anuario_diu_egresados"]).ok
+
+
+def test_template_has_headers_codes_and_instructions(client):
+    from openpyxl import load_workbook
+
+    r = client.get("/api/v1/datasets/profiles/plantilla_generica/template")
+    assert r.status_code == 200 and "attachment" in r.headers["content-disposition"]
+    wb = load_workbook(io.BytesIO(r.content))
+    sheets = app_config().datasets.template.sheets
+    assert wb.sheetnames == list(sheets.values())
+    data = wb[sheets["data"]]
+    assert [c.value for c in data[1]] == ["indicador", "pais", "periodo", "frecuencia", "valor", "sector", "ocupacion"]
+    assert data.max_row == 1  # headers only: examples live in the instructions sheet
+    assert wb[sheets["indicators"]].max_row - 1 == len(indicators().indicators)
+    assert wb[sheets["occupations"]].max_row - 1 == len(catalog().occupations)
+    csv_text = client.get("/api/v1/datasets/profiles/plantilla_generica/template", params={"format": "csv"}).text
+    assert csv_text.strip().lstrip("﻿") == "indicador,pais,periodo,frecuencia,valor,sector,ocupacion"
+    assert client.get("/api/v1/datasets/profiles/sipa_asalariados_por_rama/template").status_code == 404
+
+
+def test_example_files_pass_and_fail_with_grouped_errors(client):
+    good = client.get("/api/v1/datasets/profiles/plantilla_generica/examples/valido").content.decode()
+    assert _upload(client, good).json()["status"] == "validated"
+    bad = client.get("/api/v1/datasets/profiles/plantilla_generica/examples/con_errores").content.decode()
+    report = _upload(client, bad).json()["report"]
+    groups = {g["kind"]: g for g in report["groups"]}
+    assert groups["unknown_country"]["count"] == 2 and groups["unknown_country"]["values"] == ["BRA", "PER"]
+    assert {"unknown_indicator", "bad_period", "bad_frequency", "not_numeric", "missing_value",
+            "unknown_occupation"} <= set(groups)
+    assert groups["unknown_country"]["hint"] == app_config().datasets.group_hints["unknown_country"]
+    assert client.get("/api/v1/datasets/profiles/plantilla_generica/examples/otro").status_code == 404
+
+
+def test_groups_count_every_error_even_beyond_the_list_limit(client, monkeypatch):
+    monkeypatch.setattr(app_config().datasets, "max_errors_reported", 1)
+    rows = "".join(f"inflation,BRA,{2000 + i},A,1\n" for i in range(5))
+    report = _upload(client, "indicador,pais,periodo,frecuencia,valor\n" + rows).json()["report"]
+    assert len(report["errors"]) == 1 and report["groups"][0]["count"] == 5
+
+
+def _upload_bytes(client, name, content):
+    data = {"profile": "plantilla_generica", "declared_source_name": "INE Uruguay",
+            "declared_source_url": "https://www.gub.uy/instituto-nacional-estadistica"}
+    return client.post("/api/v1/datasets/upload", headers=KEY, data=data,
+                       files={"file": (name, content, "application/octet-stream")}).json()
+
+
+def test_files_that_are_not_what_they_say_are_rejected_before_reading(client, monkeypatch):
+    import zipfile
+
+    msgs = app_config().datasets.messages
+    wb = Workbook()
+    wb.active.append(["indicador", "pais", "periodo", "frecuencia", "valor"])
+    real = io.BytesIO()
+    wb.save(real)
+    with_macros = io.BytesIO(real.getvalue())
+    with zipfile.ZipFile(with_macros, "a") as z:
+        z.writestr("xl/vbaProject.bin", b"macro")
+    cases = [
+        ("datos.xlsx", b"esto no es un excel", msgs["not_xlsx"]),
+        ("datos.xlsx", with_macros.getvalue(), msgs["has_macros"]),
+        ("datos.csv", real.getvalue(), msgs["csv_is_excel"]),
+        ("datos.csv", b"indicador\x00\x01\x02", msgs["csv_binary"]),
+        ("datos.csv", "indicador,pais\nañ,ARG\n".encode("latin-1"), msgs["csv_encoding"].format(encoding="UTF-8")),
+    ]
+    for name, content, message in cases:
+        up = _upload_bytes(client, name, content)
+        assert up["status"] == "rejected" and up["report"]["errors"][0]["message"] == message, name
+    monkeypatch.setattr(app_config().datasets, "max_unzipped_bytes", 10)
+    assert _upload_bytes(client, "datos.xlsx", real.getvalue())["report"]["errors"][0]["message"].startswith(
+        msgs["unzipped_too_large"].split("(")[0])
+    monkeypatch.setattr(app_config().datasets, "max_rows", 1)
+    assert "más de 1 filas" in _upload(client, GOOD_CSV).json()["report"]["errors"][0]["message"]
+
+
+def test_values_already_official_need_confirmation_and_stay_apart(client, engine):
+    with Session(engine) as s:
+        ilostat = s.scalar(select(Source.source_id).where(Source.source_code == "ilostat"))
+        s.add(Observation(indicator_code="inflation", country_iso3="URY", period_start=date(2025, 1, 1),
+                          period_end=date(2025, 12, 31), frequency="A", value=4.8, unit="percent",
+                          data_type="observed", source_id=ilostat, fetched_at=datetime.now(UTC)))
+        s.commit()
+    up = _upload(client, GOOD_CSV).json()
+    overlaps = up["report"]["overlaps"]
+    assert up["status"] == "validated" and overlaps["count"] == 1 and overlaps["by_source"] == {"ILOSTAT": 1}
+    assert "URY 2025: oficial 4.8, archivo 4.9" in up["report"]["warnings"][0]["message"]
+    url = f"/api/v1/datasets/{up['dataset_id']}/commit"
+    r = client.post(url, headers=KEY, json={})
+    assert r.status_code == 409 and r.json()["detail"] == app_config().datasets.messages["overlap_confirm_required"]
+    assert client.post(url, headers=KEY, json={"confirm_overlap": True}).json()["status"] == "loaded"
+    with Session(engine) as s:  # the official value is still there, next to the uploaded one
+        values = s.execute(select(Source.source_code, Observation.value).join(Source).where(
+            Observation.indicator_code == "inflation", Observation.country_iso3 == "URY")).all()
+        assert sorted(values) == [("ilostat", 4.8), ("manual_upload", 4.9)]

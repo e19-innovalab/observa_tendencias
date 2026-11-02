@@ -100,6 +100,30 @@ Están en `backend/backend/config/catalog.yaml` y se aplican sin modificar los a
 
 ## 5. Correspondencia carrera → ocupación
 
+### Desde v0.2: a través de la CINE-F 2013 (UNESCO)
+
+Cada carrera recibe un **campo detallado de la CINE-F 2013** (la clasificación de campos de estudio
+de la UNESCO), la misma clave para Argentina, Chile y Uruguay. Las ocupaciones salen de **una tabla
+común** campo → ocupación. La CIUO-08 se mantiene para las ocupaciones: la CINE-F no la reemplaza.
+
+| Archivo | Qué tiene |
+|---|---|
+| `backend/backend/config/reference/cine_f_2013.yaml` | Los campos amplios, específicos y los 99 detallados, con nombres oficiales en español (versión internacional, vía DANE) |
+| `backend/backend/config/reference/cine_f_ciuo.yaml` | Tabla común campo → ocupaciones CIUO-08: `"*"` para carreras universitarias y profesionales, `tecnico` para técnicas. Borrador sin revisar |
+| `reglas_carreras_cine.yaml` (esta carpeta) | Reglas por nombre de carrera → campo, compartidas por los tres países, y cómo se reconoce una carrera técnica |
+| `generar_correspondencia_cine.py` (esta carpeta) | Aplica las reglas a las carreras cargadas y escribe `config/reference/carreras_<país>_cine.yaml` |
+
+Para regenerar, con los egresados ya cargados:
+
+    cd backend/backend && .venv/bin/python ../data/scripts/referencias/generar_correspondencia_cine.py
+
+El script informa por país las carreras sin regla y la parte de los titulados con campo; en Chile
+lista las carreras cuyo campo no coincide con el campo específico de Mi Futuro. Después:
+`python -m app.jobs.validate_crosswalk` y `python -m app.jobs.recompute --indicator employment`.
+
+Lo que sigue de esta sección describe las correspondencias directas carrera → ocupación por país,
+que se usaron hasta v0.1 y se conservan para comparar.
+
 ### Qué es y para qué se usa
 
 Para las **brechas de habilidades** hace falta saber para qué ocupaciones forma cada carrera. La

@@ -44,6 +44,9 @@ occupation_universe:
   file: reference/isco08_occupations.yaml
   # Names of the levels above each occupation (1, 2 and 3 digits of the code).
   groups_file: reference/isco08_groups.yaml
+  # Sector of the occupations that are not featured, by ISCO group (an approximation: sectors are
+  # economic activities). Occupations in no listed group belong to no strategic sector.
+  sectors_file: reference/isco_sectors.yaml
 
 # Display-name rules applied to the universe's Spanish names, in order (regular expressions).
 # The reference file stays as published; featured occupations keep their own names.

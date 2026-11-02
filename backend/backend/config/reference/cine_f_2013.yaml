@@ -1,0 +1,157 @@
+# CINE-F 2013 (ISCED-F 2013): Clasificación Internacional Normalizada de la Educación, campos de
+# educación y formación (UNESCO, Instituto de Estadística). Fixed standard, not an API: broad (2
+# digits), narrow (3) and detailed (4) fields. Used as the common key for careers of the three
+# countries (careers -> detailed field -> CIUO-08 occupations, see cine_f_ciuo.yaml).
+#
+# Source of the Spanish names: the "CINE-F 2013 Internacional UNESCO" column of DANE (Colombia),
+#   "CINE-F 2013 A.C.", section 7.1, pages 24-27
+#   https://www.dane.gov.co/files/noticias/CINE/cine-2013/Documento-CINE-F-2013-AC.pdf
+# Original (UNESCO-UIS, 2014, ISBN 978-92-9189-157-3):
+#   https://uis.unesco.org/en/files/isced-fields-education-and-training-2013-en-pdf
+# Colombia's own additions (0315, 0918, 1016) are not included. Interdisciplinary codes (x88) and
+# 9999 (unknown) are not used by the crosswalks and are left out.
+
+broad:
+  "00": Programas y certificaciones genéricos
+  "01": Educación
+  "02": Artes y humanidades
+  "03": Ciencias sociales, periodismo e información
+  "04": Administración de empresas y derecho
+  "05": Ciencias naturales, matemáticas y estadística
+  "06": Tecnologías de la información y la comunicación (TIC)
+  "07": Ingeniería, industria y construcción
+  "08": Agricultura, silvicultura, pesca y veterinaria
+  "09": Salud y bienestar
+  "10": Servicios
+
+narrow:
+  "001": Programas y certificaciones básicas
+  "002": Alfabetización y aritmética elemental
+  "003": Competencias personales y desarrollo
+  "011": Educación
+  "021": Artes
+  "022": Humanidades (excepto idiomas)
+  "023": Idiomas
+  "031": Ciencias sociales y del comportamiento
+  "032": Periodismo e información
+  "041": Educación comercial y administración
+  "042": Derecho
+  "051": Ciencias biológicas y afines
+  "052": Medio ambiente
+  "053": Ciencias físicas
+  "054": Matemáticas y estadística
+  "061": Tecnologías de la información y la comunicación (TIC)
+  "071": Ingeniería y profesiones afines
+  "072": Industria y producción
+  "073": Arquitectura y construcción
+  "081": Agricultura
+  "082": Silvicultura
+  "083": Pesca
+  "084": Veterinaria
+  "091": Salud
+  "092": Bienestar
+  "101": Servicios personales
+  "102": Servicios de higiene y salud ocupacional
+  "103": Servicios de protección
+  "104": Servicios de transporte
+
+detailed:
+  "0011": Programas y certificaciones básicas
+  "0021": Alfabetización y aritmética elemental
+  "0031": Competencias personales y desarrollo
+  "0111": Ciencias de la educación
+  "0112": Formación para docentes de educación preprimaria
+  "0113": Formación para docentes sin asignatura de especialización
+  "0114": Formación para docentes con asignatura de especialización
+  "0119": Educación no clasificada en otra parte
+  "0211": Técnicas audiovisuales y producción para medios de comunicación
+  "0212": Diseño industrial, de modas e interiores
+  "0213": Bellas artes
+  "0214": Artesanías
+  "0215": Música y artes escénicas
+  "0219": Artes no clasificadas en otra parte
+  "0221": Religión y teología
+  "0222": Historia y arqueología
+  "0223": Filosofía y ética
+  "0229": Humanidades (excepto idiomas) no clasificadas en otra parte
+  "0231": Adquisición de lenguaje
+  "0232": Literatura y lingüística
+  "0239": Idiomas no clasificados en otra parte
+  "0311": Economía
+  "0312": Ciencias políticas y educación cívica
+  "0313": Psicología
+  "0314": Sociología y estudios culturales
+  "0319": Ciencias sociales y del comportamiento no clasificadas en otra parte
+  "0321": Periodismo y reportajes
+  "0322": Bibliotecología, información y archivología
+  "0329": Periodismo e información no clasificados en otra parte
+  "0411": Contabilidad e impuestos
+  "0412": Gestión financiera, administración bancaria y seguros
+  "0413": Gestión y administración
+  "0414": Mercadotecnia y publicidad
+  "0415": Secretariado y trabajo de oficina
+  "0416": Ventas al por mayor y por menor
+  "0417": Competencias laborales
+  "0419": Educación comercial y administración no clasificadas en otra parte
+  "0421": Derecho
+  "0511": Biología
+  "0512": Bioquímica
+  "0519": Ciencias biológicas y afines no clasificadas en otra parte
+  "0521": Ciencias del medio ambiente
+  "0522": Medio ambiente natural y vida silvestre
+  "0529": Medio ambiente no clasificado en otra parte
+  "0531": Química
+  "0532": Ciencias de la tierra
+  "0533": Física
+  "0539": Ciencias físicas no clasificadas en otra parte
+  "0541": Matemáticas
+  "0542": Estadística
+  "0611": Uso de computadores
+  "0612": Diseño y administración de redes y bases de datos
+  "0613": Desarrollo y análisis de software y aplicaciones
+  "0619": Tecnologías de la información y la comunicación (TIC) no clasificadas en otra parte
+  "0711": Ingeniería y procesos químicos
+  "0712": Tecnología de protección del medio ambiente
+  "0713": Electricidad y energía
+  "0714": Electrónica y automatización
+  "0715": Mecánica y profesiones afines a la metalistería
+  "0716": Vehículos, barcos y aeronaves motorizadas
+  "0719": Ingeniería y profesiones afines no clasificadas en otra parte
+  "0721": Procesamiento de alimentos
+  "0722": Materiales (vidrio, papel, plástico y madera)
+  "0723": Productos textiles (ropa, calzado y artículos de cuero)
+  "0724": Minería y extracción
+  "0729": Industria y producción no clasificadas en otra parte
+  "0731": Arquitectura y urbanismo
+  "0732": Construcción e ingeniería civil
+  "0811": Producción agrícola y ganadera
+  "0812": Horticultura
+  "0819": Agricultura no clasificada en otra parte
+  "0821": Silvicultura
+  "0831": Pesca
+  "0841": Veterinaria
+  "0911": Odontología
+  "0912": Medicina
+  "0913": Enfermería y partería
+  "0914": Tecnología de diagnóstico y tratamiento médico
+  "0915": Terapia y rehabilitación
+  "0916": Farmacia
+  "0917": Medicina y terapia tradicional y complementaria
+  "0919": Salud no clasificada en otra parte
+  "0921": Asistencia a adultos mayores y discapacitados
+  "0922": Asistencia a la infancia y servicios para jóvenes
+  "0923": Trabajo social y orientación
+  "0929": Bienestar no clasificado en otra parte
+  "1011": Servicios domésticos
+  "1012": Peluquería y tratamientos de belleza
+  "1013": Hotelería, restaurantes y servicios de banquetes
+  "1014": Deportes
+  "1015": Viajes, turismo y actividades recreativas
+  "1019": Servicios personales no clasificados en otra parte
+  "1021": Saneamiento de la comunidad
+  "1022": Salud y protección laboral
+  "1029": Servicios de higiene y salud ocupacional no clasificados en otra parte
+  "1031": Educación militar y de defensa
+  "1032": Protección de las personas y de la propiedad
+  "1039": Servicios de protección no clasificados en otra parte
+  "1041": Servicios de transporte

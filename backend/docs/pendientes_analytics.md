@@ -1,11 +1,65 @@
 # Pendientes de Data Analytics
 
 Tareas que necesitan revisión o decisión del equipo de Data Analytics antes de publicar resultados.
-Estado al 18/10/2026. Al cerrar una tarea, marcala como hecha y anotá quién la cerró y la fecha.
+Estado al 31/10/2026. Al cerrar una tarea, marcala como hecha y anotá quién la cerró y la fecha.
 
 ---
 
-## 1. Revisar la correspondencia carrera → ocupación (Chile) · prioridad alta
+## 0. Revisar la ruta carrera → campo CINE-F → ocupación (los tres países) · prioridad alta
+
+**Estado:** pendiente · **Responsable:** a definir · **Bloquea:** la publicación de las brechas de
+habilidades. **Reemplaza** a las tareas 1, 1b y 1c (desde la versión v0.2).
+
+Desde v0.2 las carreras ya no se asocian directamente a ocupaciones, país por país. Cada carrera
+recibe un campo detallado de la **CINE-F 2013** (UNESCO), la misma clave para los tres países, y las
+ocupaciones salen de **una sola tabla común** campo → ocupación. Así se revisan unos 100 campos una
+vez, en lugar de más de 800 filas en tres tablas.
+
+### Qué hay que revisar
+
+1. **La tabla común** `backend/backend/config/reference/cine_f_ciuo.yaml` (99 campos): para qué
+   ocupaciones CIUO-08 forma cada campo, con dos listas: `"*"` para carreras universitarias y
+   profesionales, y `tecnico` para carreras técnicas (técnico, tecnólogo, tecnicatura).
+2. **Las reglas** `data/scripts/referencias/reglas_carreras_cine.yaml`: qué campo recibe cada
+   carrera según su nombre (gana la primera regla que coincide). Se ven aplicadas en el Explorer,
+   sección "Correspondencia carrera → ocupación" (columna "Campo CINE-F 2013"), o en
+   `GET /api/v1/graduates/crosswalk?country=CHL&format=csv` (columnas `cine_f`, `campo_cine_f`,
+   `tecnica`).
+
+### Puntos dudosos para discutir primero
+
+- **Chile, cuatro carreras donde el campo no coincide con el campo específico de Mi Futuro:**
+  - Diseño Industrial y Técnico en Diseño Industrial → 0212 "Diseño industrial, de modas e
+    interiores" (como dice el manual de la CINE-F); Mi Futuro las ubica en Ingeniería.
+  - Ingeniería Civil Agrícola → 0732 "Construcción e ingeniería civil"; Mi Futuro: Industria y producción.
+  - Ingeniería Civil en Geografía → 0314; Mi Futuro: Ingeniería.
+- **Argentina, "Economía y Administración"** (la disciplina con más egresados) → 0411 "Contabilidad e
+  impuestos", porque la mayoría son contadores. Con un solo campo por carrera, los administradores y
+  economistas de esa disciplina quedan fuera. ¿Conviene otro campo?
+- **Argentina, "Educación"** → 0114 (profesorados con asignatura de especialización).
+- **Un campo amplio lleva a varias ocupaciones:** por ejemplo 0413 "Gestión y administración" →
+  especialistas en organización (2421) y gerentes (1219). Los titulados se reparten en partes iguales.
+- **Uruguay, cifras del anuario 2024** (Diseño de Comunicación Visual y Contador Público): siguen
+  pendientes, ver la tarea 1c.
+
+### Cómo corregir
+
+Editar las reglas o la tabla común y regenerar:
+
+```bash
+cd backend_app_test/backend   # o backend/backend en el repositorio
+.venv/bin/python ../data/scripts/referencias/generar_correspondencia_cine.py
+python -m app.jobs.validate_crosswalk
+python -m app.jobs.recompute --indicator employment
+```
+
+Al terminar: `revisada: true` en las reglas y `reviewed: true` en la tabla común.
+
+---
+
+## 1. Revisar la correspondencia carrera → ocupación (Chile) · reemplazada por la tarea 0
+
+*Desde v0.2 esta correspondencia directa ya no se usa (se conserva como referencia y para comparar).*
 
 **Estado:** pendiente · **Responsable:** a definir · **Bloquea:** la publicación de las brechas de
 habilidades.
@@ -80,7 +134,7 @@ secciones 1 y 5.
 
 ---
 
-## 1b. Revisar la correspondencia disciplina → ocupación (Argentina) · prioridad alta
+## 1b. Revisar la correspondencia disciplina → ocupación (Argentina) · reemplazada por la tarea 0
 
 **Estado:** pendiente · **Responsable:** a definir · **Bloquea:** la publicación de las brechas de
 habilidades de Argentina.
@@ -99,7 +153,7 @@ habilidades de Argentina.
 
 ---
 
-## 1c. Revisar la correspondencia carrera → ocupación (Uruguay) · prioridad alta
+## 1c. Revisar la correspondencia carrera → ocupación (Uruguay) · reemplazada por la tarea 0 (las cifras del anuario 2024 siguen pendientes)
 
 **Estado:** pendiente · **Responsable:** a definir · **Bloquea:** la publicación de las brechas de
 habilidades de Uruguay.
@@ -135,4 +189,6 @@ habilidades de Uruguay.
 | Desajuste educación-ocupación en Uruguay | Los años 2023 y 2025 de ILOSTAT clasifican como "nivel 0" a entre 11 % y 16 % de los ocupados (2 % en 2022 y 2024), y la subcalificación salta 7 puntos. ¿Consultar a INE Uruguay u OIT, o excluir esos años? | `config/reference/isco_education_requirements.yaml` |
 | ISE: exclusión dudosa | ¿Excluir 9624 (acarreadores de agua y recolectores de leña) como ocupación de subsistencia? | `catalog.yaml → excluded_occupations` |
 | Argentina: demanda por ocupación | La EPH es urbana y la muestra por ocupación es chica. ¿Usar promedio móvil de 3 años o sumar los registros del SIPA? | `analytics.yaml → employability.dimensions` |
+| Nombres locales de ocupaciones | Sumar las palabras que falten de cada país (hoy 251, revisadas el 2026-11-01). Las que no encuentra el buscador quedan en `assistant_logs` (preguntas que terminan en el modelo) | `config/reference/ocupaciones_nombres_locales.yaml` |
+| Asistente: qué modelo responde | Las preguntas frecuentes se responden por plantilla. Para el resto, ¿modelo abierto local (gratis, más lento y menos confiable) o Claude (centavos por pregunta)? Comparar con las mismas preguntas antes de decidir | `app.yaml → assistant.provider` |
 | Titulados de Argentina y Uruguay | Buscar el archivo oficial descargable (Departamento de Información Universitaria; Ministerio de Educación y Cultura) para que esos países tengan brechas | Nuevo perfil en `config/datasets/` |

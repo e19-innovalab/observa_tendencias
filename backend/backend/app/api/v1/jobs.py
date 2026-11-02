@@ -1,3 +1,5 @@
+from statistics import median
+
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
@@ -5,7 +7,7 @@ from sqlalchemy.orm import Session
 from app.core.config_files import app_config
 from app.core.database import get_session
 from app.models import JobPosting
-from app.schemas.analytics import JobItem, JobsPage, JobsSummary, JobsSummaryCell
+from app.schemas.analytics import JobItem, JobsCompetition, JobsPage, JobsSummary, JobsSummaryCell
 
 router = APIRouter(tags=["jobs"])
 _pagination = app_config().pagination
@@ -61,8 +63,25 @@ def jobs_summary(
         .order_by(JobPosting.provincia, JobPosting.sector)
     ).all()
     last = session.scalar(select(func.max(JobPosting.scraped_at)).where(*conds))
+    rows = session.execute(select(JobPosting.sector, JobPosting.postulantes).where(*conds)).all()
+    by_sector: dict[str, list[int | None]] = {}
+    for sector, applicants in rows:
+        by_sector.setdefault(sector, []).append(applicants)
+    sectors = sorted((_competition(s, v) for s, v in by_sector.items()),
+                     key=lambda c: -(c.mediana_postulantes if c.mediana_postulantes is not None else -1))
     return JobsSummary(
         total=sum(n for _, _, n in cells),
         scraped_at=last,
         por_provincia_sector=[JobsSummaryCell(provincia=p, sector=s, n=n) for p, s, n in cells],
+        competencia=[_competition(None, [a for _, a in rows]), *sectors] if rows else [],
     )
+
+
+def _competition(sector: str | None, applicants: list[int | None]) -> JobsCompetition:
+    view = app_config().jobs_view
+    known = [a for a in applicants if a is not None]
+    enough = len(known) >= view.competition_min_postings
+    return JobsCompetition(
+        sector=sector, ofertas=len(applicants), con_postulantes=len(known),
+        mediana_postulantes=float(median(known)) if enough else None,
+        en_tope=sum(a >= view.applicants_cap for a in known) / len(known) if enough else None)

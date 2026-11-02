@@ -16,11 +16,13 @@ from sqlalchemy.orm import Session
 
 from app.connectors.http import download_sync
 from app.core.config_files import analytics_params, app_config, sources
+from app.datasets.filecheck import check_file
 from app.datasets.profiles import DatasetProfile, normalize_text, profile_for_source
 from app.datasets.reader import Issue, ReadReport, read_dataset
 from app.ingestion.revisions import OBSERVATION_KEY, record_changes
 from app.models import Alert, DatasetFile, Graduate, IngestionRun, Observation, Source
 from app.normalization.normalizer import normalize
+from app.normalization.periods import to_period_range
 
 
 class DatasetError(Exception):
@@ -56,7 +58,10 @@ def _latest_link(page_url: str, profile: DatasetProfile, release: str | None = N
         raise DatasetError(_msg("no_link", page=page_url))
     best = max(matches, key=lambda m: m.groupdict().get("release") or m.group(0))
     url = _allowed(urljoin(page_url, best.group(0)), profile)
-    return FoundLink(url=url, release=best.groupdict().get("release") or release)
+    found = best.groupdict().get("release")
+    if found and len(found) < 4:
+        found = profile.download.release_prefix + found
+    return FoundLink(url=url, release=found or release)
 
 
 def find_download_link(profile: DatasetProfile) -> FoundLink:
@@ -298,6 +303,41 @@ def run_dataset_source(session: Session, source_code: str, run: IngestionRun) ->
     return loaded, changed
 
 
+def official_overlaps(session: Session, source_id: int, report: ReadReport) -> dict | None:
+    """Values of the file that already exist from another (official) source: same indicator,
+    country, sector, occupation, period and frequency. None when there are none."""
+    keys = {}
+    for r in report.records:
+        start, _ = to_period_range(r.period, r.frequency)
+        keys[(r.indicator_code, r.country_iso3, r.sector_code, r.occupation_code, start, r.frequency)] = r
+    if not keys:
+        return None
+    rows = session.execute(
+        select(Observation.indicator_code, Observation.country_iso3, Observation.sector_code,
+               Observation.occupation_code, Observation.period_start, Observation.frequency,
+               Observation.value, Source.name)
+        .join(Source, Source.source_id == Observation.source_id)
+        .where(Observation.source_id != source_id, Observation.data_type == "observed",
+               Observation.indicator_code.in_({k[0] for k in keys}),
+               Observation.country_iso3.in_({k[1] for k in keys}),
+               Observation.period_start.in_({k[4] for k in keys}))).all()
+    found = [(row, keys[tuple(row[:6])]) for row in rows if tuple(row[:6]) in keys]
+    if not found:
+        return None
+    conf = app_config().datasets
+    by_source: dict[str, int] = {}
+    for row, _ in found:
+        by_source[row.name] = by_source.get(row.name, 0) + 1
+    examples = [_msg("overlap_example", indicator=rec.indicator_code, country=rec.country_iso3,
+                     period=rec.period, official=row.value, uploaded=rec.value)
+                for row, rec in found[:conf.overlap_examples]]
+    count = len({tuple(row[:6]) for row, _ in found})
+    return {"count": count, "by_source": by_source, "examples": examples,
+            "message": _msg("overlap_official", count=count,
+                            sources=", ".join(f"{k}: {v}" for k, v in by_source.items()),
+                            examples="; ".join(examples))}
+
+
 def register_upload(session: Session, profile: DatasetProfile, content: bytes, file_name: str,
                     declared_name: str | None, declared_url: str | None,
                     reference_date: date | None) -> tuple[DatasetFile, ReadReport]:
@@ -312,7 +352,15 @@ def register_upload(session: Session, profile: DatasetProfile, content: bytes, f
         declared_source_url=declared_url, reference_date=reference_date,
         created_at=datetime.now(UTC),
     )
-    report = validate_file(session, profile, path)
+    problems = check_file(content, file_name, profile)
+    if problems:  # not what it says it is: not read at all (kept, with the reason, in the history)
+        report = ReadReport(errors=[Issue(m) for m in problems])
+    else:
+        report = validate_file(session, profile, path)
+        if report.ok and profile.is_long:
+            report.overlaps = official_overlaps(session, source.source_id, report)
+            if report.overlaps:
+                report.warnings.append(Issue(report.overlaps["message"], kind="overlap"))
     if profile.requires_declared_source and not (declared_name and declared_url):
         report.errors.insert(0, Issue(_msg("declared_source_required")))
     dataset.report = report.summary()
