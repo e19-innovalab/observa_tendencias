@@ -738,7 +738,7 @@ assistant:
       # Ollama: http://localhost:11434/v1 · llama-server: http://localhost:8080/v1
       base_url: http://localhost:11434/v1
       model: qwen2.5:7b-instruct
-      max_tokens: 1024
+      max_tokens: 4096
       temperature: 0.2
       timeout_seconds: 180
     anthropic:
@@ -763,7 +763,7 @@ assistant:
   # Tool results are trimmed before the model reads them: lists to this many items, then the
   # whole text to this many characters; keys listed here are removed (texts for screens).
   tool_result_max_items: 10
-  tool_result_max_chars: 6000
+  tool_result_max_chars: 16000
   tool_result_drop_keys: [texts]
   # Numbers check: every number in the answer must appear in what the tools returned (or in the
   # question). Tolerance is relative; a share (0.64) also matches its percentage (64 %). Whole
