@@ -274,6 +274,12 @@ def test_unknown_questions_go_to_the_model(client, monkeypatch):
     assert body["source"] == "model" and fake.messages and body["answer"] == "No tengo ese dato."
 
 
+def test_scale_from_the_instructions_is_not_flagged(client, monkeypatch):
+    """ "de 0 a 100" comes from the instructions, not from the data: it is not an invented number."""
+    _use(monkeypatch, Scripted([], "El índice va de 0 a 100."))
+    assert _ask(client, "¿qué escala usa?")["status"] == "ok"
+
+
 def test_blocked_without_links_suggests_other_words(client, monkeypatch):
     _use(monkeypatch, Scripted([], "Gana USD 4.321."))
     body = _ask(client, "algo")
@@ -360,18 +366,25 @@ def test_occupation_search_finds_local_names(client):
 def test_provider_can_be_set_per_environment(monkeypatch):
     from app.core import config_files
 
+    fresh = config_files.app_config.__wrapped__  # reads the YAML again without touching the cache
     monkeypatch.setattr(settings, "assistant_provider", "anthropic")
-    config_files.app_config.cache_clear()
-    try:
-        assert config_files.app_config().assistant.provider == "anthropic"
-        # in the cloud: provider local pointed to a hosted OpenAI-compatible API
-        monkeypatch.setattr(settings, "assistant_provider", "local")
-        monkeypatch.setattr(settings, "assistant_base_url", "https://api.example.com/v1")
-        monkeypatch.setattr(settings, "assistant_model", "modelo-hospedado")
-        config_files.app_config.cache_clear()
-        local = config_files.app_config().assistant.providers["local"]
-        assert (local.base_url, local.model) == ("https://api.example.com/v1", "modelo-hospedado")
-    finally:
-        for name in ("assistant_provider", "assistant_base_url", "assistant_model"):
-            monkeypatch.setattr(settings, name, "")
-        config_files.app_config.cache_clear()
+    assert fresh().assistant.provider == "anthropic"
+    # in the cloud: provider local pointed to a hosted OpenAI-compatible API
+    monkeypatch.setattr(settings, "assistant_provider", "local")
+    monkeypatch.setattr(settings, "assistant_base_url", "https://api.example.com/v1")
+    monkeypatch.setattr(settings, "assistant_model", "modelo-hospedado")
+    local = fresh().assistant.providers["local"]
+    assert (local.base_url, local.model) == ("https://api.example.com/v1", "modelo-hospedado")
+
+
+def test_every_configured_tool_reaches_its_endpoint(client, monkeypatch):
+    """Each tool in app.yaml -> assistant.tools answers (no wrong path or parameter)."""
+    samples = {"q": "software", "code": "2512", "occupation": "2512", "country": "ARG",
+               "methodology_type": "employability_index"}
+    calls = [(t.name, {k: samples[k] for k, p in t.params.items() if p.required or k in ("country",)})
+             for t in CONF.tools]
+    fake = _use(monkeypatch, Scripted(calls, "Listo."))
+    client.post("/api/v1/assistant/ask", json={"question": "probar todo con 2512"})
+    failed = [(r.tool, r.result[:80]) for r in fake.runs if not r.ok]
+    assert not failed, failed
+    assert {"moctezuma_paises", "ludita_ocupacion", "reina_roja_ocupacion", "sisifo_paises"} <= {r.tool for r in fake.runs}
