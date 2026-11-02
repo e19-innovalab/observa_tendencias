@@ -19,7 +19,10 @@ def main() -> None:
     print(f"series: {summary.series} | trends: {summary.trends} | "
           f"projection points: {summary.projections} | "
           f"employability scores: {summary.employability_scores} | "
-          f"skill gaps: {summary.skill_gaps} | new alerts: {summary.alerts}")
+          f"skill gaps: {summary.skill_gaps} | "
+          f"moctezuma scores: {summary.moctezuma_scores} | "
+          f"ludita scores: {summary.ludita_scores} | "
+          f"reina roja scores: {summary.red_queen_scores} | new alerts: {summary.alerts}")
 
 
 if __name__ == "__main__":

@@ -4,9 +4,9 @@ from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from app.core.auth import require_permission
 from app.core.config_files import analytics_params, app_config, sources
 from app.core.database import get_session
-from app.core.security import require_api_key
 from app.ingestion.pipeline import IngestionError, run_source
 from app.models import DataRevision, IngestionRun, Source
 from app.schemas.observatory import RevisionItem, RunItem, SourceItem
@@ -103,7 +103,7 @@ def source_revisions(
                            .offset(offset).limit(limit)).all()
 
 
-@router.post("/{code}/refresh", response_model=RunItem, dependencies=[Depends(require_api_key)])
+@router.post("/{code}/refresh", response_model=RunItem, dependencies=[Depends(require_permission("manage_data"))])
 def refresh_source(code: str, since_year: int | None = None,
                    session: Session = Depends(get_session)):
     _source(session, code)

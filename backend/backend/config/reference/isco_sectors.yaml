@@ -1,0 +1,87 @@
+# CIUO-08 (ISCO-08) groups -> the catalog's strategic sectors, for the occupations that are not
+# featured (featured occupations keep the sector set in catalog.yaml). The occupation takes the
+# sector of the LONGEST matching code prefix (a 4-digit code beats its 3-digit group).
+#
+# Approximation: sectors are defined by economic activity (CIIU/ISIC, catalog.yaml -> isic_codes)
+# and occupations are not activities. Each group goes to the sector whose activities mainly employ
+# it. Groups not listed belong to no strategic sector (teachers, clerks, trades, operators...);
+# they still appear when no sector is selected. ICT occupations go to Tecnología even though
+# J62-J63 is also part of Economía del conocimiento.
+# STATUS: draft, NOT REVIEWED.
+
+reviewed: false
+
+prefixes:
+  # Tecnología (J62-J63)
+  "133": technology    # Gerentes de servicios de TIC
+  "251": technology    # Desarrolladores y analistas de software y multimedia
+  "252": technology    # Especialistas en bases de datos y redes
+  "2152": technology   # Ingenieros electrónicos
+  "2153": technology   # Ingenieros en telecomunicaciones
+  "351": technology    # Técnicos en operaciones de TIC y asistencia al usuario
+  "352": technology    # Técnicos en telecomunicaciones y radiodifusión
+  "742": technology    # Instaladores y reparadores en electrónica y telecomunicaciones
+
+  # Salud (Q86-Q88)
+  "1342": health       # Gerentes de servicios de salud
+  "1343": health       # Gerentes de servicios de cuidado de personas de edad
+  "221": health        # Médicos
+  "222": health        # Profesionales de enfermería y partería
+  "223": health        # Profesionales de medicina tradicional y alternativa
+  "224": health        # Practicantes paramédicos
+  "226": health        # Otros profesionales de la salud
+  "2634": health       # Psicólogos
+  "2635": health       # Profesionales del trabajo social
+  "321": health        # Técnicos médicos y farmacéuticos
+  "322": health        # Profesionales de nivel medio de enfermería y partería
+  "323": health        # Profesionales de nivel medio de medicina tradicional
+  "325": health        # Otros profesionales de nivel medio de la salud
+  "532": health        # Trabajadores de los cuidados personales en servicios de salud
+
+  # Energía (D35, B06, C19)
+  "2151": energy       # Ingenieros electricistas
+  "3113": energy       # Electrotécnicos
+  "3131": energy       # Operadores de centrales eléctricas
+  "3134": energy       # Operadores de refinerías de petróleo y gas natural
+  "7411": energy       # Electricistas de obras
+  "7412": energy       # Mecánicos y ajustadores electricistas
+  "7413": energy       # Instaladores y reparadores de líneas eléctricas
+  "2146": energy       # Ingenieros de minas, metalúrgicos y afines (incluye petróleo y gas, B06)
+  "3117": energy       # Técnicos en ingeniería de minas y metalurgia
+  "8182": energy       # Operadores de máquinas de vapor y calderas
+
+  # Turismo (I55-I56, N79)
+  "1411": tourism      # Gerentes de hoteles
+  "1412": tourism      # Gerentes de restaurantes
+  "3332": tourism      # Organizadores de conferencias y eventos
+  "3434": tourism      # Chefs
+  "4221": tourism      # Empleados de agencias de viajes
+  "4224": tourism      # Recepcionistas de hoteles
+  "511": tourism       # Personal al servicio directo de los pasajeros (acompañantes, guías)
+  "512": tourism       # Cocineros
+  "513": tourism       # Camareros
+  "941": tourism       # Ayudantes de preparación de alimentos
+
+  # Economía del conocimiento (J62-J63, M69-M75): servicios profesionales, científicos y técnicos
+  "1211": knowledge_economy  # Gerentes financieros
+  "1212": knowledge_economy  # Gerentes de recursos humanos
+  "1213": knowledge_economy  # Gerentes de políticas y planeamiento
+  "1219": knowledge_economy  # Gerentes de servicios administrativos no clasificados
+  "122": knowledge_economy   # Gerentes de ventas, comercialización y desarrollo
+  "211": knowledge_economy   # Físicos, químicos y afines
+  "212": knowledge_economy   # Matemáticos, actuarios y estadísticos
+  "213": knowledge_economy   # Profesionales en ciencias biológicas
+  "214": knowledge_economy   # Ingenieros (excepto electrotecnología)
+  "216": knowledge_economy   # Arquitectos, urbanistas, agrimensores y diseñadores
+  "225": knowledge_economy   # Veterinarios (M75)
+  "241": knowledge_economy   # Especialistas en finanzas
+  "242": knowledge_economy   # Especialistas en organización de la administración
+  "243": knowledge_economy   # Profesionales de ventas, comercialización y relaciones públicas
+  "261": knowledge_economy   # Profesionales en derecho
+  "2631": knowledge_economy  # Economistas
+  "2632": knowledge_economy  # Sociólogos, antropólogos y afines
+  "311": knowledge_economy   # Técnicos en ciencias físicas y en ingeniería
+  "3313": knowledge_economy  # Tenedores de libros
+  "3314": knowledge_economy  # Profesionales de nivel medio de servicios estadísticos
+  "324": knowledge_economy   # Técnicos y asistentes veterinarios (M75)
+  "3411": knowledge_economy  # Profesionales de nivel medio del derecho

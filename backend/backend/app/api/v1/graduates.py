@@ -79,12 +79,15 @@ def isco_levels(code: str) -> list[IscoLevel]:
 
 
 CSV_COLUMNS = ["carrera", "nivel", "area", "subarea", "titulados", "anio", "crecimiento_anual",
-               "generica", "ciuo", "ocupacion", "proporcion", "gran_grupo", "subgrupo_principal",
+               "generica", "cine_f", "campo_cine_f", "tecnica", "ciuo", "ocupacion", "proporcion", "gran_grupo", "subgrupo_principal",
                "subgrupo"]
 
 
-def _career_row(career, level, key, fields, series, year, growth, codes) -> CrosswalkCareer:
+def _career_row(career, level, key, fields, series, year, growth, codes,
+                cine: dict | None = None) -> CrosswalkCareer:
     return CrosswalkCareer(
+        cine_f=(cine or {}).get("code"), cine_f_name=(cine or {}).get("name"),
+        technical=(cine or {}).get("technical"),
         career=career, level=level, field_area=fields.get(key, (None, None))[0],
         field_subarea=fields.get(key, (None, None))[1],
         graduates=series.get(year) if year else None, graduates_year=year,
@@ -131,7 +134,12 @@ def crosswalk_review(
             growth = dimension_value([Point(y, v, "g", None) for y, v in sorted(series.items())],
                                      conf, year, max_age)[0] if series else None
             codes = crosswalk_codes(entry, level)
-            items.append(_career_row(career, level, key, fields, series, year, growth, codes))
+            cine = cw.get("cine", {}).get(career)
+            if cine is not None:  # technical by name or by level
+                cine = {**cine, "technical": cine["technical"]
+                        or level in (cw.get("technical_levels") or [])}
+            items.append(_career_row(career, level, key, fields, series, year, growth, codes,
+                                     cine))
     items.sort(key=lambda i: (-(i.graduates or 0), i.career, i.level))
 
     total = sum(i.graduates or 0 for i in items)
@@ -140,7 +148,7 @@ def crosswalk_review(
         cw["source_profile"]].source))
     review = CrosswalkReview(
         country_iso3=country.upper(), reviewed=bool(cw.get("reviewed")), file=path,
-        levels=levels, source=SourceRef(code=source.source_code, name=source.name)
+        levels=levels, via=cw.get("via"), source=SourceRef(code=source.source_code, name=source.name)
         if source else None, careers=len(items), mapped=sum(not i.is_generic for i in items),
         generic=sum(i.is_generic for i in items),
         graduates_mapped_share=mapped_total / total if total else None, items=items)
@@ -152,7 +160,8 @@ def crosswalk_review(
     for i in items:
         base = [i.career, i.level, i.field_area, i.field_subarea, i.graduates, i.graduates_year,
                 None if i.graduates_growth is None else round(i.graduates_growth, 4),
-                "si" if i.is_generic else "no"]
+                "si" if i.is_generic else "no", i.cine_f, i.cine_f_name,
+                None if i.technical is None else ("si" if i.technical else "no")]
         if not i.occupations:
             writer.writerow(base + [None] * 6)
         for o in i.occupations:

@@ -1,0 +1,286 @@
+# Nombres locales de ocupaciones (Argentina, Chile, Uruguay) que ESCO no tiene, con su grupo
+# CIUO-08. ESCO está escrito en español de España; estas son las palabras que se usan acá.
+#
+# Criterio: el grupo se elige según la definición de ISCO-08 Vol. 1 (OIT, 2012), igual que en
+# ml/occupation_match/testset.yaml. "also": otros grupos donde la palabra también cae (según el contexto).
+# countries: dónde se usa la palabra con ese sentido (ARG, CHL, URY). La misma palabra puede
+# tener otro sentido en otro país (p. ej. "colectivero": colectivo es un bus en Argentina y un
+# taxi compartido en Chile); en ese caso hay una entrada por país.
+# review: true marca las entradas con dudas, para mirar primero.
+#
+# Uso (app.yaml -> search.aliases_file):
+# - el buscador (/occupations?q=, app/core/search.py): "remisero" encuentra 8322;
+# - el asistente (app/assistant/scripted.py): reconoce la ocupación de la pregunta;
+# - el prototipo ml/occupation_match: build_data.py agrega cada nombre como kind "local" para
+#   evaluar y entrenar (evaluate.py oculta las frases que también están en su testset.yaml).
+#
+# STATUS: revisado y aprobado por Paula Vergara el 2026-11-01, contra ISCO-08 Vol. 1 (OIT, 2012).
+# Primera versión: borrador del equipo del mismo día. En la revisión se corrigieron 22 entradas
+# marcadas con dudas; las que cambiaron de código lo dicen en "note" ("revisado: …; antes …").
+
+reviewed: true
+reviewed_by: Paula Vergara
+reviewed_on: 2026-11-01
+reference: ISCO-08 Vol. 1 (OIT, 2012)
+entries:
+  # Transporte
+  - {term: "colectivero", code: "8331", countries: [ARG]}
+  - {term: "chofer de colectivo", code: "8331", countries: [ARG]}
+  - {term: "colectivero", code: "8322", countries: [CHL], note: "en Chile el colectivo es un taxi compartido"}
+  - {term: "micrero", code: "8331", countries: [CHL]}
+  - {term: "chofer de micro", code: "8331", countries: [CHL, ARG]}
+  - {term: "chofer de ómnibus", code: "8331", countries: [URY, ARG]}
+  - {term: "guarda de ómnibus", code: "5112", countries: [URY], note: "cobra boletos a bordo"}
+  - {term: "remisero", code: "8322", countries: [ARG]}
+  - {term: "chofer de remís", code: "8322", countries: [ARG]}
+  - {term: "tachero", code: "8322", countries: [ARG], note: "taxista, coloquial"}
+  - {term: "chofer de aplicación", code: "8322", countries: [ARG, CHL, URY], note: "Uber, Cabify, DiDi"}
+  - {term: "conductor de uber", code: "8322", countries: [ARG, CHL, URY]}
+  - {term: "fletero", code: "9333", countries: [ARG, URY], also: ["8322", "8332"], note: "revisado: 9333 (carga y descarga); si maneja, también camioneta (8322) o camión (8332)"}
+  - {term: "camionero", code: "8332", countries: [ARG, CHL, URY]}
+  - {term: "chofer de camión", code: "8332", countries: [ARG, CHL, URY]}
+  - {term: "motoquero", code: "8321", countries: [ARG]}
+  - {term: "motoboy", code: "8321", countries: [ARG, URY]}
+  - {term: "repartidor en moto", code: "8321", countries: [ARG, CHL, URY]}
+  - {term: "cadete", code: "9621", countries: [ARG, URY]}
+  - {term: "mandadero", code: "9621", countries: [ARG, CHL, URY]}
+  - {term: "repartidor en bicicleta", code: "9621", countries: [ARG, CHL, URY]}
+  - {term: "peoneta", code: "9333", countries: [CHL], note: "ayudante de carga del camión"}
+  - {term: "clarkista", code: "8344", countries: [ARG], note: "operador de autoelevador"}
+  - {term: "autoelevadorista", code: "8344", countries: [ARG]}
+  - {term: "operador de grúa horquilla", code: "8344", countries: [CHL]}
+  - {term: "aeromoza", code: "5111", countries: [CHL, URY, ARG]}
+  - {term: "tripulante de cabina", code: "5111", countries: [ARG, CHL, URY]}
+  - {term: "playero", code: "5245", countries: [ARG], note: "estación de servicio"}
+  - {term: "bombero de bencinera", code: "5245", countries: [CHL]}
+  - {term: "pistero", code: "5245", countries: [URY]}
+  # Gastronomía
+  - {term: "mozo", code: "5131", countries: [ARG, URY]}
+  - {term: "moza", code: "5131", countries: [ARG, URY]}
+  - {term: "garzón", code: "5131", countries: [CHL]}
+  - {term: "garzona", code: "5131", countries: [CHL]}
+  - {term: "cantinero", code: "5132", countries: [ARG, CHL, URY]}
+  - {term: "barman", code: "5132", countries: [ARG, CHL, URY]}
+  - {term: "parrillero", code: "5120", countries: [ARG, URY]}
+  - {term: "pizzero", code: "5120", countries: [ARG, URY]}
+  - {term: "bachero", code: "9412", countries: [ARG], note: "lavaplatos"}
+  - {term: "copero", code: "9412", countries: [CHL]}
+  - {term: "lavaplatos", code: "9412", countries: [ARG, CHL, URY]}
+  - {term: "sanguchero", code: "5212", countries: [CHL, ARG], note: "revisado: vendedor de comida en la calle"}
+  - {term: "completero", code: "5212", countries: [CHL], note: "revisado: vende completos (hot dogs)"}
+  - {term: "jefe de cocina", code: "3434", countries: [ARG, CHL, URY]}
+  # Comercio
+  - {term: "almacenero", code: "5221", countries: [ARG, URY]}
+  - {term: "kiosquero", code: "5221", countries: [ARG, URY], also: ["5223"]}
+  - {term: "bolichero", code: "5221", countries: [URY]}
+  - {term: "empleado de comercio", code: "5223", countries: [ARG, CHL, URY]}
+  - {term: "vendedor de mostrador", code: "5223", countries: [ARG, CHL, URY]}
+  - {term: "repositor", code: "9334", countries: [ARG, URY]}
+  - {term: "reponedor", code: "9334", countries: [CHL]}
+  - {term: "feriante", code: "5211", countries: [ARG, CHL, URY]}
+  - {term: "puestero de feria", code: "5211", countries: [ARG, URY]}
+  - {term: "mantero", code: "9520", countries: [ARG], note: "vendedor callejero sobre una manta"}
+  - {term: "colero", code: "9520", countries: [CHL], also: ["5211"], note: "revisado: vende sin permiso al principio o al final (la cola) de una feria libre; ropa (9520) o frutas y verduras (5211)"}
+  - {term: "colero", code: "9212", countries: [CHL], note: "revisado: en el rodeo chileno, ayuda con los novillos y los corrales en la medialuna"}
+  - {term: "sopaipillero", code: "5212", countries: [CHL]}
+  - {term: "vendedor viajante", code: "3322", countries: [ARG, URY]}
+  - {term: "visitador médico", code: "2433", countries: [ARG, CHL, URY]}
+  - {term: "martillero", code: "3339", countries: [ARG, CHL, URY], also: ["3315"], note: "revisado: martillero público (Argentina), profesional independiente que hace subastas o remates públicos, privados o judiciales de bienes (inmuebles, muebles, semovientes, marcas o patentes); también tasa (3315) y actúa como perito"}
+  - {term: "corredor de propiedades", code: "3334", countries: [CHL]}
+  - {term: "telemarketer", code: "5244", countries: [ARG, CHL, URY]}
+  - {term: "ejecutivo de call center", code: "4222", countries: [CHL]}
+  - {term: "teleoperador", code: "4222", countries: [ARG, CHL, URY]}
+  # Construcción y oficios
+  - {term: "maestro albañil", code: "7112", countries: [ARG, CHL, URY]}
+  - {term: "peón de albañil", code: "9313", countries: [ARG, URY]}
+  - {term: "jornalero de la construcción", code: "9313", countries: [ARG, CHL, URY]}
+  - {term: "maestro chasquilla", code: "9622", countries: [CHL], note: "hace arreglos de todo tipo"}
+  - {term: "changarín", code: "9622", countries: [ARG], also: ["9333"]}
+  - {term: "gasfíter", code: "7126", countries: [CHL]}
+  - {term: "gásfiter", code: "7126", countries: [CHL]}
+  - {term: "plomero", code: "7126", countries: [ARG, URY]}
+  - {term: "sanitarista", code: "7126", countries: [URY, ARG]}
+  - {term: "gasista", code: "7126", countries: [ARG, URY]}
+  - {term: "electricista domiciliario", code: "7411", countries: [ARG, CHL, URY]}
+  - {term: "pintor de brocha gorda", code: "7131", countries: [ARG, CHL, URY]}
+  - {term: "techista", code: "7121", countries: [ARG, URY]}
+  - {term: "colocador de cerámicos", code: "7122", countries: [ARG, URY]}
+  - {term: "ceramista de obra", code: "7122", countries: [ARG]}
+  - {term: "yesero", code: "7123", countries: [ARG, CHL, URY]}
+  - {term: "durlockero", code: "7123", countries: [ARG], note: "revisado: instala placas de yeso (drywall)"}
+  - {term: "vidriero", code: "7125", countries: [ARG, CHL, URY]}
+  - {term: "frigorista", code: "7127", countries: [ARG, CHL, URY]}
+  - {term: "técnico en refrigeración", code: "7127", countries: [ARG, CHL, URY]}
+  - {term: "capataz de obra", code: "3123", countries: [ARG, CHL, URY]}
+  - {term: "maestro mayor de obras", code: "3112", countries: [ARG]}
+  - {term: "constructor civil", code: "3112", countries: [CHL], note: "revisado: técnico en ingeniería civil, no supervisor de obra (3123)"}
+  - {term: "mueblero", code: "7522", countries: [ARG, CHL, URY]}
+  - {term: "chapista", code: "7213", countries: [ARG, URY], note: "carrocería de autos"}
+  - {term: "desabollador", code: "7213", countries: [CHL]}
+  - {term: "gomero", code: "7231", countries: [ARG, URY], note: "revisado: repara neumáticos (gomería); ESCO pone a los montadores de neumáticos en 7231"}
+  - {term: "vulcanizador", code: "7231", countries: [CHL], note: "revisado: repara neumáticos, igual que gomero"}
+  - {term: "mecánico automotor", code: "7231", countries: [ARG, CHL, URY]}
+  - {term: "electricista del automotor", code: "7412", countries: [ARG, URY]}
+  - {term: "instalador de fibra óptica", code: "7422", countries: [ARG, CHL, URY]}
+  - {term: "técnico de cable", code: "7422", countries: [ARG, URY]}
+  - {term: "pañolero", code: "4321", countries: [ARG], note: "encargado del pañol de herramientas"}
+  - {term: "bodeguero", code: "4321", countries: [CHL]}
+  - {term: "encargado de depósito", code: "4321", countries: [ARG, URY]}
+  - {term: "operario", code: "9329", countries: [ARG, CHL, URY]}
+  - {term: "operario de producción", code: "9329", countries: [ARG, CHL, URY]}
+  - {term: "estibador", code: "9333", countries: [ARG, CHL, URY]}
+  - {term: "costurera", code: "7533", countries: [ARG, CHL, URY], also: ["7531"]}
+  - {term: "modista", code: "7531", countries: [ARG, CHL, URY]}
+  - {term: "confitero", code: "7512", countries: [ARG, URY]}
+  - {term: "faenador", code: "7511", countries: [ARG, CHL, URY]}
+  # Campo, pesca y minería
+  - {term: "temporero", code: "9211", countries: [CHL]}
+  - {term: "temporera", code: "9211", countries: [CHL]}
+  - {term: "trabajador golondrina", code: "9211", countries: [ARG]}
+  - {term: "cosechero", code: "9211", countries: [ARG, URY]}
+  - {term: "vendimiador", code: "9211", countries: [ARG, CHL]}
+  - {term: "peón rural", code: "9213", countries: [ARG, URY], also: ["9211", "9212"]}
+  - {term: "peón de estancia", code: "9212", countries: [ARG, URY]}
+  - {term: "puestero de campo", code: "9212", countries: [ARG, URY], note: "cuida un puesto de una estancia"}
+  - {term: "arriero", code: "9212", countries: [ARG, CHL]}
+  - {term: "tambero", code: "6121", countries: [ARG], also: ["9212"]}
+  - {term: "ordeñador", code: "9212", countries: [ARG, CHL, URY]}
+  - {term: "viverista", code: "6113", countries: [ARG, CHL, URY]}
+  - {term: "parquista", code: "6113", countries: [ARG, URY], also: ["9214"], note: "revisado: paisajista, jardinero o cuidador de parques"}
+  - {term: "hachero", code: "6210", countries: [ARG, URY]}
+  - {term: "motosierrista", code: "6210", countries: [ARG, CHL, URY]}
+  - {term: "mariscador", code: "6222", countries: [CHL]}
+  - {term: "buzo mariscador", code: "6222", countries: [CHL]}
+  - {term: "alguero", code: "6222", countries: [CHL], also: ["9216"]}
+  - {term: "pirquinero", code: "8111", countries: [CHL], note: "minero artesanal"}
+  - {term: "perito agrónomo", code: "3142", countries: [ARG]}
+  - {term: "técnico agropecuario", code: "3142", countries: [ARG, CHL, URY]}
+  - {term: "ingeniero agrónomo", code: "2132", countries: [ARG, CHL, URY]}
+  # Salud y cuidados
+  - {term: "kinesiólogo", code: "2264", countries: [ARG, CHL]}
+  - {term: "kinesióloga", code: "2264", countries: [ARG, CHL]}
+  - {term: "kine", code: "2264", countries: [CHL]}
+  - {term: "fonoaudiólogo", code: "2266", countries: [ARG, CHL, URY]}
+  - {term: "fonoaudióloga", code: "2266", countries: [ARG, CHL, URY]}
+  - {term: "nutricionista", code: "2265", countries: [ARG, CHL, URY]}
+  - {term: "licenciado en nutrición", code: "2265", countries: [ARG, URY]}
+  - {term: "terapeuta ocupacional", code: "2269", countries: [ARG, CHL, URY]}
+  - {term: "podólogo", code: "2269", countries: [ARG, CHL, URY]}
+  - {term: "matrona", code: "2222", countries: [CHL]}
+  - {term: "obstétrica", code: "2222", countries: [ARG], note: "licenciada en obstetricia"}
+  - {term: "partera", code: "2222", countries: [ARG, URY]}
+  - {term: "tens", code: "3221", countries: [CHL], note: "técnico de nivel superior en enfermería"}
+  - {term: "técnico en enfermería", code: "3221", countries: [CHL, ARG]}
+  - {term: "paramédico", code: "3258", countries: [ARG, CHL, URY]}
+  - {term: "auxiliar de farmacia", code: "3213", countries: [ARG, CHL, URY]}
+  - {term: "médico clínico", code: "2211", countries: [ARG, URY]}
+  - {term: "médico de familia", code: "2211", countries: [ARG, CHL, URY]}
+  - {term: "médico de cabecera", code: "2211", countries: [ARG, URY]}
+  - {term: "pediatra", code: "2212", countries: [ARG, CHL, URY]}
+  - {term: "ginecólogo", code: "2212", countries: [ARG, CHL, URY]}
+  - {term: "traumatólogo", code: "2212", countries: [ARG, CHL, URY]}
+  - {term: "psiquiatra", code: "2212", countries: [ARG, CHL, URY]}
+  - {term: "anestesista", code: "2212", countries: [ARG, CHL, URY]}
+  - {term: "cardiólogo", code: "2212", countries: [ARG, CHL, URY]}
+  - {term: "cuidadora de adultos mayores", code: "5322", countries: [ARG, CHL, URY], also: ["5321"]}
+  - {term: "cuidador domiciliario", code: "5322", countries: [ARG, CHL, URY]}
+  - {term: "acompañante terapéutico", code: "5322", countries: [ARG, URY], also: ["3259"]}
+  - {term: "niñera", code: "5311", countries: [ARG, CHL, URY]}
+  - {term: "babysitter", code: "5311", countries: [ARG, CHL, URY]}
+  - {term: "nana", code: "9111", countries: [CHL], also: ["5311"]}
+  - {term: "asesora del hogar", code: "9111", countries: [CHL]}
+  - {term: "trabajadora de casa particular", code: "9111", countries: [CHL, ARG]}
+  - {term: "empleada doméstica", code: "9111", countries: [ARG, CHL, URY]}
+  - {term: "mucama", code: "9111", countries: [ARG, URY], also: ["9112"], note: "en hotel: 9112"}
+  - {term: "personal de limpieza", code: "9112", countries: [ARG, CHL, URY]}
+  - {term: "auxiliar de aseo", code: "9112", countries: [CHL]}
+  - {term: "portero de edificio", code: "5153", countries: [ARG, URY]}
+  - {term: "encargado de edificio", code: "5153", countries: [ARG]}
+  - {term: "conserje", code: "5153", countries: [CHL, URY]}
+  - {term: "peluquero canino", code: "5164", countries: [ARG, CHL, URY]}
+  - {term: "paseador de perros", code: "5164", countries: [ARG, CHL, URY]}
+  - {term: "cosmiatra", code: "5142", countries: [ARG]}
+  - {term: "cosmetóloga", code: "5142", countries: [ARG, CHL, URY]}
+  - {term: "manicurista", code: "5142", countries: [CHL, URY, ARG]}
+  - {term: "depiladora", code: "5142", countries: [ARG, URY]}
+  - {term: "barbero", code: "5141", countries: [ARG, CHL, URY]}
+  # Educación y social
+  - {term: "maestra jardinera", code: "2342", countries: [ARG]}
+  - {term: "educadora de párvulos", code: "2342", countries: [CHL]}
+  - {term: "parvularia", code: "2342", countries: [CHL]}
+  - {term: "maestra de inicial", code: "2342", countries: [URY, ARG]}
+  - {term: "técnico en párvulos", code: "5312", countries: [CHL]}
+  - {term: "auxiliar de jardín", code: "5312", countries: [ARG, URY]}
+  - {term: "maestra", code: "2341", countries: [ARG, URY]}
+  - {term: "profesora básica", code: "2341", countries: [CHL]}
+  - {term: "profesor de liceo", code: "2330", countries: [URY, CHL]}
+  - {term: "profesor de secundaria", code: "2330", countries: [ARG, URY]}
+  - {term: "profesor de media", code: "2330", countries: [CHL]}
+  - {term: "educadora diferencial", code: "2352", countries: [CHL]}
+  - {term: "maestra especial", code: "2352", countries: [ARG, URY]}
+  - {term: "preceptor", code: "5312", countries: [ARG], note: "auxiliar docente en la escuela secundaria"}
+  - {term: "inspector de colegio", code: "5312", countries: [CHL, URY]}
+  - {term: "docente universitario", code: "2310", countries: [ARG, CHL, URY]}
+  - {term: "catedrático", code: "2310", countries: [ARG, CHL, URY]}
+  - {term: "educador social", code: "3412", countries: [URY]}
+  - {term: "operador social", code: "3412", countries: [URY, ARG]}
+  - {term: "director técnico", code: "3422", countries: [ARG, CHL, URY], note: "entrenador de fútbol"}
+  - {term: "preparador físico", code: "3422", countries: [ARG, CHL, URY], also: ["3423"]}
+  - {term: "personal trainer", code: "3423", countries: [ARG, CHL, URY]}
+  - {term: "profe de gimnasio", code: "3423", countries: [ARG, CHL, URY]}
+  # Oficina, finanzas y derecho
+  - {term: "contador", code: "2411", countries: [ARG, URY]}
+  - {term: "contador auditor", code: "2411", countries: [CHL]}
+  - {term: "auxiliar contable", code: "4311", countries: [ARG, CHL, URY]}
+  - {term: "liquidador de sueldos", code: "4313", countries: [ARG]}
+  - {term: "encargado de remuneraciones", code: "4313", countries: [CHL]}
+  - {term: "despachante de aduana", code: "3331", countries: [ARG, URY]}
+  - {term: "agente de aduana", code: "3331", countries: [CHL]}
+  - {term: "escribano", code: "2619", countries: [ARG, URY], note: "notario"}
+  - {term: "notario", code: "2619", countries: [CHL]}
+  - {term: "procurador", code: "3411", countries: [ARG, URY], also: ["2611"], note: "revisado: en Argentina es un título de la carrera de derecho"}
+  - {term: "administrativo", code: "4110", countries: [ARG, CHL, URY]}
+  - {term: "oficinista", code: "4110", countries: [ARG, CHL, URY]}
+  - {term: "cajero de banco", code: "4211", countries: [ARG, CHL, URY]}
+  - {term: "ingeniero comercial", code: "1221", countries: [CHL], also: ["2421"], note: "revisado: 1221 (directores de ventas y comercialización); antes 2421"}
+  - {term: "ingeniero civil industrial", code: "2141", countries: [CHL], note: "en Chile 'ingeniero civil' es la carrera larga de ingeniería, no solo obras"}
+  - {term: "agrimensor", code: "2165", countries: [ARG, URY]}
+  # Tecnología y comunicación
+  - {term: "programador", code: "2512", countries: [ARG, CHL, URY], also: ["2514"]}
+  - {term: "desarrollador", code: "2512", countries: [ARG, CHL, URY]}
+  - {term: "dev", code: "2512", countries: [ARG, CHL, URY]}
+  - {term: "programador web", code: "2513", countries: [ARG, CHL, URY]}
+  - {term: "desarrollador frontend", code: "2513", countries: [ARG, CHL, URY]}
+  - {term: "desarrollador backend", code: "2512", countries: [ARG, CHL, URY]}
+  - {term: "full stack", code: "2512", countries: [ARG, CHL, URY], also: ["2513"]}
+  - {term: "tester", code: "2519", countries: [ARG, CHL, URY]}
+  - {term: "qa", code: "2519", countries: [ARG, CHL, URY]}
+  - {term: "sysadmin", code: "2522", countries: [ARG, CHL, URY]}
+  - {term: "dba", code: "2521", countries: [ARG, CHL, URY]}
+  - {term: "analista de ciberseguridad", code: "2529", countries: [ARG, CHL, URY]}
+  - {term: "data scientist", code: "2120", countries: [ARG, CHL, URY], also: ["2511"]}
+  - {term: "analista de datos", code: "2529", countries: [ARG, CHL, URY], also: ["2120", "2511"], note: "revisado: 2529; antes 2120"}
+  - {term: "mesa de ayuda", code: "3512", countries: [ARG, CHL, URY]}
+  - {term: "help desk", code: "3512", countries: [ARG, CHL, URY]}
+  - {term: "técnico en redes", code: "3513", countries: [ARG, CHL, URY]}
+  - {term: "publicista", code: "2431", countries: [ARG, CHL, URY]}
+  - {term: "relacionista público", code: "2432", countries: [CHL, ARG]}
+  - {term: "rrpp", code: "2432", countries: [ARG, URY]}
+  - {term: "notero", code: "2642", countries: [ARG], note: "periodista de exteriores en TV"}
+  - {term: "cronista", code: "2642", countries: [ARG, CHL, URY]}
+  - {term: "locutor", code: "2656", countries: [ARG, CHL, URY]}
+  - {term: "traductor público", code: "2643", countries: [ARG, URY]}
+  # Seguridad y limpieza urbana
+  - {term: "vigilador", code: "5414", countries: [ARG]}
+  - {term: "vigilante", code: "5414", countries: [ARG, CHL, URY]}
+  - {term: "patovica", code: "5414", countries: [ARG], note: "control de acceso en boliches"}
+  - {term: "nochero", code: "5414", countries: [CHL, URY]}
+  - {term: "carabinero", code: "5412", countries: [CHL]}
+  - {term: "gendarme", code: "5412", countries: [ARG]}
+  - {term: "recolector de residuos", code: "9611", countries: [ARG, CHL, URY]}
+  - {term: "cartonero", code: "9612", countries: [ARG]}
+  - {term: "recuperador urbano", code: "9612", countries: [ARG]}
+  - {term: "reciclador de base", code: "9612", countries: [CHL]}
+  - {term: "clasificador de residuos", code: "9612", countries: [URY]}
+  - {term: "cuidacoches", code: "9629", countries: [URY, ARG]}
+  - {term: "lavacoches", code: "9122", countries: [ARG, CHL, URY]}

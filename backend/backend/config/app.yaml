@@ -75,6 +75,27 @@ employability:
     salary_ppp: Salario (USD PPA)
     insertion_rate: Tasa de inserción
     automation_risk: Riesgo de automatización (exposición a IA generativa)
+  # Short explanations shown when hovering over the terms that come with each dimension.
+  terms:
+    normalized: >-
+      El valor de esta dimensión llevado a una escala de 0 a 100 dentro del grupo comparado
+      (todas las ocupaciones de los 3 países ese año): 100 es el mejor valor del grupo y 0 el peor.
+    contribution: >-
+      Cuántos puntos suma esta dimensión al ISE: el valor escalado multiplicado por su peso
+      efectivo. Los aportes de todas las dimensiones suman el ISE.
+  # How a value of each unit is written ({value}: the number, already formatted).
+  unit_formats:
+    ppp_usd_month: "USD PPA {value} / mes"
+    usd_month: "USD {value} / mes"
+  # Value shown first in a dimension's card instead of the one the index uses (same country,
+  # occupation and period); the index value is still shown below it.
+  display_values:
+    salary_ppp:
+      indicator: mean_monthly_earnings_usd
+      label: Salario (USD)
+      note: >-
+        En dólares al tipo de cambio de mercado. El ISE usa el salario en USD PPA (paridad de
+        poder adquisitivo), que corrige las diferencias de precios entre países.
   # Shown with the ranking while some dimension has no source. {dimensions}: their names and
   # weights; {weights}: the weights the other dimensions take; {min_coverage}: analytics.yaml.
   no_source_note: >-
@@ -112,6 +133,331 @@ employability:
       unit: Índice 0 a 1
       possible_range: 0 a 1. En el índice se invierte (menos exposición, más puntaje).
 
+# Moctezuma indicator labels (method: analytics.yaml -> moctezuma).
+moctezuma:
+  levels:
+    low: Baja asimetría
+    medium: Asimetría media
+    high: Alta asimetría
+    insufficient_data: Datos insuficientes
+    not_applicable: No aplica a la región
+  sides:
+    pace: Ritmo del cambio
+    readiness: Capacidad de respuesta
+  dimensions:
+    ai_exposure: Exposición a la IA generativa
+    digital_diffusion: Velocidad de digitalización
+    training_growth: Crecimiento de la formación (titulados)
+    education_fit: Ajuste educativo (menos subcalificación)
+    tertiary_base: Base educativa (matrícula superior)
+  # Historical version (1519) and the worked examples, served by /moctezuma/reference.
+  history_file: reference/moctezuma_history.yaml
+  # Occupation of the worked example and of the reading guide (ISCO-08 code).
+  example_occupation: "2512"
+  # What each side meant in 1519 (shown under each side's definition).
+  side_history:
+    pace: La llegada de caballos, acero, pólvora y nuevas enfermedades, que alcanzó su máximo en dos años.
+    readiness: La población que quedaba para sostener la sociedad, su economía y su conocimiento.
+  # What each side measures (returned by /moctezuma -> sides, shown next to the ranking).
+  side_info:
+    pace: >-
+      Qué tan rápido y con cuánta intensidad llega el cambio tecnológico a una ocupación. Combina
+      cuánto de sus tareas puede hacer la IA generativa con la velocidad a la que se digitaliza el
+      país. Va de 0 a 100 dentro del grupo comparado: 100 es el cambio más rápido e intenso del
+      grupo y 0 el más lento.
+    readiness: >-
+      Qué tan preparada está la sociedad para incorporar ese cambio en la ocupación: si crece la
+      formación de nuevas personas para ese trabajo, si quienes ya lo hacen tienen la educación
+      que pide y qué tan amplia es la base de educación superior del país. Va de 0 a 100 dentro
+      del grupo comparado: 100 es la mayor capacidad del grupo y 0 la menor.
+  # What each dimension measures, its unit and possible range (as employability.dimension_info).
+  dimension_info:
+    ai_exposure:
+      definition: >-
+        Exposición de las tareas de la ocupación a la IA generativa (OIT, 2025): promedio de las
+        tareas, de 0 (la IA no puede hacerla) a 1 (podría hacerla sola). Es la misma para los tres
+        países y todos los años.
+      unit: Índice 0 a 1
+      possible_range: 0 a 1. Más exposición, más ritmo.
+    digital_diffusion:
+      definition: >-
+        Crecimiento anual promedio de la población que usa internet en el país en los últimos 3
+        años (Banco Mundial). Todas las ocupaciones del país comparten el valor.
+      unit: "% anual"
+      possible_range: Sin límite fijo; cerca de 0 cuando casi toda la población ya usa internet.
+    training_growth:
+      definition: >-
+        Crecimiento anual promedio de los titulados de las carreras que forman para la ocupación
+        en los últimos 3 años (mismas fuentes y correspondencias que las brechas de habilidades).
+      unit: "% anual"
+      possible_range: Sin límite fijo. Negativo si egresan menos personas, positivo si más.
+    education_fit:
+      definition: >-
+        Subcalificación: porcentaje de los ocupados del gran grupo con menos educación de la que
+        pide la ocupación (OIT). Cuenta en contra: menos subcalificación, más capacidad.
+      unit: "%"
+      possible_range: 0 a 100 %.
+    tertiary_base:
+      definition: >-
+        Matrícula bruta en educación superior del país (Banco Mundial). Todas las ocupaciones del
+        país comparten el valor.
+      unit: "% de la población en edad teórica"
+      possible_range: Desde 0; puede superar 100 % porque cuenta a estudiantes de cualquier edad.
+
+ludita:
+  levels:
+    low: Poco parecido
+    medium: Parecido intermedio
+    high: Muy parecido
+    insufficient_data: Datos insuficientes
+    not_applicable: No aplica a la región
+  sides:
+    exposure: Exposición
+    vitality: Vitalidad
+  dimensions:
+    ai_exposure: Exposición a la IA generativa
+    employment_growth: Crecimiento del empleo
+    training_growth: Crecimiento de la formación (titulados)
+  side_info:
+    exposure: >-
+      Cuánto de las tareas de la ocupación puede hacer la IA generativa, sea automatizándolas o
+      complementándolas. Va de 0 a 100 dentro del grupo comparado: 100 es la ocupación más
+      expuesta del grupo.
+    vitality: >-
+      Si el mercado sigue apostando por la ocupación: crece la gente que trabaja en ella y crece
+      la gente que se forma para hacerla. Va de 0 a 100 dentro del grupo comparado: 100 es el
+      mayor crecimiento del grupo y 0 la mayor caída.
+  dimension_info:
+    ai_exposure:
+      definition: >-
+        Exposición de las tareas de la ocupación a la IA generativa (OIT, 2025): promedio de las
+        tareas, de 0 (la IA no puede hacerla) a 1 (podría hacerla sola). Es la misma para los tres
+        países y todos los años.
+      unit: Índice 0 a 1
+      possible_range: 0 a 1. Más exposición, más parecido al tejedor.
+    employment_growth:
+      definition: >-
+        Crecimiento anual promedio de los ocupados del grupo ocupacional en los últimos 3 años, sin
+        contar 2020 y 2021 (OIT; Chile: INE vía SIMEL). Las ocupaciones del grupo comparten el valor.
+      unit: "% anual"
+      possible_range: Sin límite fijo. Negativo si el empleo se achica.
+    training_growth:
+      definition: >-
+        Crecimiento anual promedio de los titulados de las carreras que forman para la ocupación
+        en los últimos 3 años (mismas fuentes y correspondencias que las brechas de habilidades).
+      unit: "% anual"
+      possible_range: Sin límite fijo. Negativo si egresan menos personas.
+  # Paths (quadrants of exposure and vitality), named after the historical cases.
+  paths:
+    weaver:
+      label: Camino del tejedor
+      short: Expuesta y el mercado se retira
+      description: >-
+        La IA puede hacer buena parte de las tareas y el empleo y la formación caen. Es el
+        patrón de los tejedores manuales después del telar mecánico y de las operadoras
+        telefónicas después del discado.
+    teller:
+      label: Camino del cajero
+      short: Expuesta y el mercado crece
+      description: >-
+        La IA puede hacer buena parte de las tareas pero el empleo o la formación crecen: la
+        tecnología cambia el trabajo sin achicarlo, como pasó con los cajeros de banco durante
+        décadas después del cajero automático.
+    other_causes:
+      label: Se achica por otras causas
+      short: Poco expuesta y el mercado se retira
+      description: >-
+        La IA generativa no explica la caída: puede ser la economía, otra tecnología o la demanda.
+    out_of_reach:
+      label: Fuera del alcance, por ahora
+      short: Poco expuesta y el mercado crece
+      description: >-
+        Pocas tareas expuestas y el empleo o la formación crecen.
+  history:
+    file: reference/ludita_history.yaml
+    # Years after the arrival shown in "Los primeros años".
+    zoom_years: 10
+    # Today's curve next to the historical ones: employment of these occupation groups (rolled
+    # up as in motion), indexed to arrival_year = 100.
+    today:
+      label: Personal de apoyo administrativo, hoy
+      technology: IA generativa
+      arrival_year: 2022
+      arrival_note: >-
+        Noviembre de 2022: lanzamiento de ChatGPT. El personal de apoyo administrativo es el gran
+        grupo más expuesto a la IA generativa según la OIT.
+      indicator: employment
+      group_digits: 1
+      groups: ["4"]
+      source_short: empleo por ocupación de OIT e INE Chile
+
+red_queen:
+  levels:
+    low: Cambio lento
+    medium: Cambio medio
+    high: Cambio rápido
+    insufficient_data: Datos insuficientes
+  dimensions:
+    technology_turnover: Recambio de tecnologías (O*NET)
+    skill_turnover: Recambio de habilidades (ESCO)
+  dimension_info:
+    technology_turnover:
+      definition: >-
+        Qué parte de las tecnologías que usa la ocupación (programas, equipos, plataformas)
+        cambia por año según O*NET, la base de ocupaciones de Estados Unidos, llevada a CIUO-08
+        con el cruce ESCO–O*NET.
+      unit: "% anual"
+      possible_range: 0 a 100 %. 0 es un perfil que no cambia.
+    skill_turnover:
+      definition: >-
+        Qué parte de las habilidades y conocimientos que ESCO asigna a la ocupación cambia por año
+        entre versiones de la clasificación europea.
+      unit: "% anual"
+      possible_range: 0 a 100 %. 0 es un perfil que no cambia.
+
+sisyphus:
+  levels:
+    low: Rinde estudiar
+    medium: Rinde a medias
+    high: La piedra vuelve a caer
+    insufficient_data: Datos insuficientes
+    not_applicable: No aplica
+  sides:
+    stone: La piedra
+    reward: La recompensa
+  dimensions:
+    overeducation: Sobreeducación
+    earnings_vs_tertiary: Ingreso frente al de un título
+  side_info:
+    stone: >-
+      Cuánta gente del grupo tiene más estudios de los que pide su puesto: el esfuerzo de estudiar
+      que el trabajo no usa. Va de 0 a 100 entre los grupos de los tres países.
+    reward: >-
+      Cuánto paga el grupo frente a lo que gana en promedio quien tiene educación superior en el
+      país. Va de 0 a 100 entre los grupos de los tres países: 100 es el que más se acerca.
+  dimension_info:
+    overeducation:
+      definition: >-
+        Ocupados del gran grupo con un nivel educativo mayor al que pide (OIT, enfoque normativo),
+        como porcentaje de los ocupados con ocupación y educación informadas.
+      unit: "%"
+      possible_range: 0 a 100 %.
+    earnings_vs_tertiary:
+      definition: >-
+        Ingreso mensual medio del gran grupo dividido por el ingreso mensual medio de los
+        asalariados con educación superior del país, el mismo año (OIT, USD PPA).
+      unit: Cociente
+      possible_range: Desde 0. 1 es pagar lo mismo que un título en promedio.
+  quadrants:
+    sisyphus:
+      label: La piedra vuelve a caer
+      short: Mucha sobreeducación y paga poco
+      description: >-
+        Mucha gente con más estudios de los que pide el puesto, en un trabajo que paga lejos de lo que suele pagar un título: el esfuerzo de estudiar no vuelve.
+    overqualified_paid:
+      label: Sobra título, pero paga
+      short: Mucha sobreeducación y paga relativamente bien
+      description: >-
+        Sobran estudios para el puesto, pero el puesto paga más cerca de un título: el estudio rinde aunque no se use del todo.
+    low_pay:
+      label: Paga poco, pero no por el título
+      short: Poca sobreeducación y paga poco
+      description: >-
+        Paga poco, pero casi nadie tiene más estudios de los que pide: el problema no es el título que sobra.
+    fits:
+      label: El estudio rinde
+      short: Poca sobreeducación y paga relativamente bien
+      description: >-
+        Pocos estudios de sobra y el puesto paga más cerca de un título.
+
+# Brecha generacional (Panorama, /generational-gap): youth unemployment over total, same source.
+generational_gap:
+  title: Brecha generacional
+  youth_indicator: youth_unemployment_rate_survey
+  total_indicator: unemployment_rate
+  description: >-
+    Cuántas veces más desocupación tienen los jóvenes de 15 a 24 años que el conjunto de la fuerza
+    de trabajo. Las dos tasas salen de las mismas encuestas de hogares (OIT, ILOSTAT). 1 sería no
+    tener brecha.
+  # {country}, {ratio}, {year}: filled with the latest year that has both rates.
+  headline: "En {country}, un joven de 15 a 24 años tiene {ratio} veces más chance de estar desocupado que el promedio ({year})."
+
+# Ocupaciones en movimiento (Tendencias, /occupation-groups/motion): one bubble per occupation
+# group and country, per year. Values of the catalog occupations are rolled up to groups of
+# group_digits digits: each source group (the digits the series is published at) counts once,
+# then the group value is the sum or mean of its source groups (aggregate).
+motion:
+  title: Las ocupaciones en movimiento
+  description: >-
+    Cada burbuja es un gran grupo de ocupaciones en un país: más a la derecha, mejor pago; más
+    grande, más gente trabajando. Tocá ▶ para ver cómo se movieron año a año.
+  group_digits: 1
+  first_year: 2015
+  # A country-group-year still shows when x or size is missing, using the latest value at most
+  # this many years older (flagged in the response).
+  max_carry_years: 1
+  # Salaries are shown in USD (market exchange rate) and always next to the USD PPA value the
+  # indexes use (x_secondary), as in the employability cards.
+  x:
+    indicator: mean_monthly_earnings_usd
+    aggregate: mean
+    label: Ingreso mensual promedio (USD)
+    scale: log
+  x_secondary:
+    indicator: mean_monthly_earnings_ppp
+    aggregate: mean
+    label: Ingreso mensual promedio (USD PPA)
+  size:
+    indicator: employment
+    aggregate: sum
+    label: Personas ocupadas (miles)
+  default_y: growth
+  y:
+    growth:
+      short_label: Crecimiento del empleo
+      indicator: employment
+      aggregate: sum
+      measure: yoy
+      # Groups smaller than this (thousands of people) the year before are left out: survey
+      # samples that small swing widely from year to year.
+      min_base: 30
+      label: Crecimiento del empleo (% anual)
+      description: >-
+        Variación de los ocupados del grupo respecto del año anterior. 2020 marca la caída por la
+        pandemia y 2021 el rebote.
+      reference: 0
+      # Axis range; values outside are drawn at the edge and flagged.
+      domain: [-30, 30]
+    ai_exposure:
+      short_label: Exposición a IA
+      indicator: genai_exposure
+      aggregate: mean
+      measure: level
+      applies_to_all_years: true
+      label: Exposición a la IA generativa (0 a 1)
+      description: >-
+        Promedio de la exposición de las ocupaciones del grupo (OIT, 2025). Es la misma todos los
+        años: las burbujas solo se mueven en horizontal y en tamaño.
+    employability:
+      short_label: Empleabilidad (ISE)
+      methodology: employability_index
+      label: Índice de empleabilidad (ISE, 0 a 100)
+      description: >-
+        Promedio del ISE de las ocupaciones del grupo con puntaje en ese año.
+      reference: 50
+      domain: [0, 100]
+  notes:
+    - >-
+      Cada burbuja es un gran grupo de ocupaciones (CIUO-08, 1 dígito) en un país. Chile publica
+      el empleo por ocupación desde 2017; Argentina y Uruguay, antes.
+    - >-
+      El ingreso es del gran grupo (OIT), en dólares al tipo de cambio de mercado; al lado se
+      muestra en USD PPA (paridad de poder adquisitivo), la medida que usan el ISE y los demás
+      índices porque corrige las diferencias de precios entre países. En dólares de mercado las
+      devaluaciones mueven las burbujas aunque los salarios en moneda local no cambien. En el
+      eje horizontal la escala es logarítmica: cada paso igual es el mismo porcentaje de
+      diferencia.
+
 # Datasets: downloaded and uploaded files. Paths are relative to the backend/ folder; every
 # file is kept (never overwritten) so each load can be traced to the exact file.
 datasets:
@@ -120,6 +466,71 @@ datasets:
   max_upload_bytes: 50000000
   max_errors_reported: 50
   preview_rows: 20
+  # Whatever is uploaded is checked before reading it: the real format (not just the extension),
+  # macros, size once unzipped (xlsx are zip files) and number of rows.
+  max_rows: 200000
+  max_unzipped_bytes: 300000000
+  # Errors grouped by type, as the screen shows them first: rows and values listed per group.
+  group_rows_shown: 8
+  group_values_shown: 5
+  group_titles:
+    missing_value: "Faltan valores en la columna «{column}»"
+    unknown_indicator: "Indicadores que no existen"
+    unknown_country: "Países fuera del catálogo"
+    unknown_sector: "Sectores que no existen"
+    unknown_occupation: "Ocupaciones CIUO que no existen"
+    bad_frequency: "Frecuencias inválidas"
+    not_numeric: "Valores que no son números"
+    bad_period: "Períodos que no se pueden leer"
+    out_of_range: "Valores fuera de rango"
+  group_hints:
+    missing_value: "Completá la celda o borrá la fila."
+    unknown_indicator: "Usá un código de la hoja «indicadores» de la plantilla."
+    unknown_country: "Usá ARG, CHL o URY."
+    unknown_sector: "Usá un código de la hoja «sectores» de la plantilla, o dejala vacía."
+    unknown_occupation: "Usá un código CIUO-08 de 4 dígitos de la hoja «ocupaciones», o dejala vacía."
+    bad_frequency: "A (anual), Q (trimestral) o M (mensual)."
+    not_numeric: "Solo números, con punto o coma decimal y sin símbolos (%, $)."
+    bad_period: "Anual: 2024 · trimestral: 2024-Q2 · mensual: 2024-03."
+    out_of_range: "Revisá la unidad del indicador."
+  # Values that already exist from an official source (same indicator, country, sector,
+  # occupation and period): the upload warns, and loading needs an explicit confirmation. The
+  # uploaded values are kept as a separate source; nothing official is overwritten.
+  overlap_examples: 3
+  # Template for long-format profiles (GET /datasets/profiles/{code}/template). The data sheet
+  # has only the headers (no example rows, so examples are never loaded by mistake); the codes
+  # sheets come from the catalog and indicators.yaml.
+  template:
+    file_name: "plantilla_{code}"
+    sheets:
+      data: datos
+      help: instrucciones
+      indicators: indicadores
+      countries: paises
+      sectors: sectores
+      occupations: ocupaciones
+    instructions:
+      - "Una fila por valor. Completá la hoja «datos» sin cambiar los encabezados."
+      - "Obligatorias: indicador, pais, periodo, frecuencia y valor. Opcionales: sector y ocupacion."
+      - "indicador: un código de la hoja «indicadores». pais: ARG, CHL o URY."
+      - "periodo y frecuencia: 2024 con A (anual), 2024-Q2 con Q (trimestral) o 2024-03 con M (mensual)."
+      - "valor: solo el número, en la unidad del indicador (columna «unidad» de la hoja «indicadores»)."
+      - "Al subirlo, declarás la fuente oficial (nombre y URL). Primero se revisa; nada se carga hasta que lo confirmes."
+    examples_title: "Ejemplo de filas (no las copies tal cual: son para ver el formato)"
+    examples:
+      - {indicador: unemployment_rate, pais: ARG, periodo: "2024", frecuencia: A, valor: 7.2}
+      - {indicador: employment, pais: CHL, periodo: "2024", frecuencia: A, valor: 950.5, ocupacion: "2221"}
+    headers:
+      code: codigo
+      name: nombre
+      unit: unidad
+  # Example files to try the check (served by GET /datasets/profiles/{code}/examples/{name}):
+  # real values already published by ILOSTAT and the World Bank, so the valid one also shows the
+  # overlap warning (config/datasets/ejemplos/README.md).
+  example_files:
+    plantilla_generica:
+      valido: datasets/ejemplos/ejemplo_valido.csv
+      con_errores: datasets/ejemplos/ejemplo_con_errores.csv
   messages:
     sheet_missing: "La hoja \"{sheet}\" no está en el archivo (hojas: {sheets})"
     headers_changed: "Las columnas cambiaron respecto del formato validado"
@@ -152,6 +563,18 @@ datasets:
     outline_no_items: "Hoja \"{sheet}\": no se encontró ninguna fila de detalle"
     outline_total_gap: "Hoja \"{sheet}\": las filas de detalle suman {found} y el total dice {total} (diferencia {pct}%)"
     summary: "{errors} errores, {warnings} avisos"
+    not_xlsx: "El archivo no es un Excel .xlsx válido (puede ser otro formato con la extensión cambiada)"
+    has_macros: "El archivo tiene macros; guardalo como .xlsx común (sin macros)"
+    unzipped_too_large: "El archivo descomprimido supera el máximo ({max_mb} MB)"
+    csv_is_excel: "El archivo es un Excel con extensión .csv; subilo como .xlsx o exportalo a CSV"
+    csv_binary: "El archivo no es texto: no parece un CSV"
+    csv_encoding: "El CSV no está en {encoding}; guardalo como «CSV UTF-8»"
+    too_many_rows: "El archivo tiene más de {max} filas de datos"
+    overlap_official: "{count} valores ya existen en fuentes oficiales ({sources}). Ej.: {examples}. Se guardan como fuente aparte; no reemplazan el dato oficial."
+    overlap_example: "{indicator} {country} {period}: oficial {official}, archivo {uploaded}"
+    overlap_confirm_required: "El archivo repite valores de fuentes oficiales: confirmá la carga para continuar"
+    no_template: "El formato {code} no tiene plantilla: se sube el archivo tal como lo publica la fuente"
+    unknown_example: "No hay un archivo de ejemplo «{name}» para {code}"
 
 # Skills (ESCO). Types are the tail of ESCO's skill-type URI.
 skills:
@@ -163,6 +586,25 @@ skills:
   # Skill gap rankings (/skills/gaps, views top/bottom): only skills with a full gap used by
   # at least this many occupations, so niche skills of a single occupation do not fill the list.
   gap_ranking_min_occupations: 3
+  # Skills by sector use ESCO's own categories (occupation_skills.relation), not a share of
+  # weight. A skill belongs to a sector when it is essential for at least one of the sector's
+  # occupations; /skills/gaps?sector= keeps those (relation=any also adds the optional ones).
+  # Each gap lists the sectors that use it and how; a skill essential in two or more sectors is
+  # cross-sector ("transversal"). E.g. dietary food preparation: essential for dietitians
+  # (health), optional for cooks (tourism). Its gap is computed over all its occupations.
+  sector_relation: essential
+  relations:
+    essential: Esencial
+    optional: Opcional
+  # Group for the occupations that use a skill but belong to no strategic sector.
+  no_sector_label: Otras ocupaciones
+  # Shown next to the gaps of the years whose graduates come from a supplementary source
+  # (analytics.yaml -> skill_gaps.supply_supplements), per country.
+  supply_notes:
+    ARG: >-
+      Los titulados de 2024 vienen del adelanto parcial del Anuario Estadístico del Sistema
+      Universitario 2024 (DIU), publicado en agosto de 2026; el anuario final puede corregirlos.
+      Pregrado y grado se separan con las proporciones de 2023 (estimación).
   sufficiency:
     full: Demanda y oferta con datos
     partial: Datos insuficientes
@@ -265,7 +707,296 @@ jobs_view:
   other_sector: Otros
   # The value LinkedIn experience levels use for "no level".
   no_level: Not Applicable
+  # Competition per posting: median applicants per posting, by sector. LinkedIn shows "200+" as
+  # 200, so postings at the cap are counted apart and a median at the cap reads "200 o más".
+  # Sectors with fewer postings with applicant data than the minimum get no median.
+  applicants_cap: 200
+  competition_min_postings: 10
   page_size: 25
+
+# Text search (/occupations?q=, app/core/search.py). aliases_file: local names of occupations
+# (Argentina, Chile, Uruguay) with their CIUO-08 code; a search that matches a name also returns
+# its occupations ("remisero" → 8322).
+search:
+  aliases_file: reference/ocupaciones_nombres_locales.yaml
+
+# Assistant ("Preguntale al Observatorio"): answers questions with the observatory's own data. It
+# can only call the read-only API endpoints listed under tools (in-process, same answers the
+# frontend gets); it has no database, web or write access. Every question is logged in
+# assistant_logs (question, tools used, answer, tokens, time) and counts toward the daily limits.
+# Secrets live in backend/.env: ANTHROPIC_API_KEY (provider anthropic) and ASSISTANT_LOCAL_API_KEY
+# (only if the local server asks for one).
+assistant:
+  enabled: true
+  # Role permission needed to ask (app.yaml -> auth.roles); the user must be logged in.
+  permission: view
+  # local: an open model behind an OpenAI-compatible server (Ollama or llama.cpp's llama-server,
+  # both run GGUF files on CPU). anthropic: Claude through the Anthropic API.
+  provider: local
+  providers:
+    local:
+      # Ollama: http://localhost:11434/v1 · llama-server: http://localhost:8080/v1
+      base_url: http://localhost:11434/v1
+      model: qwen2.5:7b-instruct
+      max_tokens: 1024
+      temperature: 0.2
+      timeout_seconds: 180
+    anthropic:
+      model: claude-opus-5-5
+      # Thinking depth: low keeps answers fast and cheap; raise it if answers fall short.
+      effort: low
+      # Includes the model's thinking, so it is higher than for the local model.
+      max_tokens: 8000
+      timeout_seconds: 120
+      # On a safety decline the API re-runs the request on Anthropic's recommended fallback model
+      # (server-side). Empty: no fallback, the decline is returned as an error.
+      fallbacks: default
+  # Tool calls per question; after that the model must answer with what it has.
+  max_tool_calls: 4
+  max_question_chars: 500
+  # Earlier turns of the conversation sent back with each question (the client keeps them).
+  history_turns: 6
+  # Questions answered by the model per day. Scripted answers (templates, no cost) do not count.
+  limits:
+    questions_per_user_per_day: 30
+    questions_per_day: 500
+  # Tool results are trimmed before the model reads them: lists to this many items, then the
+  # whole text to this many characters; keys listed here are removed (texts for screens).
+  tool_result_max_items: 10
+  tool_result_max_chars: 6000
+  tool_result_drop_keys: [texts]
+  # Numbers check: every number in the answer must appear in what the tools returned (or in the
+  # question). Tolerance is relative; a share (0.64) also matches its percentage (64 %). Whole
+  # numbers up to ignore_up_to (counts like "3 países") and years are not checked.
+  # on_unverified: warn (answer shown with a warning) | block (answer replaced by the message).
+  numbers_check:
+    enabled: true
+    tolerance: 0.005
+    ignore_up_to: 10
+    year_range: [1990, 2100]
+    on_unverified: block
+  system_prompt: |
+    Sos el asistente del Observatorio de Tendencias de InnovaLab, que estudia el trabajo y la
+    formación en Argentina (ARG), Chile (CHL) y Uruguay (URY). Respondés en español rioplatense,
+    claro y breve (hasta 150 palabras), para personas que no son especialistas.
+
+    Reglas:
+    - Usá solo datos que te devuelvan las herramientas. Nunca inventes ni redondees de memoria un
+      número: copiá los valores tal como vienen (podés redondear a 1 decimal).
+    - Si una pregunta nombra una ocupación por su nombre, buscá primero su código CIUO con
+      buscar_ocupacion. Si hay varias posibles, elegí la más cercana y decí cuál usaste.
+    - Decí siempre de qué año y país es cada dato. Si hay datos insuficientes, decilo.
+    - Si las herramientas no tienen la respuesta, decí que el observatorio no tiene ese dato. No
+      respondas con conocimiento general sobre otros temas.
+    - El ISE (Índice Sintético de Empleabilidad) va de 0 a 100. Los salarios en USD PPA sirven
+      para comparar países; en USD son al tipo de cambio de mercado.
+    - No des consejos personales de carrera; describí lo que muestran los datos.
+  # Line added to the question with what the user is looking at (only the fields sent).
+  context_template: "La persona está mirando: {fields}."
+  context_fields:
+    page: página
+    country: país
+    occupation: ocupación (CIUO)
+    sector: sector
+  final_round_note: "Ya no podés usar más herramientas. Respondé con los datos que obtuviste."
+  # Codes the model may use without searching: 4-digit CIUO codes written in the question, the
+  # history or the context. Any other code must come from a tool with "provides" (the search):
+  # params with must_be_known reject codes the model made up from memory.
+  known_code_pattern: "\\b\\d{4}\\b"
+  # Read-only API endpoints the model may call. params: what the model fills (JSON schema
+  # types); fixed: values always sent; path placeholders ({code}) are filled from params.
+  # link: page of the frontend that shows the same data, returned with the answer.
+  # provides: key of the results whose values become known codes (see known_code_pattern).
+  tools:
+    - name: buscar_ocupacion
+      description: Busca ocupaciones por nombre (palabras en cualquier orden, sin importar tildes) o por código CIUO-08. Devuelve código y nombre.
+      path: /occupations
+      params:
+        q: {type: string, description: "Nombre o código CIUO de la ocupación", required: true}
+      provides: occupation_code
+    - name: ficha_ocupacion
+      description: Ficha de una ocupación (código CIUO de 4 dígitos) en los tres países, con el ISE, sus dimensiones (demanda neta, salario, inserción, riesgo de automatización), los salarios y el año de cada dato.
+      path: /occupations/{code}
+      params:
+        code: {type: string, description: "Código CIUO-08 de 4 dígitos (de buscar_ocupacion)", required: true, must_be_known: true}
+      link: {path: "/ocupaciones/{code}", label: "Ficha de la ocupación"}
+    - name: historia_ocupacion
+      description: Evolución del ISE de una ocupación por año.
+      path: /employability/history
+      params:
+        occupation: {type: string, description: "Código CIUO-08 de 4 dígitos (de buscar_ocupacion)", required: true, must_be_known: true}
+        country: {type: string, description: "ARG, CHL o URY (vacío: los tres)"}
+      link: {path: "/ocupaciones/{occupation}", query: [country], label: "Ficha de la ocupación"}
+    - name: ranking_ocupaciones
+      description: Ranking de ocupaciones por ISE en un país (las mejores o las peores), opcionalmente de un sector.
+      path: /employability
+      params:
+        country: {type: string, description: "ARG, CHL o URY", required: true}
+        view: {type: string, enum: [top, bottom], description: "top: mejores · bottom: peores"}
+        sector: {type: string, description: "Código de sector (opcional)"}
+        year: {type: integer, description: "Año (vacío: el último)"}
+      fixed: {limit: 10}
+      link: {path: "/ocupaciones", query: [country], label: "Ranking de ocupaciones"}
+    - name: sectores
+      description: Resumen por sector económico de un país (ISE medio, salario medio y cantidad de ocupaciones).
+      path: /employability/sectors
+      params:
+        country: {type: string, description: "ARG, CHL o URY", required: true}
+        year: {type: integer, description: "Año (vacío: el último)"}
+      link: {path: "/sectores", query: [country], label: "Sectores"}
+    - name: habilidades_ocupacion
+      description: Habilidades y conocimientos de una ocupación según ESCO (esenciales y opcionales).
+      path: /occupations/{code}/skills
+      params:
+        code: {type: string, description: "Código CIUO-08 de 4 dígitos (de buscar_ocupacion)", required: true, must_be_known: true}
+      fixed: {limit: 10}
+      link: {path: "/ocupaciones/{code}", label: "Ficha de la ocupación"}
+    - name: brechas_habilidades
+      description: Habilidades con mayor (o menor) brecha entre lo que pide el trabajo y lo que forma la educación, en un país; opcionalmente de una ocupación o un sector.
+      path: /skills/gaps
+      params:
+        country: {type: string, description: "ARG, CHL o URY", required: true}
+        occupation: {type: string, description: "Código CIUO-08 (opcional, de buscar_ocupacion)", must_be_known: true}
+        sector: {type: string, description: "Código de sector (opcional)"}
+        view: {type: string, enum: [top, bottom], description: "top: mayores brechas · bottom: menores"}
+      fixed: {limit: 10}
+      link: {path: "/habilidades", query: [country], label: "Brechas de habilidades"}
+    - name: metodologia
+      description: Cómo se calcula un indicador del observatorio (parámetros y descripción).
+      path: /methodologies/{methodology_type}
+      params:
+        methodology_type:
+          type: string
+          enum: [employability_index, skill_gap, trend, projection]
+          description: "employability_index: ISE · skill_gap: brechas · trend: tendencias · projection: proyecciones"
+          required: true
+      link: {path: "/metodologia", label: "Metodología"}
+  # Scripted answers: frequent questions are answered from templates with the API's data, without a
+  # model (exact numbers, instant, no cost). The question type comes from the words below; the
+  # occupation from a CIUO code, a local name (search.aliases_file) or the search; the country from
+  # its name or the page being looked at. What does not fit a template goes to the model.
+  scripted:
+    enabled: true
+    # Words that say what is asked (accents and case do not matter; phrases allowed).
+    intent_words:
+      methodology: ["como se calcula", "como se mide", "metodologia", "que es el ise", "que mide el ise", "que significa el ise"]
+      sectors: [sector, sectores, rama, ramas]
+      ranking_top: [mejores, mejor, "mas empleables", "mas empleabilidad", "mas alto", "mas altos", top]
+      ranking_bottom: [peores, peor, "menos empleables", "mas bajo", "mas bajos"]
+      skills: [habilidades, habilidad, competencias, conocimientos, "necesita saber", "tiene que saber", "que necesita", "que se necesita", "que hace falta"]
+      salary: [gana, ganan, ganar, paga, pagan, sueldo, sueldos, salario, salarios, cobra, cobran, ingreso, ingresos, plata]
+      employability: ["como le va", "como les va", conviene, empleabilidad, ise, futuro, demanda, "como esta", "como estan"]
+    # Words ignored when looking for the occupation in the question.
+    stopwords: [que, cual, cuales, cuanto, cuanta, cuantos, como, donde, de, del, la, el, los, las, un, una, unos, unas, en, a, al, y, o, u, para, por, ser, es, son, hay, me, mi, se, le, les, lo, con, sin, sobre, esta, este, esa, ese, ocupacion, ocupaciones, trabajo, trabajar, profesion, oficio, carrera, gente, persona, personas, hoy, ahora, actualmente, promedio, medio, media, mes, mensual, pais, paises, tiene, tienen, hoy, dia, anio, ano, segun, datos, observatorio, nos, decime, dime, quiero, saber, mas, menos, necesita, necesitan, requiere, requieren, debe, deben, tener, hace, falta, sirve, sabe, saben, puede]
+    # Ways to name each country (besides its name and ISO3 code in catalog.yaml).
+    country_words:
+      ARG: [argentina, argentino, argentinos, argentinas, arg]
+      CHL: [chile, chileno, chilenos, chilenas, chl]
+      URY: [uruguay, uruguayo, uruguayos, uruguayas, ury]
+    # Occupations offered when the question matches several; more than this goes to the model.
+    max_options: 4
+    ranking_size: 5
+    skills_size: 8
+    decimals: 1
+    # Shown as the model in the log and the response.
+    model_label: plantillas
+    templates:
+      occupation: "**{name}** (CIUO {code})"
+      alias_note: "«{term}» corresponde a **{name}** (CIUO {code})."
+      salary_title: "Salario medio de {occupation}:"
+      salary_line: "- {country}: USD {usd} por mes (USD PPA {ppp}) en {year}."
+      salary_line_ppp: "- {country}: USD PPA {ppp} por mes en {year}."
+      salary_missing: "- {country}: sin dato de salario."
+      salary_group_note: "Ojo: este salario no se publica para la ocupación sola; es el promedio del grupo {group} «{group_name}» ({countries})."
+      employability_title: "Índice de empleabilidad (ISE, de 0 a 100) de {occupation}:"
+      employability_line: "- {country}: {score} ({level}) en {year}."
+      employability_missing: "- {country}: datos insuficientes para calcular el ISE."
+      skills: "Habilidades y conocimientos esenciales de {occupation} según ESCO: {items}."
+      skills_missing: "ESCO no tiene habilidades cargadas para {occupation}."
+      ranking_top: "Ocupaciones con mayor ISE en {country} ({year}):"
+      ranking_bottom: "Ocupaciones con menor ISE en {country} ({year}):"
+      ranking_line: "{n}. {name}: {score}"
+      sectors_score: "Sectores de {country} por ISE medio ({year}):"
+      sectors_salary: "Sectores de {country} por salario medio ({year}):"
+      sectors_score_line: "{n}. {name}: ISE {score} ({level})"
+      sectors_salary_line: "{n}. {name}: USD {usd} por mes (USD PPA {ppp})"
+      methodology: "El ISE (Índice Sintético de Empleabilidad) va de 0 a 100 y combina: {parts}. Cada dimensión se lleva a una escala de 0 a 100 dentro del grupo comparado; si falta un dato, su peso se reparte entre las demás. Versión {version}."
+      methodology_part: "{label} ({weight} %)"
+      ask_occupation: "Encontré varias ocupaciones para «{query}». ¿Cuál querés?"
+      ask_country: "¿De qué país?"
+      option_occupation: "{code} · {name}"
+  messages:
+    disabled: "El asistente no está disponible."
+    empty_question: "Escribí una pregunta."
+    too_long: "La pregunta es muy larga (máximo {max} caracteres)."
+    user_limit: "Llegaste al límite de {limit} preguntas por día. Probá mañana."
+    global_limit: "El asistente llegó al límite de preguntas de hoy. Probá mañana."
+    provider_unavailable: "El asistente no responde en este momento. Probá en unos minutos."
+    refused: "No puedo responder esa pregunta."
+    cancelled: "Pregunta cancelada."
+    unknown_code: "El código {value} no salió de buscar_ocupacion. Buscá primero la ocupación por su nombre y usá un código de los resultados."
+    no_answer: "No encontré una respuesta con los datos del observatorio."
+    unverified_warning: "Algunos números de esta respuesta no coinciden con los datos consultados: {numbers}. Verificalos en las páginas enlazadas."
+    blocked: "No pude verificar los números de la respuesta con los datos del observatorio. Consultá las páginas enlazadas."
+    blocked_no_links: "No pude verificar los números de la respuesta con los datos del observatorio. Probá preguntar por una ocupación o un sector con otras palabras, o buscalo en el buscador de arriba."
+  # Texts for the screen (the frontend shows them as they are). name: what the bot is called.
+  texts:
+    name: Baqueano
+    title: Preguntale al Observatorio
+    tab: Preguntale al Baqueano
+    intro: "Conozco los datos del observatorio. Preguntame por una ocupación, un sector, un país o cómo se calcula un indicador."
+    placeholder: "Por ejemplo: ¿cómo le va a Enfermería en Chile?"
+    disclaimer: "Responde con los datos del observatorio. Puede equivocarse: verificá en las páginas enlazadas."
+    thinking: "Buscando en los datos… puede tardar hasta un minuto."
+    send: Preguntar
+    stop: Detener
+    stopped: "Cancelaste la pregunta. No cuenta para tu límite del día."
+    new_chat: Nueva conversación
+    close: Cerrar
+    links: "Ver en el observatorio:"
+    remaining: "Te quedan {n} preguntas hoy."
+    error: "No pude responder. Probá de nuevo en un rato."
+  # Example questions shown before the first one (one click asks it).
+  examples:
+    - "¿Cómo le va a Enfermería en Chile?"
+    - "¿Qué sector tiene el salario medio más alto en Uruguay?"
+    - "¿Cómo se calcula el ISE?"
+
+# Login and user accounts. Roles grant permissions: view (the observatory), manage_data (upload
+# files, refresh sources, mark alerts), manage_users (accounts and roles). The token secret is
+# AUTH_SECRET in .env; without it nobody can log in.
+auth:
+  token_ttl_hours: 12
+  password_min_length: 10
+  default_role: viewer
+  roles:
+    admin:
+      label: Administrador
+      permissions: [view, manage_data, manage_users]
+    editor:
+      label: Editor
+      permissions: [view, manage_data]
+    viewer:
+      label: Consultas
+      permissions: [view]
+  statuses:
+    active: Activo
+    suspended: Suspendido
+  messages:
+    no_secret: "El inicio de sesión no está configurado (falta AUTH_SECRET en backend/.env)"
+    bad_credentials: "Correo o contraseña incorrectos"
+    suspended: "La cuenta está suspendida. Consultá con un administrador."
+    not_authenticated: "Iniciá sesión para continuar"
+    invalid_token: "La sesión venció o no es válida. Volvé a iniciar sesión."
+    forbidden: "Tu rol no tiene permiso para esta acción"
+    email_taken: "Ya existe un usuario con ese correo"
+    user_not_found: "Usuario no encontrado"
+    short_password: "La contraseña debe tener al menos {min} caracteres"
+    unknown_role: "Rol desconocido: {role}"
+    unknown_sector: "Sector desconocido: {sector}"
+    unknown_country: "País fuera del catálogo: {country}"
+    wrong_password: "La contraseña actual no es correcta"
+    last_admin: "No se puede quitar el rol ni suspender al último administrador activo"
 
 messages:
   db_unavailable: "No se pudo conectar a la base de datos. Revisá DATABASE_URL en backend/.env"
@@ -276,11 +1007,13 @@ messages:
   unknown_methodology: "Metodología desconocida: {code}"
   invalid_year_range: "El año inicial no puede ser posterior al año final"
   unknown_occupation: "Ocupación desconocida: {code}"
+  unknown_motion_axis: "Variable desconocida: {axis}. Opciones: {options}"
   invalid_sort: "No se puede ordenar por {field}. Opciones: {options}"
   unknown_alert: "Alerta desconocida: {id}"
   unknown_profile: "Perfil de dataset desconocido: {code}"
   unknown_dataset: "Archivo desconocido: {id}"
   unknown_skill: "Habilidad desconocida: {code}"
   no_crosswalk: "No hay correspondencia carrera → ocupación para {country}"
+  unknown_career: "La carrera {career} no está en la correspondencia de {country}"
   no_education_mismatch: "No hay datos de desajuste educación-ocupación para {country}"
   dataset_not_committable: "El archivo no se puede cargar (estado: {status})"

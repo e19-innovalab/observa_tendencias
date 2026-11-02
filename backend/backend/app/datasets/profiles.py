@@ -31,10 +31,12 @@ class DownloadConf(BaseModel):
     # relative. Releases before min_release are ignored (e.g. years without a spreadsheet).
     page_pattern: str | None = None
     min_release: str | None = None
+    # Prepended to a release the link writes short (e.g. "24" in "adelanto_anuario_24" -> "2024").
+    release_prefix: str = ""
 
 
 class FileConf(BaseModel):
-    format: Literal["xlsx", "csv", "auto"]
+    format: Literal["xlsx", "csv", "auto", "zip"]
     sheet: str | None = None
     header_row: int = 1
     first_data_row: int = 2
@@ -96,6 +98,25 @@ class OutlineConf(BaseModel):
     max_total_gap: float = 0.0
 
 
+class DisciplineTablesConf(BaseModel):
+    """Yearbook published as a zip of workbooks (DIU, Argentina). In the workbooks whose name
+    matches members_pattern, each sheet titled title_pattern holds one field of study: a row of
+    discipline names (each over a group of columns), a row of column kinds (EST, NI, RE, EGR...)
+    and the total row right below. The value_kinds column of the total row is read for each
+    discipline and added up over the workbooks (public and private institutions)."""
+    members_pattern: str
+    title_pattern: str
+    period_pattern: str  # regex with a "year" group, searched in the table title
+    value_kinds: list[str]
+    skip_names_pattern: str  # discipline headers that are subtotals (e.g. "^Total")
+    level: str  # stored as the graduates' level
+    # Cross-check: in each workbook, the sheet titled totals_title_pattern has a row starting
+    # with totals_row_pattern and one column per year; the disciplines must add up to it.
+    totals_title_pattern: str
+    totals_row_pattern: str
+    max_total_gap: float = 0.0
+
+
 class ExpectedConf(BaseModel):
     headers: list[str] | None = None
     first_period: str | None = None
@@ -126,6 +147,7 @@ class DatasetProfile(BaseModel):
     long_format: LongFormatConf | None = None
     aggregate: AggregateConf | None = None
     outline: OutlineConf | None = None
+    discipline_tables: DisciplineTablesConf | None = None
     expected: ExpectedConf = ExpectedConf()
 
     @property

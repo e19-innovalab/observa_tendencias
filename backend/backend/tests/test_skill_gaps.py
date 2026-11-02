@@ -26,6 +26,7 @@ from app.models import (
     OccupationSkill,
     Skill,
     SkillGap,
+    SkillGroup,
     Source,
 )
 from tests.conftest import sqlite_tables
@@ -59,14 +60,17 @@ def engine():
             for year, v in zip((2022, 2025), values):
                 s.add(Graduate(country_iso3="CHL", career_key=normalize_text(career), career=career,
                                level="Pregrado", year=year, graduates=v, source_id=2))
-        s.add_all([Skill(skill_code="care", name="cuidar pacientes", skill_type="skill"),
-                   Skill(skill_code="audit", name="auditar cuentas", skill_type="skill"),
-                   Skill(skill_code="talk", name="comunicarse", skill_type="skill")])
+        s.add_all([SkillGroup(group_code="S3.1.0", name="asistir y cuidar", level=3),
+                   SkillGroup(group_code="S2.2.1", name="preparar informes financieros", level=3)])
+        s.add_all([Skill(skill_code="care", name="cuidar pacientes", skill_type="skill", group_code="S3.1.0",
+                         description="Atender las necesidades de los pacientes."),
+                   Skill(skill_code="audit", name="auditar cuentas", skill_type="skill", group_code="S2.2.1"),
+                   Skill(skill_code="talk", name="comunicarse", skill_type="skill", group_code="S3.1.0")])
         for country in ("ARG", "URY", "CHL"):
-            s.add_all([OccupationSkill(occupation_code="2221", skill_code="care", country_iso3=country, weight=1.0),
-                       OccupationSkill(occupation_code="2411", skill_code="audit", country_iso3=country, weight=1.0),
-                       OccupationSkill(occupation_code="2221", skill_code="talk", country_iso3=country, weight=0.5),
-                       OccupationSkill(occupation_code="2411", skill_code="talk", country_iso3=country, weight=0.5)])
+            s.add_all([OccupationSkill(occupation_code="2221", skill_code="care", country_iso3=country, weight=1.0, relation="essential"),
+                       OccupationSkill(occupation_code="2411", skill_code="audit", country_iso3=country, weight=1.0, relation="essential"),
+                       OccupationSkill(occupation_code="2221", skill_code="talk", country_iso3=country, weight=0.5, relation="essential"),
+                       OccupationSkill(occupation_code="2411", skill_code="talk", country_iso3=country, weight=0.5, relation="optional")])
         s.commit()
         refresh_skill_gaps(s)
         s.commit()
@@ -165,15 +169,18 @@ def test_crosswalk_review_json_and_csv(engine):
         assert r["reviewed"] is False and r["careers"] == r["mapped"] + r["generic"]
         top = r["items"][0]  # most graduates first: Enfermería (1000) before Contador Auditor
         assert top["career"] == "Enfermería" and top["graduates"] == 1000
+        # through CINE-F 0913 (nursing and midwifery): nurses and midwives, half each
+        assert top["cine_f"] == "0913" and top["cine_f_name"] == "Enfermería y partería"
+        assert r["via"] == "reference/cine_f_ciuo.yaml"
         occ = top["occupations"][0]
-        assert occ["occupation_code"] == "2221" and occ["share"] == 1.0
+        assert occ["occupation_code"] == "2221" and occ["share"] == 0.5
         assert [h["code"] for h in occ["hierarchy"]] == ["2", "22", "222", "2221"]
         assert occ["hierarchy"][0]["name"] == "Profesionales científicos e intelectuales"
         assert any(i["is_generic"] and not i["occupations"] for i in r["items"])
         csv_text = c.get("/api/v1/graduates/crosswalk",
                          params={"country": "CHL", "format": "csv"}).text
         header = csv_text.lstrip("﻿").splitlines()[0]
-        assert header.startswith("carrera,") and "gran_grupo" in header
+        assert header.startswith("carrera,") and "gran_grupo" in header and "cine_f" in header
         assert c.get("/api/v1/graduates/crosswalk", params={"country": "BRA"}).status_code == 404  # no crosswalk
     finally:
         app.dependency_overrides.clear()
@@ -221,3 +228,177 @@ def test_superseded_results_are_pruned_but_methodologies_kept(engine, monkeypatc
         assert s.scalar(select(func.count()).where(SkillGap.methodology_id == old.methodology_id)) == 0
         assert s.get(Methodology, old.methodology_id) is not None  # what that version used stays
         assert s.scalar(select(func.count()).select_from(SkillGap)) > 0  # current results stay
+
+
+def test_cine_f_crosswalk_goes_through_the_shared_field_table(monkeypatch):
+    from app.analytics import skill_gaps_run
+
+    files = {
+        "via.yaml": {"reviewed": True, "classification": "names.yaml",
+                     "fields": {"0613": {"*": [2511, 2512], "tecnico": [3512]}, "0421": [2611]}},
+        "names.yaml": {"detailed": {"0613": "Desarrollo de software", "0421": "Derecho"}},
+    }
+    monkeypatch.setattr(skill_gaps_run, "_read_yaml", lambda path: files[path])
+    cw = skill_gaps_run.expand_cine_crosswalk({
+        "reviewed": True, "levels": ["Grado", "Pregrado"], "via": "via.yaml",
+        "technical_levels": ["Pregrado"],
+        "careers": {"Ingeniería en Informática": {"cine": "0613"},
+                    "Técnico en Programación": {"cine": "0613", "tecnico": True},
+                    "Abogacía": {"cine": "0421"}, "Plan común": {"cine": None}}})
+    careers = cw["careers"]
+    assert crosswalk_codes(careers["Ingeniería en Informática"], "Grado") == ["2511", "2512"]
+    # technical by level (Pregrado) or by name: the field's "tecnico" codes
+    assert crosswalk_codes(careers["Ingeniería en Informática"], "Pregrado") == ["3512"]
+    assert crosswalk_codes(careers["Técnico en Programación"], "Grado") == ["3512"]
+    # a field without "tecnico" codes uses the same for every career
+    assert crosswalk_codes(careers["Abogacía"], "Pregrado") == ["2611"]
+    assert careers["Plan común"] == {"Grado": [], "Pregrado": []}
+    assert cw["cine"]["Abogacía"] == {"code": "0421", "name": "Derecho", "technical": False}
+    assert cw["reviewed"] is True
+    with pytest.raises(ValueError):  # unknown field
+        skill_gaps_run.expand_cine_crosswalk({**cw, "careers": {"X": {"cine": "9999"}}})
+
+
+def test_shared_cine_f_tables_are_complete_and_valid():
+    import yaml
+
+    from app.analytics.skill_gaps_run import field_codes
+    from app.core.config import settings
+
+    names = yaml.safe_load((settings.config_dir / "reference/cine_f_2013.yaml").read_text())
+    table = yaml.safe_load((settings.config_dir / "reference/cine_f_ciuo.yaml").read_text())
+    assert set(table["fields"]) == set(names["detailed"])  # every detailed field has a row
+    for field in table["fields"].values():
+        for technical in (False, True):
+            for code in crosswalk_codes(field_codes(field, technical), ""):
+                occ = catalog().occupation(code)
+                assert occ is not None and not occ.is_excluded
+
+
+def test_gaps_filter_by_sector_and_occupation_with_summary(engine):
+    def override():
+        with Session(engine) as s:
+            yield s
+
+    app.dependency_overrides[get_session] = override
+    try:
+        c = TestClient(app)
+        base = {"country": "CHL", "view": "all", "min_occupations": 1}
+        everything = c.get("/api/v1/skills/gaps", params=base).json()
+        assert {i["skill"]["skill_code"] for i in everything["items"]} == {"care", "audit", "talk"}
+        # nurses (2221, health): their skills only
+        health = c.get("/api/v1/skills/gaps", params={**base, "sector": "health"}).json()
+        assert {i["skill"]["skill_code"] for i in health["items"]} == {"care", "talk"}
+        # "talk": essential for nurses (health), optional for accountants (knowledge economy)
+        by_code = {i["skill"]["skill_code"]: i for i in everything["items"]}
+        assert [(x["sector_code"], x["relation"], [(o["name"], o["relation"]) for o in x["occupations"]])
+                for x in by_code["talk"]["sectors"]] == [
+            ("health", "essential", [("Profesional de enfermería", "essential")]),
+            ("knowledge_economy", "optional", [("Contador/a", "optional")])]
+        assert by_code["talk"]["is_cross_sector"] is False  # essential in one sector only
+        # by sector: essential skills by default, optional ones too with relation=any
+        knowledge = c.get("/api/v1/skills/gaps", params={**base, "sector": "knowledge_economy"}).json()
+        assert {i["skill"]["skill_code"] for i in knowledge["items"]} == {"audit"}
+        knowledge_any = c.get("/api/v1/skills/gaps", params={**base, "sector": "knowledge_economy", "relation": "any"}).json()
+        assert {i["skill"]["skill_code"] for i in knowledge_any["items"]} == {"audit", "talk"}
+        accountants = c.get("/api/v1/skills/gaps", params={**base, "occupation": "2411"}).json()
+        assert {i["skill"]["skill_code"] for i in accountants["items"]} == {"audit", "talk"}
+        s = everything["summary"]
+        assert s["skills_with_gap"] == 3 and s["average_gap"] == pytest.approx(0.0)
+        assert s["largest_shortage"]["skill_code"] == "care" and s["largest_surplus"]["skill_code"] == "audit"
+        assert s["occupations"] == 2 and s["full_share"] == 1.0
+    finally:
+        app.dependency_overrides.clear()
+
+
+def test_gaps_per_skill_group(engine):
+    """A group joins its skills: each occupation weighs as its strongest skill of the group."""
+    def override():
+        with Session(engine) as s:
+            yield s
+
+    app.dependency_overrides[get_session] = override
+    try:
+        c = TestClient(app)
+        base = {"country": "CHL", "view": "all", "min_occupations": 1}
+        groups = {i["group"]["group_code"]: i for i in
+                  c.get("/api/v1/skills/groups/gaps", params=base).json()["items"]}
+        care = groups["S3.1.0"]  # care (nurses 1.0) + talk (nurses 0.5, accountants 0.5)
+        # nurses weigh 1.0 (max, not 1.5), accountants 0.5: demand (1·10% + 0.5·0%) / 1.5,
+        # supply (1·0% + 0.5·10%) / 1.5
+        assert care["demand_growth"] == pytest.approx(0.1 / 1.5)
+        assert care["supply_growth"] == pytest.approx(0.05 / 1.5)
+        assert care["gap"] == pytest.approx(0.05 / 1.5)
+        assert care["skills"] == 2 and care["occupations"] == 2
+        assert [sk["skill_code"] for sk in care["top_skills"]] == ["care", "talk"]
+        assert care["top_skills"][0]["description"] == "Atender las necesidades de los pacientes."
+        assert groups["S2.2.1"]["gap"] == pytest.approx(-0.1)
+        # by sector: groups with a skill essential for the sector's occupations
+        health = c.get("/api/v1/skills/groups/gaps", params={**base, "sector": "health"}).json()
+        assert [i["group"]["group_code"] for i in health["items"]] == ["S3.1.0"]
+    finally:
+        app.dependency_overrides.clear()
+
+
+def test_gaps_by_reference_year(engine):
+    """Gaps are kept for several reference years; the latest is the default, any can be chosen."""
+    def override():
+        with Session(engine) as s:
+            yield s
+
+    app.dependency_overrides[get_session] = override
+    try:
+        c = TestClient(app)
+        base = {"country": "CHL", "view": "all", "min_occupations": 1}
+        latest = c.get("/api/v1/skills/gaps", params=base).json()
+        # the fixture has data for 2022 and 2025 only: earlier reference years have no growth
+        # to compute, so only 2025 is stored (years without data are not filled with empty rows)
+        assert latest["year"] == 2025 and latest["available_years"] == [2025]
+        assert c.get("/api/v1/skills/gaps", params={**base, "year": 2024}).json()["total"] == 0
+        groups = c.get("/api/v1/skills/groups/gaps", params={**base, "year": 2025}).json()
+        assert groups["year"] == 2025 and groups["available_years"] == [2025]
+    finally:
+        app.dependency_overrides.clear()
+
+
+def test_supply_supplement_fills_only_missing_years_split_by_latest_shares(engine):
+    """A supplement (DIU yearbook) adds the years the main source lacks, its combined level split
+    into the crosswalk's levels with the career's latest shares in the main source."""
+    from app.analytics.skill_gaps_run import occupation_supply
+    from app.models import Source
+
+    with Session(engine) as s:
+        main = s.scalar(select(Source.source_id).where(Source.source_code == "mifuturo_chile"))
+        extra = Source(source_code="anuario_diu_argentina", name="DIU", source_kind="dataset")
+        s.add(extra)
+        s.flush()
+        key = normalize_text("Enfermería")
+        # main source: 2022 and 2025 (1000 Pregrado each, from the fixture); yearbook: 2025 (must
+        # be ignored, the main source has it) and 2026 (combined level, to be split)
+        for year, v in ((2025, 9999), (2026, 1200)):
+            s.add(Graduate(country_iso3="CHL", career_key=key, career="Enfermería",
+                           level="Pregrado y grado", year=year, graduates=v, source_id=extra.source_id))
+        s.flush()
+        cw = {"careers": {"Enfermería": ["2221"]}, "levels": ["Pregrado"], "source_profile": "mifuturo_titulados"}
+        supplement = {"profile": "arg_anuario_diu_egresados", "combined_level": "Pregrado y grado"}
+        series = occupation_supply(s, "CHL", cw, supplement)["2221"]
+        assert main is not None
+        assert series[2025] == 1000  # the main source wins for the years it has
+        assert series[2026] == 1200  # all of Enfermería's graduates were Pregrado in 2025
+        s.rollback()
+
+
+def test_supply_growth_uses_averages_and_drops_unstable_series():
+    from app.analytics.skill_gaps_run import supply_growth
+
+    conf = {"window_years": 3, "exclude_years": [], "min_base": 30, "smoothing_years": 2, "max_jump": 3.0}
+    # averages: first two years of the window (2018-2019: 100, 110) vs last two (2021-2022: 130, 140)
+    smooth = {2018: 100, 2019: 110, 2020: 120, 2021: 130, 2022: 140}
+    growth, unstable = supply_growth(smooth, 2022, conf, max_age=5)
+    assert not unstable and growth == pytest.approx((135 / 105) ** (1 / 3) - 1)
+    # Argentina, Medicina pregrado: 32, 56, 658, 58, 645 -> more than 3x jumps: unstable, no growth
+    jumpy = {2018: 32, 2019: 56, 2020: 658, 2021: 58, 2022: 645}
+    assert supply_growth(jumpy, 2022, conf, max_age=5) == (None, True)
+    # a small base is not unstable, just too small
+    small = {2018: 10, 2019: 12, 2020: 13, 2021: 14, 2022: 15}
+    assert supply_growth(small, 2022, conf, max_age=5) == (None, False)

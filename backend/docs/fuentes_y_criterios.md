@@ -2,7 +2,8 @@
 
 Qué datos usa hoy el backend de Observa Tendencias, de dónde salen, cómo se consultan y con qué criterios se
 calculan los indicadores, las tendencias, las proyecciones y el Índice Sintético de Empleabilidad
-(ISE). Estado al 18/10/2026.
+(ISE), y los indicadores temáticos (Moctezuma, Ludita, Reina Roja, Sísifo, Brecha generacional y
+burbujas de Tendencias). Estado al 01/11/2026.
 
 Todo lo que se describe acá está en archivos de configuración: no hay valores fijos en el código.
 Si cambia un criterio, cambia en el archivo indicado en cada sección y este documento debe
@@ -13,9 +14,9 @@ actualizarse.
 | `backend/config/sources.yaml` | Fuentes, URLs, frecuencia esperada, opciones de cada conector, reintentos HTTP |
 | `backend/config/indicators.yaml` | Indicadores y las series de cada fuente que los alimentan |
 | `backend/config/catalog.yaml` | Países, sectores, universo de ocupaciones, ocupaciones destacadas, reglas de nombres |
-| `backend/config/analytics.yaml` | Metodología: ISE, tendencias, proyecciones, alertas |
+| `backend/config/analytics.yaml` | Metodología: ISE, tendencias, proyecciones, alertas e indicadores temáticos |
 | `backend/config/app.yaml` | Etiquetas, tarjetas de Inicio, paginación, rangos y definiciones que muestra la API |
-| `backend/config/reference/` | Tablas de referencia citadas (ocupaciones CIUO-08, exposición a IA de la OIT) |
+| `backend/config/reference/` | Tablas de referencia citadas (ocupaciones CIUO-08 y definiciones de sus grandes grupos, exposición a IA de la OIT, series históricas de Moctezuma y Ludita) |
 | `backend/.env` | Secretos y valores por entorno (base de datos, CORS, API key) |
 
 ---
@@ -35,6 +36,8 @@ actualizarse.
 | INE Uruguay | Archivo oficial (XLSX), descarga automática | IPC total país y variaciones, mensual desde 1937 | URY | No | Mensual |
 | Mi Futuro, titulados (MINEDUC, Chile) | Archivo oficial (XLSX), descarga automática | Titulaciones de educación superior por programa, 2007 en adelante | CHL | No | Anual (se revisa semanalmente) |
 | SIPA, trabajo registrado (Secretaría de Trabajo) | Archivo oficial (XLSX), descarga automática | Asalariados registrados del sector privado por rama, mensual desde 2009 | ARG | No | Mensual |
+| O*NET Technology Skills, por versión (EE. UU.) | Archivo oficial (ZIP), descarga automática | Tecnologías que usa cada ocupación, versiones 25.1 (2020) a 31.0 (2026), para el indicador Reina Roja | Igual para los 3 | No | Anual |
+| ESCO, por versión (Comisión Europea) | API REST (JSON) | Habilidades de cada ocupación en las versiones v1.0.9 a v1.2.1, para el indicador Reina Roja | Igual para los 3 | No | Anual |
 
 #### World Bank Indicators API
 
@@ -89,6 +92,12 @@ actualizarse.
   1. `GET /resource/concept?uri=http://data.europa.eu/esco/isco/C{código}` lista las ocupaciones ESCO de cada grupo CIUO-08 de 4 dígitos.
   2. `GET /resource/occupation?uri=...` da las habilidades esenciales y opcionales de cada una.
 - **Peso de una habilidad en un grupo CIUO:** el promedio, entre las ocupaciones ESCO del grupo, de 1 si es esencial, 0,5 si es opcional y 0 si no figura (`relation_weights` en `sources.yaml`).
+- **Categoría de la relación (`occupation_skills.relation`):** *esencial* si la habilidad es esencial para al menos una ocupación ESCO del grupo; si no, *opcional* (`relation_categories` en `sources.yaml`). Se usa la categoría de ESCO, no un porcentaje del peso.
+- **Jerarquía y definiciones (`app/skills/esco_hierarchy.py`):** cada habilidad guarda su definición (en español; si ESCO no la tiene, en inglés) y su grupo de la jerarquía de ESCO (`skills.group_code`, tabla `skill_groups`): S para habilidades (S2 > S2.2 > S2.2.1), A actitudes, L idiomas, T transversales; los conocimientos siguen los campos CINE-F (04 > 041 > 0412). Se usa el nivel `skill_gaps.group_level` de `analytics.yaml` (hoy 3). Se actualiza con cada carga de ESCO o con `python -m app.jobs.esco_hierarchy`. Algunos registros de ESCO devuelven error del servidor siempre; se omiten y se listan.
+- **Descripciones en español:** cada descripción guarda el original en inglés de ESCO (`description_en`) y el texto en español que se muestra (`description`), con su origen (`description_origin`): `esco` si ESCO la publica en español (todas las habilidades) o `translation` si viene de `config/reference/esco_traducciones_es.yaml`. Ese archivo es el documento fuente de las traducciones: para cada grupo tiene el texto en inglés exactamente como lo devuelve la API de ESCO y su traducción; es propia del equipo, no oficial, y está sin revisar (`reviewed: false`). Una traducción solo se usa mientras su original coincida con el texto actual de ESCO; si ESCO lo cambia, vuelve a mostrarse el inglés hasta actualizarla. Hoy: 488 grupos traducidos, 3 con español de ESCO y 49 sin descripción en ESCO.
+- **Brechas por grupo (`skill_group_gaps`):** el mismo método que por habilidad, sobre las ocupaciones que usan alguna habilidad del grupo; en cada ocupación el grupo pesa lo que su habilidad más fuerte. Sirve para no mostrar cuatro versiones casi iguales del mismo tema con brechas distintas.
+- **Ocupaciones ESCO detrás de cada relación (`occupation_skills.via`):** para cada grupo CIUO y habilidad se guardan las ocupaciones de ESCO del grupo que la usan y cómo. Explica casos que parecen raros: "asesorar e informar sobre ganado" es esencial para el grupo 7515 (catadores y clasificadores de alimentos y bebidas) porque ESCO pone ahí al "controlador de leche de granja"; ESCO no se la asigna al "ganadero" (6121), que solo tiene como opcional "asesorar sobre la productividad del ganado". La página lo muestra como "vía …".
+- **Habilidades por sector:** una habilidad es de un sector si es **esencial** para alguna de sus ocupaciones (`skills.sector_relation` en `app.yaml`); con "También opcionales" se suman las opcionales. Si es esencial en dos o más sectores es **transversal**. Ejemplo: "aconsejar sobre la preparación de alimentos de dieta" es esencial para dietistas (Salud) y opcional para cocineros (Turismo). La brecha de una habilidad se calcula siempre con todas las ocupaciones que la usan, de todos los sectores.
 - **Carga del 18/10/2026:**
   - 11.551 habilidades (2.580 conocimientos y 8.971 habilidades o competencias).
   - 424 de los 431 grupos aplicables, con 44.374 relaciones.
@@ -97,6 +106,26 @@ actualizarse.
   - 2240, 3221, 4414, 7549 y 9624: ESCO no detalla ocupaciones para esos grupos.
 - **Registros con error:** se omiten y se listan en la corrida. Si fallan más de `max_failed_share` (2 %), no se reemplaza nada.
 - **Uso:** ESCO no varía por país; las mismas relaciones valen para los tres. Tablas `skills` y `occupation_skills`.
+
+#### Versiones de O*NET y ESCO (indicador Reina Roja)
+
+Conector `skill_versions` (`app/skills/versions.py`); configuración en `sources.yaml → onet_technology`
+y `esco_versions`. Guarda el perfil de cada ocupación CIUO-08 en cada versión (tabla `skill_profiles`):
+no reemplaza versiones anteriores.
+
+- **O*NET (Technology Skills):**
+  - Base de datos de cada versión: `https://www.onetcenter.org/dl_files/database/db_{versión}_text.zip`,
+    archivo `Technology Skills.txt`, columna `Example`. En la 31.0 O*NET lo renombró a
+    `Software Skills.txt`, columna `Workplace Example` (se configura por versión en `releases`).
+  - Las ocupaciones de EE. UU. (O*NET-SOC 2019) se llevan a CIUO-08 con el cruce oficial
+    ESCO–O*NET: https://www.onetcenter.org/crosswalks/esco/ESCO_to_ONET-SOC.xlsx. Una ocupación CIUO
+    reúne las tecnologías de todas sus ocupaciones O*NET.
+  - Los ZIP originales quedan en `data/raw/datasets/onet/`.
+  - Versiones cargadas: 25.1 (11/2020), 26.0, 27.0, 28.0, 29.0, 30.0 y 31.0 (08/2026).
+- **ESCO:** la misma API de la sección anterior, con `selectedVersion` y en inglés (los nombres
+  comparables entre versiones). Versiones: v1.0.9 (11/2021), v1.1.1 (09/2022), v1.2.0 (05/2024) y
+  v1.2.1 (12/2025).
+- **Nuevas versiones:** se agregan en `releases` con su fecha de publicación.
 
 #### SIMEL: Sistema de Información del Mercado Laboral (INE Chile)
 
@@ -137,6 +166,16 @@ actualizarse.
 - **Resultado:** 1.060 filas, de 2014 a 2023. En 2023 hubo 138.799 egresados de grado y pregrado.
 - **Limitaciones:** solo universidades: los institutos terciarios no universitarios no están en el archivo. La unidad es la disciplina (37), mucho más amplia que la carrera genérica de Chile: "Ingeniería" agrupa todas las ingenierías.
 - **Perfil:** `config/datasets/arg_egresados_universitarios.yaml`.
+
+#### Anuario Estadístico del Sistema Universitario: egresados por disciplina (DIU, Argentina)
+
+- **Página oficial:** https://www.argentina.gob.ar/educacion/universidades/informacion/publicaciones/anuarios (Departamento de Información Universitaria, Secretaría de Educación). Cada anuario es un `.zip` con planillas; a veces sale primero un "adelanto" parcial.
+- **Para qué:** es la misma información que el archivo de Indicadores CTI (comparado en 2023: idéntico en las 37 disciplinas), pero se publica antes. Se usan solo los anuarios desde 2024 y solo para los años que el archivo CTI todavía no tiene (`skill_gaps.supply_supplements` en `analytics.yaml`). Si el archivo CTI publica ese año, manda el CTI.
+- **Qué se usa:** en las planillas "Pregrado y Grado Gestión Estatal" y "Gestión Privada", los cuadros de estudiantes, nuevos inscriptos, reinscriptos y egresados por disciplina (2.1.14 a 2.1.18a y 2.2.14 a 2.2.18a): la columna de egresados (EGR en 2023, EGRE en 2024) de la fila de total de cada disciplina, sumando gestión estatal y privada.
+- **Archivo cargado:** `adelanto_anuario_24_14-08.zip`, adelanto parcial del Anuario 2024, con planillas fechadas el 14/08/2026 (el servidor lo marca modificado el 18/08/2026). El anuario final 2024 puede corregir las cifras: si se publica, reemplaza el año 2024 y los cambios quedan en el historial de revisiones.
+- **Control:** las disciplinas tienen que sumar el total de egresados del propio anuario (cuadros 2.1.4 y 2.2.4, fila "Total Instituciones"); una diferencia de hasta 1 % es un aviso. 2024: 145.235 egresados (96.183 estatales + 49.052 privados), igual al total del anuario.
+- **Pregrado y grado juntos (estimación):** el anuario da cada disciplina sin separar pregrado de grado. Para calcular las brechas se reparte con la proporción de esa disciplina en el último año del archivo CTI que la tiene (hoy 2023). Es una estimación hasta que el CTI publique el año con el detalle.
+- **Perfil:** `config/datasets/arg_anuario_diu_egresados.yaml` (lector de cuadros por disciplina, `app/datasets/reader.py`).
 
 #### Anuario Estadístico de Educación: egresados universitarios por carrera (MEC, Uruguay)
 
@@ -202,11 +241,25 @@ base, y queda registrado en `dataset_files` con su URL, versión, checksum, ubic
 
 **Revisiones:** un archivo nuevo puede corregir los últimos `revision_grace_periods` períodos (12 en SIPA). Si valores más viejos cambian más que `max_revision` (5 %), se bloquea la carga porque puede ser otra serie.
 
-**Carga manual** (`POST /datasets/upload` y después `POST /datasets/{id}/commit`, con `X-API-Key`):
-1. Se sube el archivo con un perfil. Se valida, se guarda en `data/uploads/` y se devuelve el reporte (errores por fila y columna) con una vista previa. Todavía no se carga nada.
-2. Al confirmar, se vuelve a validar y se carga.
+**Carga manual.** En los frontends está en menú de la cuenta → Carga de datos. En la API son dos pasos: `POST /datasets/upload` y después `POST /datasets/{id}/commit`. Requiere sesión con permiso `manage_data` o el `X-API-Key`.
+
+1. **Control del archivo, antes de leerlo** (`app/datasets/filecheck.py`). Se rechaza:
+   - un `.xlsx` que no es un Excel real, tiene macros, o descomprimido supera `datasets.max_unzipped_bytes` (300 MB);
+   - un `.csv` que en realidad es un Excel, es binario o no está en UTF-8.
+
+   El archivo rechazado queda en el historial con el motivo.
+2. **Validación.** Se valida contra el perfil, se guarda en `data/uploads/` y se devuelve el reporte con una vista previa. Todavía no se carga nada. El reporte trae:
+   - los errores **agrupados** por tipo: cuántas filas, cuáles, qué valores y qué hacer (`app.yaml → datasets.group_titles` y `group_hints`);
+   - el detalle fila por fila (los primeros 50).
+
+   Hay un máximo de `datasets.max_rows` filas (200.000).
+3. **Choque con datos oficiales.** Si un valor ya existe en otra fuente (mismo indicador, país, sector, ocupación, período y frecuencia), el reporte lo avisa, con la cantidad por fuente y ejemplos. Para cargar hay que confirmarlo (`{"confirm_overlap": true}`). Los valores cargados se guardan como fuente aparte (`manual_upload`) y **nunca reemplazan el dato oficial**.
+4. **Confirmar.** Se vuelve a validar y se carga. Se recalculan tendencias, proyecciones, ISE y alertas.
 
 La **plantilla genérica** (`plantilla_generica`) acepta cualquier dato oficial en formato largo (`indicador, pais, periodo, frecuencia, valor`, más `sector` y `ocupacion` opcionales). Exige declarar el nombre y la URL de la fuente, que se guardan con el archivo. Una nueva versión de la misma fuente declarada reemplaza los valores de la anterior.
+
+- **Plantilla:** se descarga en Excel o CSV (`GET /datasets/profiles/plantilla_generica/template`). La hoja de datos trae solo los encabezados, para que nunca se carguen ejemplos por error. Las otras hojas traen las instrucciones con filas de ejemplo y los códigos válidos de indicadores, países, sectores y ocupaciones, sacados de la configuración.
+- **Archivos de ejemplo** (`config/datasets/ejemplos/`): uno válido, con valores reales de ILOSTAT y del Banco Mundial, que muestra el aviso de choque con datos oficiales, y uno con errores puestos a propósito.
 
 **Actualización programada** (`python -m app.jobs.scheduler`, configurada en `sources.yaml → scheduler`):
 - World Bank e ILOSTAT: los lunes a las 6:00.
@@ -239,11 +292,15 @@ Hay 18 indicadores. El dominio corresponde a la pestaña del mockup: economic �
 | `unemployment_rate_quarterly` | Desocupación trimestral (EPH) | % | Datos Argentina `42.3_EPH_PUNTUATAL_0_M_30` (× 100) | Trimestral (ARG) | 2026-T2 |
 | `activity_rate_quarterly` | Actividad trimestral (EPH) | % | Datos Argentina `43.2_ECTAT_0_T_33` (× 100) | Trimestral (ARG) | 2026-T2 |
 | `youth_unemployment_rate` | Desocupación juvenil (15 a 24) | % | World Bank `SL.UEM.1524.ZS` | Anual | 2025 |
+| `youth_unemployment_rate_survey` | Desocupación juvenil (15 a 24 años, encuestas) | % | ILOSTAT `DF_UNE_DEAP_SEX_AGE_RT`, clave `{countries}.A..SEX_T.AGE_YTHADULT_Y15-24`. La misma serie de encuestas que `unemployment_rate`, para la Brecha generacional. La del World Bank (estimación modelada de la OIT) se mantiene | Anual | 2025 (ARG desde 2004; CHL y URY desde 2000) |
 | `labor_force_participation` | Tasa de actividad | % | World Bank `SL.TLF.CACT.ZS` | Anual | 2025 |
 | `self_employment_share` | Trabajo por cuenta propia | % | World Bank `SL.EMP.SELF.ZS` | Anual | 2025 |
 | `registered_private_employment` | Asalariados registrados del sector privado (SIPA) | Miles | SIPA, hoja A.2.1: total, Turismo, Salud y Energía | Mensual (ARG) | 07/2026 (últimos 10 meses provisorios) |
 | `employment` | Personas ocupadas | Miles | ILOSTAT `DF_EMP_TEMP_SEX_ECO_NB` (total y por sector, 3 países). Por ocupación: ILOSTAT `DF_EMP_TEMP_SEX_OC2_NB` (2 dígitos, ARG y URY) y SIMEL `DF_OCUCIUO_CIUO_SEXO` (gran grupo, CHL) | Anual | 2025 |
 | `mean_monthly_earnings_ppp` | Ingreso laboral mensual promedio | USD PPA | ILOSTAT `DF_EAR_EMTA_SEX_ECO_CUR_NB` (sector) y `DF_EAR_EMTA_SEX_OCU_CUR_NB` (ocupación, 1 dígito), `CUR_TYPE_PPP` | Anual | 2025 ARG, 2024 URY y CHL |
+| `mean_monthly_earnings_usd` | Ingreso laboral mensual promedio (para mostrar) | USD | ILOSTAT, las mismas dos series con `CUR_TYPE_USD` (tipo de cambio de mercado) | Anual | 2025 ARG, 2024 URY y CHL |
+| `earnings_tertiary_ppp`, `earnings_tertiary_usd` | Ingreso laboral mensual promedio con educación superior | USD PPA y USD | ILOSTAT `DF_EAR_EMTA_SEX_EDU_CUR_NB`, `EDU_AGGREGATE_ADV` | Anual | 2025 ARG, 2024 URY y CHL |
+| `earnings_secondary_ppp`, `earnings_secondary_usd` | Ingreso laboral mensual promedio con secundaria | USD PPA y USD | ILOSTAT `DF_EAR_EMTA_SEX_EDU_CUR_NB`, `EDU_AGGREGATE_INT` | Anual | 2025 ARG, 2024 URY y CHL |
 | `genai_exposure` | Exposición a la IA generativa | Índice 0 a 1 | OIT WP 140, Tabla A1 | Estática (2025) | 2025 |
 
 ### 2.3 Educativos
@@ -318,6 +375,17 @@ la serie con cautela hasta confirmarlo con INE Uruguay.
 
 ## 3. Criterios de normalización
 
+- **Búsqueda de ocupaciones y habilidades** (`/occupations?q=`, `/skills?q=`, buscador del encabezado y asistente). Cada palabra tiene que coincidir con el comienzo de una palabra del nombre:
+  - en cualquier orden y sin importar tildes;
+  - sin importar plural ni género: se busca la raíz, sacando -es, -as, -os, -a, -o o -s si quedan al menos 4 letras. Así "enfermera" encuentra "enfermería" y "desarrolladores" encuentra "Desarrollador/a".
+  
+  Un número de hasta 4 dígitos es un código CIUO. La regla está en `app/core/search.py` y, igual, en el frontend (`src/lib/utils/search.ts`).
+- **Nombres locales de ocupaciones** (`config/reference/ocupaciones_nombres_locales.yaml`). Son 251 palabras de Argentina, Chile y Uruguay que no están en la CIUO ni en ESCO (escrito en español de España), con su código CIUO-08: remisero, gasfíter, colectivero, patovica… Algunas puntualizaciones:
+  - cada código se eligió según la definición de ISCO-08 Vol. 1 (OIT, 2012), y si ESCO asigna otro grupo, manda ISCO-08;
+  - una palabra puede tener otro sentido en otro país: "colectivero" es chofer de bus en Argentina (8331) y de taxi compartido en Chile (8322);
+  - `also` agrega otros grupos posibles.
+  
+  Revisado y aprobado por Paula Vergara el 2026-11-01. Una búsqueda que coincide con un nombre local devuelve también su ocupación.
 - **Países:** códigos ISO3 (ARG, URY, CHL).
 - **Períodos:** cada dato se guarda en su frecuencia original, con fecha de inicio, fecha de fin y frecuencia (A, Q, M). No se transforma la frecuencia al guardar.
 - **Tipo de dato:** cada valor es `observed` (de la fuente), `calculated` (lo calcula la plataforma) o `projected` (proyección). La API lo devuelve con su etiqueta.
@@ -402,6 +470,13 @@ puntaje), y así se aplica el signo negativo.
 | Tasa de inserción | 25 % | Sin fuente todavía | — | % | 0 a 100 % | Sin datos |
 | Riesgo de automatización | 15 % (se invierte) | `genai_exposure` (OIT WP 140) | Valor de la tabla | Índice 0 a 1 | 0 a 1 | 0,09 a 0,70 |
 
+**Salario que se muestra.** Las pantallas muestran primero el salario en dólares al tipo de cambio
+de mercado (`mean_monthly_earnings_usd`, ILOSTAT `CUR_TYPE_USD`) y debajo el valor en USD PPA. El
+ISE sigue usando USD PPA, porque corrige las diferencias de precios entre países y permite comparar
+poder de compra. El valor en USD es el del mismo país, grupo CIUO y año que usó el índice; si
+ILOSTAT no lo publica para ese año, se muestra solo el de USD PPA. Se configura en
+`app.yaml → employability.display_values`.
+
 **Tasa de inserción: sin fuente oficial todavía.**
 - **Chile:** Mi Futuro (SIES, MINEDUC) calcula la empleabilidad al 1.er y 2.º año por carrera
   genérica y tipo de institución, con datos del SII
@@ -470,7 +545,29 @@ Configuración: `analytics.yaml → skill_gaps` (versión 0.2).
 - **Cuándo se calcula:** solo si las ocupaciones con datos de oferta suman al menos `min_supply_coverage` (30 %) del peso de la habilidad. Si no, "Datos insuficientes".
 - **Emergente:** una habilidad cuya demanda crece más de `emerging_growth` (10 %) por año.
 
-**Correspondencia carrera → ocupación** (`config/reference/carreras_chile_ciuo.yaml`, `carreras_argentina_ciuo.yaml` y `carreras_uruguay_ciuo.yaml`; criterios, cómo revisarla y scripts en [`data/scripts/referencias/README.md`](../data/scripts/referencias/README.md)):
+**Correspondencia carrera → ocupación, desde v0.2 a través de la CINE-F 2013** (criterios, cómo
+revisarla y scripts en [`data/scripts/referencias/README.md`](../data/scripts/referencias/README.md)):
+- **Dos clasificaciones distintas:** la CIUO-08 clasifica **ocupaciones** (lo que se hace en el
+  trabajo) y la CINE-F 2013 de la UNESCO clasifica **campos de estudio** (lo que se estudió). Los datos
+  laborales (ILOSTAT, SIMEL, encuestas de hogares), las habilidades (ESCO) y el ISE están por
+  ocupación, así que la CIUO-08 se mantiene. La CINE-F se usa solo para las carreras.
+- **Ruta:** carrera → campo detallado CINE-F (`config/reference/carreras_<país>_cine.yaml`) →
+  ocupaciones, con **una tabla común a los tres países** (`config/reference/cine_f_ciuo.yaml`). Cada
+  campo tiene ocupaciones para carreras universitarias y profesionales (`"*"`) y, si difieren, para
+  carreras técnicas (`tecnico`). Una carrera es técnica por su nombre (técnico, tecnólogo,
+  tecnicatura…) o por su nivel (en Argentina, Pregrado).
+- **Clasificación:** los 99 campos detallados de la CINE-F 2013 (`config/reference/cine_f_2013.yaml`),
+  con los nombres de la versión internacional de la UNESCO publicados por el DANE (Colombia),
+  [CINE-F 2013 A.C., §7.1](https://www.dane.gov.co/files/noticias/CINE/cine-2013/Documento-CINE-F-2013-AC.pdf).
+- **Asignación del campo:** reglas por nombre de carrera, compartidas por los tres países
+  (`data/scripts/referencias/reglas_carreras_cine.yaml`). Tienen campo el 98,3 % de los titulados de
+  Chile, el 98,5 % de Argentina y el 100 % de Uruguay. En Chile se controla contra el campo
+  específico que publica Mi Futuro: coinciden todas las carreras salvo cuatro, anotadas para revisar.
+- **Comparación con v0.1** (correspondencia directa por país): las brechas se parecen
+  (correlación 0,66 en Argentina, 0,72 en Chile y 0,81 en Uruguay). Argentina cambia más porque
+  cada disciplina pasa por un solo campo. Los resultados de v0.1 se conservan.
+
+**Correspondencias directas carrera → ocupación (hasta v0.1, se conservan para comparar):**
 - Las 277 carreras genéricas de Chile llevan a grupos CIUO-08: 252 con ocupación y 25 categorías genéricas sin ocupación ("Otros…", "Bachillerato…", plan común).
 - **Es un borrador escrito por profesión, sin revisar** (`reviewed: false`). No existe una correspondencia oficial.
 - Argentina: 37 disciplinas. Como una disciplina es amplia, casi todas llevan a varias ocupaciones. Una fila puede tener códigos distintos por nivel: `{Pregrado: [...], "*": [...]}`, donde `"*"` vale para los demás niveles (por ejemplo, Informática de pregrado lleva a técnicos 351x y la de grado a profesionales 251x). "Otras Ciencias Aplicadas" y "Otras Ciencias Sociales" quedan sin ocupación.
@@ -494,7 +591,135 @@ Configuración: `analytics.yaml → skill_gaps` (versión 0.2).
 
 ---
 
-## 7. Alertas
+## 7. Indicadores temáticos
+
+Indicadores que cuentan una idea con una analogía histórica o literaria. Todos se calculan con los
+mismos datos y correspondencias que el ISE y las brechas, guardan su metodología con parámetros
+(`GET /methodologies/{tipo}`) y conservan los resultados de cada año y versión. Los textos que
+explican cada gráfico se arman en el frontend con esos parámetros y los datos, así que si cambian
+los datos o la configuración el texto cambia con ellos.
+
+**Motor común de dos lados** (`app/analytics/moctezuma.py → compute_two_sided_index`), usado por
+Moctezuma, Ludita y Sísifo:
+- Cada dimensión se escala de 0 a 100 entre todas las ocupaciones (o grupos) de los 3 países en el
+  mismo año (min-max). Si todas valen lo mismo, `flat_cohort_score` (50).
+- Cada lado es el promedio ponderado de sus dimensiones con datos.
+- Indicador = peso₁ · Lado₁ + peso₂ · (100 − Lado₂) (`side_weights`, hoy 0,5 y 0,5). 50 es equilibrio.
+- Solo se calcula si cada lado tiene datos para al menos `min_side_coverage` (50 %) de su peso.
+- Niveles: bajo por debajo de `levels.low` (40), alto por encima de `levels.high` (60).
+- Es un puntaje relativo al grupo comparado, no una medida absoluta.
+
+### 7.1 Indicador Moctezuma
+
+Configuración: `analytics.yaml → moctezuma` (versión 0.1); textos: `app.yaml → moctezuma`; serie
+histórica: `config/reference/moctezuma_history.yaml`. Tabla `moctezuma_scores`.
+
+- **Qué mide:** la asimetría entre el ritmo con que llega el cambio tecnológico a una ocupación y la
+  capacidad de respuesta para incorporarlo.
+- **Ritmo:** exposición a la IA generativa (OIT, 2025) y crecimiento anual de la población que usa
+  internet en el país (`internet_users`).
+- **Capacidad de respuesta:** crecimiento de los titulados de las carreras que forman para la
+  ocupación, subcalificación del gran grupo (en contra) y matrícula bruta en educación superior.
+- **Años:** desde 2018, con datos de hasta `max_age_years` (5) años de antigüedad.
+- **Referencia histórica:** la población del centro de México de 1518 a 1568 (Cook y Borah, con la
+  alternativa de Rosenblat), con los hitos de 1519 (llegada de Cortés), 1520 (viruela), 1521 (caída de
+  Tenochtitlan) y 1531 (sarampión), y el primer dato después de la conquista (1532). Cada valor y
+  cada hito citan su fuente en el archivo.
+- **Limitación:** la exposición a la IA es una foto fija, así que el ritmo cambia en el tiempo solo
+  por la digitalización.
+
+### 7.2 Indicador Ludita
+
+Configuración: `analytics.yaml → ludita` (versión 0.1); textos: `app.yaml → ludita`; casos
+históricos: `config/reference/ludita_history.yaml`. Tabla `ludita_scores` (migración 0022).
+
+- **Qué mide:** cuánto se parece hoy una ocupación al camino de los oficios que la tecnología
+  desplazó.
+- **Exposición:** exposición a la IA generativa (OIT, 2025).
+- **Vitalidad:** crecimiento anual promedio del empleo del grupo en 3 años (sin 2020 ni 2021, base
+  mínima 10 mil) y de los titulados (base mínima 30).
+- **Indicador** = 0,5 · Exposición + 0,5 · (100 − Vitalidad). Desde 2018.
+- **Camino** (con los valores sin escalar, para que signifique lo mismo todos los años; `paths`):
+  - expuesta (exposición ≥ 0,40, donde empiezan los gradientes 2 a 4 de la OIT) y el mercado se
+    retira (crecimiento promedio < 0): **camino del tejedor**;
+  - expuesta y el mercado crece: **camino del cajero de banco**;
+  - poco expuesta y se achica: **otras causas**;
+  - poco expuesta y crece: **fuera del alcance, por ahora**.
+- **Casos históricos** (empleo con base 100 en el año de llegada de la tecnología): tejedores
+  manuales en Inglaterra (Wood 1910, vía Acemoglu y Johnson 2024; telar mecánico, 1813), operadoras
+  telefónicas en EE. UU. (Richmond Fed; discado automático, 1921) y cajeros de banco en EE. UU. (BLS y
+  Bessen; cajero automático, 1970). Hoy se compara con la IA generativa (2022) en el gran grupo 4.
+- **Limitaciones:** la exposición es una foto fija; el empleo es del grupo de 2 dígitos (1 en
+  Chile); 3 años después de la IA generativa son pocos para hablar de desplazamiento.
+
+### 7.3 Indicador Reina Roja
+
+Configuración: `analytics.yaml → red_queen` (versión 0.1). Fuentes: versiones de O*NET y ESCO
+(sección 1.1). Tablas `skill_profiles` y `red_queen_scores` (migración 0023).
+
+- **Qué mide:** cuánto tiene que actualizarse una ocupación solo para no quedarse atrás.
+- **Perfil:** las tecnologías de O*NET o las habilidades de ESCO de la ocupación en cada versión.
+  Perfiles con menos de `min_items` (20) elementos no se usan.
+- **Comparación:** cada año, la última versión publicada hasta ese año contra la última de al menos
+  `window_years` (3) años antes (como mínimo `min_years`, 1). Desde 2022.
+- **Renombres:** un nombre que solo cambia de forma (se agrega o quita el fabricante o una palabra,
+  con al menos `rename_min_chars` = 5 letras) cuenta como el mismo elemento; en ESCO, una habilidad con
+  el mismo nombre y código nuevo también.
+- **Puntaje: novedades por año**, los elementos nuevos divididos por los años entre versiones,
+  escalados de 0 a 100 por fuente; el indicador es el promedio de las dos fuentes con dato. Se eligió
+  frente al recambio relativo, que favorecía a los perfiles chicos.
+- **Se muestran al lado:** el recambio (distancia de Jaccard, anualizada) y la vida media del perfil
+  (años hasta compartir solo la mitad, con tope `half_life_cap` = 50), y las listas completas de lo
+  que entró y salió.
+- **Filtro por carrera:** con `country` y `career`, solo las ocupaciones a las que lleva la carrera
+  (la misma correspondencia CINE-F de las brechas).
+- **Sesgo y limitaciones:** los perfiles grandes suman más novedades; O*NET es de EE. UU. y no
+  revisa todas las ocupaciones en cada versión; ESCO refleja revisiones de expertos; no varía por
+  país; un cambio puede ser una corrección de la clasificación.
+
+### 7.4 Indicador Sísifo
+
+Configuración: `analytics.yaml → sisyphus` (versión 0.1); textos: `app.yaml → sisyphus`;
+definiciones de los grandes grupos: `config/reference/isco08_groups.yaml` (OIT, CIUO-08 vol. 1). Se
+calcula al consultar (son pocos grupos), no se guarda en una tabla.
+
+- **Qué mide:** dónde estudiar más no rinde, por gran grupo CIUO-08 (1 dígito), país y año.
+- **La piedra:** sobreeducación del grupo (OIT, enfoque normativo). Los grupos 1 a 3 piden el nivel
+  más alto, no pueden estar sobreeducados y quedan afuera.
+- **La recompensa:** ingreso medio del grupo / ingreso medio con educación superior en el país ese
+  año (los dos en USD PPA). Se muestran también en USD.
+- **Indicador** = 0,5 · Piedra + 0,5 · (100 − Recompensa). Desde 2015, con datos de hasta 2 años de
+  antigüedad.
+- **Cuadrante** (valores sin escalar): sobreeducado desde 20 %, mal pago debajo de 0,5.
+- **Por país:** proporción de ocupados con educación superior en grupos que no la piden (tabla del
+  desajuste educación-ocupación) y prima salarial (ingreso con superior / con secundaria − 1).
+- **Limitación:** la OIT no publica ingresos por educación dentro de cada ocupación; la recompensa
+  compara el promedio del grupo con el de los graduados.
+
+### 7.5 Brecha generacional
+
+Configuración: `app.yaml → generational_gap` (indicadores que se comparan, textos y la frase
+destacada).
+
+- **Brecha** = desocupación de 15 a 24 años (`youth_unemployment_rate_survey`) / desocupación total
+  (`unemployment_rate`), por país y año, solo en los años con las dos tasas. Las dos salen de las
+  mismas encuestas de hogares (ILOSTAT). 1 es no tener brecha.
+- **2025:** Uruguay 3,3 (24,4 % frente a 7,3 %), Argentina 2,6 y Chile 2,5.
+
+### 7.6 Ocupaciones en movimiento (burbujas de Tendencias)
+
+Configuración: `app.yaml → motion`. Se calcula al consultar.
+
+- Cada burbuja es un gran grupo (1 dígito) en un país y un año, desde 2015.
+- **Eje horizontal:** ingreso mensual promedio en USD (escala logarítmica), con el valor en USD PPA
+  en el detalle. **Tamaño:** ocupados.
+- **Eje vertical, a elegir:** crecimiento del empleo respecto del año anterior (base mínima 30 mil),
+  exposición a la IA o ISE promedio del grupo.
+- Si a un grupo le falta un año, se repite el último valor hasta `max_carry_years` (1) año.
+
+---
+
+## 8. Alertas
 
 Configuración: `analytics.yaml → alerts`; etiquetas: `app.yaml → alerts`. Se evalúan después de cada
 actualización, para los indicadores que cambiaron.
@@ -515,9 +740,9 @@ actualización, para los indicadores que cambiaron.
 
 ---
 
-## 8. Configuración y API
+## 9. Configuración y API
 
-### 8.1 Variables de entorno (`backend/.env`)
+### 9.1 Variables de entorno (`backend/.env`)
 
 | Variable | Uso |
 |---|---|
@@ -526,12 +751,15 @@ actualización, para los indicadores que cambiaron.
 | `DATABASE_CONNECT_TIMEOUT` | Segundos de espera al conectar (5) |
 | `CORS_ORIGINS` | Orígenes del frontend, por ejemplo `["http://localhost:3010"]` |
 | `ADMIN_API_KEY` | Clave para los endpoints de administración (header `X-API-Key`) |
+| `AUTH_SECRET` | Firma las sesiones de los usuarios; vacío = nadie puede iniciar sesión |
+| `ANTHROPIC_API_KEY` | Asistente con `provider: anthropic` |
+| `ASSISTANT_LOCAL_API_KEY` | Asistente con `provider: local`, solo si el servidor del modelo pide una clave |
 | `BCENTRAL_USER`, `BCENTRAL_PASSWORD` | Para el futuro conector del Banco Central de Chile |
 | `CONFIG_DIR` | Opcional: otra carpeta de archivos YAML |
 
 Ninguna fuente activa necesita credenciales. Las de Banco Central de Chile van solo en `.env`.
 
-### 8.2 Puesta en marcha y actualización
+### 9.2 Puesta en marcha y actualización
 
 Desde `backend/backend`, con el entorno virtual activo:
 
@@ -547,7 +775,7 @@ python -m app.jobs.scheduler --list     # qué corre y cuándo
 uvicorn app.main:app --reload --port 8010
 ```
 
-### 8.3 Endpoints (prefijo `/api/v1`)
+### 9.3 Endpoints (prefijo `/api/v1`)
 
 Documentación interactiva: http://localhost:8010/docs. Explorer (herramienta de desarrollo):
 http://localhost:8010/explorer.
@@ -561,28 +789,55 @@ http://localhost:8010/explorer.
 | `GET /dashboard/summary?country=` | Tarjetas de Inicio |
 | `GET /trends?indicator=&domain=&country=&from_year=&to_year=&state=` | Estado de tendencia y valoración |
 | `GET /projections?indicator=&country=&from_year=` | Serie observada más la proyección con intervalo |
-| `GET /methodologies/{trend\|projection\|employability_index}` | Texto y parámetros de cada metodología |
+| `GET /methodologies/{trend\|projection\|employability_index\|moctezuma_index\|ludita_index\|red_queen_index\|sisyphus_index}` | Texto y parámetros de cada metodología |
 | `GET /employability` | ISE. Parámetros: `view=top\|bottom\|all`, `sort_by=score\|net_demand\|salary_ppp\|insertion_rate\|automation_risk\|coverage\|occupation\|isco\|country`, `order=asc\|desc`, `country`, `sector`, `featured`, `q`, `year`, `limit`, `offset`. Devuelve también `dimension_ranges`. |
 | `GET /employability/history?occupation=&country=` | Evolución del ISE |
 | `GET /occupations/{código CIUO}` | Perfil: grupos usados, ISE por país, últimos valores |
 | `GET /alerts?country=&severity=&alert_type=&indicator=&sector=&occupation=&unread=` | Panel de alertas, con `unread` (para la campana) y `by_severity` |
 | `PATCH /alerts/{id}`, `POST /alerts/read-all` | Marcar como leídas (requiere `X-API-Key`) |
-| `GET /datasets/profiles` | Archivos que la plataforma sabe leer y el formato esperado |
+| `GET /datasets/profiles` | Archivos que la plataforma sabe leer y el formato esperado (`has_template`, `example_files`) |
+| `GET /datasets/profiles/{código}/template?format=xlsx\|csv` · `/datasets/profiles/{código}/examples/{nombre}` | Plantilla para completar y archivos de ejemplo |
 | `GET /datasets?origin=download\|upload`, `/datasets/{id}` | Historial de archivos leídos y su reporte de validación |
-| `POST /datasets/upload` (multipart: `file`, `profile`, `declared_source_name`, `declared_source_url`, `reference_date`) | Validar un archivo (requiere `X-API-Key`) |
-| `POST /datasets/{id}/commit` | Cargar un archivo validado (requiere `X-API-Key`) |
+| `POST /datasets/upload` (multipart: `file`, `profile`, `declared_source_name`, `declared_source_url`, `reference_date`) | Validar un archivo (permiso `manage_data` o `X-API-Key`). Reporte con errores agrupados (`groups`) y choques con datos oficiales (`overlaps`) |
+| `POST /datasets/{id}/commit` con `{"confirm_overlap": true}` si hace falta | Cargar un archivo validado (permiso `manage_data` o `X-API-Key`) |
 | `GET /occupations/{código}/skills?skill_type=&limit=` | Habilidades de una ocupación (ESCO), con peso y fuente |
 | `GET /skills?q=&skill_type=` · `GET /skills/{código}` | Buscar habilidades y ver qué ocupaciones las usan |
 | `GET /skills/gaps?country=&view=top\|bottom\|all&sort_by=gap\|demand_growth\|supply_growth\|occupations&order=&min_occupations=&emerging=&q=` | Brechas de habilidades, con estado de la correspondencia carrera → ocupación |
+| `GET /moctezuma?country=&sector=&featured=&year=&view=&limit=&offset=` | Indicador Moctezuma por ocupación, con `available_years`, lados y rangos |
+| `GET /moctezuma/countries`, `/moctezuma/history?occupation=&country=`, `/moctezuma/reference` | Promedio por país y año, evolución de una ocupación y la serie histórica de 1518–1568 |
+| `GET /ludita?country=&sector=&featured=&path=weaver\|teller\|other_causes\|out_of_reach&year=&view=` | Indicador Ludita y camino de cada ocupación |
+| `GET /ludita/countries`, `/ludita/history?country=` | Promedio y caminos por país y año; casos históricos frente a hoy |
+| `GET /red-queen?year=&country=&career=&featured=&view=&limit=&offset=` | Indicador Reina Roja, con lo que entró y salió de cada perfil |
+| `GET /red-queen/years`, `/red-queen/careers?country=` | Medianas por año; carreras para el filtro |
+| `GET /sisyphus?country=&year=`, `/sisyphus/countries?country=` | Indicador Sísifo por gran grupo; vista por país |
+| `GET /generational-gap?country=` | Brecha generacional por país y año |
+| `GET /occupation-groups/motion?y=growth\|ai_exposure\|employability&country=` | Burbujas de Tendencias |
 | `GET /sources`, `/sources/{code}/runs` | Estado de las fuentes e historial de actualizaciones |
 | `POST /sources/{code}/refresh` | Actualiza una fuente (requiere `X-API-Key`) |
+| `POST /auth/login`, `GET /auth/me`, `/users` | Inicio de sesión y usuarios (roles en `app.yaml → auth`) |
+| `GET /assistant` · `POST /assistant/ask` | Asistente: estado y textos; preguntar (con sesión). Ver 8.4 |
 
 Cada valor que devuelve la API incluye `source`, `source_updated_at`, `fetched_at`, `data_type` y,
 cuando corresponde, `methodology_id`.
 
+### 8.4 Asistente: de dónde salen las respuestas
+
+El asistente ("Baqueano") solo usa datos del observatorio. Responde de dos maneras:
+
+1. **Por plantilla, sin modelo** (`app.yaml → assistant.scripted`). Es para las preguntas frecuentes: salario, empleabilidad o habilidades de una ocupación, ranking y sectores de un país, y cómo se calcula el ISE.
+   - **Cómo reconoce la pregunta.** El tipo sale de palabras clave. La ocupación, de un código, un nombre o un nombre local. El país, de su nombre o de la página que se está mirando.
+   - **De dónde salen los números.** Se copian de los mismos endpoints que usan las pantallas. Las plantillas agregan las aclaraciones que corresponden: por ejemplo, que un salario es el promedio del gran grupo CIUO cuando la fuente no lo publica para la ocupación sola.
+   - **Ambigüedad y límite.** Si hay varias ocupaciones posibles, ofrece elegir. No cuentan para el límite diario.
+2. **Con un modelo**, para lo demás. Por defecto es un modelo abierto local (Ollama, `qwen2.5:7b-instruct`); también puede ser Claude.
+   - **Qué puede consultar.** Solo los endpoints de lectura de `assistant.tools`. Solo puede usar códigos CIUO que salieron de la búsqueda, de la pregunta o de la página.
+   - **Chequeo de números.** Todo número de la respuesta tiene que estar en los datos consultados, con una tolerancia de 0,5 %; una proporción también vale como porcentaje. Si no está, la respuesta se reemplaza por un aviso (`numbers_check.on_unverified: block`).
+   - **Límites.** 30 preguntas por persona por día y 500 en total.
+
+Cada pregunta queda en `assistant_logs`: pregunta, contexto, consultas, respuesta, números no verificados, tokens y tiempo. Esos registros no se editan. Limitación conocida: una afirmación sin números ("tiene un ISE alto") no se puede verificar así.
+
 ---
 
-## 9. Pendientes
+## 10. Pendientes
 
 - **Scheduler en el despliegue:** como proceso aparte o como cron de Render/Railway.
 - **Más perfiles de archivos oficiales:** ECH (INE Uruguay), ANEP, SABE.
@@ -591,3 +846,11 @@ cuando corresponde, `methodology_id`.
 - **Revisar la correspondencia carrera → ocupación de Chile** (`reviewed: false`) antes de publicar brechas: ver [`pendientes_analytics.md`](pendientes_analytics.md).
 - **Uruguay, más formación:** sumar la formación docente (ANEP, hoja II-6.2.1 del mismo anuario) y la terciaria no universitaria.
 - **Revisar exclusiones dudosas:** por ejemplo 9624 (acarreadores de agua y recolectores de leña), hoy incluida.
+- **Carga manual, segunda etapa:** retirar una carga sin borrarla y marcar en las pantallas los datos de carga manual.
+- **Asistente:** elegir el modelo para lo que no cubren las plantillas (el de 7B local no siempre completa la búsqueda y la consulta) y sumar plantillas para las preguntas que más llegan al modelo (`assistant_logs`).
+- **Búsqueda por significado:** entrenar y evaluar el modelo de `backend/ml/occupation_match/` (frase → código CIUO) y conectarlo al buscador.
+- **Indicadores temáticos:**
+  - Moctezuma y Ludita: falta una serie de adopción de IA por país, para que el ritmo y la exposición
+    cambien en el tiempo.
+  - Moctezuma: evaluar límites fijos para las dimensiones nacionales en lugar del min-max del año.
+  - Reina Roja: corregir el sesgo por tamaño del perfil de O*NET.

@@ -140,6 +140,21 @@ def test_country_and_legacy_pais_are_equivalent(client):
     assert proj and all(p["pais"] == "chile" for p in proj)
 
 
+def test_jobs_competition_median_and_cap(monkeypatch):
+    """Median applicants per posting; LinkedIn's "200+" is counted apart; small sectors get none."""
+    from app.api.v1.jobs import _competition
+    from app.core.config_files import app_config
+
+    view = app_config().jobs_view
+    monkeypatch.setattr(view, "competition_min_postings", 3)
+    c = _competition("Energía", [10, 50, view.applicants_cap, view.applicants_cap, None])
+    assert (c.ofertas, c.con_postulantes) == (5, 4)
+    assert c.mediana_postulantes == (50 + view.applicants_cap) / 2
+    assert c.en_tope == 0.5
+    small = _competition("Salud", [10, 20])
+    assert small.mediana_postulantes is None and small.en_tope is None
+
+
 def test_analytics_densidad_profesional_enfoques(client):
     # Enfoque regional comun: solo anios de la ventana armonizada (2022 presente, 2025 excluido)
     r_reg = client.get("/api/v1/analytics/densidad-profesional", params={"enfoque": "regional_comun"}).json()
@@ -224,6 +239,3 @@ def test_analytics_habilidades_filtros(client):
     assert "Microservicios" in dev["habilidades_emergentes_sector"] or "microservicios" in dev["habilidades_emergentes_sector"]
     assert "Scrum" in dev["habilidades_transversales_humanas"]
     assert dev["oit_gradiente"] == "Gradient 3"
-
-
-

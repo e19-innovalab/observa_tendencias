@@ -8,8 +8,8 @@ employability:
     Índice orientativo por ocupación: ISE = 0,35·Demanda neta + 0,25·Salario PPA +
     0,25·Tasa de inserción − 0,15·Riesgo de automatización.
 
-    Cada dimensión se escala de 0 a 100 dentro del grupo comparado (las 20 ocupaciones de los
-    3 países, para que los puntajes sean comparables entre países). En el riesgo de
+    Cada dimensión se escala de 0 a 100 dentro del grupo comparado (todas las ocupaciones de
+    los 3 países en el mismo año, para que los puntajes sean comparables entre países). En el riesgo de
     automatización la escala se invierte, que es como se aplica la penalización.
 
     Demanda neta: crecimiento anual promedio del empleo del grupo ocupacional en los últimos
@@ -123,7 +123,9 @@ projections:
     prolonga en línea recta la tendencia actual.
 
     4. Intervalo: valor ± ci_z × σ × √h, donde σ es el desvío de los errores del modelo sobre la
-    historia. Se ensancha con √h: cuanto más lejos, más incertidumbre.
+    historia. Se ensancha con √h: cuanto más lejos, más incertidumbre. El valor y el intervalo
+    se recortan a los valores posibles del indicador (indicators.yaml -> value_range): por
+    ejemplo, una tasa nunca se proyecta por debajo de 0 % ni por encima de 100 %.
 
     Se proyectan horizon períodos en la frecuencia de la serie (años, trimestres o meses). Con
     menos de min_points valores observados no se proyecta.
@@ -147,9 +149,22 @@ skill_gaps:
     ocupación (ESCO).
 
     Oferta de una habilidad: crecimiento de los titulados de las carreras que forman para esas
-    ocupaciones (Mi Futuro, pregrado), promediado con los mismos pesos. Una carrera que forma
-    para varias ocupaciones reparte sus titulados en partes iguales. La correspondencia carrera
-    → ocupación es un borrador sin revisar (config/reference/carreras_chile_ciuo.yaml).
+    ocupaciones (Chile: Mi Futuro, pregrado; Argentina: datos.gob.ar; Uruguay: anuarios del
+    MEC), promediado con los mismos pesos. Una carrera que forma para varias ocupaciones reparte
+    sus titulados en partes iguales. Cada carrera se clasifica en un campo de estudio de la
+    CINE-F 2013 (UNESCO) y cada campo se asocia a ocupaciones CIUO-08 con una tabla común a los
+    tres países; esa correspondencia es un borrador sin revisar (config/reference).
+
+    Argentina: los años que el archivo de Indicadores CTI todavía no tiene se completan con el
+    Anuario Estadístico del DIU (la misma información, publicada antes). El anuario no separa
+    pregrado de grado: se reparte con la proporción de cada disciplina en el último año del CTI
+    (una estimación hasta que el CTI publique ese año).
+
+    El crecimiento de la oferta compara el promedio de los primeros supply_smoothing_years de
+    la ventana con el de los últimos, no dos años sueltos. Si la serie de titulados de una
+    ocupación salta más de supply_max_jump veces de un año al siguiente dentro de la ventana, se
+    considera inestable y esa ocupación queda fuera de la oferta ese año (se informa con la
+    brecha).
 
     La ventana de la oferta (supply_window_years) no excluye 2020 y 2021: la exclusión de la
     demanda responde a la caída del empleo en la pandemia, que no tuvo un equivalente en las
@@ -159,7 +174,23 @@ skill_gaps:
     que la formación. Solo se calcula si las ocupaciones con datos de oferta suman al menos
     min_supply_coverage del peso de la habilidad; si no, "datos insuficientes" (nunca se inventa
     una brecha). Una habilidad es emergente si su demanda crece más que emerging_growth por año.
+
+    Grupos de habilidades: ESCO divide un mismo tema en muchas habilidades casi iguales (por
+    ejemplo "preparar estados financieros" y "realizar informes estadísticos y financieros").
+    También se calcula la brecha de cada grupo de la jerarquía de ESCO (nivel group_level; los
+    conocimientos siguen los campos CINE-F), con el mismo método sobre todas las ocupaciones que
+    usan alguna habilidad del grupo. En cada ocupación el grupo pesa lo que su habilidad más
+    fuerte (no la suma), para que las habilidades repetidas no inflen el resultado.
   emerging_growth: 0.10
+  # Gaps are also computed per ESCO skill group, at this level of the hierarchy (3: S2.2.1
+  # "preparar documentos, registros, informes o presupuestos financieros", or a CINE-F detailed
+  # field such as 0412 for knowledge). ESCO splits topics into many near-identical skills; the
+  # group joins them. In each occupation a group weighs as its strongest skill (not their sum).
+  group_level: 3
+  # Gaps are computed for the latest year with demand and supply data and for this many years
+  # in total going back (each year with the data available up to that year), so they can be
+  # compared over time. Years without enough data simply get fewer gaps.
+  history_years: 5
   # Demand growth window: same as the ISE's net demand (years, excluded years).
   window_years: 3
   exclude_years: [2020, 2021]
@@ -170,15 +201,374 @@ skill_gaps:
   supply_exclude_years: []
   # Minimum graduates per occupation at the start of the window to compute its supply growth.
   min_supply_base: 30
+  # Supply growth compares the average of the first supply_smoothing_years of the window with
+  # the average of the last ones (not two single years), so a one-off spike does not decide it.
+  supply_smoothing_years: 2
+  # A graduates series that jumps more than this factor from one year to the next inside the
+  # window (e.g. Argentina, Medicina pregrado: 58 -> 645 -> 194) is unstable: that occupation is
+  # left out of the supply side for that year and listed with the gap ("serie inestable").
+  supply_max_jump: 3.0
   # Share of the skill's total weight that must have supply data to report a gap.
   min_supply_coverage: 0.3
-  # Supply data by country: crosswalk files in config/reference (career -> ISCO).
+  # Supply data by country: crosswalk files in config/reference. Since v0.2 each career gets a
+  # CINE-F 2013 field (carreras_<país>_cine.yaml) and reaches occupations through one table
+  # shared by the three countries (cine_f_ciuo.yaml). The direct career -> CIUO files used until
+  # v0.1 (carreras_chile_ciuo.yaml, carreras_argentina_ciuo.yaml, carreras_uruguay_ciuo.yaml) are
+  # kept for comparison; pointing a country back to one of them restores the old behaviour.
   crosswalks:
-    CHL: reference/carreras_chile_ciuo.yaml
-    ARG: reference/carreras_argentina_ciuo.yaml
-    URY: reference/carreras_uruguay_ciuo.yaml
+    CHL: reference/carreras_chl_cine.yaml
+    ARG: reference/carreras_arg_cine.yaml
+    URY: reference/carreras_ury_cine.yaml
+  # Extra graduate sources per country, used only for the years the crosswalk's own source does
+  # not have yet (the DIU yearbook comes out before the CTI file). combined_level: the level the
+  # supplement uses for several levels together; it is split into the crosswalk's levels with
+  # each career's shares in the latest year of the main source that has them (an estimate).
+  supply_supplements:
+    ARG: {profile: arg_anuario_diu_egresados, combined_level: Pregrado y grado}
   # Gap above this many percentage points is a "high" gap (used by the new_skill_gap alert).
   high_gap_points: 3.0
+
+moctezuma:
+  version: "0.1"
+  name: Indicador Moctezuma
+  description: >-
+    Mide la asimetría de cada ocupación entre el ritmo con que llega el cambio tecnológico y la
+    capacidad de respuesta de la sociedad para incorporarlo. El nombre alude al encuentro de
+    1519 entre Moctezuma y los europeos, el ejemplo clásico de una tecnología que llega mucho
+    más rápido de lo que una sociedad puede incorporarla; la analogía es sobre ese desfase, no
+    un juicio sobre las culturas.
+
+    Ritmo del cambio: exposición de las tareas de la ocupación a la IA generativa (OIT, 2025) y
+    velocidad de digitalización del país (crecimiento anual promedio de la población que usa
+    internet).
+
+    Capacidad de respuesta: crecimiento de los titulados de las carreras que forman para la
+    ocupación (los mismos datos y correspondencias que las brechas de habilidades), ajuste
+    educativo de quienes ya trabajan en ella (subcalificación del gran grupo ocupacional, en
+    contra) y base educativa del país (matrícula bruta en educación superior).
+
+    Cada dimensión se escala de 0 a 100 dentro del grupo comparado (todas las ocupaciones de los
+    3 países en el mismo año); en las dimensiones donde un valor bajo indica más ritmo o más
+    capacidad la escala se invierte. Ritmo y Capacidad son el promedio ponderado de sus
+    dimensiones con datos (dimension weights, relativos dentro de cada lado).
+
+    Indicador = side_weights.pace · Ritmo + side_weights.readiness · (100 − Capacidad).
+    50 es equilibrio: el ritmo del cambio y la capacidad de respuesta están parejos. Por encima
+    de 50 el cambio va más rápido que la respuesta; 100 sería el ritmo más alto con la menor
+    capacidad del grupo. Es un puntaje relativo al grupo comparado, no una medida absoluta.
+    Niveles: Baja por debajo de levels.low, Alta por encima de levels.high, Media en el medio.
+
+    Solo se calcula si cada lado tiene datos para al menos min_side_coverage de su peso: sin
+    alguno de los dos lados no hay asimetría que medir (Datos insuficientes).
+
+    Limitación: la exposición a la IA es una foto fija (no varía por año ni por país), así que
+    el ritmo cambia en el tiempo solo por la digitalización; falta una serie de adopción de IA
+    por país.
+  side_weights:
+    pace: 0.5
+    readiness: 0.5
+  # side: pace (ritmo del cambio) | readiness (capacidad de respuesta). weight: relative within
+  # the side. higher_is_more: true when a higher raw value means a faster pace (pace side) or
+  # more capacity (readiness side).
+  # scope: occupation (series by occupation) | country (national series, shared by every
+  # occupation of the country). indicator: graduates uses the graduates table through the
+  # skill_gaps crosswalks instead of an indicator. measure/window_years/exclude_years/min_base/
+  # applies_to_all_years: as in the employability dimensions.
+  dimensions:
+    ai_exposure:
+      side: pace
+      weight: 1
+      indicator: genai_exposure
+      scope: occupation
+      measure: latest
+      applies_to_all_years: true
+      higher_is_more: true
+    digital_diffusion:
+      side: pace
+      weight: 1
+      indicator: internet_users
+      scope: country
+      measure: growth
+      window_years: 3
+      exclude_years: []
+      higher_is_more: true
+    training_growth:
+      side: readiness
+      weight: 1
+      indicator: graduates
+      scope: occupation
+      measure: growth
+      # Same window and minimum base as the skill gaps' supply (skill_gaps section).
+      window_years: 3
+      exclude_years: []
+      min_base: 30
+      higher_is_more: true
+    education_fit:
+      side: readiness
+      weight: 1
+      indicator: undereducation_rate
+      scope: occupation
+      measure: latest
+      higher_is_more: false
+    tertiary_base:
+      side: readiness
+      weight: 1
+      indicator: tertiary_enrollment
+      scope: country
+      measure: latest
+      higher_is_more: true
+  max_age_years: 5
+  first_year: 2018
+  # all: one cohort for the 3 countries; country: each country scaled on its own.
+  cohort: all
+  min_side_coverage: 0.5
+  levels:
+    low: 40
+    high: 60
+  flat_cohort_score: 50.0
+  scale_max: 100.0
+
+ludita:
+  version: "0.1"
+  name: Indicador Ludita
+  description: >-
+    Mide cuánto se parece hoy cada ocupación al camino de los oficios que la tecnología
+    desplazó. El nombre alude a los luditas, los tejedores ingleses que entre 1811 y 1816
+    rompieron los telares mecánicos; la analogía es sobre el desplazamiento, no un juicio sobre
+    quienes se resisten al cambio.
+
+    Exposición: cuánto de las tareas de la ocupación puede hacer la IA generativa (OIT, 2025).
+
+    Vitalidad: si el mercado sigue apostando por la ocupación. Crecimiento anual promedio del
+    empleo del grupo ocupacional en los últimos 3 años (sin 2020 ni 2021, como en el ISE) y de
+    los titulados de las carreras que forman para ella (las mismas correspondencias que las
+    brechas de habilidades).
+
+    Cada dimensión se escala de 0 a 100 dentro del grupo comparado (todas las ocupaciones de los
+    3 países en el mismo año). Exposición y Vitalidad son el promedio ponderado de sus
+    dimensiones con datos.
+
+    Indicador = side_weights.exposure · Exposición + side_weights.vitality · (100 − Vitalidad).
+    50 es neutro. Por encima de 50 la ocupación está expuesta y el mercado se retira de ella,
+    como los tejedores manuales después del telar mecánico; por debajo, está menos expuesta o
+    el mercado sigue apostando por ella. Niveles: Bajo por debajo de levels.low, Alto por encima
+    de levels.high.
+
+    Camino: el cuadrante según los valores sin escalar, para que signifique lo mismo todos los
+    años. Expuesta es una exposición de al menos paths.exposed_from (donde empiezan los
+    gradientes 2 a 4 de la OIT); el mercado se retira cuando el crecimiento promedio del empleo
+    y de los titulados es menor que paths.retreat_below. Expuesta y el mercado se retira: camino
+    del tejedor (el oficio se achica). Expuesta y el mercado crece: camino del cajero de banco
+    (la tecnología cambia el trabajo pero el empleo crece, como los cajeros después del cajero
+    automático). Poco expuesta y se achica: otras causas. Poco expuesta y crece: fuera del
+    alcance, por ahora.
+
+    Limitaciones: la exposición es una foto fija (no varía por año ni por país); el empleo por
+    ocupación es del grupo de 2 dígitos (Argentina, Uruguay) o 1 dígito (Chile), así que las
+    ocupaciones de un grupo comparten esa señal; 3 años de datos después de la IA generativa
+    son muy pocos para hablar de desplazamiento.
+  sides: [exposure, vitality]
+  side_weights:
+    exposure: 0.5
+    vitality: 0.5
+  # As in the moctezuma section: side, weight within the side, indicator, scope, measure.
+  dimensions:
+    ai_exposure:
+      side: exposure
+      weight: 1
+      indicator: genai_exposure
+      scope: occupation
+      measure: latest
+      applies_to_all_years: true
+      higher_is_more: true
+    employment_growth:
+      side: vitality
+      weight: 1
+      indicator: employment
+      scope: occupation
+      measure: growth
+      # Same window, excluded years and minimum base as the ISE's net demand.
+      window_years: 3
+      exclude_years: [2020, 2021]
+      min_base: 10
+      higher_is_more: true
+    training_growth:
+      side: vitality
+      weight: 1
+      indicator: graduates
+      scope: occupation
+      measure: growth
+      window_years: 3
+      exclude_years: []
+      min_base: 30
+      higher_is_more: true
+  # Path (quadrant) of each scored occupation, on the raw values so it means the same every year:
+  # exposed when ai_exposure >= exposed_from (0.40 is where the ILO's gradients 2-4 start);
+  # the market moves away when the weighted mean growth of the vitality dimensions with data is
+  # below retreat_below (0: employment and training shrink on average).
+  paths:
+    exposure_dimension: ai_exposure
+    exposed_from: 0.40
+    retreat_below: 0.0
+  max_age_years: 5
+  first_year: 2018
+  cohort: all
+  min_side_coverage: 0.5
+  levels:
+    low: 40
+    high: 60
+  flat_cohort_score: 50.0
+  scale_max: 100.0
+
+red_queen:
+  version: "0.1"
+  name: Indicador Reina Roja
+  description: >-
+    Mide cuánto tiene que actualizarse una ocupación solo para no quedarse atrás: qué parte de lo
+    que se le pide cambia cada año. El nombre viene de Alicia a través del espejo, donde la Reina
+    Roja explica que hay que correr todo lo posible para quedarse en el mismo lugar.
+
+    Perfil de una ocupación en una versión: las tecnologías que lista O*NET (Technology Skills,
+    EE. UU., llevadas a CIUO-08 con el cruce ESCO–O*NET-SOC 2019) o las habilidades que le asigna
+    ESCO en esa versión.
+
+    Recambio entre dos versiones: 1 − (elementos en las dos / elementos en alguna), la distancia
+    de Jaccard. Se anualiza según los años entre versiones: si s = 1 − recambio es lo que se
+    mantiene, lo que se mantiene por año es s^(1/años) y el recambio anual es 1 − ese valor.
+
+    Vida media: años hasta que el perfil comparte solo la mitad con el de hoy,
+    ln(0,5) / ln(lo que se mantiene por año).
+
+    Cada año compara la última versión publicada hasta ese año con la última de al menos
+    window_years años antes y anualiza el recambio, para no depender de qué ocupaciones revisó
+    la fuente en una versión puntual. Los nombres que solo cambian de forma (se agrega o quita el
+    fabricante o una palabra) cuentan como el mismo elemento.
+
+    Puntaje: novedades por año, los elementos que entraron al perfil divididos por los años entre
+    versiones (lo que hay que aprender para no quedarse atrás). Cada fuente es una dimensión; sus
+    novedades por año se escalan de 0 a 100 entre las ocupaciones con dato ese año y el indicador
+    es el promedio ponderado de las dimensiones con dato. El recambio y la vida media se
+    muestran al lado: dicen qué parte del perfil cambia. Niveles: Baja por debajo de levels.low,
+    Alta por encima de levels.high.
+
+    Sesgo conocido: los perfiles grandes suman más novedades; en O*NET una ocupación CIUO puede
+    reunir varias ocupaciones de EE. UU. (el cruce ESCO–O*NET) y tener un perfil más grande.
+
+    Limitaciones: O*NET es de Estados Unidos y no actualiza todas las ocupaciones en cada
+    versión; ESCO refleja la revisión de expertos de la clasificación, no los avisos. No varía por
+    país. Los cambios de una versión pueden ser correcciones de la clasificación y no cambios
+    reales del trabajo.
+  # source: source_code in sources.yaml. weight: relative. min_items: profiles smaller than this
+  # in the earlier version are left out (a change of one item would read as a huge turnover).
+  dimensions:
+    technology_turnover:
+      source: onet_technology
+      weight: 1
+      min_items: 20
+    skill_turnover:
+      source: esco_versions
+      weight: 1
+      min_items: 20
+  # Each year compares the latest version published up to that year with the latest one at
+  # least window_years older (or the oldest there is, if at least min_years older), and annualizes
+  # the turnover: a single release can change little or a lot depending on which occupations the
+  # source revised that time.
+  window_years: 3
+  min_years: 1
+  # Two names count as the same item when one is contained in the other (a source adding or
+  # dropping the vendor or a word, "Confluence" -> "Atlassian Confluence"), if the shorter one has
+  # at least this many characters.
+  rename_min_chars: 5
+  # A pair of versions is used for a year until this many years after its later version.
+  max_age_years: 3
+  first_year: 2022
+  # Half-life above this many years is shown as "más de" (a profile that barely changes).
+  half_life_cap: 50
+  levels:
+    low: 40
+    high: 60
+  flat_cohort_score: 50.0
+  scale_max: 100.0
+  # Every added and removed item is stored; this many are shown before "ver más".
+  examples: 12
+
+sisyphus:
+  version: "0.1"
+  name: Indicador Sísifo
+  description: >-
+    Mide dónde estudiar más no rinde: grupos de ocupación donde mucha gente tiene más estudios de
+    los que pide el puesto y el puesto paga poco frente a lo que suele pagar un título. El nombre
+    viene de Sísifo, condenado a subir una piedra que siempre vuelve a caer.
+
+    La piedra: sobreeducación del gran grupo de ocupación (OIT, enfoque normativo: ocupados con
+    más educación de la que pide el grupo). Solo existe en los grupos que no piden el nivel más
+    alto (en la norma de la OIT, del 4 al 9).
+
+    La recompensa: ingreso medio del gran grupo dividido por el ingreso medio de quien tiene
+    educación superior en el país, ese año (los dos en USD PPA, OIT). Debajo de 1, el grupo paga
+    menos de lo que paga en promedio un título.
+
+    Cada dimensión se escala de 0 a 100 entre todos los grupos de los 3 países ese año. Indicador
+    = side_weights.stone · Piedra + side_weights.reward · (100 − Recompensa). Por encima de 50,
+    estudiar más rinde poco en ese grupo. Niveles: Bajo por debajo de levels.low, Alto por encima
+    de levels.high.
+
+    Cuadrante, con los valores sin escalar: sobreeducado desde quadrants.overeducated_from (%) y
+    mal pago debajo de quadrants.paid_below (ingreso del grupo / ingreso con educación superior).
+
+    Por país: la proporción de ocupados con educación superior que trabajan en un grupo que no la
+    pide, y la prima salarial (ingreso con educación superior / con secundaria − 1).
+
+    Limitaciones: la OIT no publica ingresos por educación dentro de cada ocupación: la
+    recompensa compara el promedio del grupo con el de los graduados, no lo que gana un graduado
+    en ese grupo. En el grupo 9 la norma pide solo primaria, así que cuenta como sobreeducado
+    cualquiera con secundaria.
+  sides: [stone, reward]
+  side_weights:
+    stone: 0.5
+    reward: 0.5
+  dimensions:
+    overeducation:
+      side: stone
+      weight: 1
+      indicator: overeducation_rate
+      scope: group
+      measure: latest
+      higher_is_more: true
+    earnings_vs_tertiary:
+      side: reward
+      weight: 1
+      indicator: mean_monthly_earnings_ppp
+      scope: group
+      measure: latest
+      # divided by this national series of the same country (latest value up to the same year)
+      relative_to: earnings_tertiary_ppp
+      higher_is_more: true
+  # Unit: ISCO-08 major group (overeducation and earnings by occupation are published by group).
+  group_digits: 1
+  # Groups whose required education is the highest band cannot be overeducated: left out.
+  requirements_file: reference/isco_education_requirements.yaml
+  # Shown next to the earnings: the same figures in USD (market rate), as everywhere else.
+  display:
+    group_earnings_usd: mean_monthly_earnings_usd
+    tertiary_usd: earnings_tertiary_usd
+    tertiary_ppp: earnings_tertiary_ppp
+    secondary_usd: earnings_secondary_usd
+    secondary_ppp: earnings_secondary_ppp
+  # Occupations listed as examples of each major group (featured ones first).
+  group_examples: 8
+  quadrants:
+    overeducated_from: 20
+    paid_below: 0.5
+  max_age_years: 2
+  first_year: 2015
+  cohort: all
+  min_side_coverage: 0.5
+  levels:
+    low: 40
+    high: 60
+  flat_cohort_score: 50.0
+  scale_max: 100.0
 
 alerts:
   version: "0.1"

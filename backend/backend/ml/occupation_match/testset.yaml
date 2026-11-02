@@ -1,0 +1,111 @@
+# Búsquedas de prueba: cómo escribe la gente un oficio (con palabras de Argentina, Chile y
+# Uruguay) y qué código CIUO-08 debería encontrar. "codes": respuestas aceptadas (la primera es
+# la principal). evaluate.py cuenta un acierto si alguno aparece en los primeros k resultados.
+#
+# STATUS: revisado y aprobado por Paula Vergara el 2026-11-01, contra la definición de cada
+# grupo en ISCO-08 Vol. 1 (OIT, 2012):
+#   https://webapps.ilo.org/ilostat-files/ISCO/newdocs-08-2021/ISCO-08/ISCO-08%20EN%20Vol%201.pdf
+# Donde ESCO asigna otro grupo a la misma palabra (p. ej. kinesiólogo → 2269 en ESCO), manda
+# ISCO-08. Primera versión: borrador del equipo del mismo día, con los mismos códigos.
+
+reviewed: true
+reviewed_by: Paula Vergara
+reviewed_on: 2026-11-01
+reference: ISCO-08 Vol. 1 (OIT, 2012)
+queries:
+  # Transporte
+  - {q: "chofer de camión", codes: ["8332"]}
+  - {q: "camionero", codes: ["8332"]}
+  - {q: "colectivero", codes: ["8331"], country: ARG}
+  - {q: "micrero", codes: ["8331"], country: CHL}
+  - {q: "taxista", codes: ["8322"]}
+  - {q: "remisero", codes: ["8322"], country: ARG}
+  - {q: "motoquero", codes: ["8321"], country: ARG}
+  - {q: "repartidor de delivery", codes: ["9621", "8321"]}
+  - {q: "cadete", codes: ["9621"]}
+  - {q: "maquinista de tren", codes: ["8311"]}
+  - {q: "piloto de avión", codes: ["3153"]}
+  - {q: "azafata", codes: ["5111"]}
+  # Gastronomía y comercio
+  - {q: "mozo", codes: ["5131"], country: ARG}
+  - {q: "garzón", codes: ["5131"], country: CHL}
+  - {q: "bartender", codes: ["5132"]}
+  - {q: "cocinero", codes: ["5120"]}
+  - {q: "chef", codes: ["3434"]}
+  - {q: "panadero", codes: ["7512"]}
+  - {q: "almacenero", codes: ["5221"]}
+  - {q: "cajero de supermercado", codes: ["5230"]}
+  - {q: "repositor", codes: ["9334"], country: ARG}
+  - {q: "vendedor ambulante", codes: ["5211", "9520"]}
+  - {q: "feriante", codes: ["5211"]}
+  - {q: "agente inmobiliario", codes: ["3334"]}
+  - {q: "corredor de seguros", codes: ["3321"]}
+  # Construcción, industria y oficios
+  - {q: "albañil", codes: ["7112"]}
+  - {q: "gasfíter", codes: ["7126"], country: CHL}
+  - {q: "plomero", codes: ["7126"]}
+  - {q: "sanitarista", codes: ["7126"], country: URY}
+  - {q: "electricista de obra", codes: ["7411"]}
+  - {q: "pintor de obra", codes: ["7131"]}
+  - {q: "carpintero", codes: ["7115"]}
+  - {q: "soldador", codes: ["7212"]}
+  - {q: "tornero", codes: ["7223"]}
+  - {q: "mecánico de autos", codes: ["7231"]}
+  - {q: "operario de fábrica", codes: ["9329"]}
+  - {q: "minero", codes: ["8111"]}
+  # Campo y pesca
+  - {q: "peón rural", codes: ["9211", "9212", "9213"]}
+  - {q: "tambero", codes: ["6121", "9212"], country: ARG}
+  - {q: "temporero de la fruta", codes: ["9211"], country: CHL}
+  - {q: "jardinero", codes: ["6113", "9214"]}
+  - {q: "pescador artesanal", codes: ["6222"]}
+  - {q: "agrónomo", codes: ["2132"]}
+  # Salud y cuidados
+  - {q: "kinesiólogo", codes: ["2264"]}
+  - {q: "médico de guardia", codes: ["2211", "2212"]}
+  - {q: "auxiliar de enfermería", codes: ["3221", "5321"]}
+  - {q: "odontólogo", codes: ["2261"]}
+  - {q: "farmacéutico", codes: ["2262"]}
+  - {q: "veterinario", codes: ["2250"]}
+  - {q: "cuidador de ancianos", codes: ["5322", "5321"]}
+  - {q: "niñera", codes: ["5311"]}
+  - {q: "nana", codes: ["9111", "5311"], country: CHL}
+  - {q: "empleada doméstica", codes: ["9111"]}
+  - {q: "peluquera", codes: ["5141"]}
+  - {q: "manicura", codes: ["5142"]}
+  # Educación y social
+  - {q: "maestra jardinera", codes: ["2342"], country: ARG}
+  - {q: "docente de primaria", codes: ["2341"]}
+  - {q: "profe de educación física", codes: ["2330", "2341"]}
+  - {q: "profesor universitario", codes: ["2310"]}
+  - {q: "psicopedagoga", codes: ["2352", "2634", "2359"]}
+  - {q: "trabajador social", codes: ["2635"]}
+  - {q: "asistente social", codes: ["2635"]}
+  # Oficina, finanzas y derecho
+  - {q: "contador público", codes: ["2411"]}
+  - {q: "liquidador de sueldos", codes: ["4313"], country: ARG}
+  - {q: "abogado laboralista", codes: ["2611"]}
+  - {q: "despachante de aduana", codes: ["3331"], country: ARG}
+  - {q: "tasador", codes: ["3315"]}
+  - {q: "secretaria", codes: ["4120"]}
+  - {q: "asistente administrativo", codes: ["4110", "3343"]}
+  - {q: "operador de call center", codes: ["4222"]}
+  - {q: "telefonista", codes: ["4223"]}
+  - {q: "recepcionista de hotel", codes: ["4224"]}
+  # Tecnología y comunicación
+  - {q: "programador de apps", codes: ["2514", "2512"]}
+  - {q: "científico de datos", codes: ["2120", "2511", "2519"]}
+  - {q: "devops", codes: ["2522", "2512", "2523"]}
+  - {q: "soporte técnico informático", codes: ["3512"]}
+  - {q: "diseñador ux", codes: ["2166", "2513", "2512"]}
+  - {q: "community manager", codes: ["2431", "2432"]}
+  - {q: "periodista", codes: ["2642"]}
+  - {q: "traductor", codes: ["2643"]}
+  # Ingeniería y otros
+  - {q: "ingeniero civil", codes: ["2142"]}
+  - {q: "arquitecto", codes: ["2161"]}
+  # Seguridad y limpieza
+  - {q: "guardia de seguridad", codes: ["5414"]}
+  - {q: "patovica", codes: ["5414"], country: ARG}
+  - {q: "barrendero", codes: ["9613"]}
+  - {q: "basurero", codes: ["9611"]}
