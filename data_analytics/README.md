@@ -477,3 +477,13 @@ Con el fin de planificar la automatización y calendarización del observatorio 
 * **Comportamiento en el Pipeline:** El módulo `ingesta_01.py` las consulta directamente y actualiza las series de contexto macro y salarial de forma liviana (< 10 segundos).
 * **Estrategia de Programación:** Apta para cron jobs periódicos (semanales o mensuales) que regeneran reportes de coyuntura (`reporte_brecha_salarial_regional.csv`, `analisis_genero_integral.csv`) sin necesidad de reprocesar las series históricas de graduados.
 
+---
+
+## 12. Herramientas de Productividad y Asistencia Técnica
+
+Para el diseño metodológico, la implementación del pipeline y la gestión de datos del módulo, se utilizaron las siguientes herramientas y servicios:
+
+* **Entorno de Desarrollo:** Google Antigravity IDE y Visual Studio Code, permitiendo la ejecución coordinada de tareas, revisión de terminales y control de versiones.
+* **Desarrollo Asistido y Pair Programming:** Claude AI y modelos de Google (Gemini) como asistentes técnicos para la aceleración en la homologación de taxonomías internacionales (ESCO y CIUO-08), refactorización modular de scripts, pruebas de consistencia matemática y redacción de documentación técnica.
+* **Almacenamiento y Distribución de Fuentes:** Google One / Google Drive como plataforma centralizada para la descarga y resguardo de las bases censales y planillas oficiales de gran volumen que no se versionan directamente en Git.
+
