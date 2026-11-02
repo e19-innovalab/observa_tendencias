@@ -19,6 +19,7 @@ backend/                   (esta carpeta)
 │   ├── ml/                prototipos de modelos (búsqueda de ocupaciones por significado)
 │   └── docker-compose.yml Postgres local
 ├── frontend/              primer prototipo en Next.js (puerto 3010)
+├── frontend_minimal/     frontend minimal en Next.js (puerto 3001): el que se publica en Vercel
 ├── data/
 │   ├── raw/               archivos originales: ofertas de LinkedIn, egresados y archivos oficiales descargados
 │   ├── processed/         archivos limpios o derivados (CSV del equipo de datos)
@@ -41,7 +42,7 @@ backend/                   (esta carpeta)
 | [`backend/backend_plan_ES.md`](backend/backend_plan_ES.md) | Plan completo del backend |
 | [`backend/ml/occupation_match/README.md`](backend/ml/occupation_match/README.md) | Prototipo de búsqueda de ocupaciones por significado: datos, evaluación y cómo entrenar en otra máquina |
 | [`backend/config/datasets/ejemplos/README.md`](backend/config/datasets/ejemplos/README.md) | Archivos de ejemplo para probar la carga manual |
-| [`../frontend/frontend_minimal/README.md`](../frontend/frontend_minimal/README.md) | Frontend minimal (pantallas, buscador, asistente, carga de datos) |
+| [`frontend_minimal/README.md`](frontend_minimal/README.md) | Frontend minimal (pantallas, buscador, asistente, carga de datos) |
 
 ## Requisitos
 

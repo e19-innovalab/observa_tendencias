@@ -265,6 +265,6 @@ El texto de cada error viene en `detail` (de `assistant.messages`). Con un model
 ## 3. Pendientes conocidos
 
 - **URL de producción:** se define con el despliegue y la base en Supabase.
-- **Dashboard viejo (`backend/frontend`):** usa solo `/jobs`, `/coverage` y `/graduates/*`. Los frontends nuevos (`frontend/frontend` y `frontend/frontend_minimal`) ya usan los endpoints de esta guía, con inicio de sesión y roles (`/auth/login`, `/auth/me`).
+- **Dashboard viejo (`backend/frontend`):** usa solo `/jobs`, `/coverage` y `/graduates/*`. El frontend minimal (`backend/frontend_minimal`) ya usa los endpoints de esta guía, con inicio de sesión y roles (`/auth/login`, `/auth/me`).
 - **Carga manual, segunda etapa:** retirar una carga y marcar en las pantallas los datos de carga manual. La API todavía no los distingue en las series: hay que agregar ese dato a la respuesta antes de mostrarlo.
 - **Asistente:** el modelo que responde lo que no cubren las plantillas está en evaluación. Los textos y el comportamiento de la pantalla no cambian, porque vienen de `GET /assistant`.

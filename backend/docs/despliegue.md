@@ -128,7 +128,7 @@ En [vercel.com](https://vercel.com): **Add New → Project** → importá el rep
 
 | Campo | Valor |
 |---|---|
-| Root Directory | `frontend/frontend_minimal` |
+| Root Directory | `backend/frontend_minimal` |
 | Framework Preset | Next.js |
 | Variable `NEXT_PUBLIC_API_URL` | La URL de Render, por ejemplo `https://observa-tendencias-api.onrender.com` |
 

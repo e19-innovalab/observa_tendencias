@@ -1,6 +1,6 @@
 # Observa Tendencias · frontend minimal + visual
 
-Segunda versión del frontend, con el mismo backend y los mismos datos que `../frontend`. Cambia la
+Segunda versión del frontend, con el mismo backend y los mismos datos que el frontend original. Cambia la
 experiencia: cada pantalla responde una pregunta con un gráfico grande y el menú es mínimo.
 
 - Una barra superior: 10 secciones (Panorama, Sectores, Ocupaciones, Habilidades, Tendencias, Pulso
