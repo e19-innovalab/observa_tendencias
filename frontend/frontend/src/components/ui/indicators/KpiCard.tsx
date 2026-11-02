@@ -1,28 +1,33 @@
 type Props = {
   label: string;
   value: string;
-  caption?: string; // por ejemplo el período del dato
+  caption?: string; // por ejemplo país y período del dato
   changeText: string | null;
   negative?: boolean;
 };
 
 export function KpiCard({ label, value, caption, changeText, negative = false }: Props) {
   return (
-    <div className="border border-gray-300 bg-white p-4">
-      <p className="text-sm text-gray-700">{label}</p>
-      <div className="mt-1 flex items-center justify-between gap-2">
-        <p className="text-2xl font-semibold text-gray-900">{value}</p>
+    <article className="flex min-h-36 flex-col justify-between gap-3 rounded-lg border border-line bg-canvas p-5 shadow-[0_1px_2px_var(--shadow-color)]">
+      <div className="flex items-start justify-between gap-2">
+        <p className="text-[11px] font-semibold tracking-wide text-muted-text uppercase">{label}</p>
         {changeText && (
           <span
-            className={`rounded-full px-3 py-1 text-xs font-medium ${
-              negative ? 'bg-gray-600 text-white' : 'bg-gray-100 text-gray-800'
-            }`}
+            className={
+              negative
+                ? 'rounded-full bg-heading px-3 py-1 text-xs font-semibold text-white'
+                : 'rounded-full bg-surface-2 px-3 py-1 text-xs font-semibold text-body'
+            }
           >
             {changeText}
           </span>
         )}
       </div>
-      {caption && <p className="mt-1 text-xs text-gray-500">{caption}</p>}
-    </div>
+
+      <div>
+        <p className="text-2xl font-semibold text-heading">{value}</p>
+        {caption && <p className="mt-1 text-xs text-muted-text">{caption}</p>}
+      </div>
+    </article>
   );
 }

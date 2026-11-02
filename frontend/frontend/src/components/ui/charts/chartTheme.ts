@@ -1,5 +1,11 @@
 export type ChartRow = Record<string, string | number | null>;
-export type ChartSeries = { key: string; label: string; color: string };
+export type ChartSeries = {
+  key: string;
+  label: string;
+  color: string;
+  /** Las proyecciones se dibujan con línea punteada. */
+  dashed?: boolean;
+};
 
 /** Colores de país del Design System (--country-arg, --country-chl, --country-ury). */
 export const COUNTRY_COLORS: Record<string, string> = {

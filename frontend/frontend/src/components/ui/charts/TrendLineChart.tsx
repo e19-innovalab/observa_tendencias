@@ -12,11 +12,16 @@ import {
 import { formatValue } from '@/lib/utils/format';
 import type { ChartRow, ChartSeries } from './chartTheme';
 
-type Props = { data: ChartRow[]; series: ChartSeries[]; unit: string };
+type Props = {
+  data: ChartRow[];
+  series: ChartSeries[];
+  unit: string;
+  heightClassName?: string;
+};
 
-export function TrendLineChart({ data, series, unit }: Props) {
+export function TrendLineChart({ data, series, unit, heightClassName = 'h-72' }: Props) {
   return (
-    <div className="h-72 w-full">
+    <div className={`${heightClassName} w-full`}>
       <ResponsiveContainer width="100%" height="100%">
         <LineChart data={data} margin={{ top: 8, right: 16, bottom: 0, left: 0 }}>
           <CartesianGrid stroke="#e5e7eb" vertical={false} />
@@ -37,7 +42,8 @@ export function TrendLineChart({ data, series, unit }: Props) {
               name={s.label}
               stroke={s.color}
               strokeWidth={2}
-              dot={{ r: 3 }}
+              strokeDasharray={s.dashed ? '6 4' : undefined}
+              dot={{ r: 3, fill: s.color }}
               connectNulls
             />
           ))}

@@ -20,6 +20,7 @@ export const getObservations = (params: {
   countries: string[];
   sector?: string;
   fromYear?: string;
+  toYear?: string;
 }) =>
   apiGet(
     '/observations',
@@ -29,6 +30,7 @@ export const getObservations = (params: {
       country: params.countries,
       sector: params.sector,
       from_year: params.fromYear,
+      to_year: params.toYear,
       data_type: 'observed',
       limit: 1000,
     },

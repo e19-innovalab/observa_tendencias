@@ -6,9 +6,9 @@ export default function AppLayout({ children }: { children: ReactNode }) {
   return (
     <>
       {/* Usuario y alertas son datos de ejemplo hasta definir autenticación */}
-      <AppHeader userName="Eduardo González" userRole="consultas" unreadAlerts={9} />
+      <AppHeader userName="Santiago Morales" userRole="Administrador" unreadAlerts={9} />
       <MainNav />
-      <main>{children}</main>
+      <main className="flex-1">{children}</main>
     </>
   );
 }

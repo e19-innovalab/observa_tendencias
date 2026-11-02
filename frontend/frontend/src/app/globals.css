@@ -1,13 +1,14 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
+@import "../styles/design-tokens.css";
 
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-sans);
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
   --font-mono: var(--font-geist-mono);
   --font-heading: var(--font-sans);
   --color-sidebar-ring: var(--sidebar-ring);
@@ -49,38 +50,38 @@
 }
 
 :root {
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
-  --chart-1: oklch(0.87 0 0);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
+  --background: #ffffff;
+  --foreground: #0f172a;
+  --card: #ffffff;
+  --card-foreground: #050c1e;
+  --popover: #ffffff;
+  --popover-foreground: #050c1e;
+  --primary: #172bc4;
+  --primary-foreground: #ffffff;
+  --secondary: #f5f7fd;
+  --secondary-foreground: #0f172a;
+  --muted: #f5f7fd;
+  --muted-foreground: #475569;
+  --accent: #edf2fc;
+  --accent-foreground: #050c1e;
+  --destructive: #dc2626;
+  --border: #aebdde;
+  --input: #aebdde;
+  --ring: #172bc4;
+  --chart-1: #172bc4;
+  --chart-2: #38bdf8;
+  --chart-3: #8b5cf6;
+  --chart-4: #d97706;
+  --chart-5: #16a34a;
   --radius: 0.625rem;
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
+  --sidebar: #fafbfe;
+  --sidebar-foreground: #0f172a;
+  --sidebar-primary: #172bc4;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #edf2fc;
+  --sidebar-accent-foreground: #0f172a;
+  --sidebar-border: #aebdde;
+  --sidebar-ring: #172bc4;
 }
 
 .dark {
