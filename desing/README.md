@@ -4,6 +4,13 @@ Este espacio resume las decisiones de diseño, herramientas de trabajo, la organ
 
 ---
 
+## Equipo de Diseño UX/UI
+
+* **Gisella Franco** — Diseñadora UX/UI ([@kikyomu](https://github.com/kikyomu))
+* **Diego Ferreira** — Diseñador UX/UI ([@DieFerreira](https://github.com/DieFerreira))
+
+---
+
 ## Accesos Rápidos y Recursos Principales
 
 * **Espacio Colaborativo Centralizado:** [Tablero de Miro](https://miro.com/app/board/uXjVHI5DvM=/)
@@ -54,9 +61,11 @@ El diseño de la arquitectura de información se abordó mediante una metodolog�
 ### Aspectos clave de la estructura:
 
 * **Experiencia de Descubrimiento (Onboarding):** Diagramación de la narrativa visual y de contenido en la zona pública para comunicar la propuesta de valor del Observatorio y facilitar el acceso a la plataforma.
-* **Gestión de Accesos y Roles:** Modelado de la estructura de navegación diferenciada entre vistas públicas de consulta general y paneles privados orientados a análisis avanzado y administración del sistema.
-* **Modelado de Módulos y Taxonomía de Datos:** Definición conceptual de las pantallas clave (*Panorama Regional, Tendencias, Ocupaciones, Habilidades y Alertas*), estableciendo la jerarquía de filtros, la organización de métricas socioeconómicas/laborales y la estructura para la gestión de fuentes de datos.
-
+* **Gestión de Accesos y Roles:** Modelado de la navegación y permisos del sistema estructurados en tres perfiles clave:
+  * **Consultas:** Acceso a las vistas públicas y privadas (incluyendo análisis y alertas) en modo lectura, sin acceso al área de gestión ni administración.
+  * **Editor:** Permisos idénticos al rol de Consultas, sumando el acceso al módulo de **Gestión de Datos** para la carga, actualización y eliminación de datasets.
+  * **Administrador:** Control total del sistema. Incluye todos los permisos anteriores más el acceso exclusivo a **Gestión de Usuarios** para crear, editar, asignar roles y eliminar usuarios de la plataforma.
+* **Modelado de Módulos y Taxonomía de Datos:** Definición conceptual de las pantallas clave (*Panorama Regional, Sectores, Ocupaciones, Habilidades y Alertas*), estableciendo la jerarquía de filtros, la organización de métricas socioeconómicas, laborales y educativas, y la estructura para la gestión de fuentes de datos.
 ---
 
 ## 3. Diseño de Interfaz (UI) y Prototipado
@@ -70,21 +79,22 @@ Se trabaja en la maquetación progresiva de pantallas, componentes y prototipos 
 | :--- | :---: | :---: |
 | Landing Page | 🟢 `COMPLETADO` | ⚪ `PENDIENTE` |
 | Iniciar sesión *(Login)* | 🟢 `COMPLETADO` | ⚪ `PENDIENTE` |
+| Registrarse *(Sign Up)* | ⚪ `PENDIENTE` | ⚪ `PENDIENTE` |
 
 #### Navegación Privada
 | Vista / Módulo | Wireframes | Diseño Final |
 | :--- | :---: | :---: |
 | Inicio *(Dashboard principal)* | 🟢 `COMPLETADO` | ⚪ `PENDIENTE` |
 | Panorama regional | 🟢 `COMPLETADO` | ⚪ `PENDIENTE` |
-| Tendencias | 🟢 `COMPLETADO` | ⚪ `PENDIENTE` |
-| Ocupaciones | ⚪ `PENDIENTE` | ⚪ `PENDIENTE` |
-| Ocupaciones | ⚪ `PENDIENTE` | ⚪ `PENDIENTE` |
-| └─ *Detalle de Ocupación* | ⚪ `PENDIENTE` | ⚪ `PENDIENTE` |
-| Habilidades | ⚪ `PENDIENTE` | ⚪ `PENDIENTE` |
+| Sectores | 🟢 `COMPLETADO` | ⚪ `PENDIENTE` |
+| Ocupaciones | 🟢 `COMPLETADO` | ⚪ `PENDIENTE` |
+| └─ *Detalle de Ocupación* | 🟢 `COMPLETADO` | ⚪ `PENDIENTE` |
+| Habilidades | 🟢 `COMPLETADO` | ⚪ `PENDIENTE` |
+| Metodologías | 🟢 `COMPLETADO` | ⚪ `PENDIENTE` |
 | Alertas | ⚪ `PENDIENTE` | ⚪ `PENDIENTE` |
-| Gestión / Administración | ⚪ `PENDIENTE` | ⚪ `PENDIENTE` |
-| ├─ *Gestión de Usuarios* | ⚪ `PENDIENTE` | ⚪ `PENDIENTE` |
-| └─ *Gestión de Datos* | ⚪ `PENDIENTE` | ⚪ `PENDIENTE` |
+| Gestión / Administración | 🟢 `COMPLETADO` | ⚪ `PENDIENTE` |
+| ├─ *Gestión de Usuarios* | 🟢 `COMPLETADO` | ⚪ `PENDIENTE` |
+| └─ *Gestión de Datos* | 🟢 `COMPLETADO` | ⚪ `PENDIENTE` |
 
 #### Sistema e Identidad Visual
 | Elemento / Recursos UI | Definición Base | Diseño Final |
