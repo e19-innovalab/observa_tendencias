@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { Suspense } from 'react';
 import { io } from 'next/cache';
 import { ApiErrorNote } from '@/components/ui/feedback/ApiErrorNote';
 import { QuickAccessGrid } from '@/components/ui/home/QuickAccessGrid';
@@ -83,7 +84,7 @@ function buildFeed(alertsPage: Awaited<ReturnType<typeof getAlerts>> | null): Tr
   }));
 }
 
-export default async function InicioPage() {
+async function Contenido() {
   await io(); // el inicio se calcula con datos vivos, no en el shell estático
 
   let kpis: Kpi[] = [];
@@ -158,5 +159,13 @@ export default async function InicioPage() {
         )}
       </section>
     </div>
+  );
+}
+
+export default function InicioPage() {
+  return (
+    <Suspense fallback={<div role="status" className="mx-auto max-w-7xl px-6 py-10 text-sm text-muted-text">Cargando datos…</div>}>
+      <Contenido />
+    </Suspense>
   );
 }

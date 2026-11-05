@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { Suspense, type ComponentProps } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { ChartCard } from '@/components/ui/charts/ChartCard';
 import { TrendLineChart } from '@/components/ui/charts/TrendLineChart';
@@ -89,7 +90,7 @@ function average(values: number[]): number | null {
   return values.reduce((sum, value) => sum + value, 0) / values.length;
 }
 
-export default async function HabilidadesPage({
+async function Contenido({
   searchParams,
 }: {
   searchParams: Promise<SearchParams>;
@@ -510,5 +511,13 @@ async function ProjectionsContent() {
         methodologyHref="/panorama-regional"
       />
     </>
+  );
+}
+
+export default function HabilidadesPage(props: ComponentProps<typeof Contenido>) {
+  return (
+    <Suspense fallback={<div role="status" className="mx-auto max-w-7xl px-6 py-10 text-sm text-muted-text">Cargando datos…</div>}>
+      <Contenido {...props} />
+    </Suspense>
   );
 }

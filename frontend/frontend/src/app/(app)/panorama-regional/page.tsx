@@ -23,6 +23,7 @@ import { io } from 'next/cache';
 import type { Country, ObservationPoint } from '@/lib/schemas/api';
 import { formatChange, formatDate, formatValue } from '@/lib/utils/format';
 import type { Metadata } from 'next';
+import { Suspense, type ComponentProps } from 'react';
 
 export const metadata: Metadata = { title: 'Panorama regional' };
 
@@ -90,7 +91,7 @@ async function load(sp: SearchParams) {
   return { countries, sectors, domains, tab, inDomain, indicator, kpiCountry, summary, observations };
 }
 
-export default async function PanoramaRegionalPage({ searchParams }: Props) {
+async function Contenido({ searchParams }: Props) {
   await io(); // los KPI y la serie se calculan por request, no en el shell estático
   const sp = await searchParams;
 
@@ -208,5 +209,13 @@ export default async function PanoramaRegionalPage({ searchParams }: Props) {
         </div>
       </div>
     </>
+  );
+}
+
+export default function PanoramaRegionalPage(props: ComponentProps<typeof Contenido>) {
+  return (
+    <Suspense fallback={<div role="status" className="mx-auto max-w-7xl px-6 py-10 text-sm text-muted-text">Cargando datos…</div>}>
+      <Contenido {...props} />
+    </Suspense>
   );
 }

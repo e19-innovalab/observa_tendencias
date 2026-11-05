@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { Suspense } from 'react';
 import { io } from 'next/cache';
 import { ChartCard } from '@/components/ui/charts/ChartCard';
 import { TrendLineChart } from '@/components/ui/charts/TrendLineChart';
@@ -61,7 +62,7 @@ function trendSummary(trends: TrendItem[], countries: Country[]): string | null 
     .join(' · ');
 }
 
-export default async function TendenciasPage({ searchParams }: { searchParams: Promise<SearchParams> }) {
+async function Contenido({ searchParams }: { searchParams: Promise<SearchParams> }) {
   await io(); // el año actual y las series se calculan por request
   const sp = await searchParams;
   const tab = sp.tab === 'projections' ? 'projections' : 'trends';
@@ -325,5 +326,13 @@ export default async function TendenciasPage({ searchParams }: { searchParams: P
         )}
       </div>
     </>
+  );
+}
+
+export default function TendenciasPage({ searchParams }: { searchParams: Promise<SearchParams> }) {
+  return (
+    <Suspense fallback={<div role="status" className="mx-auto max-w-7xl px-6 py-10 text-sm text-muted-text">Cargando datos…</div>}>
+      <Contenido searchParams={searchParams} />
+    </Suspense>
   );
 }

@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { Suspense, type ComponentProps } from 'react';
 import Link from 'next/link';
 import { ArrowRight } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
@@ -109,7 +110,7 @@ function buildComponentRanking(
   });
 }
 
-export default async function SectoresPage({
+async function Contenido({
   searchParams,
 }: {
   searchParams: Promise<SearchParams>;
@@ -420,5 +421,13 @@ export default async function SectoresPage({
         />
       </div>
     </>
+  );
+}
+
+export default function SectoresPage(props: ComponentProps<typeof Contenido>) {
+  return (
+    <Suspense fallback={<div role="status" className="mx-auto max-w-7xl px-6 py-10 text-sm text-muted-text">Cargando datos…</div>}>
+      <Contenido {...props} />
+    </Suspense>
   );
 }

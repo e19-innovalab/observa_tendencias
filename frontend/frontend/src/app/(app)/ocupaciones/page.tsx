@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { Suspense, type ComponentProps } from 'react';
 import { Badge, type BadgeTone } from '@/components/ui/badge';
 import { OptionPills } from '@/components/ui/controls/OptionPills';
 import { ApiErrorNote } from '@/components/ui/feedback/ApiErrorNote';
@@ -49,7 +50,7 @@ function buildBaseHref(sp: SearchParams): string {
   return query ? `/ocupaciones?${query}` : '/ocupaciones';
 }
 
-export default async function OcupacionesPage({
+async function Contenido({
   searchParams,
 }: {
   searchParams: Promise<SearchParams>;
@@ -249,5 +250,13 @@ export default async function OcupacionesPage({
         />
       </div>
     </>
+  );
+}
+
+export default function OcupacionesPage(props: ComponentProps<typeof Contenido>) {
+  return (
+    <Suspense fallback={<div role="status" className="mx-auto max-w-7xl px-6 py-10 text-sm text-muted-text">Cargando datos…</div>}>
+      <Contenido {...props} />
+    </Suspense>
   );
 }

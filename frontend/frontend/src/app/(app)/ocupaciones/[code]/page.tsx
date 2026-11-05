@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { Suspense, type ComponentProps } from 'react';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { ArrowLeft } from 'lucide-react';
@@ -80,7 +81,7 @@ function buildBreakdown(item: EmployabilityItem): RankingItem[] {
   });
 }
 
-export default async function OcupacionDetallePage({ params, searchParams }: Props) {
+async function Contenido({ params, searchParams }: Props) {
   const { code } = await params;
   const sp = await searchParams;
 
@@ -337,5 +338,13 @@ export default async function OcupacionDetallePage({ params, searchParams }: Pro
         methodologyHref="/panorama-regional"
       />
     </div>
+  );
+}
+
+export default function OcupacionDetallePage(props: ComponentProps<typeof Contenido>) {
+  return (
+    <Suspense fallback={<div role="status" className="mx-auto max-w-7xl px-6 py-10 text-sm text-muted-text">Cargando datos…</div>}>
+      <Contenido {...props} />
+    </Suspense>
   );
 }
