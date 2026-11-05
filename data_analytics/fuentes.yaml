@@ -1,0 +1,211 @@
+# ==============================================================================
+# Inventario Oficial de Fuentes de Datos - Data Analytics
+# Observatorio Predictivo de Tendencias Socioeconómicas, Laborales y Educativas
+# Alcance Regional: Argentina (ARG), Chile (CHL), Uruguay (URY)
+# ==============================================================================
+
+version: "1.0"
+ultima_actualizacion: "2026-10-24"
+entorno: "data_analytics"
+norma_metodologica: "Dato 100% observado, sin imputaciones ni valores sintéticos"
+
+apis_supranacionales:
+  banco_mundial:
+    nombre: "Banco Mundial - Indicadores de Desarrollo Mundial (WDI)"
+    base_url: "https://api.worldbank.org/v2/country/{country}/indicator/{indicator}"
+    formato: "json"
+    paises: ["ARG", "CHL", "URY"]
+    metodo: "GET automatizado (requests)"
+    indicadores:
+      PA.NUS.PPP:
+        descripcion: "Factor de conversión PPA del PIB (moneda local por USD internacional)"
+        uso: "Factor único oficial adoptado para deflación salarial a USD PPA (Decisión D1 y Etapa 3). Cobertura oficial observada continua 2022-2024 para ARG, CHL y URY."
+      PA.NUS.PRVT.PP:
+        descripcion: "Factor de conversión PPA del consumo privado"
+        uso: "Serie de referencia histórica (discontinuada oficialmente por el Banco Mundial para Argentina a partir de 2022)"
+      FP.CPI.TOTL:
+        descripcion: "Índice de Precios al Consumidor (IPC base 2010)"
+        uso: "Deflación intertemporal y armonización regional base 2016=100 para CHL y URY"
+      SL.UEM.TOTL.ZS:
+        descripcion: "Tasa de desempleo total (% de la población económicamente activa)"
+        uso: "Contexto macroeconómico y benchmark de desempleo en reporte_contexto_educativo_laboral.csv"
+      SL.UEM.ADVN.ZS:
+        descripcion: "Tasa de desempleo con educación terciaria/avanzada"
+        uso: "Evaluación del efecto protector de la titulación universitaria en reporte_contexto_educativo_laboral.csv y gráfico desempleo_educacion_superior_regional.png"
+
+  cepalstat:
+    nombre: "CEPAL - Base de Datos CEPALSTAT"
+    base_url: "https://api-cepalstat.cepal.org/cepalstat/api/v1/indicator/{id}/data"
+    formato: "json"
+    paises: ["ARG", "CHL", "URY"]
+    metodo: "GET automatizado (requests) con mapeo dinámico de dimensiones temporales"
+    indicadores:
+      99:
+        descripcion: "Tasa bruta de matrícula terciaria por sexo (%)"
+        uso: "Indicador de cobertura formativa superior en reporte_contexto_educativo_laboral.csv"
+      127:
+        descripcion: "Tasa de desocupación por sexo (%)"
+        uso: "Desagregación sociodemográfica de desocupación"
+      5701:
+        descripcion: "Porcentaje de personas de 18 a 24 años que cursan estudios superiores"
+        uso: "Medición de inserción de jóvenes en estudios superiores en reporte_contexto_educativo_laboral.csv"
+
+  ilostat:
+    nombre: "Organización Internacional del Trabajo (OIT / ILOSTAT)"
+    base_url: "https://rplumber.ilo.org/data/indicator/?id={indicator}&ref_area={country}&format=.csv"
+    formato: "csv"
+    paises: ["ARG", "CHL", "URY"]
+    metodo: "GET automatizado vía rplumber/SDMX con cabecera de User-Agent oficial"
+    indicadores:
+      EAR_EMTA_SEX_ECO_NB:
+        descripcion: "Salarios medios mensuales de asalariados por sexo y rama de actividad económica"
+        clasificador: "CIIU Rev. 4 / ISIC Rev. 4 a 1 dígito (Secciones D, I, J, M, Q)"
+        desagregacion_sexo: ["SEX_T", "SEX_M", "SEX_F"]
+        ventana_temporal:
+          ARG: "1997-2025"
+          CHL: "2014-2024"
+          URY: "2011-2024"
+        moneda: "Moneda local (ARS, CLP, UYU) convertida a USD PPA mediante factor PIB"
+        uso_en_pipeline:
+          - "Comparativa salarial regional tripartita armonizada (reporte_brecha_salarial_regional.csv)"
+          - "Cálculo de brechas salariales de género 100% observadas (analisis_genero_integral.csv)"
+      EAP_TEAP_SEX_AGE_EDU_NB:
+        descripcion: "Población económicamente activa por sexo, edad y nivel educativo"
+      EMP_TEMP_SEX_ECO_NB:
+        descripcion: "Población ocupada por sexo y rama de actividad económica (miles de personas)"
+        clasificador: "CIIU Rev. 4 / ISIC Rev. 4 a 1 dígito (Secciones D, I, J, M, Q)"
+        desagregacion_sexo: ["SEX_T", "SEX_M", "SEX_F"]
+        paises: ["ARG", "CHL", "URY"]
+        uso_en_pipeline: "Derivación observada de share_mujeres en el empleo por sector para ARG, CHL y URY sin imputaciones ni ponderaciones artificiales (Decisión Etapa 1 Opción B)"
+
+  unesco_uis:
+    nombre: "Instituto de Estadística de la UNESCO (UIS) - CINE-F 2013"
+    base_url: "https://data.uis.unesco.org / https://api.uis.unesco.org"
+    formato: "csv / api"
+    clasificador: "CINE-F 2013 (ISCED-F 2013: Campos de Educación y Formación a 4 dígitos)"
+    estado_incorporacion: "Propuesta técnica pendiente de corroboración con el equipo interdisciplinario"
+    nota_auditoria: "Decisión de trazabilidad observada que la analista debe corroborar con el equipo de 5 roles, dado que esta fuente supranacional no formaba parte del documento original de requerimientos del proyecto."
+    uso_en_pipeline: "Homologación internacional observada del clasificador formativo cine_f_codigo"
+
+  unsd_ciiu:
+    nombre: "División de Estadística de Naciones Unidas (UNSD) - Clasificación CIIU Rev. 4"
+    base_url: "https://unstats.un.org/unsd/classifications/Econ/Download/In%20Text/ISIC_Rev_4_spanish_structure.txt"
+    formato: "txt / csv"
+    clasificador: "CIIU Rev. 4 / ISIC Rev. 4 (Estructura de divisiones a 2 dígitos)"
+    estado_incorporacion: "Propuesta técnica pendiente de corroboración con el equipo interdisciplinario"
+    nota_auditoria: "Decisión de trazabilidad observada que la analista debe corroborar con el equipo de 5 roles, dado que esta fuente supranacional no formaba parte del documento original de requerimientos del proyecto."
+    uso_en_pipeline: "Estandarización de divisiones ciiu_rev4_divisiones que componen los 5 sectores estratégicos"
+
+fuentes_nacionales:
+  argentina:
+    araucano:
+      nombre: "Base SIU-Araucano de Graduados Universitarios"
+      archivo: "data/raw/argentina/base_araucano_traducida.xlsx"
+      organismo: "Secretaría de Políticas Universitarias (SPU) / Ministerio de Capital Humano"
+      ventana_temporal: "2016-2018"
+      variables: ["carrera", "disciplina_nombre", "tipo_gestion", "genero", "graduados"]
+      cobertura: "Graduados universitarios desglosados por carrera y género (F/M)"
+    anuarios_spu:
+      nombre: "Anuarios Estadísticos Universitarios Oficiales (SPU)"
+      archivos:
+        - "data/raw/argentina/anuario_csv_2020.zip"
+        - "data/raw/argentina/anuario_csv_2021.zip"
+        - "data/raw/argentina/anuario_csv_2022.zip"
+      organismo: "Secretaría de Políticas Universitarias (SPU) / Subsecretaría de Políticas Universitarias"
+      ventana_temporal: "2020-2022"
+      variables: ["institucion", "rama_disciplinar", "egresados"]
+      uso_en_pipeline: "Trazabilidad de graduados institucionales para rankings y consolidación de serie nacional de graduados de Argentina (2020-2022) en hecho_egresados.csv"
+    cep_xxi:
+      nombre: "Centro de Estudios para la Producción (CEP-XXI) / Secretaría de Industria"
+      archivos:
+        puestos: "data/raw/argentina/puestos_privados_mensual_por_clae2.csv"
+        salario_medio: "data/raw/argentina/w_mean_privado_mensual_por_clae2.csv"
+        salario_mediano: "data/raw/argentina/w_median_privado_mensual_por_clae2.csv"
+        share_mujer: "data/raw/argentina/share_mujer_privado_mensual_por_clae2.csv"
+      organismo: "Ministerio de Economía / CEP-XXI (datos.gob.ar)"
+      ventana_temporal: "2007-2023"
+      variables: ["clae2", "fecha", "puestos", "w_mean", "w_median", "share_mujer"]
+      tratamiento_metodologico:
+        - "Código -99 tratado como NaN (secreto estadístico)"
+        - "Promedio mensual por año para puestos y salarios"
+        - "Ponderación salarial exacta por masa de puestos observados de cada rama"
+        - "Metadato explícito meses_observados = 11 para año 2023"
+        - "NOTA: La serie share_mujer de CEP-XXI fue formalmente descartada y sustituida en analytics por OIT/ILOSTAT EMP_TEMP_SEX_ECO_NB para garantizar paridad regional"
+    indec_ipc:
+      nombre: "API Oficial de Series de Tiempo del INDEC (IPC Nacional)"
+      base_url: "https://apis.datos.gob.ar/series/api/series/?ids=145.3_INGNACNAL_DICI_M_15"
+      organismo: "Instituto Nacional de Estadística y Censos (INDEC) / Datos Abiertos Argentina"
+      ventana_temporal: "2016-2026"
+      variables: ["fecha", "valor"]
+      base_original: "diciembre-2016 = 100"
+      uso_en_pipeline: "Serie oficial observada de IPC de Argentina para factores_macro_ppa.csv armonizada en base común 2016=100 con Chile y Uruguay (Etapa 3 Item 3.1)"
+
+  chile:
+    mi_futuro_titulados:
+      nombre: "Base Histórica de Titulados de Educación Superior (Mi Futuro)"
+      archivo: "data/raw/chile/TITULADO_2007-2025_web_27_05_2026_E-1.xlsx"
+      organismo: "Subsecretaría de Educación Superior / Ministerio de Educación"
+      ventana_temporal: "2007-2025"
+      variables: ["NOMBRE INSTITUCIÓN", "TIPO INSTITUCIÓN 1", "NOMBRE CARRERA", "TITULACIONES MUJER", "TITULACIONES HOMBRE", "TITULACIONES NB E INDEFINIDO", "TOTAL TITULADOS"]
+      cobertura: "Serie exhaustiva de egresados por institución, carrera, nivel y género (F, M, NB)"
+    sies_carreras_e_ingresos:
+      nombre: "Buscador de Estadísticas por Carrera e Ingresos (SIES)"
+      archivos:
+        - "data/raw/chile/Buscador_Estadisticas_por_carrera_2024_2025_SIES.xlsx"
+        - "data/raw/chile/Buscador_Empleabilidad_e_Ingresos_2024_2025_SIES.xlsx"
+      organismo: "Servicio de Información de Educación Superior (SIES)"
+      ventana_temporal: "2024-2025"
+      variables: ["Tipo de institución", "Nombre carrera", "Ingreso promedio al 1er año", "Ingreso promedio al 4to año", "Empleabilidad 1er año", "Empleabilidad 2do año"]
+      tratamiento_metodologico:
+        - "Lectura de doble encabezado para separar tipo de institución e indicadores temporales"
+        - "Uso oficial del ingreso al 1er año de egreso (Etapa 3 Item 3.7) por representatividad de inserción laboral profesional inicial y mayor cobertura de carreras"
+        - "Trazabilidad de Empleabilidad al 2do año consolidada observada"
+        - "Estratificación de nivel educativo: CFTs a técnico, IPs desagregados, Universidades a grado"
+
+  uruguay:
+    mec_educ_superior:
+      nombre: "Datos Abiertos de Educación Superior (Egresados)"
+      archivo: "data/raw/uruguay/00._educ_superior_datos.csv"
+      organismo: "Ministerio de Educación y Cultura (MEC) - División de Investigación y Estadística"
+      ventana_temporal: "2014-2023"
+      variables: ["ANIO", "TIPO_UNIV", "NIVEL_ACADEM", "DISCIP_OCDE", "DISCIP_ESPECIF", "U_MED", "VALOR"]
+      tratamiento_metodologico:
+        - "Lectura con thousands='.' para evitar artefactos fraccionarios"
+        - "Filtrado estricto por U_MED == 'Cantidad de personas'"
+        - "Desagregación por nivel académico (Pregrado / Grado / Posgrado)"
+    udelar_serie_historica:
+      nombre: "Serie Histórica de Egresos de Grado por Servicio (UdelaR)"
+      archivo: "data/raw/uruguay/1.Serie-Egresos-totales-Grado-por-Servicio-2000-2024.ods"
+      organismo: "Universidad de la República (UdelaR) - Dirección General de Planeamiento"
+      ventana_temporal: "2000-2024"
+      uso_en_pipeline: "Fuente oficial de validación y paridad institucional para el ranking regional de universidades (año 2022)"
+    mec_anuario_2024:
+      nombre: "Anuario Estadístico de Educación 2024"
+      archivo: "data/raw/uruguay/Anuario Estadístico de Educación 2024.xlsx"
+      organismo: "Ministerio de Educación y Cultura (MEC)"
+      ventana_temporal: "2024 (Egresos 2023)"
+      tabla: "Cuadro II-7.1.1 Egresados de grado por institución universitaria"
+      cobertura: "Universidades públicas y privadas de Uruguay (UdelaR, UTEC, ORT, UCU, UM, UDE, CLAEH)"
+    ine_uruguay_empleo:
+      nombre: "Distribución Porcentual de Personas Ocupadas según Sexo por Rama de Actividad"
+      archivo: "data/raw/uruguay/10235_distribucion_porcentual_de_las_personas_ocupadas_segun_sexo_por_rama_de_actividad_en_ocupa.csv"
+      organismo: "Instituto Nacional de Estadística (INE Uruguay) / Encuesta Continua de Hogares (ECH)"
+      ventana_temporal: "2012-2017"
+      variables: ["Sexo", "Rama de Actividad", "año", "valor"]
+      estado: "Descartada formalmente del pipeline de analytics; sustituida por OIT/ILOSTAT EMP_TEMP_SEX_ECO_NB para garantizar paridad regional continua y evitar duplicidades"
+
+fuentes_soporte_futuro_y_backend:
+  argentina_puestos_departamental:
+    nombre: "CEP-XXI Puestos Privados Registrados por Departamento y Rama CLAE2"
+    archivo: "data/raw/argentina/puestos_depto_priv_por_clae2.csv"
+    organismo: "Ministerio de Economía / CEP-XXI"
+    estado: "Fuente de reserva / apoyo metodológico para futura apertura geográfica subnacional"
+  uruguay_terciarios:
+    nombre: "Anuario MEC - Terciaria no Universitaria"
+    archivo: "data/raw/uruguay/Anuario Estadístico de Educación 2024.xlsx (Hoja TERCIARIA NO UNIVERSITARIA)"
+    organismo: "Ministerio de Educación y Cultura (MEC)"
+    estado: "Fuente de reserva para futura incorporación del nivel técnico-terciario no universitario"
+  linkedin_jobs_scraping:
+    nombre: "Dataset Scraping de Puestos de Empleo LinkedIn"
+    carpeta: "data/raw/linkedin_jobs/"
+    estado: "Excluida de data_analytics; reservada para desarrollo y explotación del rol Backend"

@@ -1,0 +1,104 @@
+# Carreras de Uruguay: une los nombres que cambian entre anuarios del MEC, para que una serie por nombre
+# no muestre un cambio de nombre como crecimiento. Lo usa app/analytics/graduate_trends_run.py
+# (analytics.yaml -> graduate_trends.countries.URY.names_file).
+#
+# Se aplica en este orden, sobre cada nombre publicado:
+# 1. reglas: expresión regular -> reemplazo, sin distinguir mayúsculas. Quitan sedes y corrigen formas
+#    generales ("Licenciado en X" -> "Licenciatura en X").
+# 2. equivalencias: nombre final -> nombres normalizados (minúsculas, sin tildes) ya pasados por las
+#    reglas. Varias formas de la misma carrera suman sus egresados por año.
+# Un nombre que no aparece queda como lo publica la fuente.
+#
+# Criterio: se unen los nombres cuando uno termina y el otro empieza en el mismo momento, o cuando
+# son la misma carrera con otra redacción. No se unen carreras distintas de distintas instituciones
+# solo por parecerse, salvo las marcadas en review.
+#
+# STATUS: borrador sin revisar.
+# review: uniones que son una decisión, para confirmar:
+# - Abogacía: "Doctor en Derecho y Ciencias Sociales" termina en 2023 y Abogacía crece en 2024.
+# - Notariado: "Escribano Público" termina en 2023 y Notariado salta de 20 a 253 en 2024.
+# - Medicina: el título de Udelar ("Doctor en Medicina") con la carrera de otra institución.
+# - Veterinaria y Odontología: igual que Medicina.
+# - Obstetricia: "Obstetra Partera" y "Licenciada en Obstetricia" de Paysandú.
+# - Licenciatura en Diseño Industrial: las opciones y perfiles se publican juntos desde 2023.
+reviewed: false
+review:
+  - Abogacía
+  - Notariado
+  - Medicina
+  - Veterinaria
+  - Odontología
+  - Obstetricia
+  - Licenciatura en Diseño Industrial
+
+reglas:
+  # Sede o convenio entre paréntesis al final: no cambian la carrera.
+  - ['\s*\((montevideo|salto|paysand[uú]|maldonado|tacuaremb[oó]|rivera|treinta y tres|itr cs|paysand[uú] - entre r[ií]os|(cetp|dgetp)\s*-\s*utu-utec)\)\s*$', '']
+  # Título en lugar de carrera, y errores de tipeo que se repiten.
+  - ['^lic\.\s+en\b', 'Licenciatura en']
+  - ['^(licenciad[oa]|liccenciado|licencitura|licenicatura)\s+en\b', 'Licenciatura en']
+  - ['^licenciatura\s+(an[aá]lisis|comunicaci[oó]n)\b', 'Licenciatura en \1']
+  - ['^tecn[oó]logo/a\b', 'Tecnólogo']
+  - ['^t[eé]cnico universitario en\b', 'Tecnicatura Universitaria en']
+  - ['^t[eé]cnico en (anatom[ií]a|hemoterapia|podolog[ií]a|radiois[oó]topos|recreaci[oó]n|tecnolog[ií]as de la imagen|desarrollo regional|artes)\b', 'Tecnicatura en \1']
+  # Mayúsculas de algunos anuarios ("Licenciatura En Negocios Internacionales E Integración").
+  - ['(?<=\s)en(?=\s)', 'en']
+  - ['(?<=\s)de(?=\s)', 'de']
+  - ['(?<=\s)del(?=\s)', 'del']
+  - ['(?<=\s)y(?=\s)', 'y']
+  - ['(?<=\s)e(?=\s)', 'e']
+  - ['(?<=\s)para(?=\s)', 'para']
+
+equivalencias:
+  Abogacía: [abogacia, doctor en derecho y ciencias sociales]
+  Notariado: [notariado, escribano publico, escribania]
+  Medicina: [medicina, doctor en medicina]
+  Veterinaria: [doctor en ciencias veterinarias, doctor en medicina y tecnologia veterinaria, medico veterinario]
+  Odontología: [odontologia, doctor en odontologia]
+  Obstetricia: [obstetra - partera, obstetra partera, licenciatura en obstetricia]
+  Arquitectura: [arquitectura, arquitecto]
+  Agrimensura: [agrimensura, ingeniero agrimensor]
+  Ingeniería Agronómica: [ingenieria agronomica, ingeniero agronomo]
+  Ingeniería Civil: [ingenieria civil, ingeniero civil]
+  Ingeniería de Alimentos: [ingenieria de alimentos, ingenieria en alimentos, ingeniero alimentario]
+  Ingeniería de Producción: [ingenieria de produccion, ingeniero de produccion]
+  Ingeniería Eléctrica: [ingenieria electrica, ingeniero electrico]
+  Ingeniería en Computación: [ingenieria en computacion, ingeniero en computacion]
+  Ingeniería en Energías Renovables: [ingenieria en energias renovables, ingenieria en energias renovables (solar y eolica)]
+  Ingeniería en Sistemas de Comunicación: [ingenieria en sistemas de comunicacion, ingeniero en sistemas de comunicacion]
+  Ingeniería en Telecomunicaciones: [ingenieria en telecomunicaciones, ingenieria en telecomunicacion]
+  Ingeniería Físico-Matemática: [ingenieria fisico-matematica, ingenieria en fisico-matematica]
+  Ingeniería Forestal: [ingenieria forestal, ingeniero forestal]
+  Ingeniería Industrial Mecánica: [ingenieria industrial mecanica, ingeniero industrial mecanico]
+  Ingeniería Naval: [ingenieria naval, ingeniero naval]
+  Ingeniería Química: [ingenieria quimica, ingeniero quimico]
+  Licenciatura en Análisis Alimentario: [licenciatura en analisis alimentario]
+  Licenciatura en Antropología: [licenciatura en antropologia, licenciatura en ciencias antropologicas]
+  Licenciatura en Archivología: [licenciatura en archivologia, archivologo]
+  Licenciatura en Artes - Cerámica: [licenciatura en artes - ceramica, licenciatura en artes-ceramica]
+  Licenciatura en Artes - Ciclo Básico: [licenciatura en artes - ciclo basico, licenciatura en arte- ciclo basico]
+  Licenciatura en Bibliotecología: [licenciatura en bibliotecologia, bibliotecologia]
+  Licenciatura en Ciencia de Datos para Negocios: [licenciatura en ciencia de datos para negocios, licenciatura en ciencias de datos para negocios]
+  Licenciatura en Ciencia y Tecnología de Lácteos: [licenciatura en ciencia y tecnologia de lacteos, licenciatura en ciencias y tecnologia de lacteos]
+  Licenciatura en Comunicación y Marketing: [licenciatura en comunicacion y marketing]
+  Licenciatura en Dirección y Administración de Empresas: [licenciatura en direccion y administracion de empresas, licenciatura en direccion y administracion de empresa, licenciatura en administracion y direccion de empresas]
+  Licenciatura en Diseño Industrial: [licenciatura en diseno industrial, licenciatura en diseno industrial - perfil producto, licenciatura en diseno industrial - perfil textil - indumentaria, diseno industrial - opcion industrial, diseno industrial - opcion textil y moda]
+  Licenciatura en Economía y Finanzas: [licenciatura en economia y finanzas, licenciatura en economia y finanzas aplicadas]
+  Licenciatura en Educación Física, Recreación y Deporte: ["licenciatura en educacion fisica, recreacion y deporte", "licenciatura en educacion fisica, recreacion y deporte plan 2012", "licenciatura en educacion fisica, deporte y recreacion", "licenciatura en educacion fisica, deportes y recreacion"]
+  Licenciatura en Enfermería: [licenciatura en enfermeria, licenciatura en emfermeria]
+  Licenciatura en Enfermería - Profesionalización de Auxiliares: [licenciatura en enfermeria - profesionalizacion de auxiliares, licenciatura en enfermeria (profesionalizacion de auxiliar)]
+  Licenciatura en Física: [licenciatura en fisica, licenciatura en ciencias fisicas]
+  Licenciatura en Historia: [licenciatura en historia, licenciatura en ciencias historicas]
+  Maestro en Educación Primaria: [maestro en educacion primaria, maestro de educacion primaria, maestro educacion primaria]
+  Nutrición: [licenciatura en nutricion, nutricionista dietista]
+  Tecnicatura Binacional en Turismo: [tecnicatura binacional en turismo, tecnicatura binacional de turismo]
+  Tecnicatura en Acompañamiento Terapéutico: [tecnicatura en acompanamiento terapeutico, acompanamiento terapeutico]
+  Tecnicatura en Administración: [tecnicatura en administracion, tecnico en administracion]
+  Tecnicatura en Artes - Artes Plásticas y Visuales: [tecnicatura en artes - artes plasticas y visuales, "tecnicatura en artes: artes plasticas y visuales"]
+  Tecnicatura en Deportes: [tecnicatura en deportes, tecnicatura en deporte, tecnicatura en deportes - atletismo]
+  Tecnicatura en Gestión de Recursos Naturales: [tecnicatura en gestion de recursos naturales, tecnicatura en gestion de recursos naturales y desarrollo sustentable, tecnicatura en gestion en recursos naturales y desarrollo sustentable]
+  Tecnicatura en Interpretación y Traducción LSU: ["tecnicatura en interpretacion y traduccion lsu, lengua de senas uruguaya - espanol", "tecnologo en interpretacion y traduccion lsu, lengua de senas uruguaya - espanol", tecnicatura universitaria en interpretacion lsu esp lsu]
+  Tecnicatura Universitaria en Bienes Culturales: [tecnicatura universitaria en bienes culturales, tecnicatura universitario en bienes culturales]
+  Tecnicatura Universitaria en Museología: [tecnicatura universitaria en museologia, tecnicatura en museologia]
+  Técnico Deportivo Superior: [tecnico deportivo superior, tecnico deportivo superior - actividades acuaticas, tecnico deportivo superior - atletismo, tecnico deportivo superior - basquebol, tecnico deportivo superior - futbol, tecnico deportivo superior - handball, tecnico deportivo superior - opcion actividades acuaticas, tecnico deportivo superior - opcion atletismo, tecnico deportivo superior - opcion futbol, tecnico deportivo superior - opcion handball, tecnico deportivo superior actividades basquebol, tecnico deportivo superior-opcion basquetbol]
+  Traductorado Público: [traductorado publico, traductor publico, traductorado publico ingles, licenciatura en traduccion ingles<>espanol]

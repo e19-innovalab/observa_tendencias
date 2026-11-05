@@ -48,7 +48,9 @@ def check(country: str, path: str) -> list[str]:
                  if normalize_text(c) not in rows]
     problems += [f"Fila sin carrera en los datos: {k}" for k in cw["careers"]
                  if data and normalize_text(k) not in {normalize_text(c) for c in data}]
-    mapped = sum(1 for v in cw["careers"].values() if v)
+    # a row maps to occupations when some level has codes (a row with only empty levels is generic)
+    mapped = sum(1 for v in cw["careers"].values()
+                 if (any(v.values()) if isinstance(v, dict) else v))
     print(f"{country} ({path}): {len(cw['careers'])} carreras, {mapped} con ocupación, "
           f"{len(cw['careers']) - mapped} genéricas | revisada: {'sí' if cw.get('reviewed') else 'no'}"
           f" | carreras en los datos: {len(data)}")

@@ -114,7 +114,7 @@ uvicorn app.main:app --port 8010
 ## Tablas en Supabase
 
 `countries`, `sectors`, `occupations`, `occupation_crosswalks`, `skills`, `occupation_skills`, `sources`,
-`ingestion_runs`, `indicators`, `observations`, `coverage_report`, `job_postings`, `graduate_trends` y
+`ingestion_runs`, `indicators`, `observations`, `job_postings`, `graduate_trends` y
 `graduate_projections`. `observations` guarda cada valor con su fuente, fecha y tipo de dato.
 
 ## Problemas frecuentes

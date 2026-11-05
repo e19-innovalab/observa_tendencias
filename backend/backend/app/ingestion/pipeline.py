@@ -10,7 +10,15 @@ from sqlalchemy import delete, select
 from sqlalchemy.dialects import postgresql, sqlite
 from sqlalchemy.orm import Session
 
-from app.analytics.recompute import recompute, refresh_skill_gaps
+from app.analytics.recompute import (
+    recompute,
+    refresh_graduate_trends,
+    refresh_ludita,
+    refresh_moctezuma,
+    refresh_red_queen,
+    refresh_sector_kpis,
+    refresh_skill_gaps,
+)
 from app.connectors.registry import build_connector
 from app.core.config_files import app_config, indicators, sources
 from app.datasets.ingest import DatasetError, run_dataset_source
@@ -74,6 +82,11 @@ def _write_observations(session: Session, rows: list[dict]) -> None:
 
 DATASET_CONNECTOR = "dataset_download"
 ESCO_CONNECTOR = "esco"
+SKILL_VERSIONS_CONNECTOR = "skill_versions"
+UNIVERSITIES_CONNECTOR = "universities"
+TRACKED_CAREERS_CONNECTOR = "tracked_careers"
+CEP_CONNECTOR = "cep_xxi"
+BCRA_CONNECTOR = "bcra_fx"
 
 
 def prune_out_of_scope(session: Session, source_id: int, specs) -> None:
@@ -135,8 +148,14 @@ def run_source(
         raise IngestionError(messages["unknown_source"].format(code=source_code))
     is_dataset = source_conf.connector == DATASET_CONNECTOR
     is_esco = source_conf.connector == ESCO_CONNECTOR
-    connector = None if (is_dataset or is_esco) else build_connector(source_conf)
-    if connector is None and not (is_dataset or is_esco):
+    is_versions = source_conf.connector == SKILL_VERSIONS_CONNECTOR
+    is_universities = source_conf.connector == UNIVERSITIES_CONNECTOR
+    is_tracked = source_conf.connector == TRACKED_CAREERS_CONNECTOR
+    is_cep = source_conf.connector == CEP_CONNECTOR
+    is_bcra = source_conf.connector == BCRA_CONNECTOR
+    special = is_dataset or is_esco or is_versions or is_universities or is_tracked or is_cep or is_bcra
+    connector = None if special else build_connector(source_conf)
+    if connector is None and not special:
         raise IngestionError(messages["source_without_connector"].format(code=source_code))
     source = session.scalar(select(Source).where(Source.source_code == source_code))
     if source is None:
@@ -148,7 +167,58 @@ def run_source(
     session.commit()
 
     try:
-        if is_esco:
+        if is_versions:
+            # skill profiles per release (Reina Roja): only releases not stored yet are fetched
+            from app.skills.versions import run_skill_versions  # heavy imports, only when used
+
+            releases, profiles, skipped = run_skill_versions(session, source_code)
+            if releases:
+                refresh_red_queen(session)
+            session.commit()
+            run.records_fetched, run.records_normalized = releases, profiles
+            run.status = "partial" if skipped else "success"
+            run.error_message = (f"ocupaciones ESCO omitidas (error del servidor): {skipped}"
+                                 if skipped else None)
+        elif is_universities:
+            # graduates per university: no indicators or scores depend on them
+            from app.datasets.universities import run_universities_source
+
+            loaded, warnings = run_universities_source(session, source_code, run)
+            session.commit()
+            run.records_fetched = run.records_normalized = loaded
+            run.status = "partial" if warnings else "success"
+            run.error_message = "; ".join(warnings)[:MAX_ERROR_LENGTH] or None
+        elif is_bcra:
+            # read by the CEP-XXI job when it converts the wages: nothing to recalculate
+            from app.datasets.bcra_fx import run_bcra_source
+
+            loaded, warnings = run_bcra_source(session, source_code, run)
+            session.commit()
+            run.records_fetched = run.records_normalized = loaded
+            run.status = "partial" if warnings else "success"
+            run.error_message = "; ".join(warnings)[:MAX_ERROR_LENGTH] or None
+        elif is_cep:
+            # files and factors the KPIs read when asked: nothing to recalculate
+            from app.datasets.cep_xxi import run_cep_source
+
+            loaded, warnings = run_cep_source(session, source_code, run)
+            session.commit()
+            run.records_fetched = run.records_normalized = loaded
+            run.status = "partial" if warnings else "success"
+            run.error_message = "; ".join(warnings)[:MAX_ERROR_LENGTH] or None
+        elif is_tracked:
+            # topics grouped from program names: only career trends depend on them
+            from app.datasets.tracked_careers import run_tracked_careers_source
+
+            loaded, warnings = run_tracked_careers_source(session, source_code, run)
+            if loaded:  # same transaction: if this fails, the next run loads the file again
+                refresh_graduate_trends(session)
+                refresh_sector_kpis(session)
+            session.commit()
+            run.records_fetched = run.records_normalized = loaded
+            run.status = "partial" if warnings else "success"
+            run.error_message = "; ".join(warnings)[:MAX_ERROR_LENGTH] or None
+        elif is_esco:
             # reference data (skills by occupation): no observations, no recalculation
             groups, rows, skipped = run_esco_source(session, source_code)
             session.commit()
@@ -164,7 +234,11 @@ def run_source(
             session.commit()
             run.records_fetched = run.records_normalized = loaded
             if loaded and not changed:  # files without indicators (e.g. graduates)
+                refresh_graduate_trends(session)
+                refresh_sector_kpis(session)
                 refresh_skill_gaps(session)
+                refresh_moctezuma(session)
+                refresh_ludita(session)
                 session.commit()
             _finish(session, run, changed, [])
         else:

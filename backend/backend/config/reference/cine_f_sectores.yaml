@@ -1,0 +1,22 @@
+# Sector de cada carrera: campo detallado CINE-F 2013 -> sector estratégico del catálogo. Cada carrera
+# ya tiene su campo en config/reference/carreras_<país>_cine.yaml. Lo usa
+# app/analytics/graduate_trends_run.py (analytics.yaml -> graduate_trends.sector_file).
+#
+# Criterio: el sector se define por actividad económica (catalog.yaml -> isic_codes). Un campo entra
+# en un sector si esa actividad es adonde va principalmente quien estudia ese campo. Un campo que no
+# aparece acá queda en "Otros": no se fuerza a entrar en un sector.
+#
+# review: decisiones menos directas, para confirmar:
+# - 0714 Electrónica y automatización en Tecnología: fabricar electrónica no es J62-J63.
+# - 0724 Minería en Energía: el catálogo solo tiene B06 (petróleo y gas), no toda la minería.
+# - 0211 y 0212 Diseño en Economía del conocimiento: M74 incluye diseño; 0211 también es audiovisual.
+# - 0413 Gestión y administración en Economía del conocimiento: M70, aunque se trabaja en todo sector.
+reviewed: false
+review: ["0714", "0724", "0211", "0212", "0413"]
+
+sectors:
+  technology: ["0611", "0612", "0613", "0619", "0714"]
+  health: ["0911", "0912", "0913", "0914", "0915", "0916", "0917", "0919", "0921", "0922", "0923", "0929"]
+  energy: ["0713", "0724"]
+  tourism: ["1013", "1015"]
+  knowledge_economy: ["0211", "0212", "0411", "0413", "0414", "0421", "0542", "0731", "0841"]

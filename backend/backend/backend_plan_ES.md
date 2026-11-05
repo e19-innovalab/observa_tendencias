@@ -236,6 +236,18 @@ Las fuentes sin API (INDEC EPH, ECH de INE Uruguay, SABE, SIES, ANEP) pasan por 
 
 ## 6. Carga manual de datasets
 
+> **Estado (2026-11-01): implementado, con cambios respecto de este plan.** Formatos CSV y XLSX
+> (sin JSON), contra perfiles declarados en `config/datasets/` o una plantilla genérica en formato
+> largo. Además del plan:
+> - control del archivo real antes de leerlo: Excel real sin macros, CSV en UTF-8, límites de tamaño y filas;
+> - errores agrupados por tipo, con indicaciones;
+> - plantilla descargable con los códigos válidos y archivos de ejemplo;
+> - aviso y confirmación cuando el archivo repite valores de fuentes oficiales.
+>
+> El estado al subir es `validated` o `rejected` (no `pending`). La versión nueva de la misma fuente
+> declarada reemplaza a la anterior al confirmar, sin endpoint `replace`. Detalle vigente en
+> `docs/fuentes_y_criterios.md` (sección 1.4).
+
 Flujo en dos pasos, para que el usuario revise la vista previa antes de confirmar:
 
 ```

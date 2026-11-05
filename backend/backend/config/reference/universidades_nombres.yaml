@@ -1,0 +1,246 @@
+# Nombres de universidades e institutos: nombre publicado por la fuente -> nombre normalizado.
+# Lo usa app/datasets/universities.py (analytics.yaml -> universities.names_file).
+#
+# Criterio: el nombre oficial completo, con mayúsculas y tildes. Varias formas publicadas de la misma
+# institución van al mismo nombre y sus egresados se suman por año. Las marcas de nota de los
+# anuarios argentinos, como "Salvador (4)", se quitan antes de buscar acá, salvo que la forma con
+# la marca tenga su propia entrada. Un nombre publicado que no esté acá se carga tal como viene
+# y queda avisado en la corrida.
+#
+# Instituciones sucesoras con otra figura legal siguen separadas: el Instituto Universitario
+# Nacional del Arte (hasta 2014) y la Universidad Nacional de las Artes (desde 2015).
+#
+# review: nombres para confirmar contra la fuente.
+review:
+  - Instituto Universitario para el Desarrollo Productivo y Tecnológico
+  - Instituto Universitario Nacional de Derechos Humanos Madres de Plaza de Mayo
+  - Universidad del Gran Rosario
+
+ARG:
+  Abierta Interamericana: Universidad Abierta Interamericana
+  Aconcagua: Universidad del Aconcagua
+  Adventista del Plata: Universidad Adventista del Plata
+  Aeronáutico: Instituto Universitario Aeronáutico
+  Alto Uruguay: Universidad Nacional del Alto Uruguay
+  Argentina John F. Kennedy: Universidad Argentina John F. Kennedy
+  Argentina de la Empresa: Universidad Argentina de la Empresa
+  Artes: Universidad Nacional de las Artes
+  Arturo Jauretche: Universidad Nacional Arturo Jauretche
+  Atlántida Argentina: Universidad Atlántida Argentina
+  Austral: Universidad Austral
+  Autónoma de Entre Ríos: Universidad Autónoma de Entre Ríos
+  Avellaneda: Universidad Nacional de Avellaneda
+  Belgrano: Universidad de Belgrano
+  Blás Pascal: Universidad Blas Pascal
+  Blas Pascal: Universidad Blas Pascal
+  Buenos Aires: Universidad de Buenos Aires
+  CAECE: Universidad CAECE
+  CEMA: Universidad del CEMA
+  CEMIC: Instituto Universitario CEMIC
+  Catamarca: Universidad Nacional de Catamarca
+  Católica Argentina: Pontificia Universidad Católica Argentina
+  Católica de Cuyo: Universidad Católica de Cuyo
+  Católica de Córdoba: Universidad Católica de Córdoba
+  Católica de La Plata: Universidad Católica de La Plata
+  Católica de Salta: Universidad Católica de Salta
+  Católica de Santa Fe: Universidad Católica de Santa Fe
+  Católica de Santiago del Estero: Universidad Católica de Santiago del Estero
+  Católica de las Misiones: Universidad Católica de las Misiones
+  Centro Educativo Latinoamericano: Universidad del Centro Educativo Latinoamericano
+  Centro de la PBA: Universidad Nacional del Centro de la Provincia de Buenos Aires
+  Chaco Austral: Universidad Nacional del Chaco Austral
+  Champagnat: Universidad Champagnat
+  Chilecito: Universidad Nacional de Chilecito
+  Chubut: Universidad del Chubut
+  Ciencias Biomédicas de Córdoba: Instituto Universitario de Ciencias Biomédicas de Córdoba
+  Ciencias Empresariales y Sociales: Universidad de Ciencias Empresariales y Sociales
+  Cine: Universidad del Cine
+  Comahue: Universidad Nacional del Comahue
+  Comechingones: Universidad Nacional de los Comechingones
+  Concepción del Uruguay: Universidad de Concepción del Uruguay
+  Congreso: Universidad de Congreso
+  Cs de la Salud de la Fundación Barceló: Instituto Universitario de Ciencias de la Salud Fundación Barceló
+  Cuenca del Plata: Universidad de la Cuenca del Plata
+  Cuyo: Universidad Nacional de Cuyo
+  Córdoba: Universidad Nacional de Córdoba
+  DD. HH. Madres de Plaza de Mayo: Instituto Universitario Nacional de Derechos Humanos Madres de Plaza de Mayo
+  Defensa: Universidad de la Defensa Nacional
+  ESEADE: Instituto Universitario ESEADE
+  Empresarial Siglo 21: Universidad Empresarial Siglo 21
+  Enseñanza Superior del Ejército: Instituto de Enseñanza Superior del Ejército
+  Entre Ríos: Universidad Nacional de Entre Ríos
+  Escuela Argentina de Negocios: Instituto Universitario Escuela Argentina de Negocios
+  Escuela Universitaria de Teología: Escuela Universitaria de Teología
+  Escuela de Medicina del Hospital Italiano: Instituto Universitario Escuela de Medicina del Hospital Italiano
+  Este: Universidad del Este
+  Ezeiza: Universidad Provincial de Ezeiza
+  FASTA: Universidad FASTA
+  Favaloro: Universidad Favaloro
+  Flores: Universidad de Flores
+  Formosa: Universidad Nacional de Formosa
+  Gastón Dachary: Universidad Gastón Dachary
+  Gendarmería: Instituto Universitario de Gendarmería Nacional
+  Gral. Sarmiento: Universidad Nacional de General Sarmiento
+  Gran Rosario: Universidad del Gran Rosario
+  Guillermo Brown: Universidad Nacional Guillermo Brown
+  Hurlingham: Universidad Nacional de Hurlingham
+  ISALUD: Universidad ISALUD
+  ISEDET: Instituto Universitario ISEDET
+  ITBA: Instituto Tecnológico de Buenos Aires
+  IUDPT: Instituto Universitario para el Desarrollo Productivo y Tecnológico
+  Instituto Univ. del Arte: Instituto Universitario Nacional del Arte
+  IUNA: Instituto Universitario Nacional del Arte
+  Instituto de la Cooperación: Instituto Universitario de la Cooperación
+  Italiano de Rosario: Instituto Universitario Italiano de Rosario
+  José C. Paz: Universidad Nacional de José Clemente Paz
+  Juan Agustín Maza: Universidad Juan Agustín Maza
+  Jujuy: Universidad Nacional de Jujuy
+  La Matanza: Universidad Nacional de La Matanza
+  La Pampa: Universidad Nacional de La Pampa
+  La Plata: Universidad Nacional de La Plata
+  La Rioja: Universidad Nacional de La Rioja
+  Lanús: Universidad Nacional de Lanús
+  Litoral: Universidad Nacional del Litoral
+  Lomas de Zamora: Universidad Nacional de Lomas de Zamora
+  Luján: Universidad Nacional de Luján
+  Madres de Plaza de Mayo: Universidad Popular Madres de Plaza de Mayo
+  Madres de Plaza de Mayo (3): Instituto Universitario Nacional de Derechos Humanos Madres de Plaza de Mayo
+  Maimónides: Universidad Maimónides
+  Mar del Plata: Universidad Nacional de Mar del Plata
+  Marina Mercante: Universidad de la Marina Mercante
+  Mendoza: Universidad de Mendoza
+  Metropolitana: Universidad Metropolitana para la Educación y el Trabajo
+  Misiones: Universidad Nacional de Misiones
+  Moreno: Universidad Nacional de Moreno
+  Morón: Universidad de Morón
+  Museo Social Argentino: Universidad del Museo Social Argentino
+  Naval: Instituto Universitario Naval
+  Nordeste: Universidad Nacional del Nordeste
+  Noroeste de la PBA: Universidad Nacional del Noroeste de la Provincia de Buenos Aires
+  Norte Santo Tomás de Aquino: Universidad del Norte Santo Tomás de Aquino
+  Oeste: Universidad Nacional del Oeste
+  Palermo: Universidad de Palermo
+  Patagonia Austral: Universidad Nacional de la Patagonia Austral
+  Patagonia S. J. Bosco: Universidad Nacional de la Patagonia San Juan Bosco
+  Patagónico de las Artes: Instituto Universitario Patagónico de las Artes
+  Pedagógica: Universidad Pedagógica Nacional
+  Policía Federal Argentina: Instituto Universitario de la Policía Federal Argentina
+  Provincial de Córdoba: Universidad Provincial de Córdoba
+  Provincial de Laguna Blanca: Universidad Provincial de Laguna Blanca
+  Quilmes: Universidad Nacional de Quilmes
+  Rafaela: Universidad Nacional de Rafaela
+  River Plate: Instituto Universitario River Plate
+  River: Instituto Universitario River Plate
+  Provincial de Ezeiza: Universidad Provincial de Ezeiza
+  Provincial del Sudoeste: Universidad Provincial del Sudoeste
+  Rosario: Universidad Nacional de Rosario
+  Río Cuarto: Universidad Nacional de Río Cuarto
+  Río Negro: Universidad Nacional de Río Negro
+  Salesiana: Universidad Salesiana
+  Salta: Universidad Nacional de Salta
+  Salvador: Universidad del Salvador
+  San Andrés: Universidad de San Andrés
+  San Antonio de Areco: Universidad Nacional de San Antonio de Areco
+  San Isidro: Universidad de San Isidro Dr. Plácido Marín
+  San Juan: Universidad Nacional de San Juan
+  San Luis: Universidad Nacional de San Luis
+  San Martín: Universidad Nacional de San Martín
+  San Pablo - T: Universidad de San Pablo-Tucumán
+  San Pablo -T: Universidad de San Pablo-Tucumán
+  Santiago del Estero: Universidad Nacional de Santiago del Estero
+  Scalabrini Ortiz: Universidad Nacional Raúl Scalabrini Ortiz
+  Seguridad Marítima: Instituto Universitario de Seguridad Marítima
+  Sudoeste: Universidad Provincial del Sudoeste
+  Sur: Universidad Nacional del Sur
+  Tecnológica Nacional: Universidad Tecnológica Nacional
+  Tierra del Fuego: Universidad Nacional de Tierra del Fuego, Antártida e Islas del Atlántico Sur
+  Torcuato Di Tella: Universidad Torcuato Di Tella
+  Tres de Febrero: Universidad Nacional de Tres de Febrero
+  Tucumán: Universidad Nacional de Tucumán
+  Villa María: Universidad Nacional de Villa María
+  Villa Mercedes: Universidad Nacional de Villa Mercedes
+
+CHL:
+  PONTIFICIA UNIVERSIDAD CATOLICA DE CHILE: Pontificia Universidad Católica de Chile
+  PONTIFICIA UNIVERSIDAD CATOLICA DE VALPARAISO: Pontificia Universidad Católica de Valparaíso
+  UNIVERSIDAD ACADEMIA DE HUMANISMO CRISTIANO: Universidad Academia de Humanismo Cristiano
+  UNIVERSIDAD ADOLFO IBAÑEZ: Universidad Adolfo Ibáñez
+  UNIVERSIDAD ADVENTISTA DE CHILE: Universidad Adventista de Chile
+  UNIVERSIDAD ALBERTO HURTADO: Universidad Alberto Hurtado
+  UNIVERSIDAD ANDRES BELLO: Universidad Andrés Bello
+  UNIVERSIDAD ARTURO PRAT: Universidad Arturo Prat
+  UNIVERSIDAD AUSTRAL DE CHILE: Universidad Austral de Chile
+  UNIVERSIDAD AUTONOMA DE CHILE: Universidad Autónoma de Chile
+  UNIVERSIDAD BERNARDO O'HIGGINS: Universidad Bernardo O'Higgins
+  UNIVERSIDAD BOLIVARIANA: Universidad Bolivariana
+  UNIVERSIDAD CATOLICA CARDENAL RAUL SILVA HENRIQUEZ: Universidad Católica Cardenal Raúl Silva Henríquez
+  UNIVERSIDAD CATOLICA DE LA SANTISIMA CONCEPCION: Universidad Católica de la Santísima Concepción
+  UNIVERSIDAD CATOLICA DE TEMUCO: Universidad Católica de Temuco
+  UNIVERSIDAD CATOLICA DEL MAULE: Universidad Católica del Maule
+  UNIVERSIDAD CATOLICA DEL NORTE: Universidad Católica del Norte
+  UNIVERSIDAD CENTRAL DE CHILE: Universidad Central de Chile
+  UNIVERSIDAD CHILENO BRITANICA DE CULTURA: Universidad Chileno Británica de Cultura
+  UNIVERSIDAD DE ACONCAGUA: Universidad de Aconcagua
+  UNIVERSIDAD DE ANTOFAGASTA: Universidad de Antofagasta
+  UNIVERSIDAD DE ARTE Y CIENCIAS SOCIALES ARCIS: Universidad de Arte y Ciencias Sociales ARCIS
+  UNIVERSIDAD DE ARTE Y CIENCIAS SOCIALES ARCIS ( CARRERA EN CONVENIO U. CATOLICA DEL MAULE): Universidad de Arte y Ciencias Sociales ARCIS
+  UNIVERSIDAD DE ARTES, CIENCIAS Y COMUNICACION - UNIACC: Universidad de Artes, Ciencias y Comunicación (UNIACC)
+  UNIVERSIDAD DE ATACAMA: Universidad de Atacama
+  UNIVERSIDAD DE AYSEN: Universidad de Aysén
+  UNIVERSIDAD DE CHILE: Universidad de Chile
+  UNIVERSIDAD DE CONCEPCION: Universidad de Concepción
+  UNIVERSIDAD DE LA FRONTERA: Universidad de La Frontera
+  UNIVERSIDAD DE LA SERENA: Universidad de La Serena
+  UNIVERSIDAD DE LAS AMERICAS: Universidad de Las Américas
+  UNIVERSIDAD DE LOS ANDES: Universidad de los Andes
+  UNIVERSIDAD DE LOS LAGOS: Universidad de Los Lagos
+  UNIVERSIDAD DE MAGALLANES: Universidad de Magallanes
+  UNIVERSIDAD DE O'HIGGINS: Universidad de O'Higgins
+  UNIVERSIDAD DE PLAYA ANCHA DE CIENCIAS DE LA EDUCACION: Universidad de Playa Ancha de Ciencias de la Educación
+  UNIVERSIDAD DE SANTIAGO DE CHILE: Universidad de Santiago de Chile
+  UNIVERSIDAD DE TALCA: Universidad de Talca
+  UNIVERSIDAD DE TARAPACA: Universidad de Tarapacá
+  UNIVERSIDAD DE VALPARAISO: Universidad de Valparaíso
+  UNIVERSIDAD DE VIÑA DEL MAR: Universidad de Viña del Mar
+  UNIVERSIDAD DEL ALBA: Universidad del Alba
+  UNIVERSIDAD DEL BIO-BIO: Universidad del Bío-Bío
+  UNIVERSIDAD DEL DESARROLLO: Universidad del Desarrollo
+  UNIVERSIDAD DEL MAR: Universidad del Mar
+  UNIVERSIDAD DEL PACIFICO: Universidad del Pacífico
+  UNIVERSIDAD DEL PACIFICO (CARRERA EN CONVENIO UTEM): Universidad del Pacífico
+  UNIVERSIDAD DIEGO PORTALES: Universidad Diego Portales
+  UNIVERSIDAD FINIS TERRAE: Universidad Finis Terrae
+  UNIVERSIDAD GABRIELA MISTRAL: Universidad Gabriela Mistral
+  UNIVERSIDAD IBEROAMERICANA DE CIENCIAS Y TECNOLOGIA, UNICIT: Universidad Iberoamericana de Ciencias y Tecnología (UNICYT)
+  UNIVERSIDAD IBEROAMERICANA DE CIENCIAS Y TECNOLOGIA, UNICYT (CARRERA EN CONVENIO USACH): Universidad Iberoamericana de Ciencias y Tecnología (UNICYT)
+  UNIVERSIDAD LA REPUBLICA: Universidad La República
+  UNIVERSIDAD LOS LEONES: Universidad Los Leones
+  UNIVERSIDAD MAYOR: Universidad Mayor
+  UNIVERSIDAD METROPOLITANA DE CIENCIAS DE LA EDUCACION: Universidad Metropolitana de Ciencias de la Educación
+  UNIVERSIDAD MIGUEL DE CERVANTES: Universidad Miguel de Cervantes
+  UNIVERSIDAD REGIONAL SAN MARCOS: Universidad Regional San Marcos
+  UNIVERSIDAD SAN SEBASTIAN: Universidad San Sebastián
+  UNIVERSIDAD SANTO TOMAS: Universidad Santo Tomás
+  UNIVERSIDAD SEK: Universidad SEK
+  UNIVERSIDAD TECNICA FEDERICO SANTA MARIA: Universidad Técnica Federico Santa María
+  UNIVERSIDAD TECNOLOGICA DE CHILE INACAP: Universidad Tecnológica de Chile INACAP
+  UNIVERSIDAD TECNOLOGICA METROPOLITANA: Universidad Tecnológica Metropolitana
+  UNIVERSIDAD UCINF: Universidad UCINF
+
+URY:
+  ESCUELA NACIONAL DE POLICÍA: Escuela Nacional de Policía
+  FUNDACIÓN POLITÉCNICO DE PUNTA DEL ESTE: Fundación Politécnico de Punta del Este
+  INST METODISTA UNIV CRANDON: Instituto Metodista Universitario Crandon
+  INST UNIV ASOCIACIÓN CRISTIANA DE JÓVENES: Instituto Universitario Asociación Cristiana de Jóvenes
+  INST UNIV CEDIIAP: Instituto Universitario CEDIIAP
+  INST UNIV FRANCISCO DE ASÍS: Instituto Universitario Francisco de Asís
+  INST UNIV MONSEÑOR MARIANO SOLER: Instituto Universitario Monseñor Mariano Soler
+  INSTITUTO MILITAR DE ESTUDIOS SUPERIORES (IMES): Instituto Militar de Estudios Superiores (IMES)
+  INSTITUTO UNIVERSITARIO ELBIO FERNÁNDEZ: Instituto Universitario Elbio Fernández
+  Universidad CLAEH: Universidad CLAEH
+  Universidad Católica del Uruguay (UCU): Universidad Católica del Uruguay (UCU)
+  Universidad ORT Uruguay: Universidad ORT Uruguay
+  Universidad Tecnológica (UTEC): Universidad Tecnológica del Uruguay (UTEC)
+  Universidad de Montevideo: Universidad de Montevideo
+  Universidad de la Empresa (UDE): Universidad de la Empresa (UDE)
+  Universidad de la República (UdelaR): Universidad de la República (Udelar)

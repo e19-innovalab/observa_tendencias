@@ -20,6 +20,7 @@ dependencies = [
   "apscheduler>=3.10",
   "pyyaml>=6.0",
   "python-multipart>=0.0.9",
+  "anthropic>=2.3",  # assistant with provider anthropic
 ]
 
 [project.optional-dependencies]

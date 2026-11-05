@@ -191,3 +191,42 @@ groups:
   "952": "Vendedores ambulantes (excluyendo de comida)"
   "961": "Recolectores de desechos"
   "962": "Otras ocupaciones elementales"
+
+# What each major group includes, summarised from the ILO's group definitions (ISCO-08, vol. 1:
+# structure, group definitions and correspondence tables). Shown where a major group is the unit
+# (e.g. the Sísifo indicator).
+definitions_source:
+  label: OIT (2012), Clasificación Internacional Uniforme de Ocupaciones CIUO-08, vol. 1 (estructura y definiciones de los grupos)
+  url: https://www.ilo.org/sites/default/files/wcmsp5/groups/public/@dgreports/@dcomm/@publ/documents/publication/wcms_172572.pdf
+definitions:
+  "0": >-
+    Miembros de las fuerzas armadas, incluidos los que hacen el servicio militar. No incluye a la
+    policía ni al personal civil de defensa.
+  "1": >-
+    Planifican, dirigen, coordinan y evalúan las actividades de empresas, gobiernos y otras
+    organizaciones, o de sus áreas, y formulan y revisan sus políticas y normas.
+  "2": >-
+    Amplían el conocimiento, aplican conceptos y teorías científicas o artísticas, enseñan de forma
+    sistemática, o hacen una combinación de las tres. Suelen pedir estudios universitarios.
+  "3": >-
+    Hacen tareas técnicas ligadas a la investigación y la aplicación de conceptos científicos o
+    artísticos y de normas públicas o comerciales. Suelen pedir estudios terciarios cortos.
+  "4": >-
+    Registran, organizan, guardan, calculan y buscan información, y hacen tareas de oficina:
+    manejo de dinero, viajes, pedidos de información y turnos.
+  "5": >-
+    Prestan servicios personales y de protección (viajes, cocina, cuidado de personas, limpieza,
+    seguridad) o venden en comercios y mercados.
+  "6": >-
+    Cultivan y cosechan, crían animales, explotan bosques o pescan, para vender o para consumo
+    propio, con conocimiento del oficio.
+  "7": >-
+    Aplican conocimientos de oficio para construir y mantener edificios, trabajar metales, armar
+    y reparar máquinas, imprimir y elaborar alimentos, textiles, madera y otros productos.
+  "8": >-
+    Manejan y vigilan máquinas e instalaciones industriales y agrícolas, conducen vehículos y
+    equipos móviles y arman productos a partir de piezas.
+  "9": >-
+    Tareas simples y rutinarias, sobre todo con herramientas de mano y a menudo con esfuerzo
+    físico: limpieza, peones de la construcción, la industria y el campo, ayudantes de cocina,
+    vendedores ambulantes, recolección de residuos, mensajería y cargas.

@@ -7,6 +7,7 @@ import csv
 import hashlib
 import io
 import re
+import zipfile
 from dataclasses import dataclass, field
 from datetime import date, datetime
 from pathlib import Path
@@ -27,6 +28,8 @@ class Issue:
     message: str
     row: int | None = None
     column: str | None = None
+    kind: str | None = None  # message key, to group the same problem across rows
+    value: str | None = None  # the value that failed
 
 
 @dataclass
@@ -40,6 +43,8 @@ class ReadReport:
     periods: list[str] = field(default_factory=list)
     provisional_periods: list[str] = field(default_factory=list)
     fingerprint: str = ""
+    error_groups: list[dict] = field(default_factory=list)  # all errors, grouped (before trimming)
+    overlaps: dict | None = None  # values that already exist from official sources
 
     @property
     def ok(self) -> bool:
@@ -58,7 +63,30 @@ class ReadReport:
             "periods": len(self.periods),
             "provisional_periods": self.provisional_periods,
             "fingerprint": self.fingerprint,
+            "groups": self.error_groups,
+            "overlaps": self.overlaps,
         }
+
+
+def group_errors(errors: list[Issue]) -> list[dict]:
+    """The same problem in many rows, once: title, how many rows, which ones, which values, and
+    what to do (app.yaml -> datasets.group_titles / group_hints). Errors without a kind are left
+    out (they are listed as they are)."""
+    conf = app_config().datasets
+    groups: dict[tuple, dict] = {}
+    for e in errors:
+        if not e.kind or e.kind not in conf.group_titles:
+            continue
+        g = groups.setdefault((e.kind, e.column), {
+            "kind": e.kind, "column": e.column, "count": 0, "rows": [], "values": [],
+            "title": conf.group_titles[e.kind].format(column=e.column or ""),
+            "hint": conf.group_hints.get(e.kind)})
+        g["count"] += 1
+        if e.row is not None and len(g["rows"]) < conf.group_rows_shown:
+            g["rows"].append(e.row)
+        if e.value is not None and e.value not in g["values"] and len(g["values"]) < conf.group_values_shown:
+            g["values"].append(e.value)
+    return sorted(groups.values(), key=lambda g: -g["count"])
 
 
 def _msg(key: str, **kw) -> str:
@@ -225,7 +253,12 @@ def _read_long(rows: list[tuple], profile: DatasetProfile, report: ReadReport) -
         v = row[i] if i is not None and i < len(row) else None
         return None if v in (None, "") else v
 
-    for offset, row in enumerate(rows[profile.file.first_data_row - 1:]):
+    data = rows[profile.file.first_data_row - 1:]
+    max_rows = app_config().datasets.max_rows
+    if len(data) > max_rows:
+        report.errors.append(Issue(_msg("too_many_rows", max=fmt_number(max_rows))))
+        return
+    for offset, row in enumerate(data):
         row_no = profile.file.first_data_row + offset
         if not any(v not in (None, "") for v in row):
             continue
@@ -233,7 +266,7 @@ def _read_long(rows: list[tuple], profile: DatasetProfile, report: ReadReport) -
         for key in conf.required:
             if cell(row, key) is None:
                 problems.append(Issue(_msg("missing_value", column=conf.columns[key]), row_no,
-                                      conf.columns[key]))
+                                      conf.columns[key], kind="missing_value"))
         if problems:
             report.errors.extend(problems)
             continue
@@ -254,17 +287,19 @@ def _read_long(rows: list[tuple], profile: DatasetProfile, report: ReadReport) -
         ]
         for failed, key, kw, column in checks:
             if failed:
-                problems.append(Issue(_msg(key, **kw), row_no, conf.columns[column]))
+                problems.append(Issue(_msg(key, **kw), row_no, conf.columns[column], kind=key,
+                                      value=str(next(iter(kw.values())))))
         if not problems:
             try:
                 start, _ = to_period_range(period, freq)
             except ValueError:
                 problems.append(Issue(_msg("bad_period", frequency=freq, value=period), row_no,
-                                      conf.columns["period"]))
+                                      conf.columns["period"], kind="bad_period", value=period))
         if not problems and ((exp.value_min is not None and value < exp.value_min) or (
                 exp.value_max is not None and value > exp.value_max)):
             problems.append(Issue(_msg("out_of_range", min=exp.value_min, max=exp.value_max,
-                                       value=value), row_no, conf.columns["value"]))
+                                       value=value), row_no, conf.columns["value"],
+                                  kind="out_of_range", value=str(value)))
         if problems:
             report.errors.extend(problems)
             continue
@@ -428,25 +463,131 @@ def _read_outline(path: Path, profile: DatasetProfile, report: ReadReport) -> No
     report.header_found = [s.sheet for s in conf.sheets]
 
 
+def _read_discipline_tables(path: Path, profile: DatasetProfile, report: ReadReport) -> None:
+    """DIU yearbook (zip of workbooks): graduates by discipline from the total row of every
+    field-of-study table, added up over workbooks and checked against the yearbook's totals."""
+    conf = profile.discipline_tables
+    title_re, period_re, skip_re, member_re = (re.compile(p, re.I) for p in (
+        conf.title_pattern, conf.period_pattern, conf.skip_names_pattern, conf.members_pattern))
+    totals_title_re, totals_row_re = re.compile(conf.totals_title_pattern, re.I), \
+        re.compile(conf.totals_row_pattern, re.I)
+    kinds = {k.upper() for k in conf.value_kinds}
+    values: dict[tuple[int, str], float] = {}
+    years, members, expected_total = set(), [], 0.0
+    with zipfile.ZipFile(path) as z:
+        for info in z.infolist():
+            name = info.filename.rsplit("/", 1)[-1]
+            if not member_re.search(name) or not name.lower().endswith(".xlsx"):
+                continue
+            members.append(name)
+            wb = load_workbook(io.BytesIO(z.read(info)), read_only=True, data_only=True)
+            for ws in wb.worksheets:
+                head = list(ws.iter_rows(min_row=1, max_row=12, values_only=True))
+                title = next((str(c) for r in head for c in r if c and title_re.search(str(c))), None)
+                if title:
+                    _discipline_sheet(ws.title, head, title, period_re, skip_re, kinds, values,
+                                      years, report)
+                elif any(c and totals_title_re.search(str(c)) for r in head for c in r):
+                    expected_total += _yearbook_total(head, ws, totals_row_re, years, report)
+    if not members:
+        report.errors.append(Issue(_msg("sheet_missing", sheet=conf.members_pattern,
+                                        sheets=path.name)))
+        return
+    if len(years) > 1:
+        report.errors.append(Issue(_msg("outline_periods_differ",
+                                        years=", ".join(map(str, sorted(years))))))
+    found = sum(values.values())
+    if expected_total:
+        gap = abs(expected_total - found) / expected_total
+        if gap:
+            issue = Issue(_msg("outline_total_gap", sheet=conf.totals_title_pattern,
+                               found=fmt_number(found), total=fmt_number(expected_total),
+                               pct=round(gap * 100, 1)))
+            (report.warnings if gap <= conf.max_total_gap else report.errors).append(issue)
+    else:
+        report.errors.append(Issue(_msg("outline_no_total", sheet=conf.totals_title_pattern)))
+    exp = profile.expected
+    for (year, career), value in sorted(values.items()):
+        if (exp.value_min is not None and value < exp.value_min) or (
+                exp.value_max is not None and value > exp.value_max):
+            report.errors.append(Issue(_msg("out_of_range", min=exp.value_min,
+                                            max=exp.value_max, value=value)))
+            continue
+        report.rows.append({"year": year, "career": career, "level": conf.level, "value": value})
+    report.periods = [str(y) for y in sorted(years)]
+    report.header_found = sorted(members)
+
+
+def _discipline_sheet(sheet, head, title, period_re, skip_re, kinds, values, years, report):
+    m = period_re.search(title)
+    if not m:
+        report.errors.append(Issue(_msg("outline_no_period", sheet=sheet)))
+        return
+    year = int(m.group("year"))
+    years.add(year)
+    k = next((i for i, r in enumerate(head) if r and any(
+        c is not None and str(c).strip().upper() in kinds for c in r)), None)
+    if k is None or k == 0 or k + 1 >= len(head):
+        report.errors.append(Issue(_msg("outline_no_total", sheet=sheet)))
+        return
+    names, row_kinds, total = head[k - 1], head[k], head[k + 1]
+    current = None
+    for j, kind in enumerate(row_kinds):
+        if j < len(names) and names[j]:
+            current = str(names[j]).strip()
+        if kind is None or str(kind).strip().upper() not in kinds or not current or skip_re.search(current):
+            continue
+        value = total[j] if j < len(total) else None
+        number = _number(value) if not isinstance(value, str) or value.strip() not in ("-", "") else 0.0
+        if number is None:
+            report.errors.append(Issue(_msg("not_numeric", value=value), column=f"{sheet}!{current}"))
+            continue
+        values[(year, current)] = values.get((year, current), 0.0) + number
+
+
+def _yearbook_total(head, ws, row_re, years, report) -> float:
+    """The yearbook's own total of graduates for the table's latest year (all institutions)."""
+    header = next((r for r in head if r and sum(isinstance(c, int) and 1990 < c < 2100 for c in r) >= 2), None)
+    if header is None:
+        return 0.0
+    col = max((j for j, c in enumerate(header) if isinstance(c, int) and 1990 < c < 2100),
+              key=lambda j: header[j])
+    for r in ws.iter_rows(values_only=True):
+        first = next((c for c in r if c is not None), None)
+        if first is not None and row_re.search(str(first)):
+            v = r[col] if col < len(r) else None
+            return float(v) if isinstance(v, (int, float)) else 0.0
+    return 0.0
+
+
 def fmt_number(value: float) -> str:
     return f"{value:,.0f}".replace(",", ".")
 
 
+def _finish(report: ReadReport) -> ReadReport:
+    """Group every error (counts stay complete), then keep only the first ones in the list."""
+    report.error_groups = group_errors(report.errors)
+    report.errors = report.errors[:app_config().datasets.max_errors_reported]
+    return report
+
+
 def read_dataset(path: Path, profile: DatasetProfile) -> ReadReport:
     report = ReadReport()
+    if profile.discipline_tables:
+        _read_discipline_tables(path, profile, report)
+        report.fingerprint = hashlib.sha256("|".join(report.header_found).encode()).hexdigest()[:16]
+        return _finish(report)
     if profile.outline:
         _read_outline(path, profile, report)
         report.fingerprint = hashlib.sha256("|".join(report.header_found).encode()).hexdigest()[:16]
-        report.errors = report.errors[:app_config().datasets.max_errors_reported]
-        return report
+        return _finish(report)
     if profile.aggregate:
         rows = _iter_rows(path, profile, report)
         if rows is not None:
             _read_aggregate(iter(rows), profile, report)
         report.fingerprint = hashlib.sha256("|".join(
             [profile.file.sheet or "", *report.header_found]).encode()).hexdigest()[:16]
-        report.errors = report.errors[:app_config().datasets.max_errors_reported]
-        return report
+        return _finish(report)
     rows = _rows(path, profile, report)
     if rows is None:
         return report
@@ -459,7 +600,4 @@ def read_dataset(path: Path, profile: DatasetProfile) -> ReadReport:
         _read_wide(rows, profile, report)
     report.fingerprint = hashlib.sha256("|".join(
         [profile.file.sheet or "", *report.header_found]).encode()).hexdigest()[:16]
-    limit = app_config().datasets.max_errors_reported
-    if len(report.errors) > limit:
-        report.errors = report.errors[:limit]
-    return report
+    return _finish(report)

@@ -4,9 +4,9 @@ from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from app.core.config_files import analytics_params, app_config, sources
+from app.core.auth import require_permission
+from app.core.config_files import SourceNotes, analytics_params, app_config, sources
 from app.core.database import get_session
-from app.core.security import require_api_key
 from app.ingestion.pipeline import IngestionError, run_source
 from app.models import DataRevision, IngestionRun, Source
 from app.schemas.observatory import RevisionItem, RunItem, SourceItem
@@ -62,6 +62,13 @@ def _source(session: Session, code: str) -> Source:
     return source
 
 
+@router.get("/notes", response_model=list[SourceNotes])
+def source_notes():
+    """Where the salaries in dollars and the gender indicators come from, and how they are calculated
+    (app.yaml -> source_notes)."""
+    return app_config().source_notes
+
+
 @router.get("", response_model=list[SourceItem])
 def list_sources(session: Session = Depends(get_session)):
     rows = session.scalars(select(Source).order_by(Source.source_code)).all()
@@ -103,7 +110,7 @@ def source_revisions(
                            .offset(offset).limit(limit)).all()
 
 
-@router.post("/{code}/refresh", response_model=RunItem, dependencies=[Depends(require_api_key)])
+@router.post("/{code}/refresh", response_model=RunItem, dependencies=[Depends(require_permission("manage_data"))])
 def refresh_source(code: str, since_year: int | None = None,
                    session: Session = Depends(get_session)):
     _source(session, code)

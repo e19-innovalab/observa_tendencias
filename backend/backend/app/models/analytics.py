@@ -17,19 +17,6 @@ from sqlalchemy.orm import Mapped, mapped_column
 from app.models.base import Base
 
 
-class CoverageReport(Base):
-    """Rows of data/processed/data_analytics/informe_cobertura.csv."""
-
-    __tablename__ = "coverage_report"
-    pais: Mapped[str] = mapped_column(String(3), primary_key=True)
-    sector: Mapped[str] = mapped_column(Text, primary_key=True)
-    n_anios_observados: Mapped[int] = mapped_column(Integer)
-    anio_min: Mapped[int | None] = mapped_column(Integer)
-    anio_max: Mapped[int | None] = mapped_column(Integer)
-    elegible_proyeccion: Mapped[bool] = mapped_column(Boolean)
-    estado: Mapped[str] = mapped_column(Text)
-
-
 class JobPosting(Base):
     """Rows of data/processed/data_analytics/ofertas_linkedin.csv (LinkedIn, not official data)."""
 
@@ -53,7 +40,7 @@ class JobPosting(Base):
 
 
 class GraduateTrend(Base):
-    """Rows of data/processed/data_analytics/egresados_tendencias.csv (graduates per career)."""
+    """Trend per career, from official data (app/analytics/graduate_trends_run.py)."""
 
     __tablename__ = "graduate_trends"
     pais: Mapped[str] = mapped_column(Text, primary_key=True)
@@ -69,10 +56,16 @@ class GraduateTrend(Base):
     tendencia: Mapped[str] = mapped_column(Text)
     tiene_huecos: Mapped[bool] = mapped_column(Boolean)
     proyeccion: Mapped[str] = mapped_column(Text)
+    es_seguimiento: Mapped[bool] = mapped_column(Boolean, default=False)
+    sector: Mapped[str | None] = mapped_column(Text)  # catalog sector_code; None: other activities
+    tema: Mapped[str | None] = mapped_column(Text)  # config/reference/carreras_seguimiento.yaml
+    # in the career's latest year with data; None where the source does not publish them
+    n_instituciones: Mapped[int | None] = mapped_column(Integer)
+    institucion_principal: Mapped[str | None] = mapped_column(Text)
 
 
 class GraduateProjection(Base):
-    """Rows of data/processed/data_analytics/egresados_proyecciones.csv (indicative)."""
+    """Indicative projection per career, from the same series as GraduateTrend."""
 
     __tablename__ = "graduate_projections"
     pais: Mapped[str] = mapped_column(Text, primary_key=True)

@@ -22,9 +22,9 @@ def test_projection_needs_history():
 
 def test_employability_relative_and_coverage():
     cohort = {
-        "a": {"net_demand": 10, "salary_ppp": 10, "insertion_rate": 80, "automation_risk": 5},
-        "b": {"net_demand": 0, "salary_ppp": 0, "insertion_rate": 20, "automation_risk": 20},
-        "c": {"net_demand": 5, "salary_ppp": None, "insertion_rate": None, "automation_risk": None},
+        "a": {"net_demand": 10, "salary_ppp": 10, "automation_risk": 5},
+        "b": {"net_demand": 0, "salary_ppp": 0, "automation_risk": 20},
+        "c": {"net_demand": 5, "salary_ppp": None, "automation_risk": None},
     }
     res = compute_employability_index(cohort)
     assert res["a"]["score"] == 100 and res["a"]["level"] == "high"
@@ -50,3 +50,14 @@ def test_alerts():
         {"level": "high", "prev_level": "medium", "last_update": old, "expected_days": 30}
     )
     assert {a["alert_type"] for a in alerts} == {"index_level_change", "stale_source"}
+
+
+def test_projections_are_clipped_to_the_indicator_range():
+    from app.analytics.recompute import clip_to_range
+    from app.core.config_files import indicators
+
+    assert clip_to_range(-0.15, (0, 100)) == 0 and clip_to_range(104.0, (0, 100)) == 100
+    assert clip_to_range(-3.0, (0, None)) == 0 and clip_to_range(-3.0, None) == -3.0
+    unemployment = indicators().get("unemployment_rate")
+    assert unemployment.value_range == (0, 100)
+    assert indicators().get("gdp_growth").value_range is None  # growth can be negative

@@ -100,6 +100,30 @@ Están en `backend/backend/config/catalog.yaml` y se aplican sin modificar los a
 
 ## 5. Correspondencia carrera → ocupación
 
+### Desde v0.2: a través de la CINE-F 2013 (UNESCO)
+
+Cada carrera recibe un **campo detallado de la CINE-F 2013** (la clasificación de campos de estudio
+de la UNESCO), la misma clave para Argentina, Chile y Uruguay. Las ocupaciones salen de **una tabla
+común** campo → ocupación. La CIUO-08 se mantiene para las ocupaciones: la CINE-F no la reemplaza.
+
+| Archivo | Qué tiene |
+|---|---|
+| `backend/backend/config/reference/cine_f_2013.yaml` | Los campos amplios, específicos y los 99 detallados, con nombres oficiales en español (versión internacional, vía DANE) |
+| `backend/backend/config/reference/cine_f_ciuo.yaml` | Tabla común campo → ocupaciones CIUO-08: `"*"` para carreras universitarias y profesionales, `tecnico` para técnicas. Borrador sin revisar |
+| `reglas_carreras_cine.yaml` (esta carpeta) | Reglas por nombre de carrera → campo, compartidas por los tres países, y cómo se reconoce una carrera técnica |
+| `generar_correspondencia_cine.py` (esta carpeta) | Aplica las reglas a las carreras cargadas y escribe `config/reference/carreras_<país>_cine.yaml` |
+
+Para regenerar, con los egresados ya cargados:
+
+    cd backend/backend && .venv/bin/python ../data/scripts/referencias/generar_correspondencia_cine.py
+
+El script informa por país las carreras sin regla y la parte de los titulados con campo; en Chile
+lista las carreras cuyo campo no coincide con el campo específico de Mi Futuro. Después:
+`python -m app.jobs.validate_crosswalk` y `python -m app.jobs.recompute --indicator employment`.
+
+Lo que sigue de esta sección describe las correspondencias directas carrera → ocupación por país,
+que se usaron hasta v0.1 y se conservan para comparar.
+
 ### Qué es y para qué se usa
 
 Para las **brechas de habilidades** hace falta saber para qué ocupaciones forma cada carrera. La
@@ -210,3 +234,18 @@ están documentados en [`../README.md`](../README.md).
 - **Reparto en partes iguales:** cuando una carrera lleva a varias ocupaciones, los titulados se reparten en partes iguales, porque no hay datos de a qué ocupación llega cada egresado.
 - **Nombres de la CIUO-08 de Uruguay:** se usan para los tres países porque es la versión oficial en español más completa que se encontró. Chile y Argentina tienen adaptaciones propias con algunas diferencias de redacción.
 - **ESCO es europea:** las habilidades describen las ocupaciones como se definen en Europa y no varían por país.
+
+## 9. Sectores, temas e instituciones de los titulados
+
+Tablas de `backend/config/reference/` que usa la carga de titulados por carrera e institución. Las correspondencias de nombres van siempre acá, nunca en el código.
+
+| Archivo | Para qué |
+|---|---|
+| `cine_f_sectores.yaml` | Campo CINE-F → sector del observatorio (carrera → campo → sector) |
+| `carreras_seguimiento.yaml` | Los 13 temas con seguimiento y su sector |
+| `carreras_uruguay_nombres.yaml` | Nombres de carreras de Uruguay: el MEC los cambia de un año a otro y las tendencias los necesitan unificados |
+| `disciplinas_argentina.yaml` | Disciplinas de los anuarios del DIU |
+| `universidades_nombres.yaml` | Nombres de universidades de los tres países unificados |
+
+Las entradas marcadas `review` esperan revisión. Las correspondencias flojas no se aceptan: si una carrera no pertenece claramente a un campo, se deja sin asignar.
+
