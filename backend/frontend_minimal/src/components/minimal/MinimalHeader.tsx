@@ -1,10 +1,12 @@
 import { Bell, LogOut } from 'lucide-react';
 import Link from 'next/link';
+import { Suspense } from 'react';
 import { logout } from '@/lib/auth/actions';
 import { PERMISSIONS, type User } from '@/lib/schemas/auth';
 import { Dropdown } from './Dropdown';
 import { HeaderHeight } from './HeaderHeight';
 import { SearchPalette } from './SearchPalette';
+import { SubNav } from './SubNav';
 import { TopNav } from './TopNav';
 
 const menuItem = 'block w-full px-4 py-2 text-left text-sm text-slate-700 hover:bg-slate-100';
@@ -57,6 +59,9 @@ export function MinimalHeader({ user, unreadAlerts }: { user: User; unreadAlerts
           </Dropdown>
         </div>
       </div>
+      <Suspense fallback={null}>
+        <SubNav />
+      </Suspense>
     </header>
   );
 }

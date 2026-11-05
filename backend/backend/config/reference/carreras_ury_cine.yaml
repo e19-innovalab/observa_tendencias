@@ -53,7 +53,7 @@ careers:
   "Licenciatura en Psicomotricidad": {"cine": "0313"}  # 260 · Psicología
   "Licenciatura en Tecnologías de la Información": {"cine": "0613"}  # 259 · Desarrollo y análisis de software y aplicaciones
   "Licenciado en Administración": {"cine": "0413"}  # 248 · Gestión y administración
-  "Ingeniería Civil": {"cine": "0719"}  # 231 · Ingeniería y profesiones afines no clasificadas en otra parte
+  "Ingeniería Civil": {"cine": "0732"}  # 231 · Construcción e ingeniería civil
   "Licenciado en Relaciones Internacionales": {"cine": "0312"}  # 225 · Ciencias políticas y educación cívica
   "Licenciatura en Enfermería - Profesionalización de Auxiliares": {"cine": "0913"}  # 225 · Enfermería y partería
   "Ingenieria en Informática": {"cine": "0613"}  # 223 · Desarrollo y análisis de software y aplicaciones
@@ -213,7 +213,7 @@ careers:
   "Licenciatura en Archivología": {"cine": "0322"}  # 24 · Bibliotecología, información y archivología
   "Licenciatura en Danza Contemporánea": {"cine": "0215"}  # 24 · Música y artes escénicas
   "Licenciatura en Educación Física, Deporte y Recreación": {"cine": "1014"}  # 24 · Deportes
-  "Acompañamiento Terapéutico": {"cine": "0915"}  # 23 · Terapia y rehabilitación
+  "Acompañamiento Terapéutico": {"cine": "0915", "tecnico": true}  # 23 · Terapia y rehabilitación
   "Agrimensura": {"cine": "0532"}  # 23 · Ciencias de la tierra
   "Licenciado en Ciencia Política": {"cine": "0312"}  # 23 · Ciencias políticas y educación cívica
   "Licenciatura en Humanidades": {"cine": "0229"}  # 23 · Humanidades (excepto idiomas) no clasificadas en otra parte
@@ -257,7 +257,7 @@ careers:
   "Licenciado en Física": {"cine": "0533"}  # 14 · Física
   "Licenciatura en Artes - Dibujo y Pintura": {"cine": "0213"}  # 14 · Bellas artes
   "Licenciatura en Ciencia de Datos para Negocios": {"cine": "0542"}  # 14 · Estadística
-  "Ingenieria en Telecomunicación": {"cine": "0321"}  # 13 · Periodismo y reportajes
+  "Ingenieria en Telecomunicación": {"cine": "0714"}  # 13 · Electrónica y automatización
   "Licenciada en Obstetricia": {"cine": "0913"}  # 13 · Enfermería y partería
   "Licenciado en Neumocardiología": {"cine": "0914"}  # 13 · Tecnología de diagnóstico y tratamiento médico
   "Licenciatura en Educación - Opción Tiempo Libre y Recreación": {"cine": "0111"}  # 13 · Ciencias de la educación
@@ -508,7 +508,7 @@ careers:
   "Licenciatura en Composicion": {"cine": "0215"}  # 0 · Música y artes escénicas
   "Licenciatura en Comunicación Global": {"cine": "0321"}  # 0 · Periodismo y reportajes
   "Licenciatura en Comunicación orientación Analítica de Datos e Innovación": {"cine": "0321"}  # 0 · Periodismo y reportajes
-  "Licenciatura En Comunicación Y Marketing": {"cine": "0321"}  # 0 · Periodismo y reportajes
+  "Licenciatura En Comunicación Y Marketing": {"cine": "0414"}  # 0 · Mercadotecnia y publicidad
   "Licenciatura En Datos Y Negocios": {"cine": "0542"}  # 0 · Estadística
   "Licenciatura en Dirección Coral": {"cine": "0215"}  # 0 · Música y artes escénicas
   "Licenciatura en Diseño Aplicado": {"cine": "0212"}  # 0 · Diseño industrial, de modas e interiores

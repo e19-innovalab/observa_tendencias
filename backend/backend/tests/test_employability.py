@@ -93,16 +93,20 @@ def test_scores_rank_and_trace_components(client):
     r = c.get("/api/v1/employability", params={"country": "ARG"}).json()
     assert r["year"] == 2025 and 2025 in r["available_years"]
     scored = [i for i in r["items"] if i["score"] is not None]
-    # nurse: (0·.35 + 61.54·.25 + 80·.15)/.75 = 36.51 · cook: (20·.35 + 0·.25 + 100·.15)/.75 = 29.3
+    # each one's place among all the country's scored occupations, even with a sector filter
+    assert [(i["position"], i["position_of"]) for i in scored] == [(1, 3), (2, 3), (3, 3)]
+    health = c.get("/api/v1/employability", params={"country": "ARG", "sector": "health"}).json()
+    assert [i["position"] for i in health["items"] if i["occupation"]["occupation_code"] == "2221"] == [2]
+    # nurse: 0·.4667 + 61.54·.3333 + 80·.2 = 36.51 · cook: 20·.4667 + 0·.3333 + 100·.2 = 29.3
     assert [i["occupation"]["occupation_code"] for i in scored] == [
         "2512", "2221", "5120"]
     by = {i["occupation"]["occupation_code"]: i["score"] for i in scored}
     assert by["2221"] == pytest.approx(36.51, abs=0.01)
     assert by["5120"] == pytest.approx(29.33, abs=0.01)
     top = scored[0]
-    assert top["coverage_ratio"] == pytest.approx(0.75) and top["data_type"] == "calculated"
+    assert top["coverage_ratio"] == pytest.approx(1) and top["data_type"] == "calculated"
     comps = {x["dimension"]: x for x in top["components"]}
-    assert comps["insertion_rate"]["available"] is False
+    assert "insertion_rate" not in comps
     assert sum(x["contribution"] or 0 for x in top["components"]) == pytest.approx(top["score"])
     assert comps["net_demand"]["detail"]["from_period"] == "2022"
     assert comps["net_demand"]["raw"] == pytest.approx(0.10)
@@ -136,7 +140,7 @@ def test_history_and_profile(client):
     assert c.get("/api/v1/occupations/nope").status_code == 404
     with Session(engine) as s:  # every score points to the employability methodology
         m = s.scalar(select(Methodology).where(Methodology.methodology_type == "employability_index"))
-        assert m.params["weights"]["net_demand"] == 0.35
+        assert m.params["weights"]["net_demand"] == 0.466667
 
 
 def test_views_top_bottom_and_all(client):
@@ -178,9 +182,6 @@ def test_sort_by_each_dimension(client):
     # net demand: 2512 +10%, 5120 +2%, 2221 0%
     got, r = codes(sort_by="net_demand")
     assert got == ["2512", "5120", "2221"] and r["order"] == "desc"
-    # no data for insertion rate: nothing to rank; in "all" every row comes back
-    assert codes(sort_by="insertion_rate")[0] == []
-    assert len(codes(sort_by="insertion_rate", view="all", limit=500)[0]) == 436
 
 
 def test_bottom_defaults_to_ascending_and_invalid_sort(client):
@@ -221,14 +222,12 @@ def test_dimension_ranges_and_coverage_sort(client):
     ranges = {d["dimension"]: d for d in r["dimension_ranges"]}
     assert ranges["salary_ppp"]["observed_min"] == 1200 and ranges["salary_ppp"]["observed_max"] == 2500
     assert ranges["automation_risk"]["higher_is_better"] is False
-    assert ranges["insertion_rate"]["observed_min"] is None and ranges["insertion_rate"]["with_data"] == 0
+    assert "insertion_rate" not in ranges
     assert all(d["definition"] and d["possible_range"] for d in r["dimension_ranges"])
-    # a dimension without a source: its weight goes to the others, and the API says so
-    assert ranges["insertion_rate"]["has_source"] is False and ranges["insertion_rate"]["source_status"]
-    assert ranges["insertion_rate"]["effective_weight"] == 0
+    # every dimension has a source, so no note about missing ones
+    assert all(d["has_source"] for d in r["dimension_ranges"]) and r["no_source_note"] is None
     assert sum(d["effective_weight"] for d in r["dimension_ranges"]) == pytest.approx(1)
     assert ranges["net_demand"]["effective_weight"] == pytest.approx(0.35 / 0.75)
-    assert "Tasa de inserción" in r["no_source_note"] and "46,7 %" in r["no_source_note"]
     # ranges describe the whole cohort (occupations that apply to the region), not the page
     from app.core.config_files import catalog
 
@@ -237,7 +236,7 @@ def test_dimension_ranges_and_coverage_sort(client):
     low = c.get("/api/v1/employability", params={"view": "all", "sort_by": "coverage",
                                                  "order": "asc", "limit": 1}).json()
     high = c.get("/api/v1/employability", params={"sort_by": "coverage", "limit": 1}).json()
-    assert low["items"][0]["coverage_ratio"] <= high["items"][0]["coverage_ratio"] == 0.75
+    assert low["items"][0]["coverage_ratio"] <= high["items"][0]["coverage_ratio"] == pytest.approx(1)
 
 
 def test_excluded_occupations_stay_out_of_cohort_and_rankings(client):
@@ -292,7 +291,7 @@ def test_sector_summary_averages_its_occupations(client):
     assert sectors["energy"]["average_score"] is None and sectors["energy"]["top_occupation"] is None
     scored = [score[o] for o in ("2512", "2221", "5120") if o in score]
     assert r["regional_average"] == pytest.approx(sum(scored) / len(scored))
-    assert r["no_source_note"]  # insertion rate has no source yet
+    assert r["no_source_note"] is None  # every dimension has a source
 
 
 def test_salary_shown_in_usd_for_the_same_period(client):

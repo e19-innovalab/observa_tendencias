@@ -89,6 +89,12 @@ def test_motion_bubbles(client):
     assert r["y"]["key"] == "growth" and r["y"]["unit"] == "percent"
     assert {o["key"] for o in r["y_options"]} == {"growth", "ai_exposure", "employability"}
     assert r["groups"][0]["code"] == "2" and r["groups"][0]["name"]
+    # the occupations of the group, without the ones left out of the bubbles
+    from app.core.config_files import catalog
+
+    listed = {o["code"] for o in r["groups"][0]["occupations"]}
+    assert listed == {o.occupation_code for o in catalog().occupations
+                      if o.occupation_code.startswith("2") and not o.is_excluded}
     pts = {p["year"]: p for p in r["points"]}
     assert sorted(pts) == [2023, 2024]  # 2022 has no previous year
     assert pts[2023]["size"] == 320 and pts[2023]["y"] == pytest.approx(20 / 300 * 100)

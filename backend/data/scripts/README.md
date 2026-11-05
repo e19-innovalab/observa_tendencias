@@ -8,6 +8,11 @@ Requieren el entorno del backend (`backend\.venv`), porque usan pandas.
 | `build_ofertas_linkedin.py` | `raw/linkedin_jobs/*.csv` (exports de Apify) | `processed/data_analytics/ofertas_linkedin.csv` |
 | `build_egresados_series.py` | `raw/egresados/indicadores_carrera_anio.csv` | `processed/data_analytics/egresados_series.csv` |
 | `build_egresados_trends.py` | `processed/data_analytics/egresados_series.csv` | `egresados_tendencias.csv`, `egresados_proyecciones.csv` |
+| `build_consolidado_fuentes.py` | carpeta `raw-noelia` y `raw/datasets/` | `processed/consolidado_fuentes/` (ver [`docs/cruce_fuentes_noelia.md`](../../docs/cruce_fuentes_noelia.md)) |
+
+`build_egresados_series.py` y `build_egresados_trends.py` ya no alimentan la aplicación: las tablas
+`graduate_trends` y `graduate_projections` se calculan con la tabla oficial `graduates`
+(`backend/app/analytics/graduate_trends_run.py`).
 
 Las tablas de referencia de ocupaciones (CIUO-08, exposición a IA de la OIT) y la correspondencia
 carrera → ocupación tienen su propio README: [`referencias/README.md`](referencias/README.md).

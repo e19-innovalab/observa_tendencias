@@ -12,6 +12,7 @@ from app.main import app
 from app.models import (
     Base,
     Country,
+    EscoOccupation,
     OccupationSkill,
     Skill,
     Source,
@@ -24,7 +25,7 @@ KNOW = "http://data.europa.eu/esco/skill-type/knowledge"
 DO = "http://data.europa.eu/esco/skill-type/skill"
 # ISCO 2512 has two ESCO occupations: "prog" is essential in both, "uml" optional in one
 FAKE = {
-    "isco/C2512": {"narrowerOccupation": [{"uri": "occ/a"}, {"uri": "occ/b"}]},
+    "isco/C2512": {"narrowerOccupation": [{"uri": "occ/b", "title": "probador"}, {"uri": "occ/a", "title": "analista"}]},
     "occ/a": {"hasEssentialSkill": [{"uri": SKILL.format("prog"), "title": "programación", "skillType": KNOW}],
               "hasOptionalSkill": [{"uri": SKILL.format("uml"), "title": "UML", "skillType": KNOW}]},
     "occ/b": {"hasEssentialSkill": [{"uri": SKILL.format("prog"), "title": "programación", "skillType": KNOW},
@@ -34,13 +35,16 @@ FAKE = {
 }
 
 
+TITLES = {"occ/a": "analista", "occ/b": "probador", "occ/c": "cocinero"}
+
+
 def fake_get(fail_codes=("occ/broken",)):
     async def get(client, url, params=None, headers=None):
         key = next((k for k in FAKE if params["uri"].endswith(k)), None)
         if params["uri"].endswith(fail_codes):
             req = httpx.Request("GET", url)
             raise httpx.HTTPStatusError("500", request=req, response=httpx.Response(500, request=req))
-        body = {"_links": FAKE.get(key, {})} if key else {"_links": {}}
+        body = {"_links": FAKE.get(key, {}), "title": TITLES.get(key)} if key else {"_links": {}}
         return httpx.Response(200, json=body, request=httpx.Request("GET", url))
     return get
 
@@ -89,6 +93,18 @@ def test_weights_and_broken_records(engine, monkeypatch):
         assert s.get(Skill, "test").skill_type == "skill"
 
 
+def test_esco_occupations_refresh_leaves_the_skills_alone(engine, monkeypatch):
+    monkeypatch.setitem(sources().get("esco").options, "max_failed_share", 1.0)
+    with Session(engine) as s:
+        esco.run_esco_source(s, "esco")
+        s.commit()
+        before = s.scalar(select(func.count()).select_from(OccupationSkill))
+        assert esco.run_esco_occupations(s, "esco") == 4  # occ/a, occ/b, occ/broken, occ/c
+        s.commit()
+        assert s.scalar(select(func.count()).select_from(EscoOccupation)) == 4
+        assert s.scalar(select(func.count()).select_from(OccupationSkill)) == before
+
+
 def test_too_many_failures_replace_nothing(engine, monkeypatch):
     monkeypatch.setitem(sources().get("esco").options, "max_failed_share", 0.0)
     with Session(engine) as s, pytest.raises(esco.EscoError):
@@ -114,7 +130,22 @@ def client(engine, monkeypatch):
 def test_skills_api(client):
     r = client.get("/api/v1/occupations/2512/skills").json()
     assert r["total"] == 3 and [i["skill_code"] for i in r["items"]] == ["prog", "test", "uml"]
-    assert r["items"][0]["skill_type_label"] == "Conocimiento" and r["weight_note"]
+    assert r["items"][0]["skill_type_label"] == "Conocimiento" and r["relation_note"]
+    assert {i["relation_label"] for i in r["items"]} <= {"Esencial", "Opcional"}
+    assert all(i["relation_label"] for i in r["items"])
+    # how to read them, and the ESCO occupations the group brings together, with their official page
+    assert r["relation_help"]
+    assert [o["name"] for o in r["esco_occupations"]] == ["analista", "probador"]
+    assert r["esco_occupations"][0]["url"].endswith("?uri=occ%2Fa") and r["esco_occupation"] is None
+    # one ESCO occupation: its own skills and relation, essential first
+    one = client.get("/api/v1/occupations/2512/skills", params={"esco": "a"}).json()
+    assert one["esco_occupation"]["name"] == "analista" and one["total"] == 2
+    assert [(i["skill_code"], i["relation_label"], i["weight"]) for i in one["items"]] == [
+        ("prog", "Esencial", None), ("uml", "Opcional", None)]
+    assert client.get("/api/v1/occupations/2512/skills", params={"esco": "nope"}).status_code == 404
+    # findable by name, without accents, with the group whose page shows it
+    found = client.get("/api/v1/esco-occupations", params={"q": "PROBADOR"}).json()
+    assert [(f["code"], f["occupation_code"]) for f in found] == [("b", "2512")] and found[0]["occupation_name"]
     assert client.get("/api/v1/occupations/2512/skills", params={"skill_type": "skill"}).json()["total"] == 1
     found = client.get("/api/v1/skills", params={"q": "program"}).json()
     assert found[0]["skill_code"] == "prog" and found[0]["occupations"] == 1

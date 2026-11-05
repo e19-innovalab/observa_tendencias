@@ -18,3 +18,10 @@ export const SourceItemSchema = z.object({
 export type SourceItem = z.infer<typeof SourceItemSchema>;
 
 export const getSources = () => apiGet('/sources', z.array(SourceItemSchema), {}, 300);
+
+const SourceNotesSchema = z.object({
+  title: z.string(),
+  intro: z.string(),
+  items: z.array(z.object({ label: z.string(), source: z.string(), method: z.string() })),
+});
+export const getSourceNotes = () => apiGet('/sources/notes', z.array(SourceNotesSchema), {}, 300);

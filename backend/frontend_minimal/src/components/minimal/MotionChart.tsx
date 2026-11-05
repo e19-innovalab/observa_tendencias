@@ -1,5 +1,7 @@
 'use client';
 
+import { ChevronDown } from 'lucide-react';
+import Link from 'next/link';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { CHART_GRID, COUNTRY_COLORS, FALLBACK_COLOR } from '@/components/ui/charts/chartTheme';
 import type { MotionAxis, MotionPage, MotionPoint } from '@/lib/schemas/motion';
@@ -276,14 +278,30 @@ export function MotionChart({ data, names }: { data: MotionPage; names: Record<s
         </div>
       </div>
 
-      <ul className="grid gap-x-6 gap-y-1 text-xs text-slate-600 sm:grid-cols-2">
-        {data.groups.map((g) => (
-          <li key={g.code} className="flex gap-2">
-            <span className="w-3 shrink-0 text-right font-semibold text-slate-900">{g.code}</span>
-            {g.name}
-          </li>
-        ))}
-      </ul>
+      <div>
+        <p className="mb-1 text-xs font-medium text-slate-500">Grupos de ocupaciones · tocá uno para ver qué ocupaciones incluye</p>
+        <ul className="grid items-start gap-x-6 text-xs text-slate-600 sm:grid-cols-2">
+          {data.groups.map((g) => (
+            <li key={g.code}>
+              <details className="group">
+                <summary className="flex cursor-pointer list-none items-start gap-2 rounded py-1 hover:text-slate-900 focus-visible:outline-2 focus-visible:outline-blue-700 [&::-webkit-details-marker]:hidden">
+                  <span className="w-3 shrink-0 text-right font-semibold text-slate-900">{g.code}</span>
+                  <span className="flex-1">{g.name} <span className="text-slate-500">({g.occupations.length})</span></span>
+                  <ChevronDown className="mt-px size-3.5 shrink-0 transition-transform group-open:rotate-180" aria-hidden />
+                </summary>
+                <ul className="mb-2 ml-5 mt-1 max-h-56 overflow-y-auto border-l border-slate-200 pl-3">
+                  {g.occupations.map((o) => (
+                    <li key={o.code} className="py-0.5">
+                      <Link href={`/ocupaciones/${o.code}`} className="text-blue-700 hover:underline">{o.name}</Link>
+                      <span className="ml-1.5 text-slate-400">{o.code}</span>
+                    </li>
+                  ))}
+                </ul>
+              </details>
+            </li>
+          ))}
+        </ul>
+      </div>
 
       <details className="text-sm">
         <summary className="cursor-pointer text-slate-600 hover:text-slate-900">Ver los datos de {year}</summary>

@@ -27,7 +27,7 @@ const SOURCE_SCOPE: Record<string, string> = {
 
 const FEATURES = [
   { title: 'Ocupaciones', text: 'Las 436 ocupaciones de la CIUO-08 con su índice de empleabilidad, demanda, salario y exposición a la IA generativa.', verb: 'Explorá', icon: Search, href: '/ocupaciones' },
-  { title: 'Tendencias y proyecciones', text: 'Hacia dónde se mueve cada indicador y una proyección orientativa de los próximos períodos, con su intervalo.', verb: 'Analizá', icon: LineChart, href: '/tendencias' },
+  { title: 'Tendencias y proyecciones', text: 'Hacia dónde se mueve cada indicador y una proyección orientativa de los próximos períodos, con su intervalo.', verb: 'Analizá', icon: LineChart, href: '/panorama' },
   { title: 'Brechas de habilidades', text: 'Qué habilidades se demandan más rápido de lo que se forman, a partir del empleo y de los titulados de cada país.', verb: 'Compará', icon: GitCompareArrows, href: '/habilidades' },
   { title: 'Alertas', text: 'Cambios fuera de lo habitual, cambios de tendencia y fuentes que dejaron de actualizarse, detectados en cada actualización.', verb: 'Detectá', icon: Sparkles, href: '/alertas' },
 ];

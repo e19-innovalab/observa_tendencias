@@ -1,7 +1,7 @@
 # Nombres locales de ocupaciones (Argentina, Chile, Uruguay) que ESCO no tiene, con su grupo
 # CIUO-08. ESCO está escrito en español de España; estas son las palabras que se usan acá.
 #
-# Criterio: el grupo se elige según la definición de ISCO-08 Vol. 1 (OIT, 2012), igual que en
+# Criterio: el grupo se elige según la definición de ISCO-08 Vol. 1 (OIT, 2012) https://webapps.ilo.org/ilostat-files/ISCO/newdocs-08-2021/ISCO-08/ISCO-08%20EN%20Vol%201.pdf, igual que en
 # ml/occupation_match/testset.yaml. "also": otros grupos donde la palabra también cae (según el contexto).
 # countries: dónde se usa la palabra con ese sentido (ARG, CHL, URY). La misma palabra puede
 # tener otro sentido en otro país (p. ej. "colectivero": colectivo es un bus en Argentina y un

@@ -227,7 +227,7 @@ indicators:
         occupation_isco_digits: 1
         frequency: A
 
-  # Same ILOSTAT series in U.S. dollars at market exchange rates: the salary shown to users. The
+  # Same ILOSTAT series in U.S. dollars at the official exchange rate (yearly average): the salary shown to users. The
   # ISE keeps using the PPP series (comparable purchasing power across countries).
   - code: mean_monthly_earnings_usd
     name: Ingreso laboral mensual promedio (USD)
@@ -235,8 +235,11 @@ indicators:
     domain: labor
     higher_is_better: true
     description: >-
-      Ingreso mensual promedio de los asalariados en dólares estadounidenses al tipo de cambio de
-      mercado (OIT). Es la misma serie que la de USD PPA, sin ajustar por poder de compra.
+      Ingreso mensual promedio de los asalariados en dólares estadounidenses, al tipo de cambio oficial
+      promedio de cada año. Fuente: OIT (ILOSTAT), que publica el valor ya convertido. En Argentina,
+      ese tipo de cambio coincide con el del Banco Mundial y está a menos de 1 % del promedio anual del
+      dólar oficial mayorista del BCRA; puede diferir mucho del paralelo. Es la misma serie que la de
+      USD PPA, sin ajustar por poder de compra.
       Por ocupación se usa el gran grupo CIUO-08 (1 dígito), que comparten varias ocupaciones.
     value_range: [0, null]
     series:
@@ -255,6 +258,59 @@ indicators:
         occupation_isco_digits: 1
         frequency: A
 
+  - code: employment_women
+    name: Mujeres ocupadas
+    unit: thousands_persons
+    domain: labor
+    higher_is_better: true
+    description: >-
+      Mujeres ocupadas por sector (secciones CIIU Rev.4) y en total, según la OIT. Con Personas
+      ocupadas da la participación de las mujeres en el empleo de cada sector.
+    value_range: [0, null]
+    series:
+      - source: ilostat
+        dataflow: DF_EMP_TEMP_SEX_ECO_NB
+        key: "{countries}.A..SEX_F."
+        sector_dimension: ECO
+        total_code: ECO_ISIC4_TOTAL
+        sector_aggregation: sum
+        frequency: A
+  - code: mean_monthly_earnings_ppp_women
+    name: Ingreso laboral mensual promedio de las mujeres (USD PPA)
+    unit: ppp_usd_month
+    domain: labor
+    higher_is_better: true
+    description: >-
+      Ingreso mensual promedio de las asalariadas en dólares a paridad de poder adquisitivo, por
+      sector y en total, según la OIT. En sectores que abarcan varias secciones CIIU se usa el
+      promedio simple de las secciones.
+    value_range: [0, null]
+    series:
+      - source: ilostat
+        dataflow: DF_EAR_EMTA_SEX_ECO_CUR_NB
+        key: "{countries}.A..SEX_F..CUR_TYPE_PPP"
+        sector_dimension: ECO
+        total_code: ECO_ISIC4_TOTAL
+        sector_aggregation: mean
+        frequency: A
+  - code: mean_monthly_earnings_ppp_men
+    name: Ingreso laboral mensual promedio de los varones (USD PPA)
+    unit: ppp_usd_month
+    domain: labor
+    higher_is_better: true
+    description: >-
+      Ingreso mensual promedio de los asalariados varones en dólares a paridad de poder adquisitivo,
+      por sector y en total, según la OIT. En sectores que abarcan varias secciones CIIU se usa el
+      promedio simple de las secciones.
+    value_range: [0, null]
+    series:
+      - source: ilostat
+        dataflow: DF_EAR_EMTA_SEX_ECO_CUR_NB
+        key: "{countries}.A..SEX_M..CUR_TYPE_PPP"
+        sector_dimension: ECO
+        total_code: ECO_ISIC4_TOTAL
+        sector_aggregation: mean
+        frequency: A
   - code: earnings_tertiary_ppp
     name: Ingreso laboral mensual con educación superior (USD PPA)
     unit: ppp_usd_month
@@ -276,7 +332,7 @@ indicators:
     domain: labor
     higher_is_better: true
     description: >-
-      Ingreso mensual promedio de los asalariados con nivel avanzado: terciaria, CINE 5 o más (agregado de la OIT), en dólares al tipo de cambio de mercado. Nacional.
+      Ingreso mensual promedio de los asalariados con nivel avanzado: terciaria, CINE 5 o más (agregado de la OIT), en dólares al tipo de cambio oficial promedio del año. Nacional.
       Con el de educación secundaria da la prima salarial de la educación.
     value_range: [0, null]
     series:
@@ -306,7 +362,7 @@ indicators:
     domain: labor
     higher_is_better: true
     description: >-
-      Ingreso mensual promedio de los asalariados con nivel intermedio: secundaria completa o postsecundaria no terciaria (agregado de la OIT), en dólares al tipo de cambio de mercado. Nacional.
+      Ingreso mensual promedio de los asalariados con nivel intermedio: secundaria completa o postsecundaria no terciaria (agregado de la OIT), en dólares al tipo de cambio oficial promedio del año. Nacional.
       Con el de educación superior da la prima salarial de la educación.
     value_range: [0, null]
     series:

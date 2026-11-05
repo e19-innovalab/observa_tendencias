@@ -30,6 +30,7 @@ class AskRequest(BaseModel):
 class AnswerLink(BaseModel):
     label: str
     href: str
+    external: bool = False  # outside the observatory
 
 
 class AnswerOption(BaseModel):

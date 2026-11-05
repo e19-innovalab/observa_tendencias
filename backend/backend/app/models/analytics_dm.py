@@ -1,6 +1,10 @@
+from datetime import date
+
 from sqlalchemy import (
     Boolean,
+    Date,
     Float,
+    ForeignKey,
     Index,
     Integer,
     String,
@@ -60,6 +64,7 @@ class FactoresMacroPPA(Base):
     pais: Mapped[str] = mapped_column(String(3), primary_key=True)
     anio: Mapped[int] = mapped_column(Integer, primary_key=True)
     factor_ppa: Mapped[float | None] = mapped_column(Float)
+    tipo_cambio: Mapped[float | None] = mapped_column(Float)
     metodo_ppa: Mapped[str | None] = mapped_column(Text)
     anio_base_ppa: Mapped[int | None] = mapped_column(Integer)
     ipc_base_2016: Mapped[float | None] = mapped_column(Float)
@@ -67,6 +72,16 @@ class FactoresMacroPPA(Base):
     fuente_ipc: Mapped[str | None] = mapped_column(Text)
     base_original_ipc: Mapped[str | None] = mapped_column(Text)
     nota_metodologica: Mapped[str | None] = mapped_column(Text)
+
+
+class TipoCambioDiario(Base):
+    """Cotización oficial diaria (BCRA, mayorista), en moneda local por unidad."""
+
+    __tablename__ = "tipo_cambio_diario"
+    moneda: Mapped[str] = mapped_column(String(3), primary_key=True)
+    fecha: Mapped[date] = mapped_column(Date, primary_key=True)
+    valor: Mapped[float] = mapped_column(Float)
+    source_id: Mapped[int | None] = mapped_column(ForeignKey("sources.source_id"))
 
 
 class FactEgresados(Base):
@@ -116,6 +131,7 @@ class FactSalario(Base):
     salario_moneda_local: Mapped[float | None] = mapped_column(Float)
     moneda_local: Mapped[str | None] = mapped_column(String(10))
     factor_ppa: Mapped[float | None] = mapped_column(Float)
+    salario_usd: Mapped[float | None] = mapped_column(Float)
     salario_usd_ppa: Mapped[float | None] = mapped_column(Float)
     tipo_salario: Mapped[str | None] = mapped_column(Text)
     metodo_ppa: Mapped[str | None] = mapped_column(Text)

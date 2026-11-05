@@ -122,6 +122,8 @@ export const SkillRefSchema = z.object({
   skill_type_label: z.string().nullable().optional(),
   esco_uri: z.string().nullable().optional(),
   weight: z.number().nullable().optional(),
+  relation: z.string().nullable().optional(),
+  relation_label: z.string().nullable().optional(),
 });
 
 export const OccupationProfileSchema = z.object({
@@ -143,11 +145,16 @@ export const OccupationProfileSchema = z.object({
   texts: EmployabilityTextsSchema.nullable().optional(),
 });
 
+const EscoOccupationLinkSchema = z.object({ code: z.string().nullable(), name: z.string(), url: z.string().nullable() });
+
 export const OccupationSkillsSchema = z.object({
   occupation_code: z.string(),
   occupation_name: z.string(),
   total: z.number(),
-  weight_note: z.string(),
+  relation_note: z.string(),
+  relation_help: z.array(z.string()).default([]),
+  esco_occupations: z.array(EscoOccupationLinkSchema).default([]),
+  esco_occupation: EscoOccupationLinkSchema.nullable().optional(),
   source: z.object({ code: z.string(), name: z.string() }).nullable(),
   updated_at: z.string().nullable(),
   items: z.array(SkillRefSchema),

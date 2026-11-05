@@ -12,7 +12,13 @@ from app.api.v1.indicators import _country_list
 from app.core.config_files import MotionAxis, app_config, catalog, indicators
 from app.core.database import get_session
 from app.models import EmployabilityScore
-from app.schemas.observatory import MotionAxisInfo, MotionGroup, MotionPage, MotionPoint
+from app.schemas.observatory import (
+    MotionAxisInfo,
+    MotionGroup,
+    MotionGroupOccupation,
+    MotionPage,
+    MotionPoint,
+)
 
 router = APIRouter(tags=["motion"])
 
@@ -109,11 +115,15 @@ def occupation_groups_motion(
                                   carried=carried))
     shown = {p.year for p in points}
     group_codes = sorted({p.group_code for p in points})
+    members: dict[str, list[MotionGroupOccupation]] = defaultdict(list)
+    for o in sorted(catalog().occupations, key=lambda o: o.occupation_code):
+        if not o.is_excluded:
+            members[o.occupation_code[:conf.group_digits]].append(MotionGroupOccupation(code=o.occupation_code, name=o.name))
     return MotionPage(
         title=conf.title, description=conf.description, years=[y for y in years if y in shown], x=_info("x", conf.x),
         x_secondary=_info("x_secondary", conf.x_secondary) if conf.x_secondary else None,
         y=_info(y_key, y_axis), size=_info("size", conf.size),
         y_options=[_info(k, a) for k, a in conf.y.items()],
-        groups=[MotionGroup(code=g, name=catalog().groups.get(g)) for g in group_codes],
+        groups=[MotionGroup(code=g, name=catalog().groups.get(g), occupations=members[g]) for g in group_codes],
         points=points, notes=conf.notes,
     )

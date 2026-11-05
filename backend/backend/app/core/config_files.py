@@ -388,7 +388,10 @@ class DatasetsConf(BaseModel):
 class SkillsConf(BaseModel):
     types: dict[str, str]
     profile_top: int
-    weight_note: str
+    relation_note: str
+    relation_help: list[str]
+    esco_occupation_note: str
+    esco_occupation_url: str
     gap_ranking_min_occupations: int
     sector_relation: str
     relations: dict[str, str]
@@ -432,6 +435,9 @@ class AssistantProviderConf(BaseModel):
     temperature: float | None = None  # local only
     effort: str | None = None  # anthropic only
     fallbacks: str | None = None  # anthropic only; "default" or empty
+    reasoning: dict | None = None  # local only: sent as is, for models that reason
+    # What changes for questions about the experimental indicators (any field of this class).
+    experimental: dict = {}
 
 
 class AssistantToolParam(BaseModel):
@@ -486,6 +492,21 @@ class ScriptedConf(BaseModel):
     templates: dict[str, str]
 
 
+class WebSearchConf(BaseModel):
+    enabled: bool
+    topic_words: list[str]
+    topic_pages: list[str]
+    api_url: str
+    allowed_host: str
+    source_name: str
+    user_agent: str
+    max_results: int
+    max_chars: int
+    timeout_seconds: float
+    tool: AssistantTool
+    prompt_note: str
+
+
 class AssistantConf(BaseModel):
     enabled: bool
     permission: str
@@ -510,10 +531,25 @@ class AssistantConf(BaseModel):
     texts: dict[str, str]
     examples: list[str] = []
     scripted: ScriptedConf
+    occupation_links_max: int
+    occupation_link_label: str
+    web_search: WebSearchConf
 
 
 class SearchConf(BaseModel):
     aliases_file: str
+
+
+class SourceNoteItem(BaseModel):
+    label: str
+    source: str
+    method: str
+
+
+class SourceNotes(BaseModel):
+    title: str
+    intro: str
+    items: list[SourceNoteItem]
 
 
 class AppConf(BaseModel):
@@ -543,6 +579,7 @@ class AppConf(BaseModel):
     dashboard: DashboardConf
     source_status: dict[str, str]
     notices: dict[str, str]
+    source_notes: list[SourceNotes]
     jobs_view: JobsView
     auth: AuthConf
     search: SearchConf

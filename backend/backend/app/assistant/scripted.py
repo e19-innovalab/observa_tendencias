@@ -68,6 +68,8 @@ async def answer(conf: ScriptedConf, req: AskRequest, question: str, call: CallT
     countries = [choice.country] if choice and choice.country else r.countries
     ranking = "ranking_top" in r.intents or "ranking_bottom" in r.intents
 
+    if "identity" in r.intents:
+        return Scripted(t["identity"])
     if "methodology" in r.intents:
         return await _methodology(conf, call)
     if "sectors" in r.intents or (ranking and not r.rest and not r.codes):

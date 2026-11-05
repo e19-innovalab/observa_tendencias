@@ -211,13 +211,25 @@ export function AssistantDock({ status }: { status: AssistantStatus }) {
                     ))}
                   </div>
                 )}
-                {!!turn.answer?.links.length && (
+                {!!turn.answer?.links.some((l) => !l.external) && (
                   <div className="text-xs">
                     <p className="text-slate-500">{t.links}</p>
                     <ul className="mt-0.5 flex flex-wrap gap-x-3 gap-y-1">
-                      {turn.answer.links.map((l) => (
+                      {turn.answer.links.filter((l) => !l.external).map((l) => (
                         <li key={l.href}>
                           <Link href={l.href} className="font-medium text-blue-700 hover:underline">{l.label}</Link>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+                {!!turn.answer?.links.some((l) => l.external) && (
+                  <div className="text-xs">
+                    <p className="text-slate-500">{t.external_links}</p>
+                    <ul className="mt-0.5 flex flex-wrap gap-x-3 gap-y-1">
+                      {turn.answer.links.filter((l) => l.external).map((l) => (
+                        <li key={l.href}>
+                          <a href={l.href} target="_blank" rel="noopener noreferrer" className="font-medium text-blue-700 hover:underline">{l.label} ↗</a>
                         </li>
                       ))}
                     </ul>

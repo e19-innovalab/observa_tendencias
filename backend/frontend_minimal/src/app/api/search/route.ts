@@ -7,6 +7,7 @@ import { fold, matchScore, tokens } from '@/lib/utils/search';
 
 const OccupationsSchema = z.array(z.object({ occupation_code: z.string(), name: z.string() }).loose());
 const SkillsSchema = z.array(z.object({ skill_code: z.string(), name: z.string() }).loose());
+const EscoOccupationsSchema = z.array(z.object({ code: z.string(), name: z.string(), occupation_code: z.string(), occupation_name: z.string() }));
 /** Resultados por grupo y candidatos que se piden al backend antes de ordenar. */
 const MAX = 6;
 const CANDIDATES = 30;
@@ -60,14 +61,19 @@ export async function GET(request: Request) {
       .map((o) => ({ label: o.name, detail: `CIUO ${o.occupation_code}`, href: withCountry(`/ocupaciones/${o.occupation_code}`), score: 4 }));
     groups.push({ label: 'Ocupaciones', items });
   } else if (q.length >= MIN_CHARS) {
-    const [indicators, occupations, skills] = await Promise.all([
+    const [indicators, occupations, escoOccupations, skills] = await Promise.all([
       getIndicators().catch(() => []),
       apiGet('/occupations', OccupationsSchema, { q }, 300).catch(() => []),
+      // las ocupaciones ESCO no tienen página propia: abren la de su grupo CIUO, con sus habilidades
+      apiGet('/esco-occupations', EscoOccupationsSchema, { q, limit: CANDIDATES }, 300).catch(() => []),
       apiGet('/skills', SkillsSchema, { q, limit: CANDIDATES }, 300).catch(() => []),
     ]);
     groups.push(
       { label: 'Indicadores', items: ranked(indicators.map((i) => ({ label: i.name, detail: i.domain_label, href: `/panorama?indicator=${i.code}`, score: matchScore(i.name, q) }))) },
-      { label: 'Ocupaciones', items: ranked(occupations.map((o) => ({ label: o.name, detail: `CIUO ${o.occupation_code}`, href: withCountry(`/ocupaciones/${o.occupation_code}`), score: matchScore(o.name, q) }))) },
+      { label: 'Ocupaciones', items: ranked([
+        ...occupations.map((o) => ({ label: o.name, detail: `CIUO ${o.occupation_code}`, href: withCountry(`/ocupaciones/${o.occupation_code}`), score: matchScore(o.name, q) })),
+        ...escoOccupations.map((o) => ({ label: o.name, detail: `ESCO · parte de ${o.occupation_name} (${o.occupation_code})`, href: `${withCountry(`/ocupaciones/${o.occupation_code}?esco=${o.code}`)}#habilidades`, score: matchScore(o.name, q) })),
+      ]) },
       { label: 'Habilidades', items: ranked(skills.map((s) => ({ label: s.name, href: `/habilidades?q=${encodeURIComponent(s.name)}`, score: matchScore(s.name, q) }))) },
     );
   }

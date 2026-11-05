@@ -1,0 +1,27 @@
+# Temas de seguimiento: buscan, por el nombre de cada programa del archivo oficial de titulados de Mi
+# Futuro, carreras que la fuente no publica como carrera genérica. Lo usa
+# app/datasets/tracked_careers.py (analytics.yaml -> tracked_careers).
+#
+# Criterio:
+# - Cada programa se muestra con su nombre original. El tema es solo un filtro: no es un título.
+# - patron: expresión regular sobre el nombre del programa normalizado (minúsculas, sin tildes,
+#   espacios simples). Es una agrupación propia, no una categoría de la fuente.
+# - Un programa entra en un solo tema: el primero de esta lista que coincide.
+# - sector: el del catálogo, mismo criterio que config/reference/cine_f_sectores.yaml.
+# - Cuentan todos los niveles (pregrado, postítulo y posgrado): varios temas, como inteligencia
+#   artificial, hoy son casi solo diplomados y magíster. Las carreras genéricas cuentan solo pregrado.
+# - Salió de las 13 carreras de Chile del equipo de Data Analytics sin carrera genérica equivalente.
+careers:
+  - {id: CHL_IA, nombre: Inteligencia artificial, sector: technology, patron: 'inteligencia artificial'}
+  - {id: CHL_CIBER, nombre: Ciberseguridad, sector: technology, patron: 'ciberseg|seguridad (informatica|de la informacion|digital)'}
+  - {id: CHL_DATOS, nombre: Ciencia de datos, sector: knowledge_economy, patron: 'ciencias? de (los )?datos|data science|big data|analisis de datos|analitica de datos'}
+  - {id: CHL_SOFTWARE, nombre: Desarrollo de software, sector: technology, patron: 'desarrollo de software|ingenieria (de|en) software'}
+  - {id: CHL_UX, nombre: Diseño UX/UI, sector: knowledge_economy, patron: '\bux\b|\bui\b|experiencia de usuario|diseno de interacc'}
+  - {id: CHL_AGIL, nombre: Metodologías ágiles, sector: knowledge_economy, patron: '\bagil(es|e|idad)?\b|scrum'}
+  - {id: CHL_RENOVABLES, nombre: Energías renovables, sector: energy, patron: 'energias? renovable|energias? sustentable'}
+  - {id: CHL_EFICIENCIA, nombre: Eficiencia energética, sector: energy, patron: 'eficiencia energetica'}
+  - {id: CHL_HIDROGENO, nombre: Hidrógeno verde, sector: energy, patron: 'hidrogeno'}
+  - {id: CHL_MINERIA, nombre: Minería y litio, sector: energy, patron: 'ingenieria.*\bminas\b|\bmineria\b|\blitio\b'}
+  - {id: CHL_MARKETING, nombre: Marketing digital, sector: knowledge_economy, patron: 'marketing digital|marketing directo'}
+  - {id: CHL_REVENUE, nombre: Revenue management, sector: tourism, patron: 'revenue'}
+  - {id: CHL_TURISMO, nombre: Turismo sustentable, sector: tourism, patron: 'ecoturismo|turismo.*(sustentab|sostenib|ecolog|naturaleza|aventura)'}

@@ -234,3 +234,18 @@ están documentados en [`../README.md`](../README.md).
 - **Reparto en partes iguales:** cuando una carrera lleva a varias ocupaciones, los titulados se reparten en partes iguales, porque no hay datos de a qué ocupación llega cada egresado.
 - **Nombres de la CIUO-08 de Uruguay:** se usan para los tres países porque es la versión oficial en español más completa que se encontró. Chile y Argentina tienen adaptaciones propias con algunas diferencias de redacción.
 - **ESCO es europea:** las habilidades describen las ocupaciones como se definen en Europa y no varían por país.
+
+## 9. Sectores, temas e instituciones de los titulados
+
+Tablas de `backend/config/reference/` que usa la carga de titulados por carrera e institución. Las correspondencias de nombres van siempre acá, nunca en el código.
+
+| Archivo | Para qué |
+|---|---|
+| `cine_f_sectores.yaml` | Campo CINE-F → sector del observatorio (carrera → campo → sector) |
+| `carreras_seguimiento.yaml` | Los 13 temas con seguimiento y su sector |
+| `carreras_uruguay_nombres.yaml` | Nombres de carreras de Uruguay: el MEC los cambia de un año a otro y las tendencias los necesitan unificados |
+| `disciplinas_argentina.yaml` | Disciplinas de los anuarios del DIU |
+| `universidades_nombres.yaml` | Nombres de universidades de los tres países unificados |
+
+Las entradas marcadas `review` esperan revisión. Las correspondencias flojas no se aceptan: si una carrera no pertenece claramente a un campo, se deja sin asignar.
+

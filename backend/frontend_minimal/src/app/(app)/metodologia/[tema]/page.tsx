@@ -7,7 +7,7 @@ import { HowCalculated } from '@/components/methodology/HowCalculated';
 import { PageHero } from '@/components/ui/layout/PageHero';
 import { PageSkeleton } from '@/components/ui/layout/PageSkeleton';
 import { getIndicators } from '@/lib/api/panorama';
-import { getSources } from '@/lib/api/sources';
+import { getSourceNotes, getSources } from '@/lib/api/sources';
 import { formatDate } from '@/lib/utils/format';
 
 /** Temas de la sección: los de cálculo muestran las metodologías del backend tal como se usaron. */
@@ -145,8 +145,28 @@ async function Indicators() {
 }
 
 async function Sources() {
-  const sources = await getSources();
+  const [sources, notes] = await Promise.all([getSources(), getSourceNotes().catch(() => [])]);
   return (
+    <>
+    {notes.map((block) => (
+      <section key={block.title} className="overflow-hidden rounded-lg border border-line bg-white">
+        <div className="border-b border-line/70 p-4">
+          <h3 className="font-semibold text-heading">{block.title}</h3>
+          <p className="mt-1 text-sm text-body">{block.intro}</p>
+        </div>
+        <dl className="divide-y divide-line/60">
+          {block.items.map((n) => (
+            <div key={n.label} className="grid gap-1 p-4 text-sm md:grid-cols-[14rem_1fr]">
+              <dt className="font-medium text-heading">{n.label}</dt>
+              <dd className="text-body">
+                {n.method}
+                <p className="mt-1 text-xs text-muted-text">Fuente: {n.source}</p>
+              </dd>
+            </div>
+          ))}
+        </dl>
+      </section>
+    ))}
     <section className="overflow-hidden rounded-lg border border-line bg-white">
       <div className="overflow-x-auto">
         <table className="w-full min-w-[48rem] text-sm">
@@ -186,5 +206,6 @@ async function Sources() {
         </table>
       </div>
     </section>
+    </>
   );
 }

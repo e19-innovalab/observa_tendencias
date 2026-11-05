@@ -1,0 +1,61 @@
+# Disciplinas de Argentina en los anuarios del DIU. El nombre final es el de las carreras de
+# config/reference/carreras_arg_cine.yaml, el mismo del archivo CTI. Lo usa
+# app/datasets/tracked_careers.py (analytics.yaml -> tracked_careers.argentina.names_file).
+#
+# formas: otras maneras de escribir una disciplina en las planillas.
+# columnas_csv: columna de egresados del anuario en CSV -> disciplina. Los cuadros privados abrevian
+# algunos nombres, y cada columna se comprobó contra el total de su cuadro.
+formas:
+  Filosafía: Filosofía
+  Paramédicas y Auxiliares dela Medicina: Paramédicas y Auxiliares de la Medicina
+  Paramédicas y Auxiliares de a Medicina: Paramédicas y Auxiliares de la Medicina
+
+columnas_csv:
+  e_arquitectura_disenio: Arquitectura y Diseño
+  e_astronomia: Astronomía
+  e_bioquimica_farmacia: Bioquímica y Farmacia
+  e_ciencias_agropecuarias: Ciencias Agropecuarias
+  e_ciencias_agrop: Ciencias Agropecuarias
+  e_suelo: Ciencias del Suelo
+  e_ciencias_suelo: Ciencias del Suelo
+  e_estadistica: Estadística
+  e_industrias: Industrias
+  e_industria: Industrias
+  e_informatica: Informática
+  e_ing: Ingeniería
+  e_metereologia: Meteorología
+  e_otras_ca: Otras Ciencias Aplicadas
+  e_biologia: Biología
+  e_fisica: Física
+  e_matematica: Matemática
+  e_quimica: Química
+  e_medicina: Medicina
+  e_odontologia: Odontología
+  e_paramedicas_auxiliares: Paramédicas y Auxiliares de la Medicina
+  e_paramedico_auxiliares: Paramédicas y Auxiliares de la Medicina
+  e_salud_publica: Salud Pública
+  e_sanidad: Sanidad
+  e_veterinaria: Veterinaria
+  e_arqueologia: Arqueología
+  e_artes: Artes
+  e_educacion: Educación
+  e_filosofia: Filosofía
+  e_historia: Historia
+  e_letras_idiomas: Letras e Idiomas
+  e_psicologia: Psicología
+  e_teologia: Teología
+  e_ciencias_informacion_comunicacion: Ciencias de la Información y de la Comunicación
+  e_ci: Ciencias de la Información y de la Comunicación
+  e_ciencias_politicas_relaciones: Ciencias Políticas, Relaciones Internacionales y Diplomacia
+  e_cp: Ciencias Políticas, Relaciones Internacionales y Diplomacia
+  e_demografia_geografia: Demografía y Geografía
+  e_dg: Demografía y Geografía
+  e_derecho: Derecho
+  e_economia_administracion: Economía y Administración
+  e_economia: Economía y Administración
+  e_otras_cs: Otras Ciencias Sociales
+  e_otras: Otras Ciencias Sociales
+  e_relaciones_institucionales_humanas: Relaciones Institucionales y Humanas
+  e_relaciones: Relaciones Institucionales y Humanas
+  e_sociologia_antropologia_servicio: Sociología, Antropología y Servicio Social
+  e_sociologia: Sociología, Antropología y Servicio Social

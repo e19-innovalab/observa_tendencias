@@ -2,6 +2,7 @@
 import asyncio
 from datetime import UTC, date, datetime
 
+import httpx
 import pytest
 from fastapi import HTTPException
 from fastapi.testclient import TestClient
@@ -116,7 +117,7 @@ def test_answer_from_tools_with_links_and_log(client, engine, monkeypatch):
     assert body["status"] == "ok" and body["verified"] and body["warning"] is None
     assert all(run.ok for run in fake.runs)
     assert any(o["occupation_code"] == "2512" for o in fake.runs[0].data)
-    assert body["links"] == [{"label": "Ficha de la ocupación", "href": "/ocupaciones/2512"}]
+    assert body["links"] == [{"label": "Ficha de la ocupación", "href": "/ocupaciones/2512", "external": False}]
     assert [t["tool"] for t in body["tool_calls"]] == ["buscar_ocupacion", "ficha_ocupacion"]
     assert body["remaining_today"] == CONF.limits.questions_per_user_per_day - 1
     with Session(engine) as s:
@@ -185,7 +186,7 @@ def test_tool_errors_go_back_to_the_model(client, monkeypatch):
     assert not missing.ok and "code" in missing.result
     assert not not_found.ok and not_found.result.startswith("Error 404")
     assert ranking.ok and ranking.args == {"country": "ARG", "view": "top"}  # unknown params dropped
-    assert body["links"] == [{"label": "Ranking de ocupaciones", "href": "/ocupaciones?country=ARG"}]
+    assert body["links"] == [{"label": "Ranking de ocupaciones", "href": "/ocupaciones?country=ARG", "external": False}]
 
 
 def test_codes_must_come_from_the_search_or_the_person(client, monkeypatch):
@@ -238,7 +239,7 @@ def test_scripted_salary_from_a_local_name(client, engine, monkeypatch):
     assert body["source"] == "script" and body["status"] == "ok" and fake.messages is None
     assert "«dev»" in body["answer"] and "USD 1.300 por mes (USD PPA 2.500) en 2025" in body["answer"]
     assert "Uruguay" not in body["answer"]  # only the country asked
-    assert body["links"] == [{"label": "Ficha de la ocupación", "href": "/ocupaciones/2512"}]
+    assert [link["href"] for link in body["links"]] == ["/ocupaciones/2512"] and "(CIUO 2512)" in body["links"][0]["label"]
     assert body["remaining_today"] == CONF.limits.questions_per_user_per_day  # scripted: does not count
     with Session(engine) as s:
         log = s.scalars(select(AssistantLog)).one()
@@ -260,10 +261,11 @@ def test_scripted_rankings_sectors_methodology_and_follow_up(client, monkeypatch
     assert ask_country["answer"] == CONF.scripted.templates["ask_country"]
     assert {o["country"] for o in ask_country["options"]} == {c.iso3 for c in catalog().countries}
     ranking = _ask(client, "mejores ocupaciones", choice={"country": "ARG"})
-    assert ranking["answer"].splitlines()[1].startswith("1. ") and ranking["links"][0]["href"] == "/ocupaciones?country=ARG"
+    assert ranking["answer"].splitlines()[1].startswith("1. ") and ranking["links"][-1]["href"] == "/ocupaciones?country=ARG"
+    assert ranking["links"][0]["href"].startswith("/ocupaciones/") and ranking["links"][0]["href"].endswith("?country=ARG")
     assert _ask(client, "¿Qué sector tiene mejor ISE en Argentina?")["tool_calls"][0]["tool"] == "sectores"
     method = _ask(client, "¿Cómo se calcula el ISE?")
-    assert "35 %" in method["answer"] and method["source"] == "script"
+    assert "47 %" in method["answer"] and method["source"] == "script"
     follow = _ask(client, "¿Y en Argentina?", context={"occupation": "2221", "page": "/ocupaciones/2221"})
     assert follow["source"] == "script" and "Argentina:" in follow["answer"]
 
@@ -388,3 +390,164 @@ def test_every_configured_tool_reaches_its_endpoint(client, monkeypatch):
     failed = [(r.tool, r.result[:80]) for r in fake.runs if not r.ok]
     assert not failed, failed
     assert {"moctezuma_paises", "ludita_ocupacion", "reina_roja_ocupacion", "sisifo_paises"} <= {r.tool for r in fake.runs}
+
+
+def test_the_name_question_has_a_fixed_answer_without_the_model(client, monkeypatch):
+    fake = _use(monkeypatch, Scripted([], "no debería usarse"), scripted=True)
+    r = _ask(client, "¿Cómo te llamás?")
+    assert r["answer"] == CONF.scripted.templates["identity"] and r["source"] == "script"
+    assert r["answer"].startswith("Soy Baqueano") and fake.messages is None
+
+
+def test_each_occupation_named_gets_its_link_first(client, monkeypatch):
+    _use(monkeypatch, Scripted(
+        [("ranking_ocupaciones", {"country": "ARG"}), ("ficha_ocupacion", {"code": "2512"})],
+        "Desarrollador/a de software (CIUO 2512) aparece primero en Argentina (2025). Sigue CIUO 2221."))
+    r = _ask(client, "¿Qué ocupaciones lideran en Argentina?")
+    hrefs = [link["href"] for link in r["links"]]
+    assert hrefs[:2] == ["/ocupaciones/2512?country=ARG", "/ocupaciones/2221?country=ARG"]
+    assert "2512" in r["links"][0]["label"] and "/ocupaciones?country=ARG" in hrefs
+    assert "/ocupaciones/2512" not in hrefs  # the generic card link is not repeated
+
+
+def _web_case(monkeypatch, calls, answer):
+    from app.assistant import web
+
+    seen = {}
+
+    class Fake(Scripted):
+        async def answer(self, system, messages, call_tool):
+            seen["system"] = system
+            return await super().answer(system, messages, call_tool)
+
+    fake = Fake(calls, answer)
+
+    def provider(conf):
+        seen["tools"] = [t.name for t in conf.tools]
+        return fake
+
+    monkeypatch.setattr(service, "get_provider", provider)
+
+    async def search(conf, query):
+        seen["searched"] = query
+        return [{"title": "Ludismo", "url": "https://es.wikipedia.org/wiki/Ludismo",
+                 "extract": "Movimiento de artesanos ingleses activo en 1811, con 1234 participantes."}]
+
+    monkeypatch.setattr(web, "search", search)
+    return fake, seen
+
+
+TOOL = CONF.web_search.tool.name
+
+
+def test_only_the_experimental_indicators_can_search_outside(client, monkeypatch):
+    fake, seen = _web_case(monkeypatch, [(TOOL, {"q": "salarios"})], "No tengo ese dato.")
+    r = _ask(client, "¿Qué dice internet sobre los salarios de los médicos?")
+    assert TOOL not in seen["tools"] and "searched" not in seen
+    assert not fake.runs[0].ok and CONF.web_search.prompt_note not in seen["system"]
+    assert not any(link["external"] for link in r["links"])
+
+
+def test_an_experimental_indicator_can_search_and_cites_its_source(client, monkeypatch):
+    fake, seen = _web_case(monkeypatch, [(TOOL, {"q": "ludismo"})],
+                           "Según Wikipedia, el nombre viene de un movimiento con 1234 participantes.")
+    r = _ask(client, "¿De dónde viene el nombre del índice Ludita?")
+    assert TOOL in seen["tools"] and seen["searched"] == "ludismo"
+    assert CONF.web_search.prompt_note in seen["system"] and r["status"] == "ok"  # its numbers count as seen
+    assert {"label": "Wikipedia: Ludismo", "href": "https://es.wikipedia.org/wiki/Ludismo", "external": True} in r["links"]
+
+
+def test_a_number_outside_what_was_read_is_still_blocked(client, monkeypatch):
+    _web_case(monkeypatch, [(TOOL, {"q": "ludismo"})], "Según Wikipedia, participaron 98765 personas.")
+    assert _ask(client, "¿Qué fue el ludismo? Hablame de Ludita")["status"] == "blocked"
+
+
+def test_the_page_or_the_previous_question_keep_the_topic(client, monkeypatch):
+    _, seen = _web_case(monkeypatch, [], "Respuesta.")
+    _ask(client, "¿Y de dónde viene el nombre?", context={"page": "/reina-roja"})
+    assert TOOL in seen["tools"]
+    _ask(client, "¿De dónde viene el nombre?", history=[{"role": "user", "content": "Contame del índice Sísifo"},
+                                                        {"role": "assistant", "content": "Mide…"}])
+    assert TOOL in seen["tools"]
+
+
+def test_experimental_questions_skip_the_ise_template(client, monkeypatch):
+    fake, _ = _web_case(monkeypatch, [], "El índice Ludita combina exposición y vitalidad.")
+    monkeypatch.setattr(CONF.scripted, "enabled", True)
+    r = _ask(client, "¿Cómo se calcula el índice Ludita?")
+    assert r["source"] == "model" and fake.messages is not None
+
+
+def test_only_the_sources_the_answer_mentions_are_linked(client, monkeypatch):
+    from app.assistant import web
+
+    _web_case(monkeypatch, [(TOOL, {"q": "ludismo"})], "Según Wikipedia, viene del ludismo.")
+
+    async def search(conf, query):
+        return [{"title": t, "url": f"https://es.wikipedia.org/wiki/{t}", "extract": "Texto."} for t in ("Cartismo", "Ludismo")]
+
+    monkeypatch.setattr(web, "search", search)
+    r = _ask(client, "¿De dónde viene el nombre del índice Ludita?")
+    assert [link["label"] for link in r["links"] if link["external"]] == ["Wikipedia: Ludismo"]
+
+
+def test_experimental_questions_think_harder_and_the_rest_do_not(client, monkeypatch):
+    _, _ = _web_case(monkeypatch, [], "Respuesta.")
+    used = {}
+    fake = Scripted([], "Respuesta.")
+
+    def provider(conf):
+        used["p"] = conf.providers[conf.provider]
+        return fake
+
+    monkeypatch.setattr(service, "get_provider", provider)
+    monkeypatch.setattr(CONF.scripted, "enabled", False)
+    extra = CONF.providers[CONF.provider].experimental
+    _ask(client, "¿Qué mide el índice Moctezuma?")
+    assert used["p"].reasoning == extra["reasoning"] and used["p"].max_tokens == extra["max_tokens"]
+    _ask(client, "¿Cuánto gana un médico?")
+    assert used["p"].reasoning is None and used["p"].max_tokens == CONF.providers[CONF.provider].max_tokens
+
+
+def test_reasoning_is_requested_kept_between_tools_and_never_shown(monkeypatch):
+    details = [{"type": "reasoning.text", "text": "pienso"}]
+    bodies = []
+
+    async def post(self, url, json=None, headers=None):
+        bodies.append(json)
+        call = [{"id": "1", "function": {"name": "buscar_ocupacion", "arguments": "{}"}}]
+        message = ({"content": "", "reasoning": "pienso", "reasoning_details": details, "tool_calls": call}
+                   if len(bodies) == 1 else {"content": "Respuesta final.", "reasoning": "sigo pensando"})
+        return httpx.Response(200, json={"choices": [{"message": message}]}, request=httpx.Request("POST", url))
+
+    monkeypatch.setattr(httpx.AsyncClient, "post", post)
+
+    async def tool(name, args):
+        return providers.ToolRun(name, args, True, '{"ok":1}')
+
+    p = CONF.providers["local"].model_copy(update={"reasoning": {"effort": "high"}})
+    reply = asyncio.run(LocalProvider(CONF, p).answer("sys", [{"role": "user", "content": "x"}], tool))
+    assert reply.text == "Respuesta final."
+    assert bodies[0]["reasoning"] == {"effort": "high"}
+    assert next(m for m in bodies[1]["messages"] if m["role"] == "assistant")["reasoning_details"] == details
+
+
+def test_only_the_complement_of_a_value_passes_on_experimental_questions(client, monkeypatch):
+    calls = [("sisifo_paises", {"country": "ARG"})]
+    data = client.get("/api/v1/sisyphus/countries", params={"country": "ARG"})
+    assert data.status_code == 200
+    real = numbers.data_values
+
+    def with_value(d, out=None):  # the tool returned this value
+        found = real(d, out)
+        if out is not None:
+            out.add(75.9)
+        return found
+
+    monkeypatch.setattr(numbers, "data_values", with_value)
+    _web_case(monkeypatch, calls, "En el índice Sísifo, 100 − 75,9 = 24,1 en Argentina (2025).")
+    assert _ask(client, "¿Cómo da el índice Sísifo en Argentina?")["status"] == "ok"
+    _web_case(monkeypatch, calls, "En el índice Sísifo, el valor es 33,3 en Argentina (2025).")
+    assert _ask(client, "¿Cómo da el índice Sísifo en Argentina?")["status"] == "blocked"
+    _web_case(monkeypatch, calls, "El salario es 24,1 en Argentina (2025).")
+    assert _ask(client, "¿Cuánto gana un médico en Argentina?")["status"] == "blocked"

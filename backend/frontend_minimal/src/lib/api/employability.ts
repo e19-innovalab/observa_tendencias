@@ -17,5 +17,5 @@ export const getEmployability = (params: {
 export const getOccupationProfile = (code: string) =>
   apiGet(`/occupations/${encodeURIComponent(code)}`, OccupationProfileSchema, {}, 300);
 
-export const getOccupationSkills = (code: string, limit = 500) =>
-  apiGet(`/occupations/${encodeURIComponent(code)}/skills`, OccupationSkillsSchema, { limit }, 3600);
+export const getOccupationSkills = (code: string, esco?: string, limit = 500) =>
+  apiGet(`/occupations/${encodeURIComponent(code)}/skills`, OccupationSkillsSchema, { limit, esco }, 3600);

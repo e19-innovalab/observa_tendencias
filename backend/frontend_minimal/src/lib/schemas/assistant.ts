@@ -21,7 +21,7 @@ export const AssistantAnswerSchema = z.object({
   verified: z.boolean(),
   warning: z.string().nullable().optional(),
   unverified_numbers: z.array(z.string()).default([]),
-  links: z.array(z.object({ label: z.string(), href: z.string() })).default([]),
+  links: z.array(z.object({ label: z.string(), href: z.string(), external: z.boolean().default(false) })).default([]),
   /** Botones: repetir la pregunta con choice = {occupation, country}. */
   options: z
     .array(z.object({ label: z.string(), occupation: z.string().nullable().optional(), country: z.string().nullable().optional() }))

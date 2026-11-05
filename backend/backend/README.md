@@ -28,17 +28,20 @@ backend/
 │   │                        #   alertas, fuentes, carga de archivos (datasets), usuarios y
 │   │                        #   sesión, asistente, y los índices de cada módulo
 │   ├── assistant/           # asistente: plantillas de respuesta, herramientas (endpoints de
-│   │                        #   lectura), proveedores de modelo, chequeo de números
+│   │                        #   lectura), búsqueda externa solo para los indicadores
+│   │                        #   experimentales, proveedores de modelo, chequeo de números
 │   ├── core/                # configuración (.env y YAML), base, sesión, búsqueda de texto
 │   ├── models/              # modelos SQLAlchemy (catálogo, fuentes, cálculos, usuarios, asistente)
 │   ├── schemas/             # esquemas de respuesta de la API
 │   ├── connectors/          # conectores a fuentes externas
 │   ├── datasets/            # archivos oficiales y carga manual: perfiles, control del archivo,
-│   │                        #   lectura, validación y carga
+│   │                        #   lectura, validación y carga. También universidades, carreras por
+│   │                        #   institución, CEP-XXI y el dólar oficial del BCRA
 │   ├── ingestion/           # pipeline de actualización, historial de revisiones, CSV del equipo
 │   ├── normalization/       # correspondencias, períodos, unidades
-│   ├── analytics/           # tendencias, proyecciones, ISE, brechas, alertas, recálculo e
-│   │                        #   indicadores temáticos (Moctezuma, Ludita, Reina Roja, Sísifo)
+│   ├── analytics/           # tendencias, proyecciones, ISE, brechas, alertas, recálculo,
+│   │                        #   titulados por sector, indicadores por sector y de género, e
+│   │                        #   indicadores experimentales (Moctezuma, Ludita, Reina Roja, Sísifo)
 │   ├── skills/              # ESCO: habilidades por ocupación y su jerarquía; versiones de
 │   │                        #   ESCO y O*NET (Reina Roja)
 │   ├── jobs/                # tareas de consola: run, recompute, scheduler, create_user…

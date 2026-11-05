@@ -10,7 +10,6 @@ from app.core.database import get_session
 from app.main import app
 from app.models import (
     Base,
-    CoverageReport,
     FactSalario,
     GraduateProjection,
     GraduateTrend,
@@ -24,14 +23,7 @@ def client():
     engine = create_engine("sqlite://", poolclass=StaticPool, connect_args={"check_same_thread": False})
     Base.metadata.create_all(
         engine,
-        tables=[t.__table__ for t in (
-            CoverageReport,
-            JobPosting,
-            GraduateTrend,
-            GraduateProjection,
-            ReporteDensidadProfesional,
-            FactSalario,
-        )],
+        tables=[t.__table__ for t in (JobPosting, GraduateTrend, GraduateProjection, ReporteDensidadProfesional, FactSalario)],
     )
     with Session(engine) as s:
         for nombre, tend, var in [("medicina", "growing", 25.0), ("enfermeria", "declining", -11.1)]:
@@ -41,15 +33,12 @@ def client():
                                 tiene_huecos=False, proyeccion="generada"))
         s.add(GraduateProjection(pais="chile", nombre="medicina", anio=2026,
                                  graduados_proyectado=130, limite_inferior=90, limite_superior=170))
-        s.add(CoverageReport(pais="CHL", sector="Salud", n_anios_observados=19, anio_min=2007,
-                             anio_max=2025, elegible_proyeccion=True, estado="proyectable"))
         for i, (prov, sec) in enumerate([("Santa Fe", "Salud"), ("Santa Fe", "Otros"),
                                          ("Córdoba", "Salud")]):
             s.add(JobPosting(id=str(i), pais="ARG", provincia=prov, sector=sec,
                              regla_clasificacion="industria", titulo=f"Oferta {i}",
                              fecha_publicacion=date(2026, 10, 8), url="https://x/" + str(i),
                              scraped_at=datetime(2026, 10, 13, 17, 0, tzinfo=UTC)))
-
         # Datos para pruebas de densidad profesional (ARG 2022, CHL 2022 y 2025)
         s.add_all([
             ReporteDensidadProfesional(
@@ -113,9 +102,16 @@ def test_jobs_summary(client):
     assert r["view"]["other_sector"] not in r["view"]["sector_order"]
 
 
-def test_coverage(client):
-    r = client.get("/api/v1/coverage", params={"pais": "chl"}).json()
-    assert r[0]["estado"] == "proyectable"
+def test_source_notes_cover_salaries_and_gender(client):
+    r = {n["title"]: n for n in client.get("/api/v1/sources/notes").json()}
+    labels = {title: {i["label"] for i in n["items"]} for title, n in r.items()}
+    assert {"Salario en USD", "Extrapolación del factor PPA"} <= labels["Salarios en dólares"]
+    assert {"Titulados por sexo", "Brecha salarial", "Diagnóstico de paridad"} <= labels["Indicadores de género"]
+    assert all(i["source"] and i["method"] for n in r.values() for i in n["items"])
+
+
+def test_coverage_endpoint_is_gone(client):
+    assert client.get("/api/v1/coverage").status_code == 404
 
 
 def test_graduate_trends_filter(client):
@@ -130,11 +126,9 @@ def test_graduate_projections(client):
 
 
 def test_country_and_legacy_pais_are_equivalent(client):
-    for path in ("/api/v1/jobs/summary", "/api/v1/coverage"):
-        a = client.get(path, params={"pais": "chl" if "coverage" in path else "arg"}).json()
-        b = client.get(path, params={"country": "CHL" if "coverage" in path else "ARG"}).json()
-        assert a == b
-    trends = client.get("/api/v1/graduates/trends", params={"country": "CHL"}).json()
+    a = client.get("/api/v1/jobs/summary", params={"pais": "arg"}).json()
+    assert a == client.get("/api/v1/jobs/summary", params={"country": "ARG"}).json()
+    trends =client.get("/api/v1/graduates/trends", params={"country": "CHL"}).json()
     assert {i["pais"] for i in trends["items"]} == {"chile"}
     proj = client.get("/api/v1/graduates/projections", params={"country": "CHL"}).json()
     assert proj and all(p["pais"] == "chile" for p in proj)
@@ -184,14 +178,6 @@ def test_analytics_salarios_dual(client):
     assert r_loc["total"] == 1
     assert r_loc["items"][0]["fuente_id"] == "AR_CEPXXI"
     assert r_loc["items"][0]["salario_moneda_local"] == 850000.0
-
-
-def test_analytics_ise_metodologia_insercion(client):
-    r = client.get("/api/v1/analytics/ise/metodologia-insercion").json()
-    assert r["version"] == "0.2"
-    assert r["pesos_efectivos_redistribuidos"]["insertion_rate"] == 0.0
-    assert r["pesos_efectivos_redistribuidos"]["net_demand"] == 0.467
-    assert "CHL" in r["disponibilidad_por_pais"]
 
 
 def test_analytics_habilidades_general(client):

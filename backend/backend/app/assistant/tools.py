@@ -24,6 +24,7 @@ class ToolRun:
     data: object = None  # full JSON, for the numbers check
     link: str | None = None
     extra: dict = field(default_factory=dict)
+    external_links: list[dict] = field(default_factory=list)  # sources outside the observatory
 
 
 def json_schema(tool: AssistantTool) -> dict:
