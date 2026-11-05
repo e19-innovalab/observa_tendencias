@@ -48,7 +48,7 @@ function targetOf(a: AlertItem): { href: string; label: string } | null {
   if (a.indicator) {
     const q = new URLSearchParams({ indicator: a.indicator.code });
     if (a.country_iso3) q.set('country', a.country_iso3);
-    return { href: `/tendencias?${q}`, label: 'Ver tendencia' };
+    return { href: `/panorama?${q}`, label: 'Ver tendencia' };
   }
   return null;
 }

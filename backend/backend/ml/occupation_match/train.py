@@ -22,8 +22,11 @@ from pathlib import Path
 import torch
 import yaml
 from datasets import Dataset
-from sentence_transformers import (SentenceTransformer, SentenceTransformerTrainer,
-                                   SentenceTransformerTrainingArguments)
+from sentence_transformers import (
+    SentenceTransformer,
+    SentenceTransformerTrainer,
+    SentenceTransformerTrainingArguments,
+)
 from sentence_transformers.losses import MultipleNegativesRankingLoss
 from sentence_transformers.training_args import BatchSamplers
 

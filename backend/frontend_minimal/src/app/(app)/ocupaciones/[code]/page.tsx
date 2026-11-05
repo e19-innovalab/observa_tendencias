@@ -1,4 +1,4 @@
-import { ArrowLeft, ArrowRight, ChevronRight, Home } from 'lucide-react';
+import { ArrowLeft, ArrowRight, ChevronDown, ChevronRight, Home } from 'lucide-react';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
@@ -16,12 +16,11 @@ import { formatGrowth, formatIndex, formatScore, formatShare, formatUnit, format
 
 export const metadata: Metadata = { title: 'Detalle de ocupación' };
 type Params = { code: string };
-type SearchParams = { country?: string; habilidades?: string };
-const SKILLS_PREVIEW = 15;
+type SearchParams = { country?: string; habilidades?: string; esco?: string };
+const SKILLS_PREVIEW = 10;
 const DIM_COLORS: Record<string, string> = {
   net_demand: 'var(--color-rank-1)',
   salary_ppp: 'var(--color-rank-3)',
-  insertion_rate: 'var(--color-rank-5)',
   automation_risk: 'var(--color-rank-4)',
 };
 
@@ -62,7 +61,7 @@ async function Detail({ params, searchParams }: { params: Promise<Params>; searc
   const [{ code }, sp] = await Promise.all([params, searchParams]);
   let profile, countries, skills;
   try {
-    [profile, countries, skills] = await Promise.all([getOccupationProfile(code), getCountries(), getOccupationSkills(code)]);
+    [profile, countries, skills] = await Promise.all([getOccupationProfile(code), getCountries(), getOccupationSkills(code, sp.esco)]);
   } catch (e) {
     if (e instanceof ApiError && e.status === 404) notFound();
     return (
@@ -83,6 +82,8 @@ async function Detail({ params, searchParams }: { params: Promise<Params>; searc
   const effective = (c: Component) => (c.available && availableWeight ? c.weight / availableWeight : null);
   const showAll = sp.habilidades === 'todas';
   const shownSkills = showAll ? skills.items : skills.items.slice(0, SKILLS_PREVIEW);
+  const selectedEsco = skills.esco_occupation;
+  const skillsHref = (esco?: string | null) => `/ocupaciones/${occ.occupation_code}?${new URLSearchParams({ ...(sp.country ? { country: sp.country } : {}), ...(esco ? { esco } : {}) })}#habilidades`;
   const hierarchy = profile.hierarchy.filter((h) => h.level < 4);
 
   return (
@@ -251,32 +252,64 @@ async function Detail({ params, searchParams }: { params: Promise<Params>; searc
           </ul>
         </section>
 
-        <section className="rounded-lg border border-line bg-white p-5">
+        <section id="habilidades" className="scroll-mt-28 rounded-lg border border-line bg-white p-5">
           <div className="flex flex-wrap items-baseline justify-between gap-3">
             <div>
-              <h2 className="text-lg font-semibold text-heading">Habilidades principales ({skills.total} en total)</h2>
-              <p className="mt-1 text-sm text-muted-text">{skills.weight_note} Fuente: {skills.source?.name ?? 'ESCO'}.</p>
+              <h2 className="text-lg font-semibold text-heading">
+                {selectedEsco ? `Habilidades de «${selectedEsco.name}»` : 'Habilidades'} ({skills.total} en total)
+              </h2>
+              <p className="mt-1 text-sm text-muted-text">{skills.relation_note} Fuente: {skills.source?.name ?? 'ESCO'}.</p>
             </div>
             <Link href={`/habilidades?occupation=${occ.occupation_code}`} className="inline-flex items-center gap-1 text-sm font-medium text-link hover:underline">
               Ver brechas de estas habilidades <ArrowRight className="size-4" aria-hidden />
             </Link>
           </div>
+          {selectedEsco && (
+            <p className="mt-3 rounded-md bg-surface-2 px-3 py-2 text-sm text-body">
+              Es una de las ocupaciones ESCO de {occ.name}: el empleo, los salarios y el ISE de esta página son de todo el grupo.{' '}
+              <Link href={skillsHref()} className="font-medium text-link hover:underline">Ver las habilidades del grupo</Link>
+              {selectedEsco.url && <> · <a href={selectedEsco.url} target="_blank" rel="noopener noreferrer" className="font-medium text-link hover:underline">Ficha en ESCO</a></>}
+            </p>
+          )}
+          {skills.items.length === 0 && <p className="mt-4 text-sm text-muted-text">ESCO no lista habilidades para esta ocupación, o su ficha no se pudo leer.</p>}
           <ul className="mt-4 flex flex-wrap gap-2">
             {shownSkills.map((s) => (
               <li key={s.skill_code} className="flex items-center gap-2 rounded-md border border-line px-2.5 py-1 text-xs text-body">
                 {s.name}
-                {s.weight !== null && s.weight !== undefined && <span className="rounded bg-surface-2 px-1.5 font-mono text-[10px]">{formatIndex(s.weight)}</span>}
+                {s.relation_label && <span className={`rounded px-1.5 py-px text-[10px] font-semibold uppercase tracking-wide ${s.relation === 'essential' ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-600'}`}>{s.relation_label}</span>}
               </li>
             ))}
           </ul>
           {skills.items.length > SKILLS_PREVIEW && (
             <Link
-              href={`?${new URLSearchParams({ ...(current ? { country: current.country_iso3 } : {}), ...(showAll ? {} : { habilidades: 'todas' }) })}`}
+              href={`?${new URLSearchParams({ ...(current ? { country: current.country_iso3 } : {}), ...(selectedEsco?.code ? { esco: selectedEsco.code } : {}), ...(showAll ? {} : { habilidades: 'todas' }) })}`}
               scroll={false}
               className="mt-4 inline-block text-sm font-medium text-link hover:underline"
             >
               {showAll ? 'Mostrar menos' : `Mostrar las ${skills.items.length} habilidades`}
             </Link>
+          )}
+          {skills.relation_help.length > 0 && (
+            <details open={Boolean(selectedEsco)} className="group mt-4 border-t border-line/70 pt-3">
+              <summary className="flex cursor-pointer list-none items-center justify-between gap-4 text-sm font-medium text-heading [&::-webkit-details-marker]:hidden">
+                ¿Cómo se leen estas habilidades?
+                <ChevronDown className="size-4 text-muted-text transition-transform group-open:rotate-180" aria-hidden />
+              </summary>
+              <div className="mt-2 max-w-3xl space-y-2 text-sm leading-relaxed text-body">
+                {skills.relation_help.map((text) => <p key={text}>{text}</p>)}
+                {skills.esco_occupations.length > 0 && (
+                  <p>
+                    <span className="font-medium text-heading">Las {skills.esco_occupations.length} ocupaciones ESCO de este grupo{skills.esco_occupations.some((o) => o.code) ? ' (tocá una para ver sus habilidades)' : ''}:</span>{' '}
+                    {skills.esco_occupations.map((o, i) => (
+                      <span key={o.name}>
+                        {i > 0 && ' · '}
+                        {o.code ? <Link href={skillsHref(o.code)} aria-current={o.code === selectedEsco?.code ? 'true' : undefined} className={`text-link hover:underline ${o.code === selectedEsco?.code ? 'font-semibold' : ''}`}>{o.name}</Link> : o.name}
+                      </span>
+                    ))}
+                  </p>
+                )}
+              </div>
+            </details>
           )}
         </section>
 

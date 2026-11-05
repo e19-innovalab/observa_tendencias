@@ -1,503 +1,500 @@
 # Observatorio Predictivo de Tendencias · Módulo Data Analytics
 
-**Alcance Regional:** Argentina, Uruguay y Chile  
+**Alcance regional:** Argentina, Uruguay y Chile  
 **Programa:** InnovaLab  
-**Rol del Módulo:** Ingesta, limpieza, armonización multipaís, cálculo de indicadores estadísticos, proyecciones de tendencias socioeconómicas, laborales y educativas, y articulación formativa-ocupacional con impacto de Inteligencia Artificial.  
-**Norma Metodológica:** 100% Datos Observados Oficiales (Cero imputaciones sintéticas, estimaciones figuradas ni sustituciones artificiales).
+**Rol del módulo:** define qué datos usa el observatorio y cómo se analizan: fuentes oficiales, armonización entre países, indicadores, proyecciones y cruces entre formación y ocupación.  
+**Norma metodológica:** solo datos oficiales, descargables de forma periódica, sin imputar valores. Lo que se estima o se extiende se dice en pantalla (ver [excepciones](#condiciones-básicas-y-principios-metodológicos)).
+
+> **Qué cambió en noviembre de 2026.** La analítica de este módulo se integró al backend: los datos ya no salen de `pipeline.py` ni de archivos en Drive, sino de jobs que descargan cada fuente oficial. Este README describe lo que la aplicación usa hoy. El código de `data_analytics/` queda como referencia del trabajo original y [la sección 6](#6-funcionalidad-de-los-módulos-del-pipeline) indica qué lo reemplazó.
 
 ---
 
 ## 1. Visión General del Módulo y Principios Metodológicos
 
-Este módulo constituye la capa autónoma de analítica de datos del **Observatorio Predictivo de Tendencias**. Su objetivo es integrar fuentes oficiales de empleo, salarios, educación superior y series macroeconómicas de **Argentina, Chile y Uruguay**, para normalizarlas y producir métricas comparables, modelos de tendencia a 3 y 5 años con intervalos de confianza al 95%, diagnósticos de género, análisis institucional universitario y matrices de habilidades frente a la transformación tecnológica.
+El observatorio integra fuentes oficiales de empleo, salarios, educación superior y series macroeconómicas de **Argentina, Chile y Uruguay**, para analizar cinco sectores estratégicos y sus ocupaciones.
 
 ### Condiciones Básicas y Principios Metodológicos:
 
-1. **100% Datos Observados:** No se aplican sustituciones sintéticas, datos inventados ni imputaciones calculadas. Cada dato proviene directamente de fuentes y relevamientos oficiales de los ministerios, organismos estadísticos nacionales y agencias supranacionales.
-2. **Aislamiento e Independencia Operativa:** El módulo opera de forma autónoma. No requiere conectarse a bases de datos activas del backend para procesar la analítica ni exporta directamente en directorios ajenos a `data_analytics/`.
-3. **Paridad Internacional:**
-   * Comparación estricta de los mismos **5 sectores estratégicos**: *Tecnología, Economía del conocimiento, Salud, Energía y Turismo*.
-   * Homologación de carreras y disciplinas según clasificaciones internacionales estándar (**UNESCO CINE-F 2013 / UNSD CIIU Rev. 4 / OIT CIUO-08**).
-   * Conversión de salarios en moneda local (ARS, CLP, UYU) a **USD PPA (Paridad de Poder Adquisitivo)** utilizando los factores oficiales del Banco Mundial deflactados a precios constantes base 2016=100.
-4. **Armonización de Género:** Estandarización de categorías en **F** (femenino), **M** (masculino), **NB** (no binario / indefinido, reportado en Chile) y opción de totalización segregada sin alterar las proporciones observadas.
-5. **Auditoría e Inspección Continua con Agentes de IA en Antigravity:** El diseño metodológico, la depuración del código, la inspección de consistencia matemática y la validación de paridad de este módulo se desarrollan mediante pair programming en **Google Antigravity**, apoyándose en agentes de IA para realizar revisiones exhaustivas paso a paso, trazabilidad en bitácoras y pruebas de estrés de los algoritmos.
+1. **Solo fuentes oficiales con descarga periódica o API.** Una tabla que no se puede actualizar desde su fuente oficial no entra.
+2. **Integrado, no aislado.** Cada fuente tiene un job en el backend que descarga, valida el formato y carga. Si el formato de un archivo cambió, no se carga nada, se conservan los datos anteriores y se genera una alerta.
+3. **Paridad internacional:**
+   * Los mismos **5 sectores**: *Tecnología, Economía del conocimiento, Salud, Energía y Turismo*.
+   * Carreras homologadas con **UNESCO CINE-F 2013**, sectores con **CIIU Rev. 4** y ocupaciones con **OIT CIUO-08**. Las correspondencias de nombres van en YAML (`backend/backend/config/reference/`), nunca en el código.
+   * Salarios en **USD** (tipo de cambio oficial) y **USD PPA** (paridad de poder adquisitivo). Los índices usan USD PPA.
+4. **Armonización de género:** categorías **F**, **M** y **NB** (no binario, solo Chile). `T` (total) no es una categoría de sexo.
+5. **Historial.** No se borra lo anterior: si una fuente corrige un valor, el anterior queda en `data_revisions`.
+
+**Excepciones, siempre declaradas:**
+
+| Qué | Por qué | Dónde se avisa |
+|---|---|---|
+| LinkedIn (Apify) | No es fuente oficial; se usa solo en Pulso laboral | Pantalla Pulso laboral |
+| Matrices de habilidades de este módulo | Las armó el equipo; no tienen descarga oficial | `/analytics/habilidades` |
+| Factor PPA de Argentina desde 2022 | El Banco Mundial lo publica hasta 2021; se extiende con la inflación | Metodología y fuentes |
+| Salario por ocupación | La OIT lo publica por gran grupo: todas las ocupaciones del grupo muestran el mismo valor | Metodología y fuentes |
+| Proyecciones | Son orientativas, no datos | Línea punteada en cada gráfico |
 
 ---
 
 ## 2. Stack Tecnológico
 
-El módulo de Data Analytics está construido sobre un ecosistema científico en Python, integrando librerías especializadas en procesamiento de datos masivos, modelado estadístico, consumo de APIs oficiales y estándares taxonómicos internacionales:
-
-| Capa / Dominio | Tecnología / Herramienta | Rol y Función en el Módulo |
+| Capa / Dominio | Tecnología / Herramienta | Rol |
 |---|---|---|
-| **Lenguaje Base** | Python 3.11+ (validado en 3.15) | Núcleo del pipeline de datos, tipado estricto y scripts de orquestación autónomos. |
-| **Entorno y Aislamiento** | Entorno virtual (`venv`) | Aislamiento de paquetes para garantizar reproducibilidad e independencia operativa. |
-| **Manipulación de Datos** | `pandas` (>= 2.2.0) | Limpieza, estructuración tabular, cruces de hechos/dimensiones y armonización multipaís. |
-| **Cálculo Numérico** | `numpy` (>= 1.26.0) | Operaciones matriciales vectorizadas, agregaciones rápidas y gestión estricta de `NaN`. |
-| **Estadística y Proyecciones** | `scipy` (>= 1.12.0) | Z-scores de dinamismo, regresiones lineales y conos de proyección a 3 y 5 años con $t$-Student al 95%. |
-| **Ingesta y APIs** | `requests` (>= 2.31.0) | Conexión con APIs REST oficiales y supranacionales (Banco Mundial, INDEC). |
-| **Lectura de Formatos** | `openpyxl`, `odfpy`, `csv`, `zipfile` | Extracción automatizada de censos y anuarios en `.xlsx`, `.ods`, `.zip` y `.csv` (RFC 4180 / UTF-8). |
-| **Visualización** | `matplotlib` (>= 3.8.0) | Generación de gráficos analíticos de alta resolución (.png a 300 DPI) y fan charts. |
-| **Taxonomías y Estándares** | UNESCO CINE-F 2013, CIIU Rev. 4 / CLAE2, OIT CIUO-08 / ESCO, Banco Mundial WDI | Homologación internacional de carreras, sectores económicos, competencias ocupacionales y paridad PPA / IPC. |
-| **Entornos de Desarrollo (IDE)** | Google Antigravity IDE, Visual Studio Code | Entorno de ejecución coordinada, inspección de terminales y control de flujo. |
-| **Pair Programming con IA** | Claude AI, Modelos Google (Gemini en Antigravity) | Auditoría metodológica, refactorización modular, pruebas de estrés algorítmico y consistencia matemática. |
-| **Versionado y Almacenamiento** | Git / GitHub, Google One / Google Drive | Control de versiones colaborativo y resguardo centralizado de datasets censales crudos de gran volumen. |
+| **Lenguaje base** | Python 3.11+ | Backend, jobs de datos y cálculos |
+| **API** | FastAPI, Pydantic | Endpoints y contratos de datos |
+| **Base de datos** | PostgreSQL (Supabase), SQLAlchemy, Alembic | Tablas y migraciones |
+| **Manipulación de datos** | `pandas`, `numpy` | Limpieza y cruces |
+| **Proyecciones** | `statsmodels` | Suavizado exponencial de Holt |
+| **Ingesta y APIs** | `httpx`, `apscheduler` | Conexión con APIs y archivos oficiales; actualización programada |
+| **Lectura de formatos** | `openpyxl`, `csv`, `zipfile` | `.xlsx`, `.zip` y `.csv` |
+| **Configuración** | YAML (`backend/backend/config/`) | Fuentes, metodología, textos y correspondencias |
+| **Frontend** | Next.js, TypeScript, Tailwind, Recharts | Pantallas en `backend/frontend_minimal` |
+| **Asistente** | Modelo por API compatible con OpenAI (`nvidia/nemotron-3.5-super-vl:free` en OpenRouter) | Baqueano, con chequeo de números |
+| **Taxonomías** | UNESCO CINE-F 2013, CIIU Rev. 4 / CLAE2, OIT CIUO-08, ESCO | Homologación internacional |
+| **Publicación** | Render (API), Vercel (frontend), Supabase (base) | Producción |
+| **Pair programming con IA** | Claude | Desarrollo y revisión |
 
 ---
 
 ## 3. Arquitectura del Flujo de Datos Extremo a Extremo (Pipeline a Producción)
 
-El Observatorio opera bajo una arquitectura de flujo desacoplada y unidireccional: la capa de analítica produce datasets inmutables, la capa de backend los ingesta de forma transaccional en PostgreSQL, y la capa de frontend los consume vía API REST para su representación gráfica.
-
 ```mermaid
 graph TD
-    subgraph S1["1. Fuentes Oficiales"]
-        F1["APIs Supranacionales: Banco Mundial, OIT, INDEC"]
-        F2["Datasets Censales en Drive: SPU, SIES, MEC, UdelaR"]
+    subgraph S1["1. Fuentes oficiales"]
+        F1["APIs: Banco Mundial, OIT, INDEC, BCRA, SIMEL, ESCO"]
+        F2["Archivos oficiales: Mi Futuro, DIU, MEC, UdelaR, CEP-XXI, SIPA, INE"]
     end
 
-    subgraph S2["2. Pipeline Data Analytics"]
-        P1["Etapa 01: Ingesta Automatizada (ingesta_01.py)"]
-        P2["Etapa 02: Limpieza y Normalizacion (cleaning_02.py)"]
-        P3["Etapa 03: Indicadores y Proyecciones (indicadores_03.py)"]
-        P4["Etapa 04: Matriz de Habilidades e IA (generar_matriz_habilidades_ia.py)"]
+    subgraph S2["2. Jobs del backend"]
+        P1["Descarga y control de formato"]
+        P2["Armonización con los YAML de referencia"]
+        P3["Carga con historial de revisiones"]
+        P4["Recálculo: tendencias, proyecciones, ISE, brechas, indicadores"]
         P1 --> P2
         P2 --> P3
-        P2 --> P4
+        P3 --> P4
     end
 
-    subgraph S3["3. Entregables Generados"]
-        OUT["16 Tablas CSV en output/ y Graficos PNG en output/graficos/"]
-        P3 --> OUT
-        P4 --> OUT
+    subgraph S3["3. PostgreSQL"]
+        DB["Tablas de hechos, indicadores y metodologías versionadas"]
+        P4 --> DB
     end
 
-    subgraph S4["4. Backend Central"]
-        BK1["Carga Transaccional (seeds.load_analytics)"]
-        BK2["PostgreSQL Central (Alembic 0015)"]
-        BK3["Endpoints REST (/api/v1/analytics/...)"]
-        OUT --> BK1
-        BK1 --> BK2
-        BK2 --> BK3
+    subgraph S4["4. API REST"]
+        API["Endpoints /api/v1/..."]
+        DB --> API
     end
 
-    subgraph S5["5. Frontend & UX/UI"]
-        UI1["Dashboards y Panoramas Regionales (Next.js)"]
-        UI2["Visualizaciones (Fan Charts, Slope Charts, Radar)"]
-        UI3["Directivas Anti-Alucinacion (100% datos observados)"]
-        BK3 --> UI1
-        BK3 --> UI2
-        UI1 --> UI3
+    subgraph S5["5. Frontend y asistente"]
+        UI1["Pantallas en Next.js"]
+        UI2["Baqueano, con chequeo de números"]
+        API --> UI1
+        API --> UI2
     end
 
     F1 --> P1
-    F2 --> P2
+    F2 --> P1
 ```
 
-| Capa del Sistema | Tecnologías / Módulos | Entradas y Procesamiento | Salidas Generadas |
+| Capa | Tecnologías / Módulos | Qué hace | Resultado |
 |---|---|---|---|
-| **1. Fuentes Oficiales** | APIs REST + Google Drive | Series de ARG, CHL, URY (SPU, CEP-XXI, INDEC, SIES, MEC, UdelaR, BM, OIT) | JSON directo y archivos crudos en `data/raw/` |
-| **2. Data Analytics** | `ingesta_01.py`, `cleaning_02.py`, `indicadores_03.py`, `generar_matriz_habilidades_ia.py` | Homologación CINE-F/CIIU/CIUO-08, USD PPA, Z-scores, regresiones y conos t-Student 95% | 16 tablas CSV en `output/` y 7 gráficos PNG en `output/graficos/` |
-| **3. Backend Central** | FastAPI, PostgreSQL, SQLAlchemy, Alembic | Carga transaccional por lotes (`seeds.load_analytics`: 179k filas en 18s) | Endpoints REST `/api/v1/analytics/...` |
-| **4. Frontend & UX/UI** | Next.js, TypeScript, Tailwind, Recharts | Consumo de APIs REST con validación estricta de esquemas Pydantic | Fan Charts interactivos, Slope Charts, Radar y estados anti-alucinación |
-
+| **1. Fuentes** | APIs REST y páginas oficiales | Publican los datos | Respuestas JSON y archivos guardados con su huella |
+| **2. Jobs** | `app/connectors`, `app/datasets`, `app/ingestion`, `app/analytics` | Descargan, validan, armonizan y calculan | Tablas actualizadas y `data_revisions` |
+| **3. Base** | PostgreSQL, Alembic | Guarda datos y metodologías | Migraciones hasta `0031` |
+| **4. API** | FastAPI | Expone datos y notas metodológicas | `/api/v1/...` |
+| **5. Frontend** | Next.js, Recharts | Muestra los datos y explica su origen | Pantallas y Metodología y fuentes |
 
 ### Puntos de Contacto Interdisciplinarios:
 
-* **Data Analyst $\rightarrow$ Backend Developer:** Entrega los archivos normalizados en `data_analytics/output/` junto con el catálogo de esquemas y tipos de datos.
-* **Backend Developer $\rightarrow$ Frontend Developer:** Expone los endpoints en `/api/v1/analytics/` cumpliendo los esquemas Pydantic y contratos JSON documentados en `catalogo_datos_frontend_ux.md`.
-* **Frontend Developer $\leftarrow$ UX/UI Designer:** Implementa las directivas visuales (Fan Charts con bandas sombreadas al 95%, comparativas salariales en USD PPA y tooltips metodológicos explicativos).
+* **Data Analytics → Backend:** define fuentes y metodología, que se escriben en `config/` (`sources.yaml`, `analytics.yaml`, `indicators.yaml` y `reference/`).
+* **Backend → Frontend:** expone los endpoints documentados en [`backend/docs/guia_api_frontend.md`](../backend/docs/guia_api_frontend.md).
+* **Frontend ↔ UX/UI:** implementa las directivas visuales de [la sección 10](#10-especificaciones-de-exposición-para-frontend-y-uxui-consumo-visual).
 
 ---
 
 ## 4. Inventario Maestro de Fuentes Oficiales (Qué datos se utilizan)
 
-El Observatorio integra únicamente fuentes primarias auditadas de Argentina, Chile, Uruguay y organismos internacionales:
-
-| Ámbito | Organismo | Fuente / Relevamiento | Período Observado | Formato / Acceso | Indicadores Clave Obtenidos |
+| Ámbito | Organismo | Fuente | Período | Acceso | Qué aporta |
 |---|---|---|---|---|---|
-| **Argentina** | SPU / Min. Capital Humano | Base SIU-Araucano y Anuarios SPU | 2016–2018 (Araucano), 2020–2022 (Anuarios) | XLSX / ZIP (Descarga Drive) | Egresados universitarios por carrera, disciplina y sexo (F/M). |
-| **Argentina** | CEP-XXI / Min. Economía | Series de Puestos y Salarios CLAE2 | 2007–2023 (11 meses en 2023) | CSV (Descarga Drive) | Empleo privado formal, salarios medios y medianos ponderados. |
-| **Argentina** | INDEC | API Oficial de Series de Tiempo | 2016–2026 (117 meses) | JSON (API REST directa) | IPC Nacional base dic-2016=100 para deflación de series. |
-| **Chile** | Subsecretaría Educ. Superior | Base Histórica Mi Futuro | 2007–2025 | XLSX (Descarga Drive) | Titulados por carrera, institución, tipo y sexo (F/M/NB). |
-| **Chile** | SIES / Min. Educación | Buscador Empleabilidad e Ingresos | 2016–2024 / 2024–2025 | XLSX (Descarga Drive) | Ingresos al 1° y 4° año, empleabilidad al 1° y 2° año de egreso. |
-| **Uruguay** | MEC - Div. Estadística | Datos Abiertos Educación Superior | 2014–2023 | CSV (Descarga Drive) | Egresados terciarios/universitarios por área y disciplina. |
-| **Uruguay** | UdelaR (Dirección Planeamiento) | Serie Histórica de Egresos | 2000–2024 | ODS (Descarga Drive) | Egresos de grado por facultad y carrera universitaria. |
-| **Uruguay** | INE Uruguay | Encuesta Continua de Hogares (ECH) | 2015–2024 | CSV (Descarga Drive) | Distribución de empleo formal por rama de actividad económica. |
-| **Supranacional** | Banco Mundial (WDI) | World Development Indicators API | 2010–2025 | JSON (API REST directa) | Factores PPA del PIB (`PA.NUS.PPP`), IPC (`FP.CPI.TOTL`) y desempleo. |
-| **Supranacional** | OIT (ILOSTAT) | Indicadores Laborales SDMX/API | 2011–2024 / 2024 | CSV (API REST directa) | Salarios medios mensuales (`EAR_EMTA_SEX_ECO_NB`) y ocupación formal. |
-| **Supranacional** | CEPALSTAT | Bases Estadísticas Sociales | 2010–2024 | JSON (API REST directa) | Tasa bruta de matrícula terciaria y jóvenes en estudios superiores. |
-| **Mercado Laboral** | Observatorio / LinkedIn | Scraping de Avisos Cono Sur | 2024–2026 | CSV (Muestra observada) | 640 publicaciones de empleo, perfiles y habilidades demandadas. |
+| **Argentina** | Depto. de Información Universitaria | Anuarios estadísticos | 2014–2024 | Archivo oficial | Egresados por institución y disciplina; sexo solo para el total del país |
+| **Argentina** | Indicadores CTI | Estudiantes y egresados | Según archivo | Archivo oficial | Egresados por disciplina; cubre 2015 y 2019 en las series |
+| **Argentina** | CEP-XXI | Puestos, salarios y participación de mujeres por CLAE2 | 2007–nov. 2023 | Archivo oficial | Empleo privado registrado |
+| **Argentina** | BCRA | Cotización oficial del dólar (mayorista) | 2007–hoy | API | Conversión mensual de los salarios de CEP-XXI |
+| **Argentina** | INDEC | Series de tiempo | Desde dic. 2016 | API | IPC para el salario real; EMAE y EPH |
+| **Argentina** | Secretaría de Trabajo | SIPA | Según serie | Archivo oficial | Asalariados registrados por rama |
+| **Chile** | SIES / MINEDUC | Mi Futuro, titulados | 2007–2025 | Archivo oficial | Titulados por carrera, institución y sexo (F/M/NB) |
+| **Chile** | INE Chile | SIMEL | Según serie | API | Empleo por ocupación |
+| **Uruguay** | MEC | Anuario Estadístico de Educación | 2020–2024 | Archivo oficial | Egresados por carrera, institución y sexo |
+| **Uruguay** | UdelaR | Serie de egresos de grado | 2000–2024 | Archivo oficial | Egresos por servicio, para las universidades |
+| **Uruguay** | INE Uruguay | IPC | Según serie | Archivo oficial | Precios |
+| **Supranacional** | OIT, ILOSTAT | Indicadores laborales | Según serie | API | Empleo por sector, ocupación y sexo; salarios en USD y USD PPA |
+| **Supranacional** | OIT | Exposición a la IA generativa (2025) | 2025 | Tabla de referencia | Riesgo de automatización del ISE |
+| **Supranacional** | Banco Mundial | WDI | Según serie | API | Indicadores socioeconómicos, factor PPA de consumo privado, tipo de cambio e IPC |
+| **Supranacional** | Comisión Europea | ESCO | Versión vigente | API | Habilidades de cada ocupación |
+| **Supranacional** | O*NET y ESCO | Versiones históricas | Por versión | Archivo / API | Indicador Reina Roja |
+| **Mercado laboral** | LinkedIn (Apify) | Ofertas de Argentina; **no oficial** | Oct. 2026 | CSV a mano | 640 avisos para Pulso laboral |
+
+El detalle de cada URL y criterio está en [`backend/docs/fuentes_y_criterios.md`](../backend/docs/fuentes_y_criterios.md). En la aplicación, **Metodología y fuentes** muestra el estado de cada una.
+
+### Lo que dejamos de usar
+
+| Antes | Estado | Motivo o reemplazo |
+|---|---|---|
+| Descarga manual desde Google Drive | Retirada | Cada archivo se descarga de su página oficial |
+| Base SIU-Araucano 2016–2018 | Retirada | Origen sin confirmar. Argentina queda sin sexo por sector |
+| Anuarios SPU 2020–2022 | Reemplazados | Anuarios del DIU, 2014–2024 |
+| Buscador de Empleabilidad e Ingresos del SIES | Retirado | Sin descarga pública: pide iniciar sesión. Pedido al SIES en pausa |
+| Datos Abiertos MEC 2014–2023 | Reemplazados | Anuarios del MEC, que traen institución y sexo |
+| ECH del INE Uruguay (empleo por rama y sexo) | Reemplazada | OIT, igual para los tres países |
+| Salario mediano de CEP-XXI | No se carga | La tabla usa el salario medio |
+| CEPALSTAT | Sin conector | Declarada como fuente, sin datos cargados |
+| Factor PPA del PIB (`PA.NUS.PPP`) | Reemplazado | Factor de consumo privado (`PA.NUS.PRVT.PP`), el que usa la OIT |
 
 ---
 
 ## 5. Guía de Instalación y Ejecución Local Paso a Paso
 
-Sigue esta guía secuencial para configurar el entorno desde cero, estructurar el directorio de datasets crudos y ejecutar el pipeline completo comando por comando.
+Ya no hay un entorno propio ni carpetas que armar a mano: todo corre desde el backend. Esta es la versión corta; el detalle está en [`backend/README.md`](../backend/README.md).
 
 ### Requisitos Previos del Sistema:
-* **Python 3.11 o superior** instalado (probado y validado en Python 3.15).
-* Terminal con soporte para PowerShell (Windows), Bash o CMD.
-* Conexión a Internet para la descarga inicial de librerías y consulta de APIs REST.
+* **Python 3.11 o superior** y **Docker Desktop** (PostgreSQL local).
+* Conexión a Internet para descargar las fuentes.
 
----
-
-### Paso 1: Posicionarse en el directorio del módulo
-Abre una terminal y sitúate en la raíz del módulo `data_analytics`:
-
+### Paso 1: Posicionarse en el backend
 ```bash
-cd c:/proyectos/observa_tendencias/data_analytics
+cd backend/backend
 ```
 
----
-
-### Paso 2: Crear y activar el entorno virtual de Python
-Es fundamental trabajar en un entorno virtual aislado para evitar colisiones con librerías globales:
-
+### Paso 2: Crear y activar el entorno virtual
 ```bash
-# Crear el entorno virtual en la carpeta .venv:
 python -m venv .venv
-
-# Activar en Windows (PowerShell):
-.venv\Scripts\Activate.ps1
-
-# (O si utilizas Windows CMD clásico):
-# .venv\Scripts\activate.bat
-
-# (O si utilizas Linux / macOS / Git Bash):
-# source .venv/bin/activate
+source .venv/bin/activate        # Windows (PowerShell): .venv\Scripts\Activate.ps1
 ```
 
----
-
-### Paso 3: Instalar las dependencias del proyecto
-Actualiza el gestor de paquetes e instala las librerías científicas requeridas:
-
+### Paso 3: Instalar las dependencias
 ```bash
-pip install --upgrade pip
-pip install -r requirements.txt
+pip install -e ".[dev]"
 ```
 
----
-
-### Paso 4: Crear la estructura de carpetas `data/raw/`
-Debido a que Git ignora los datasets crudos pesados, se deben crear manualmente las carpetas de almacenamiento local:
-
+### Paso 4: Preparar la configuración y la base
 ```bash
-# En Windows PowerShell:
-New-Item -ItemType Directory -Force -Path "data/raw/argentina", "data/raw/chile", "data/raw/uruguay", "data/raw/linkedin_jobs"
+cp .env.example .env             # completar DATABASE_URL y AUTH_SECRET
+docker compose up -d
+python -m seeds.load
+```
+Para crear las tablas en una base vacía, seguí [`backend/docs/despliegue.md`](../backend/docs/despliegue.md).
 
-# En Linux / macOS / Git Bash:
-# mkdir -p data/raw/argentina data/raw/chile data/raw/uruguay data/raw/linkedin_jobs
+### Paso 5: Traer los datos
+```bash
+python -m app.jobs.run --all
+```
+Para una sola fuente: `python -m app.jobs.run --source <fuente>`. El orden importa en dos casos:
+
+1. `bcra_dolar` va antes de `cep_xxi_argentina`, que usa ese dólar.
+2. `universidades_egresados` y `carreras_seguimiento` recalculan los titulados y los indicadores por sector y de género.
+
+### Paso 6: Recalcular
+```bash
+python -m app.jobs.recompute     # tendencias, proyecciones, ISE, brechas y alertas
 ```
 
----
-
-### Paso 5: Descarga manual de datasets desde Google Drive e ingreso a `data/raw/`
-
-> [!IMPORTANT]
-> **Debes descargar los datasets oficiales desde la carpeta compartida de Google Drive** del equipo e ingresarlos en sus carpetas locales correspondientes, respetando **estrictamente los nombres de archivo exactos**:
-
-#### Ubicación 1: `data/raw/argentina/`
-* `base_araucano_traducida.xlsx` *(Base de graduados universitarios SIU-Araucano 2016-2018)*
-* `anuario_csv_2020.zip` *(SPU Anuario Estadístico Universitario 2020)*
-* `anuario_csv_2021.zip` *(SPU Anuario Estadístico Universitario 2021)*
-* `anuario_csv_2022.zip` *(SPU Anuario Estadístico Universitario 2022)*
-* `puestos_privados_mensual_por_clae2.csv` *(Empleo registrado mensual CEP-XXI)*
-* `w_mean_privado_mensual_por_clae2.csv` *(Salario medio registrado CEP-XXI)*
-* `w_median_privado_mensual_por_clae2.csv` *(Salario mediano registrado CEP-XXI)*
-* `share_mujer_privado_mensual_por_clae2.csv` *(Participación femenina CEP-XXI)*
-
-#### Ubicación 2: `data/raw/chile/`
-* `TITULADO_2007-2025_web_27_05_2026_E-1.xlsx` *(Base censal histórica de titulados de Mi Futuro)*
-* `Buscador_Estadisticas_por_carrera_2024_2025_SIES.xlsx` *(Estadísticas por carrera del SIES)*
-* `Buscador_Empleabilidad_e_Ingresos_2024_2025_SIES.xlsx` *(Ingresos y empleabilidad oficial SIES)*
-
-#### Ubicación 3: `data/raw/uruguay/`
-* `00._educ_superior_datos.csv` *(Educación Superior del MEC 2014-2023)*
-* `1.Serie-Egresos-totales-Grado-por-Servicio-2000-2024.ods` *(Serie histórica de egresos de UdelaR)*
-* `Anuario Estadístico de Educación 2024.xlsx` *(Anuario oficial MEC)*
-* `10235_distribucion_porcentual_de_las_personas_ocupadas_segun_sexo_por_rama_de_actividad_en_ocupa.csv` *(Mercado laboral INE Uruguay)*
-
-#### Ubicación 4: `data/raw/linkedin_jobs/` *(opcional / exploración)*
-* Publicaciones laborales en formato `.csv` recopiladas para monitoreo de demanda.
-
-*(Nota: Las series de Banco Mundial WDI, OIT ILOSTAT, CEPALSTAT e INDEC IPC no requieren descarga manual; el pipeline las consulta directamente vía API).*
-
----
-
-### Paso 6: Ejecución Comando por Comando del Pipeline
-
-Puedes recorrer el pipeline ejecutando cada etapa en secuencia mediante la terminal:
-
-#### 1. Etapa 01: Ingesta de APIs y verificación de fuentes
-Descarga automáticamente las series supranacionales del Banco Mundial, CEPALSTAT, ILOSTAT e INDEC, verifica la integridad de los archivos en `data/raw/` y descomprime los anuarios SPU:
+### Paso 7: Levantar la API y probar
 ```bash
-python pipeline.py --etapa 1
+uvicorn app.main:app --reload --port 8010
+pytest
 ```
-*Salida generada:* `output/resumen_ingesta.csv` y descompresión de archivos zip.
 
-#### 2. Etapa 02: Limpieza, armonización y modelo dimensional
-Procesa las planillas masivas, normaliza carreras bajo UNESCO CINE-F 2013, estandariza sectores bajo CIIU Rev. 4, calcula salarios en USD PPA y exporta las tablas de hechos y dimensiones maestras:
-```bash
-python pipeline.py --etapa 2
-```
-*(Si ya existen cachés previas y deseas forzar su reconstrucción completa desde los archivos crudos, agrega la bandera `--force`: `python pipeline.py --etapa 2 --force`).*  
-*Salidas generadas:* `output/hecho_egresados.csv`, `output/hecho_salario.csv`, `output/hecho_instituciones_egresados.csv`, tablas de dimensiones y cachés en `data/processed/`.
+### Actualización automática
+`python -m app.jobs.scheduler` sigue los horarios de `config/sources.yaml`. **Producción todavía no tiene un programador de tareas:** allí las fuentes se actualizan a mano.
 
-#### 3. Etapa 03: Indicadores estadísticos, Z-scores, proyecciones y gráficos
-Calcula tasas interanuales, Z-scores de dinamismo ($|Z| \ge 1.4$), proyecciones a 3 y 5 años con $t$-Student al 95%, tasas de densidad profesional, brechas de género observadas y genera las visualizaciones analíticas:
+### Matriz de habilidades
+Es la única parte que todavía sale de este módulo:
 ```bash
-python pipeline.py --etapa 3
-```
-*Salidas generadas:* `output/proyecciones_graduados_sector.csv`, `output/indicadores_interanuales_zscore.csv`, `output/reporte_densidad_profesional_sector.csv`, reportes salariales y gráficos PNG en `output/graficos/`.
-
-#### 4. Etapa 04: Generación de la Matriz Integral de Habilidades y Riesgo IA
-Articula las 25 carreras con 54 ocupaciones CIUO-08, clasifica las 4 tipologías de competencias y calcula los gradientes de exposición a IA según el reporte OIT Working Paper 140:
-```bash
+cd data_analytics
 python generar_matriz_habilidades_ia.py
 ```
-*Salidas generadas:* `output/matriz_habilidades_sectoriales_integrales.csv` y `output/matriz_habilidades_riesgo_ia_sector.csv`.
-
----
-
-### Ejecución Integral en un solo comando:
-Si prefieres correr las tres primeras etapas automáticamente de punta a punta:
-```bash
-python pipeline.py
-python generar_matriz_habilidades_ia.py
-```
+La API lee sus CSV desde `backend/data/processed/data_analytics/`: hay que copiarlos ahí después de generarlos.
 
 ---
 
 ## 6. Funcionalidad de los Módulos del Pipeline
 
-### `01 · src/ingesta_01.py` (Ingesta Automatizada)
-1. **Descompresión Inteligente:** Detecta y extrae autónomamente paquetes `.zip` en `data/raw/` (como los anuarios universitarios de Argentina).
-2. **APIs Oficiales Consumidas:**
-   * **Banco Mundial:** Factores de Paridad de Poder Adquisitivo (`PA.NUS.PPP` y `PA.NUS.PRVT.PP`), IPC (`FP.CPI.TOTL`) y series de desempleo.
-   * **CEPALSTAT:** Tasa bruta de matrícula terciaria (ID 99), desocupación por sexo (ID 127) y jóvenes en estudios superiores (ID 5701).
-   * **ILOSTAT (OIT):**
-     * Serie de salarios medios mensuales de asalariados por rama de actividad (CIIU Rev. 4) y sexo (`EAR_EMTA_SEX_ECO_NB`) para Argentina, Chile y Uruguay.
-     * Serie de ocupación laboral desagregada por nivel educativo y rama (`EMP_TEMP_SEX_ECO_NB`).
-3. **Auditoría de Ingesta:** Inspecciona y verifica la integridad de las fuentes locales y genera `output/resumen_ingesta.csv`.
+| Módulo original | Estado | Qué lo reemplaza |
+|---|---|---|
+| `pipeline.py` | No alimenta la aplicación | `python -m app.jobs.run` y `app/ingestion/pipeline.py` |
+| `src/ingesta_01.py` | No alimenta la aplicación | `app/connectors/` |
+| `src/cleaning_02.py` | No alimenta la aplicación | `app/datasets/`: ver abajo |
+| `src/indicadores_03.py` | No alimenta la aplicación | `app/analytics/`: ver abajo |
+| `generar_matriz_habilidades_ia.py` | **En uso** | Genera los CSV de `/analytics/habilidades` |
+| `backend/seeds/load_analytics.py` | Eliminado | Hacía `TRUNCATE` y cargaba CSV: rompía el historial |
+| `fuentes.yaml` | Referencia | `backend/backend/config/sources.yaml` |
+| `catalogo_datos_frontend_ux.md` | Desactualizado | `backend/docs/guia_api_frontend.md` |
 
-### `02 · src/cleaning_02.py` (Limpieza y Armonización)
-1. **Mapeo y Clasificación:** Mapea más de 20 carreras objetivo en los 5 sectores estratégicos con expresiones regulares y normalización fonética/ortográfica bajo CINE-F.
-2. **Chile:** Normaliza la serie histórica de egresados de Mi Futuro (2007-2025) por institución e integra salarios en CLP al 1er año y empleabilidad desde SIES.
-3. **Argentina:** Procesa la base de graduados SIU-Araucano (2016-2018) y los anuarios SPU (2020-2022) totalizando 6 años observados continuos en los 5 sectores estratégicos, e integra salarios medios/medianos y puestos formales por CLAE2 ponderados desde CEP-XXI (2007-2023).
-4. **Uruguay:** Normaliza la base de Educación Superior del MEC (2014-2023), integra egresos del Anuario MEC 2024 y la serie histórica de UdelaR (2000-2024), e incorpora el relevamiento de empleo por sexo del INE Uruguay.
-5. **Capa Salarial Supranacional OIT:** Procesa `EAR_EMTA_SEX_ECO_NB` para ARG, CHL y URY, estandariza a secciones CIIU Rev. 4 (D, I, J, M, Q) y deflacta a **USD PPA** mediante factores del Banco Mundial.
-6. **Modelado Dimensional:** Exporta tablas de hechos (`hecho_egresados`, `hecho_instituciones_egresados`, `hecho_salario`, `hecho_ocupacion_terciarios`) y dimensiones maestras (`dim_pais`, `dim_sector`, `dim_carrera`, `dim_sexo`, `dim_tiempo`, `puente_carrera_sector`).
+### Limpieza y armonización (`backend/backend/app/datasets/`)
+1. **`universities.py`:** egresados por universidad de los tres países, con los nombres unificados, y rankings.
+2. **`tracked_careers.py`:** carreras por institución, temas de seguimiento y sexo. Compara las sumas con los totales que publica cada fuente y frena la carga si se desvían.
+3. **`cep_xxi.py`:** puestos, salarios y mujeres por sector, y factores PPA.
+4. **`bcra_fx.py`:** dólar oficial diario.
 
-### `03 · src/indicadores_03.py` (Indicadores y Proyecciones)
-1. **Tasas Interanuales y Z-Scores:** Mide el crecimiento relativo interanual y la aceleración estandarizada (Z-score con umbral $|Z| \ge 1.4$) por país y sector.
-2. **Proyecciones Lineales con $t$-Student:** Modela tendencias de egresados a 3 y 5 años con intervalos de confianza al 95% para las series con $n \ge 5$ años observados (los 15 estratos de ARG, CHL y URY son 100% elegibles y proyectables).
-3. **Semáforo Presupuestario:** Recomienda prioridades formativas (`ALTA`, `MEDIA`, `BAJA PRIORIDAD`) para los 3 países según pendientes estadísticas.
-4. **Comparativa Salarial Regional Multipais:** Matriz tripartita en USD PPA homologado bajo la serie supranacional de la OIT 2024 (`reporte_brecha_salarial_regional.csv`), complementada por la granularidad de CEP-XXI y SIES (`reporte_salarios_detalle_local.csv`).
-5. **Diagnóstico Integral de Género y Brecha Salarial Observada:** Calcula tasas porcentuales de graduadas por sexo (F, M, NB) y empleo formal, junto a la brecha salarial observada OIT 2024.
-6. **Rankings Universitarios:** Top 10 Regional en el año común tripartito 2022 y rankings nacionales anualizados.
+### Indicadores y proyecciones (`backend/backend/app/analytics/`)
+1. **`graduate_trends_run.py`:** series por carrera, tendencia y proyección.
+2. **`sector_kpis_run.py`:** densidad profesional, empleo, salarios, género y proyección por sector.
+3. **`employability_run.py`, `skill_gaps_run.py`:** ISE y brechas de habilidades.
+4. **`recompute.py`:** recalcula todo con la metodología vigente y la versiona.
 
 ---
 
 ## 7. Metodología de Análisis e Indicadores Clave (Cómo se analiza)
 
-### 1. Modelado Predictivo con Intervalos $t$-Student al 95%:
-Para cada estrato país-sector con $n \ge 5$ años censales continuos, se ajusta una regresión lineal por mínimos cuadrados ordinarios:
-$$\hat{Y}_t = \beta_0 + \beta_1 \cdot t$$
-El intervalo de predicción para un año futuro $t_0$ con nivel de confianza del 95% se calcula mediante la distribución $t$-Student con $n - 2$ grados de libertad:
-$$\text{IC}_{95\%} = \hat{Y}_{t_0} \pm t_{crit} \cdot S_{e} \cdot \sqrt{1 + \frac{1}{n} + \frac{(t_0 - \bar{t})^2}{\sum (t_i - \bar{t})^2}}$$
-Donde $S_e$ es el error estándar de los residuos. Esto produce bandas de incertidumbre ensanchadas a medida que la proyección se aleja en el tiempo.
+### 1. Proyecciones con suavizado de Holt
+*Reemplaza a la regresión lineal con intervalos t-Student.* Se usa el mismo método para todos los indicadores, ajustado a cada serie:
 
-### 2. Z-Score de Dinamismo y Control de Consecutividad Temporal:
-Mide si la tasa de crecimiento interanual de egresados en un año determinado se desvía anómalamente del promedio histórico del sector:
-$$Z = \frac{\Delta\% - \mu_{\Delta\%}}{\sigma_{\Delta\%}}$$
-* **Umbral homogéneo:** $|Z| \ge 1.4$, calibrado para series cortas/moderadas respetando el límite algebraico de Shiffler.
-* **Control de consecutividad:** Si $t - (t-1) \ne 1$ año (por ejemplo, Argentina 2020 tras la ausencia de 2019), la tasa interanual queda estrictamente como `NaN` para evitar promediar un salto bienal como si fuera anual.
+$$\hat{Y}_{t+h} = \text{nivel}_t + h \cdot \text{tendencia}_t$$
 
-### 3. Tasa de Densidad Profesional y Renovación Laboral:
-Cruza la oferta educativa superior con la demanda de empleo formal observada por la OIT:
-$$\text{Densidad Profesional} = \frac{\text{Graduados Universitarios Anuales}}{\text{Personas Ocupadas en el Sector (OIT)}} \times 1.000$$
-Indica el volumen de egresados que ingresan anualmente al sistema por cada 1.000 trabajadores activos.
+$$\text{IC} = \hat{Y}_{t+h} \pm 1{,}96 \cdot \sigma \cdot \sqrt{h}$$
 
-### 4. Paridad Salarial en USD PPA del PIB y Precios Constantes:
-Para comparar salarios reales entre Argentina, Chile y Uruguay sin distorsiones cambiarias:
-$$\text{Salario USD PPA} = \frac{\text{Salario en Moneda Local (ARS, CLP, UYU)}}{\text{Factor PPA del PIB (PA.NUS.PPP del Banco Mundial)}}$$
-Las series temporales se deflactan a moneda constante mediante el IPC oficial armonizado base común $2016 = 100.0$.
+* Proyecta **4 períodos**, con al menos **12 valores observados**.
+* Los titulados por sector, además, necesitan una serie **sin huecos**. Hoy solo cumple Chile (5 sectores): Argentina y Uruguay no tienen proyección por sector.
+* Prolonga la tendencia actual: no anticipa cambios de política ni shocks.
 
-### 5. Tratamiento Transparente del Índice Sintético de Empleabilidad (ISE):
-Dado que Chile cuenta con relevamiento censal anual de inserción formal a 1 y 2 años (SIES) pero Argentina y Uruguay no disponen de mediciones censales continuas, en la comparativa regional el peso nominal del 25% de inserción se **redistribuye proporcionalmente** entre las variables con datos 100% observados en los 3 países:
-* Demanda Neta Observada: **46.7%** (nominal 35%)
-* Salario USD PPA Observado: **33.3%** (nominal 25%)
-* Riesgo de Automatización OIT: **20.0%** (nominal 15%)
-En la ficha local de Chile, la tasa observada de SIES se muestra de forma informativa sin afectar la paridad de los otros países.
+### 2. Tendencias y alertas
+*Reemplaza al Z-score de dinamismo sobre titulados.*
+* **Tendencia:** regresión lineal sobre los últimos valores; la pendiente relativa supera ±0,02 para contar como crecimiento o disminución.
+* **Alerta por cambio atípico:** más de **2 desvíos** de los cambios de la serie, con al menos 5 valores. Solo compara períodos consecutivos.
 
-### 6. Matriz de Habilidades y Gradientes de Exposición a IA (OIT WP 140 / 2025):
-La matriz articula 114 cruces ocupacionales con 4 tipologías:
-1. *Técnicas Nucleares (Hard Skills):* Competencias disciplinares específicas de cada carrera.
-2. *Emergentes Sectoriales:* Transición verde, sostenibilidad, electromovilidad, bioseguridad, hospitalidad regenerativa.
-3. *Transversales y Humanas:* Pensamiento crítico, ética profesional, empatía y trabajo interdisciplinario.
-4. *Digitales e IA:* Asistencia por LLMs, ciencia de datos, arquitectura cloud e IoT.
-Se cruza con los gradientes oficiales del reporte OIT Working Paper 140 (Gmyrek et al.):
-* `Not Exposed` (0.00 - 0.20): Predominio manual/presencial sin exposición tecnológica directa.
-* `Minimal Exposure` (0.20 - 0.40): Exposición asistida moderada.
-* `Gradient 2` (0.40 - 0.50): Alta complementariedad con IA (aumento de tareas cognitivas).
-* `Gradient 3` (0.50 - 0.60): Transformación digital profunda del perfil ocupacional.
+### 3. Tasa de Densidad Profesional
+
+$$\text{Densidad} = \frac{\text{Graduados anuales}}{\text{Personas ocupadas en el sector (OIT)}} \times 1.000$$
+
+Último dato del total: Chile 25,4 (2025), Argentina 10,9 (2024) y Uruguay 5,3 (2024). Cada país cuenta un nivel distinto de titulados, así que es aproximada.
+
+### 4. Salarios: USD, USD PPA y salario real
+
+| Medida | OIT (ocupaciones y sectores) | Argentina, CEP-XXI |
+|---|---|---|
+| **USD** | Publicado por la OIT: pesos ÷ tipo de cambio oficial promedio del año | Cada mes ÷ promedio de ese mes del dólar oficial mayorista del BCRA |
+| **USD PPA** | Publicado por la OIT: pesos ÷ factor PPA de consumo privado | Salario anual ÷ `PA.NUS.PRVT.PP` (desde 2011; no en 2023) |
+| **Salario real** | No aplica | Salario ÷ IPC del INDEC, índice 2017 = 100 (no en 2023) |
+
+**Extrapolación del factor PPA argentino.** El Banco Mundial lo publica hasta 2021. Los valores de la OIT de 2022 a 2024 coinciden con:
+
+$$\text{Factor}_t = \text{Factor}_{t-1} \times \frac{\text{IPC Argentina}_t / \text{IPC Argentina}_{t-1}}{\text{IPC EE. UU.}_t / \text{IPC EE. UU.}_{t-1}}$$
+
+Se dedujo comparando los datos: no sale de documentación de la OIT. El observatorio aplica esa misma regla a CEP-XXI.
+
+### 5. Índice Sintético de Empleabilidad (ISE), versión 0.3
+La tasa de inserción **salió del índice**, porque nunca tuvo fuente oficial en los tres países. Las demás dimensiones conservan sus proporciones:
+
+$$\text{ISE} = 0{,}47 \cdot \text{Demanda neta} + 0{,}33 \cdot \text{Salario PPA} - 0{,}20 \cdot \text{Riesgo de automatización}$$
+
+Comparado con la versión 0.2, en 10.464 filas: las mismas ocupaciones tienen puntaje, ningún nivel cambió y la mayor diferencia es 0,00004.
+
+### 6. Matriz de Habilidades y Gradientes de Exposición a IA (OIT WP 140 / 2025)
+Sigue vigente en `/analytics/habilidades`: 114 cruces ocupacionales con 4 tipologías (técnicas, emergentes, transversales y digitales) y los gradientes de la OIT.
+
+Las **habilidades por ocupación** que se ven en cada ficha salen de ESCO, que las define como esenciales u opcionales sin puntuarlas. Por eso se muestran con esa etiqueta, sin decimales.
+
+### 7. Género
+* **% de mujeres** = F ÷ (F + M + NB). **Brecha** = % de mujeres − % de varones.
+* **Brecha salarial** = (salario de varones − salario de mujeres) ÷ salario de varones, sin ajustar por ocupación ni horas.
+* **Diagnóstico de paridad:** entre 40 % y 60 % de mujeres (criterio EIGE / OIT de este módulo). Con menos de 30 titulados dice "Pocos casos".
+
+### 8. Rankings de universidades
+Top 10 regional en el último año con datos de los tres países (hoy **2024**, antes 2022) y rankings nacionales del último año de cada país (Argentina 2024, Chile 2025 y Uruguay 2024).
 
 ---
 
-## 8. Catálogo de Entregables Generados (`output/`)
+## 8. Catálogo de Entregables Generados
 
-### Tablas de Hechos y Datos Normalizados:
-* `hecho_egresados.csv`: Serie histórica completa de graduados (ARG, CHL, URY) en los 5 sectores estratégicos (173.890 registros observados).
-* `hecho_instituciones_egresados.csv`: Serie de egresados con trazabilidad institucional universitaria normalizada (4.571 registros, 187 universidades, excluyendo CFT/IP en rankings de grado).
-* `hecho_salario.csv`: Salarios observados en moneda local y USD PPA (755 registros: CEP-XXI, SIES y OIT/ILOSTAT para ARG, CHL y URY).
-* `hecho_ocupacion_terciarios.csv`: Puestos de trabajo, participación de mujeres y empleabilidad censal (173 registros).
-* `factores_macro_ppa.csv`: Factores PPA del PIB del Banco Mundial e IPC armonizado (2010–2025).
+Los resultados ya no son archivos en `output/`: son **tablas de la base**, que se leen por la API. Las cantidades son de la base local al 5 de noviembre de 2026.
 
-### Reportes de Indicadores y Matrices Analíticas:
-* `matriz_habilidades_sectoriales_integrales.csv`: 114 cruces formativo-ocupacionales clasificados en las 4 tipologías de competencias y articulados con el Índice OIT GenAI WP 140.
-* `matriz_habilidades_riesgo_ia_sector.csv`: Versión especializada con focos de complementariedad tecnológica y validación en 640 avisos laborales de LinkedIn.
-* `proyecciones_graduados_sector.csv`: Proyecciones predictivas a 3 y 5 años con intervalos $t$-Student al 95% (30 estimaciones sector-país).
-* `indicadores_interanuales_zscore.csv`: Variaciones interanuales sobre años consecutivos observados y alertas $|Z| \ge 1.4$.
-* `reporte_densidad_profesional_sector.csv`: Graduados por cada 1.000 personas ocupadas en el sector económico (140 registros cruzados).
-* `ranking_universidades_regional.csv`: Top 10 regional de universidades evaluadas en el último año común tripartito (2022).
-* `ranking_universidades_nacional.csv`: Universidades con mayor volumen de egresados en el año más reciente observado por país.
-* `reporte_brecha_salarial_regional.csv`: Matriz salarial tripartita en USD PPA supranacional OIT 2024.
-* `reporte_brechas_genero_detallado.csv`: Serie de participación femenina en egresados vs. empleo formal bajo estándar EIGE/OIT.
+| Tabla | Contenido | Registros |
+|---|---|---|
+| `hecho_egresados` | Egresados por institución, carrera y sexo | 84.320 |
+| `hecho_instituciones_egresados` | Egresados por universidad | 2.703 |
+| `graduates` | Titulados oficiales por carrera | 8.080 |
+| `graduate_trends`, `graduate_projections` | Tendencia y proyección por carrera | 942 y 992 |
+| `hecho_salario` | Salarios de la OIT (620) y CEP-XXI (102) | 722 |
+| `hecho_ocupacion_terciarios` | Empleo de la OIT (246) y CEP-XXI (102) | 348 |
+| `reporte_densidad_profesional_sector` | Densidad profesional | 144 |
+| `analisis_genero_integral` | Indicadores de género | 154 |
+| `proyecciones_graduados_sector` | Proyección de titulados por sector | 20 |
+| `ranking_universidades_regional`, `ranking_universidades_nacional` | Rankings | 10 y 27 |
+| `factores_macro_ppa` | Factor PPA, tipo de cambio e IPC | 195 |
+| `tipo_cambio_diario` | Dólar oficial del BCRA | 4.852 |
+| `observations` | Series de los 29 indicadores | 77.817 |
+| `employability_scores` | ISE, versiones 0.2 y 0.3 | 20.928 |
+| `occupation_skills`, `esco_occupations` | Habilidades y ocupaciones ESCO | 133.122 y 1.701 |
+| `job_postings` | Ofertas de LinkedIn | 640 |
 
-### Visualizaciones Analíticas en Alta Resolución (`output/graficos/`):
-* `proyeccion_graduados_ARG.png`: Fan chart con intervalos de confianza al 95% para Argentina.
-* `proyeccion_graduados_CHL.png`: Fan chart con intervalos de confianza al 95% para Chile.
-* `proyeccion_graduados_URY.png`: Fan chart con intervalos de confianza al 95% para Uruguay.
-* `brecha_salarial_regional_multipais.png`: Comparativa salarial regional en USD PPA.
-* `analisis_genero_empleabilidad_brecha.png`: Gráfico dual de participación femenina en educación vs. empleo.
-* `ranking_universidades_regional_2022.png`: Top 10 regional de universidades en el año común 2022.
-* `desempleo_educacion_superior_regional.png`: Desempleo total vs. población con educación terciaria.
+**Archivos que siguen en uso** (`backend/data/processed/data_analytics/`): `matriz_habilidades_sectoriales_integrales.csv` y `matriz_habilidades_riesgo_ia_sector.csv`.
+
+**Lo que dejamos de generar:**
+
+| Entregable | Motivo |
+|---|---|
+| `indicadores_interanuales_zscore.csv` | Lo reemplazan las alertas |
+| Semáforo presupuestario (`ALTA`, `MEDIA`, `BAJA`) | Sin uso en la aplicación |
+| `reporte_brecha_salarial_regional.csv`, `reporte_salarios_detalle_local.csv` | Lo reemplazan `/analytics/sectores` y `/analytics/salarios/dual` |
+| `reporte_brechas_genero_detallado.csv` | Lo reemplaza la pestaña Género |
+| `informe_cobertura.csv` y la tabla `coverage_report` | Retirados |
+| `resumen_ingesta.csv` | Lo reemplazan `ingestion_runs` y la pantalla de fuentes |
+| Gráficos PNG en `output/graficos/` | Los gráficos se dibujan en la aplicación |
+
+Las tablas `dim_pais`, `dim_sector`, `dim_carrera`, `dim_sexo` y `dim_tiempo` siguen creadas, pero vacías: se conservan por si el equipo las necesita.
 
 ---
 
 ## 9. Especificaciones de Integración con Backend (Traspaso y Persistencia)
 
-La plataforma central persiste los datos de analítica de forma transaccional en PostgreSQL. El desarrollador de backend utiliza el script de carga masiva y los esquemas DDL versionados.
+### De los CSV a las tablas de hoy
 
-### Mapeo de Entregables CSV a Base de Datos Central:
+| Archivo original | Tabla | Quién la carga ahora |
+|---|---|---|
+| `hecho_egresados.csv` | `hecho_egresados` | `carreras_seguimiento` |
+| `hecho_instituciones_egresados.csv` | `hecho_instituciones_egresados` | `universidades_egresados` |
+| `ranking_universidades_*.csv` | `ranking_universidades_*` | `universidades_egresados` |
+| `hecho_salario.csv` | `hecho_salario` | `recompute_sector_tables` (OIT) y `cep_xxi_argentina` (CEP-XXI) |
+| `hecho_ocupacion_terciarios.csv` | `hecho_ocupacion_terciarios` | `recompute_sector_tables` (OIT) y `cep_xxi_argentina` (CEP-XXI) |
+| `factores_macro_ppa.csv` | `factores_macro_ppa` | `cep_xxi_argentina` |
+| `reporte_densidad_profesional_sector.csv` | `reporte_densidad_profesional_sector` | `recompute_sector_tables` |
+| `analisis_genero_integral.csv` | `analisis_genero_integral` | `recompute_sector_tables` |
+| `proyecciones_graduados_sector.csv` | `proyecciones_graduados_sector` | `recompute_sector_tables` |
 
-| Archivo Generado en `data_analytics/output/` | Modelo SQLAlchemy (`backend/app/models/`) | Tabla PostgreSQL | Registros Típicos |
-|---|---|---|---|
-| `informe_cobertura.csv` | `CoverageReport` | `coverage_report` | 15 estratos |
-| `dim_pais.csv` | `DimPais` | `dim_pais` | 3 registros |
-| `dim_sector.csv` | `DimSector` | `dim_sector` | 5 registros |
-| `dim_tiempo.csv` | `DimTiempo` | `dim_tiempo` | 26 años |
-| `dim_sexo.csv` | `DimSexo` | `dim_sexo` | 4 categorías |
-| `dim_carrera.csv` | `DimCarrera` | `dim_carrera` | 25 carreras |
-| `factores_macro_ppa.csv` | `FactoresMacroPPA` | `factores_macro_ppa` | 48 registros |
-| `hecho_salario.csv` | `FactSalario` | `fact_salario` | 755 registros |
-| `hecho_instituciones_egresados.csv` | `FactInstitucionesEgresados` | `fact_instituciones_egresados` | 4.571 registros |
-| `hecho_ocupacion_terciarios.csv` | `FactOcupacionTerciarios` | `fact_ocupacion_terciarios` | 173 registros |
-| `reporte_densidad_profesional_sector.csv` | `ReporteDensidadProfesional` | `reporte_densidad_profesional` | 140 registros |
-| `ranking_universidades_nacional.csv` | `RankingUniversidadesNacional` | `ranking_universidades_nacional` | 231 registros |
-| `ranking_universidades_regional.csv` | `RankingUniversidadesRegional` | `ranking_universidades_regional` | 10 registros |
-| `analisis_genero_integral.csv` | `AnalisisGeneroIntegral` | `analisis_genero_integral` | 15 registros |
-| `proyecciones_graduados_sector.csv` | `ProyeccionesGraduadosSector` | `proyecciones_graduados_sector` | 30 estimaciones |
-| `hecho_egresados.csv` | `FactEgresados` | `fact_egresados` | 173.890 registros (lotes de 10k) |
+Los datos de las fuentes registran sus cambios en `data_revisions`. Las tablas derivadas se recalculan desde esos datos, así que se pueden volver a generar.
 
-### Procedimiento de Carga Transaccional:
-Situarse en la carpeta del backend y ejecutar el seed automatizado:
-```bash
-cd c:/proyectos/observa_tendencias/backend/backend
-.venv/Scripts/python -m seeds.load_analytics
-```
-*Tiempos de ejecución:* Aproximadamente 18 segundos para persistir los 179.886 registros observados con integridad referencial.
+### Endpoints REST analíticos
 
-### Endpoints REST Analíticos en FastAPI:
-* `GET /api/v1/analytics/densidad-profesional`: Consulta de densidad profesional con parámetro `enfoque` (`local`, `regional_comun`, `todos`).
-* `GET /api/v1/analytics/salarios/dual`: Comparativa salarial con parámetro `enfoque` (`local` moneda constante, `regional` USD PPA).
-* `GET /api/v1/analytics/ise/metodologia-insercion`: Exposición transparente de la fórmula y ponderaciones redistribuidas del ISE.
-* `GET /api/v1/analytics/habilidades` (y alias `/habilidades-ia`): Consulta de competencias formativas, tipologías y exposición OIT GenAI WP 140.
+| Endpoint | Para qué |
+|---|---|
+| `GET /api/v1/analytics/sectores` | Indicadores por sector, género, proyecciones y CEP-XXI |
+| `GET /api/v1/analytics/densidad-profesional` | Densidad profesional, con `enfoque` |
+| `GET /api/v1/analytics/salarios/dual` | Salarios, con `enfoque` `local` (CEP-XXI) o `regional` (OIT) |
+| `GET /api/v1/analytics/habilidades` (y `/habilidades-ia`) | Matriz de habilidades |
+| `GET /api/v1/graduates/...` | Titulados, tendencias, instituciones y rankings |
+| `GET /api/v1/sources/notes` | Cómo se calcula cada salario e indicador de género |
+
+`GET /api/v1/analytics/ise/metodologia-insercion` se **retiró** junto con la tasa de inserción.
 
 ---
 
 ## 10. Especificaciones de Exposición para Frontend y UX/UI (Consumo Visual)
 
-Para el equipo de Frontend y UX/UI, la referencia canónica de contratos JSON, esquemas y tipos de datos se encuentra detallada en [catalogo_datos_frontend_ux.md](file:///c:/proyectos/observa_tendencias/data_analytics/catalogo_datos_frontend_ux.md). A continuación se resumen las directivas visuales clave:
+El contrato de la API está en [`backend/docs/guia_api_frontend.md`](../backend/docs/guia_api_frontend.md).
 
-### 1. Gráficos de Proyecciones con Conos de Incertidumbre (Fan Charts):
-* **Serie Observada (Hecho Censal):** Línea continua y sólida con marcadores circulares en cada año real. Color primario.
-* **Punto de Corte Censal:** Marcador destacado que indica el último año censal publicado por el país (ARG 2022, URY 2023, CHL 2025).
-* **Serie Proyectada:** Línea punteada o discontinua (`stroke-dasharray="4,4"`).
-* **Banda de Confianza:** Área sombreada semitransparente entre el límite inferior y superior al 95% de confianza ($t$-Student).
+### Dónde se ve cada cosa
 
-### 2. Enfoque Temporal Dual en Visualizaciones:
-* **Ficha País / Nivel Nacional:** Mostrar la **máxima actualidad observada** de cada país para diagnóstico local (Chile 2024/2025, Uruguay 2023/2024, Argentina 2022/2023).
-* **Comparativa Regional Tripartita:** Restringir el cotejo a la **ventana común armonizada (2018–2022)** para evitar comparar años dispares.
+| Sección | Pestañas |
+|---|---|
+| **Panorama** | Indicadores · Brecha generacional · Ocupaciones en movimiento |
+| **Empleo y habilidades** | Sectores · Ocupaciones · Brechas de habilidades · Titulados y proyecciones · Indicadores por sector · Género |
+| **Pulso laboral** | Ofertas de LinkedIn |
+| **Experimental** | Moctezuma · Ludita · Reina Roja · Sísifo |
+| **Metodología y fuentes** | Métodos, indicadores y fuentes |
 
-### 3. Principio Anti-Alucinación para UI:
-* **No inventar datos:** Si para un año, país o carrera no existe dato censal, mostrar el estado explícito `"Dato no relevado oficialmente"`.
-* **Prohibido interpolar líneas:** No unir con líneas continuas puntos que tengan vacíos intermedios.
-* **Transparencia en Inserción Laboral:** Informar explícitamente que Argentina y Uruguay no disponen de censos de inserción y que el Observatorio redistribuye el peso en el ISE de forma transparente.
+### 1. Gráficos de proyecciones
+* **Serie observada:** línea continua.
+* **Proyección:** línea punteada, con su intervalo al elegir un país.
+* Un indicador sin tendencia muestra solo la serie observada.
+
+### 2. Cada país con su último dato
+Las tablas muestran el último año de cada país y lo indican. El top 10 regional usa el último año común.
+
+### 3. Principio anti-alucinación
+* **No inventar datos:** sin dato oficial, la celda muestra "—".
+* **El asistente solo usa números verificables:** cada número de la respuesta tiene que aparecer en los datos consultados; si no, la respuesta se bloquea.
+* **Lo de afuera se separa:** para los indicadores experimentales, Baqueano puede consultar Wikipedia, y lo cita como fuente externa.
+* **Años parciales:** 2023 de CEP-XXI muestra 11 meses y no recibe factores anuales.
 
 ---
 
 ## 11. Estructura de Directorios del Módulo
 
+Cómo queda el repositorio, con lo que usa la aplicación:
+
 ```text
-data_analytics/
+backend/
+├── backend/
+│   ├── app/
+│   │   ├── connectors/          <- APIs oficiales
+│   │   ├── datasets/            <- Archivos oficiales, universidades, carreras, CEP-XXI, BCRA
+│   │   ├── ingestion/           <- Jobs de actualización e historial de revisiones
+│   │   ├── analytics/           <- Tendencias, proyecciones, ISE, brechas, sectores, género
+│   │   ├── assistant/           <- Baqueano
+│   │   └── api/v1/              <- Endpoints
+│   ├── config/
+│   │   ├── sources.yaml         <- Fuentes, URLs y horarios
+│   │   ├── indicators.yaml      <- Indicadores y sus series
+│   │   ├── analytics.yaml       <- Metodología
+│   │   └── reference/           <- Correspondencias de carreras, sectores y universidades
+│   └── migrations/              <- Alembic, hasta 0031
 ├── data/
-│   ├── raw/                             <- Datasets crudos oficiales descargados de Google Drive
-│   │   ├── argentina/                   <- Base Araucano, Anuarios SPU y salarios CEP-XXI
-│   │   ├── chile/                       <- Titulados Mi Futuro y estadísticas SIES
-│   │   ├── uruguay/                     <- Educación Superior MEC, UdelaR y mercado laboral INE
-│   │   └── linkedin_jobs/               <- Avisos laborales recopilados
-│   └── processed/                       <- Cachés intermedias normalizadas (.csv)
-├── output/                              <- Entregables analíticos consolidados (.csv)
-│   └── graficos/                        <- Visualizaciones estadísticas en alta resolución (.png)
-├── src/                                 <- Código fuente modular en Python
-│   ├── __init__.py                      <- Empaquetado del módulo y función ejecutar_todo()
-│   ├── ingesta_01.py                    <- Ingesta de APIs y verificación de fuentes
-│   ├── cleaning_02.py                   <- Normalización, limpieza y modelo dimensional
-│   └── indicadores_03.py                <- Indicadores, Z-scores, brechas y proyecciones
-├── pipeline.py                          <- Orquestador del pipeline de punta a punta
-├── generar_matriz_habilidades_ia.py     <- Generador de matriz de habilidades y riesgo IA
-├── fuentes.yaml                         <- Inventario estructurado de fuentes oficiales y URLs
-├── catalogo_datos_frontend_ux.md        <- Catálogo contractual de APIs y guía de UI/UX
-├── requirements.txt                     <- Dependencias de librerías Python
-└── .gitignore                           <- Reglas para evitar subir datasets pesados a Git
+│   ├── raw/                     <- Archivos oficiales descargados (no van a git) y LinkedIn
+│   ├── processed/data_analytics/ <- Matrices de habilidades
+│   └── scripts/                 <- Referencias y preparación
+├── frontend_minimal/            <- Frontend publicado
+└── docs/                        <- Fuentes y criterios, guía de la API, despliegue
+
+data_analytics/                  <- Trabajo original de este módulo
+├── generar_matriz_habilidades_ia.py  <- En uso
+├── pipeline.py, src/            <- Referencia: ya no alimentan la aplicación
+├── fuentes.yaml                 <- Referencia
+├── catalogo_datos_frontend_ux.md <- Desactualizado
+└── README.md                    <- Este archivo
 ```
 
 ---
 
 ## 12. Diccionario de Datos y Glosario Metodológico
 
-| Campo / Concepto | Tipo de Variable | Definición y Función en el Observatorio |
+| Campo / Concepto | Tipo | Definición |
 |---|---|---|
-| **cine_f_codigo** | Clasificador Internacional | Código de 4 dígitos de la clasificación UNESCO CINE-F 2013 para homologar carreras dispares bajo un estándar formativo internacional común. |
-| **ciiu_rev4_divisiones** | Clasificador Internacional | Códigos de dos dígitos de las divisiones de la CIIU Rev. 4 (ONU) que componen cada uno de los 5 sectores estratégicos. |
-| **ciuo_08** | Clasificador Internacional | Clasificación Internacional Uniforme de Ocupaciones (OIT) a 4 dígitos para vincular títulos universitarios con puestos de trabajo reales. |
-| **share_mujer** | Métrica Laboral | Proporción de mujeres ocupadas sobre el total de puestos de trabajo del sector, obtenida de forma observada vía OIT/ILOSTAT. |
-| **zscore_dinamismo** | Métrica Estadística | Indicador estandarizado que mide la aceleración interanual de graduados respecto al promedio histórico: $Z = (\Delta\% - \mu) / \sigma$. |
-| **es_desvio_significativo** | Indicador Booleano | Bandera estadística que toma valor `True` cuando $|Z| \ge 1.4$, alertando sobre aceleraciones o contracciones anómalas. |
-| **nota_consecutividad** | Metadato Temporal | Validación de consecutividad temporal ($t - (t-1) = 1$). Si hay una vacancia censal, el crecimiento interanual queda como `NaN`. |
-| **graduados_por_mil_ocupados**| Métrica de Densidad | Tasa de renovación profesional: $(\text{Graduados Anuales} / \text{Ocupados OIT}) \times 1.000$. |
-| **ipc_base_2016** | Índice Armonizado | Serie oficial de IPC armonizada en base común $2016 = 100.0$ para Argentina (INDEC), Chile (BM) y Uruguay (BM). |
-| **salario_usd_ppa** | Moneda Homologada | Salario mensual convertido a Dólares de Paridad de Poder Adquisitivo con factor PIB del Banco Mundial (`PA.NUS.PPP`). |
-| **paridad_eige_oit** | Estándar de Género | Zona de paridad equilibrada definida entre 40% y 60% de participación de un sexo (EIGE/OIT). |
-| **categoria_genero** | Clasificación Armonizada | Categorías `F` (femenino), `M` (masculino), `NB` (no binario / indefinido) y `T` (total de control). |
+| **cine_f** | Clasificador | Campo de estudio UNESCO CINE-F 2013; ubica cada carrera en un sector |
+| **isic_codes** | Clasificador | Divisiones CIIU Rev. 4 de cada sector (`catalog.yaml`) |
+| **ciuo_08** | Clasificador | Ocupación de la OIT, a 4 dígitos |
+| **share_mujeres** | Métrica | % de mujeres ocupadas del sector (OIT o CEP-XXI) |
+| **graduados_por_mil_ocupados** | Métrica | Densidad profesional |
+| **brecha_graduados_pct** | Métrica | % de mujeres − % de varones entre titulados |
+| **brecha_empleo_pct** | Métrica | % de mujeres − % de varones entre ocupados |
+| **brecha_salarial_pct** | Métrica | Cuánto menos ganan las mujeres que los varones |
+| **diagnostico_paridad** | Etiqueta | Zona de paridad, concentración femenina, subrepresentación femenina o pocos casos |
+| **salario_usd** | Moneda | CEP-XXI convertido mes a mes con el dólar del BCRA |
+| **salario_usd_ppa** | Moneda | Salario en dólares de paridad, con factor de consumo privado |
+| **factor_ppa** | Factor | `PA.NUS.PRVT.PP`; `metodo_ppa` indica si fue extendido |
+| **tipo_cambio** | Factor | Tipo de cambio oficial anual (`PA.NUS.FCRF`) |
+| **ipc_base_2016** | Índice | IPC con 2016 = 100; vacío para Argentina, cuyo IPC empieza en diciembre de 2016 |
+| **indice_real** | Índice | Salario real de CEP-XXI, 2017 = 100 |
+| **meses_observados** | Metadato | Meses con dato en el año; 11 en 2023 |
+| **position** | Métrica | Puesto de la ocupación entre las del país |
+| **relation** | Etiqueta | Esencial u opcional, según ESCO |
+| **categoria_genero** | Clasificación | `F`, `M` y `NB`; `T` es el total de control |
 
 ---
 
 ## 13. Bitácora de Auditoría y Verificaciones Técnicas
 
-### Síntesis de Tandas Metodológicas 1 a 5:
-* **Tanda 1 (Erradicación de Datos Ficticios):** Supresión total de series salariales simuladas para Uruguay y factores fijos de respaldo. Adopción estricta de `NaN` en celdas no observadas.
-* **Tanda 2 (Normalización y UTF-8):** Limpieza de acentos, estandarización de nombres institucionales en Title Case y mapeo fonético con expresiones regulares.
-* **Tanda 3 (Paridad PPA e Inserción SIES):** Integración del factor oficial PPA del PIB (`PA.NUS.PPP`) del Banco Mundial e ingreso al 1er año de egreso SIES Chile.
-* **Tanda 4 (Armonización Multipaís y Consecutividad):** Integración de Anuarios SPU 2020-2022 de Argentina ($n=6 \ge 5$) y validación estricta de saltos temporales.
-* **Tanda 5 (Cierre y Validación Cruzada):** Verificación integral del pipeline de punta a punta, calibración de Z-scores paritarios y erradicación de emojis no autorizados en scripts.
+### Trabajo original del módulo (Noelia Acuña)
+Las decisiones metodológicas de estas etapas siguen siendo la base del observatorio:
 
-### Síntesis de Etapas de Integración Full-Stack 1 a 5:
-* **Etapa 1 (Auditoría de Paridad Regional):** Verificación de cero imputaciones sintéticas en los 15 estratos sector-país y adopción del Enfoque Temporal Dual.
-* **Etapa 2 (Migración y Carga SQL Central):** Creación de migración Alembic `0015_analytics_tables.py` y script de persistencia `load_analytics.py` (179.886 registros cargados en 18s).
-* **Etapa 3 (Métricas Avanzadas y Transparencia ISE):** Implementación de la Tasa de Densidad Profesional y redistribución proporcional del 25% de inserción en el ISE regional.
-* **Etapa 4 (Correspondencias CIUO-08 y Matriz de Habilidades):** Homologación de 25 carreras con 54 ocupaciones, 4 tipologías de competencias y gradientes OIT GenAI WP 140.
-* **Etapa 5 (Verificación E2E y Contratos Frontend/UX):** 109 de 109 tests aprobados en backend (`pytest`) y redacción del catálogo contractual `catalogo_datos_frontend_ux.md`.
+* **Tanda 1:** supresión de series simuladas y adopción de `NaN` en celdas no observadas.
+* **Tanda 2:** limpieza de acentos, nombres institucionales y mapeo de carreras.
+* **Tanda 3:** factores PPA e ingreso al primer año de SIES.
+* **Tanda 4:** armonización multipaís y control de años consecutivos.
+* **Tanda 5:** verificación del pipeline de punta a punta.
+* **Etapas de integración 1 a 5:** paridad regional, carga en SQL, densidad profesional, correspondencias CIUO-08 y matriz de habilidades.
+
+### Tanda 6: Integración en el backend (noviembre de 2026)
+* **Fuentes oficiales:** cada tabla se alimenta de su descarga oficial, con control de formato e historial.
+* **Series de Argentina:** anuarios del DIU, con CTI en 2015 y 2019. El archivo CTI queda entre 17 % y 19 % por debajo de los anuarios en 2016–2018 y 2021.
+* **CEP-XXI:** archivos oficiales idénticos byte a byte a tres de los usados por el módulo original.
+* **ISE 0.3:** salió la tasa de inserción, sin cambios de nivel.
+* **Salarios:** se comprobó que el tipo de cambio de la OIT coincide con el del Banco Mundial en 11 países-año (2021–2024) y, en Argentina, en 17 grupos de ocupación durante 16 años. El promedio anual del dólar del BCRA queda a menos de 1 % en los 19 años de 2007 a 2025. Ejemplo: $ 957.135 ÷ 1.240,85 = USD 771.
+* **PPA:** corregido a consumo privado en CEP-XXI; el factor del PIB daba cerca de 10 % de más.
+* **Género:** indicadores llevados a su propia pestaña, con el rango de 40 % a 60 %.
+* **Verificación:** 274 tests, `ruff`, `tsc` y `next build`; Baqueano probado con el modelo real.
+
+### Pendiente
+* Elegir el programador de tareas de producción.
+* Confirmar el criterio EIGE / OIT del rango de paridad.
+* Revisar las correspondencias marcadas `review` en `config/reference/`.
+* Decidir si el Buscador del SIES se retoma y si las tablas `dim_*` siguen.

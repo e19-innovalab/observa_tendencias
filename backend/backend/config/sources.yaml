@@ -290,6 +290,69 @@ sources:
         hasOptionalSkill: optional
       max_failed_share: 0.02
 
+  # Graduates per university, from the official files of four publishers (analytics.yaml ->
+  # universities): checked monthly; files are only downloaded when a link changes.
+  - source_code: universidades_egresados
+    name: Egresados por universidad (DIU Argentina, Mi Futuro Chile, MEC Uruguay y Udelar)
+    kind: dataset
+    base_url: null
+    expected_frequency: annual
+    schedule: "0 6 5 * *"
+    connector: universities
+    series_fields: []
+    options: {}
+
+  # Official wholesale dollar, daily (app/datasets/bcra_fx.py): converts Argentina's monthly wages.
+  - source_code: bcra_dolar
+    name: BCRA · Cotización oficial del dólar (mayorista)
+    kind: api
+    base_url: https://api.bcra.gob.ar/estadisticascambiarias/v1.0
+    expected_frequency: daily
+    schedule: "0 20 * * 1-5"
+    connector: bcra_fx
+    series_fields: []
+    options:
+      currency: USD
+      first_year: 2007  # where CEP-XXI's wages start
+      page_size: 1000
+      # Days asked again on each run, in case a quote was corrected.
+      overlap_days: 10
+      max_bytes: 5000000
+
+  # Registered private jobs and salaries per activity (analytics.yaml -> cep_xxi): checked monthly.
+  - source_code: cep_xxi_argentina
+    name: CEP-XXI · Puestos y salarios del sector privado registrado por actividad (Argentina)
+    kind: dataset
+    base_url: https://datos.produccion.gob.ar/dataset/salarios-promedio-y-mediano-por-sector-de-actividad
+    expected_frequency: monthly
+    schedule: "0 6 8 * *"
+    connector: cep_xxi
+    series_fields: []
+    options: {}
+
+  # Careers per institution and programs per topic, from the official files of the three countries
+  # (analytics.yaml -> tracked_careers): checked monthly; read again when a link or the settings
+  # change.
+  - source_code: carreras_seguimiento
+    name: Carreras por institución y temas de seguimiento (Mi Futuro, Anuario del DIU y Anuario del MEC)
+    kind: dataset
+    base_url: null
+    expected_frequency: annual
+    schedule: "0 6 6 * *"
+    connector: tracked_careers
+    series_fields: []
+    options: {}
+
+  # UdelaR's own graduate series: downloaded by universidades_egresados, which names it as the
+  # source of those values. No connector of its own.
+  - source_code: udelar_planeamiento
+    name: Udelar · Egresos totales de grado por servicio (Dirección General de Planeamiento)
+    kind: dataset
+    base_url: https://planeamiento.udelar.edu.uy/portal/egresados/egresados-de-grado/
+    expected_frequency: null
+    series_fields: []
+    options: {}
+
   - source_code: manual_upload
     name: Carga manual
     kind: manual

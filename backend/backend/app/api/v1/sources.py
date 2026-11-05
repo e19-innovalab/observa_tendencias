@@ -5,7 +5,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.core.auth import require_permission
-from app.core.config_files import analytics_params, app_config, sources
+from app.core.config_files import SourceNotes, analytics_params, app_config, sources
 from app.core.database import get_session
 from app.ingestion.pipeline import IngestionError, run_source
 from app.models import DataRevision, IngestionRun, Source
@@ -60,6 +60,13 @@ def _source(session: Session, code: str) -> Source:
         raise HTTPException(status.HTTP_404_NOT_FOUND,
                             app_config().messages["unknown_source"].format(code=code))
     return source
+
+
+@router.get("/notes", response_model=list[SourceNotes])
+def source_notes():
+    """Where the salaries in dollars and the gender indicators come from, and how they are calculated
+    (app.yaml -> source_notes)."""
+    return app_config().source_notes
 
 
 @router.get("", response_model=list[SourceItem])

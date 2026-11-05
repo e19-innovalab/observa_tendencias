@@ -450,7 +450,7 @@ function drawTrends(trends) {
     : `<tr><td colspan="8" class="meta">Sin datos para este filtro</td></tr>`;
 }
 
-const DIM_COLORS = { net_demand: "#2563eb", salary_ppp: "#059669", insertion_rate: "#d97706", automation_risk: "#7c3aed" };
+const DIM_COLORS = { net_demand: "#2563eb", salary_ppp: "#059669", automation_risk: "#7c3aed" };
 
 async function initEmployability(countries, sectors) {
   $("ise-country").innerHTML += countries.map((c) => `<option value="${c.iso3}">${c.name_es}</option>`).join("");
@@ -551,8 +551,8 @@ async function loadEmployability() {
       box.dataset.loaded = "1";
       const sk = await get(`/occupations/${box.dataset.code}/skills`, { limit: 12 });
       box.innerHTML = sk.total
-        ? `<b>Habilidades principales</b> <span class="meta">(${sk.total} en total · ${sk.source?.name ?? ""} · ${sk.weight_note})</span>
-           <div class="params">${sk.items.map((x) => `<code title="${x.skill_type_label ?? ""} · peso ${fmt(x.weight, 2)}">${x.name}</code>`).join("")}</div>`
+        ? `<b>Habilidades</b> <span class="meta">(${sk.total} en total · ${sk.source?.name ?? ""} · ${sk.relation_note})</span>
+           <div class="params">${sk.items.map((x) => `<code title="${[x.skill_type_label, x.relation_label].filter(Boolean).join(" · ")}">${x.name}${x.relation_label ? ` · ${x.relation_label}` : ""}</code>`).join("")}</div>`
         : '<span class="meta">ESCO no tiene habilidades para este grupo CIUO</span>';
     }
   }));

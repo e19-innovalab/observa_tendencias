@@ -5,7 +5,8 @@ GET /resource/occupation?uri=... gives each one's essential and optional skills.
 for the group is the mean, over the group's ESCO occupations, of its relation weight
 (config/sources.yaml -> esco.options.relation_weights), and its category the strongest relation
 found in any of them (esco.options.relation_categories: essential beats optional). Stored in
-skills and occupation_skills, replacing what ESCO loaded before.
+skills and occupation_skills, replacing what ESCO loaded before. esco_occupations keeps each group's
+ESCO occupations and their official address, and can be refreshed without touching the skills.
 """
 import asyncio
 from collections import defaultdict
@@ -17,7 +18,7 @@ from sqlalchemy.orm import Session
 
 from app.connectors.http import get_with_retry, ssl_context
 from app.core.config_files import SourceConf, catalog, sources
-from app.models import OccupationSkill, Skill, Source
+from app.models import EscoOccupation, OccupationSkill, Skill, Source
 from app.skills.esco_hierarchy import run_esco_hierarchy
 
 ISCO_URI = "http://data.europa.eu/esco/isco/C{code}"
@@ -107,6 +108,38 @@ def skill_code(uri: str) -> str:
     return uri.rstrip("/").rsplit("/", 1)[-1]
 
 
+async def _group_occupations(client: httpx.AsyncClient, conf: SourceConf, code: str,
+                             sem: asyncio.Semaphore) -> list[tuple[str, str, str]]:
+    """(ISCO code, ESCO occupation uri, name) of a group."""
+    async with sem:
+        group = (await get_with_retry(client, f"{conf.base_url}/resource/concept", params={
+            "uri": ISCO_URI.format(code=code), "language": conf.options["language"]})).json()
+    return [(code, o["uri"], o.get("title") or o["uri"].rsplit("/", 1)[-1])
+            for o in group.get("_links", {}).get("narrowerOccupation", [])]
+
+
+async def _all_occupations(conf: SourceConf, codes: list[str]) -> list[list[tuple[str, str, str]]]:
+    sem = asyncio.Semaphore(conf.options["concurrency"])
+    headers = {"User-Agent": sources().http.user_agent}
+    async with httpx.AsyncClient(timeout=sources().http.timeout_seconds, headers=headers,
+                                 follow_redirects=True, verify=ssl_context()) as client:
+        return await asyncio.gather(*[_group_occupations(client, conf, c, sem) for c in codes])
+
+
+def run_esco_occupations(session: Session, source_code: str) -> int:
+    """Replace the ESCO occupations of every catalog group. Returns the rows stored."""
+    conf = sources().get(source_code)
+    source = session.scalar(select(Source).where(Source.source_code == source_code))
+    codes = [o.occupation_code for o in catalog().occupations if not o.is_excluded]
+    groups = asyncio.run(_all_occupations(conf, codes))
+    rows = [EscoOccupation(occupation_code=code, esco_uri=uri, name=name, source_id=source.source_id)
+            for group in groups for code, uri, name in group]
+    session.execute(delete(EscoOccupation))
+    session.add_all(rows)
+    session.flush()
+    return len(rows)
+
+
 def run_esco_source(session: Session, source_code: str) -> tuple[int, int, list[str]]:
     """Fetch and store skills for every catalog occupation. Returns (groups with ESCO data,
     occupation-skill rows stored, ESCO occupations skipped because the API kept failing)."""
@@ -147,4 +180,5 @@ def run_esco_source(session: Session, source_code: str) -> tuple[int, int, list[
     ])
     session.flush()
     run_esco_hierarchy(session, source_code)  # definitions and groups of the skills just stored
+    run_esco_occupations(session, source_code)
     return sum(1 for _, n, _g, _l in results if n), len(pairs), failed

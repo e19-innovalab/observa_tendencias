@@ -97,7 +97,7 @@ async function SectoresContent({ searchParams }: { searchParams: Promise<SearchP
               })}
             </ul>
             <p className="mx-3 mt-3 text-xs text-slate-500">
-              Línea vertical oscura: promedio de todas las ocupaciones ({formatScore(avg)}). {data.no_source_note ? 'La tasa de inserción todavía no tiene fuente: su peso se reparte entre las otras dimensiones.' : ''}
+              Línea vertical oscura: promedio de todas las ocupaciones ({formatScore(avg)}).
             </p>
             <SourceLine source="Fuentes: ILOSTAT, SIMEL (INE Chile) y OIT (2025)">
               <Link href="/metodologia/ise" className="text-blue-700 hover:underline">¿Cómo se calcula el ISE?</Link>

@@ -3,8 +3,8 @@
 Observatorio predictivo de tendencias laborales y educativas del Cono Sur (Argentina, Uruguay y
 Chile), del programa InnovaLab. Junta datos oficiales de empleo, salarios, educación y formación,
 calcula tendencias, proyecciones, un Índice Sintético de Empleabilidad (ISE) por ocupación,
-brechas de habilidades, alertas e indicadores temáticos (Moctezuma, Ludita, Reina Roja, Sísifo y
-Brecha generacional), y los expone en una API.
+brechas de habilidades, indicadores de género, alertas e indicadores experimentales (Moctezuma,
+Ludita, Reina Roja, Sísifo), y los expone en una API y en un frontend con un asistente.
 
 ## Estructura
 
@@ -36,13 +36,15 @@ backend/                   (esta carpeta)
 | [`docs/guia_api_frontend.md`](docs/guia_api_frontend.md) | Qué endpoint alimenta cada pantalla del mockup |
 | [`docs/pendientes_analytics.md`](docs/pendientes_analytics.md) | Revisiones y decisiones pendientes del equipo de Data Analytics |
 | [`data/scripts/referencias/README.md`](data/scripts/referencias/README.md) | Ocupaciones CIUO-08, correspondencias carrera → ocupación de los tres países y los scripts que las generan |
-| [`docs/solicitud_sies_empleabilidad.md`](docs/solicitud_sies_empleabilidad.md) | Pedido al SIES (Chile) de la base de empleabilidad por carrera, para la tasa de inserción del ISE |
+| [`docs/solicitud_sies_empleabilidad.md`](docs/solicitud_sies_empleabilidad.md) | Pedido al SIES (Chile) de la base de empleabilidad por carrera, **en pausa**: la tasa de inserción salió del ISE. Era para la tasa de inserción del ISE |
 | [`docs/despliegue.md`](docs/despliegue.md) | Cómo publicar en la nube: base en Supabase, API en Render, frontend en Vercel |
 | [`docs/conexion_supabase.md`](docs/conexion_supabase.md) | Cómo conectar a Supabase (para cuando se migre) |
 | [`backend/backend_plan_ES.md`](backend/backend_plan_ES.md) | Plan completo del backend |
 | [`backend/ml/occupation_match/README.md`](backend/ml/occupation_match/README.md) | Prototipo de búsqueda de ocupaciones por significado: datos, evaluación y cómo entrenar en otra máquina |
 | [`backend/config/datasets/ejemplos/README.md`](backend/config/datasets/ejemplos/README.md) | Archivos de ejemplo para probar la carga manual |
-| [`frontend_minimal/README.md`](frontend_minimal/README.md) | Frontend minimal (pantallas, buscador, asistente, carga de datos) |
+| [`frontend_minimal/README.md`](frontend_minimal/README.md) | Frontend minimal (menú, pantallas, buscador, asistente, carga de datos) |
+
+En la aplicación, **Metodología y fuentes** explica de dónde sale cada dato: cómo se calculan los salarios en dólares (incluido lo que se extrapola), los indicadores de género, y el estado de cada fuente.
 
 ## Requisitos
 
@@ -50,7 +52,7 @@ backend/                   (esta carpeta)
 - Docker Desktop (para la base PostgreSQL local)
 - Git
 - Node.js 18.18 o superior, solo para los frontends en Next.js
-- Opcional, para el asistente: [Ollama](https://ollama.com) con un modelo abierto, o una clave de la API de Anthropic (ver "Asistente")
+- Opcional, para el asistente: una API hospedada compatible con OpenAI (en producción, OpenRouter), [Ollama](https://ollama.com) con un modelo abierto o una clave de la API de Anthropic (ver "Asistente")
 
 ## Puesta en marcha
 
@@ -104,7 +106,7 @@ en vivo. Es una herramienta de desarrollo y revisión, no el diseño final. Secc
   total por sector y listado paginado (la misma vista del prototipo en Next.js).
 - **Alertas**, con sus reglas.
 - **Índice Sintético de Empleabilidad (ISE):** mejores, peores y todas las ocupaciones, orden por
-  cualquier dimensión, detalle de cada dimensión y aviso de la dimensión sin fuente (tasa de inserción).
+  cualquier dimensión y detalle de cada dimensión.
 - **Brechas de habilidades** por país (Argentina, Chile y Uruguay).
 - **Desajuste educación-ocupación:** sobre y subcalificación, con la tabla de ocupados de la que
   sale cada porcentaje.
@@ -118,19 +120,24 @@ Documentación interactiva de la API: http://localhost:8010/docs · estado: http
 | Fuente | Qué aporta | Cómo se actualiza |
 |---|---|---|
 | World Bank | Indicadores socioeconómicos y educativos de los 3 países | API, semanal |
-| ILOSTAT (OIT) | Desocupación, empleo por sector y ocupación, ingresos, ocupados por ocupación y nivel educativo | API, semanal |
+| ILOSTAT (OIT) | Desocupación, empleo por sector, ocupación y sexo, ingresos en USD y USD PPA, ocupados por ocupación y nivel educativo | API, semanal |
 | Datos Argentina (INDEC) | IPC, EMAE, EPH trimestral | API, diaria |
 | SIMEL (INE Chile) | Empleo por ocupación de Chile | API, diaria |
 | SIPA (Argentina) | Asalariados registrados por rama | Archivo oficial, diaria |
+| CEP-XXI (Argentina) | Puestos, salarios y participación de mujeres del empleo privado registrado por actividad, hasta noviembre de 2023 | Archivo oficial, mensual |
+| BCRA (Argentina) | Dólar oficial mayorista, diario desde 2007 | API, días hábiles |
+| Banco Mundial e INDEC | Factor PPA de consumo privado, tipo de cambio oficial anual e IPC (`factores_macro_ppa`) | API, con CEP-XXI |
 | INE Uruguay | IPC | Archivo oficial, diaria |
 | Mi Futuro (MINEDUC, Chile) | Titulados por carrera | Archivo oficial, semanal |
 | Indicadores CTI (Argentina) | Egresados universitarios por disciplina | Archivo oficial, semanal |
+| Anuarios del DIU (Argentina) | Egresados por institución, disciplina y sexo total | Archivo oficial, mensual |
 | MEC Uruguay | Egresados universitarios por carrera (un anuario por año) | Archivo oficial, semanal |
 | ESCO (Comisión Europea) | Habilidades por ocupación | API, mensual |
 | ESCO, por versión | Habilidades de cada ocupación en cada versión (indicador Reina Roja) | API, anual |
 | O*NET (EE. UU.) | Tecnologías de cada ocupación en cada versión (indicador Reina Roja) | Archivo oficial, anual |
 | OIT (2025) | Exposición de las ocupaciones a la IA generativa | Tabla de referencia |
 | LinkedIn (Apify) | Ofertas de empleo de Argentina; **no es una fuente oficial** | CSV, a mano |
+| Wikipedia | Solo el asistente, solo para las preguntas sobre indicadores experimentales; no alimenta ningún dato | API, al preguntar |
 
 Los archivos oficiales se descargan solos desde la página oficial, pero **solo se cargan si
 mantienen el formato validado**. Si el formato cambió, no se carga nada, se conservan los datos
@@ -162,11 +169,11 @@ Desde `backend/backend`, con el entorno virtual activado:
 
 | Comando | Qué hace |
 |---|---|
-| `python -m app.jobs.run --all` | Actualiza todas las fuentes con conector (o una: `--source mec_uruguay`) |
+| `python -m app.jobs.run --all` | Actualiza todas las fuentes con conector (o una: `--source mec_uruguay`). `bcra_dolar` va antes de `cep_xxi_argentina`, que convierte los salarios con ese dólar |
 | `python -m app.jobs.recompute` | Recalcula tendencias, proyecciones, ISE, brechas y alertas |
 | `python -m app.jobs.scheduler` | Actualización automática según los horarios de `sources.yaml` (`--list` muestra los horarios) |
 | `python -m app.jobs.validate_crosswalk` | Revisa las correspondencias carrera → ocupación después de editarlas |
-| `python -m app.ingestion.load_analytics` | Carga los CSV del equipo de datos (ofertas de LinkedIn, cobertura, egresados) |
+| `python -m app.ingestion.load_analytics` | Carga el CSV de ofertas de LinkedIn |
 | `python -m app.jobs.create_user` | Crea un usuario (para entrar a los frontends) |
 | `ollama serve` · `ollama pull qwen2.5:7b-instruct` | Modelo local del asistente (solo si se usa `provider: local`) |
 | `pytest` · `ruff check .` | Tests y estilo de código |
@@ -183,13 +190,23 @@ Desde `backend/backend`, con el entorno virtual activado:
 - **Asistente:** cada pregunta queda en `assistant_logs` con la respuesta, las consultas que hizo,
   los números que no pudo verificar, los tokens y el tiempo.
 
-## Asistente ("Preguntale al Observatorio")
+## Asistente (Baqueano)
 
 Responde preguntas con los datos del observatorio (`POST /api/v1/assistant/ask`, con sesión). Solo
 puede consultar endpoints de lectura de la API, listados en `config/app.yaml → assistant.tools`.
-Revisa que cada número de la respuesta aparezca en los datos que consultó y devuelve enlaces a las
-páginas con esos datos. Todo se configura en `app.yaml → assistant`: modelo, límites por día,
-instrucciones y textos.
+Revisa que cada número de la respuesta aparezca en los datos que consultó. Todo se configura en
+`app.yaml → assistant`: modelo, límites por día, instrucciones y textos.
+
+- **Enlaces:** cada ocupación que nombra la respuesta trae el enlace a su ficha, antes de los demás.
+- **Ranking:** cada ocupación trae su puesto entre todas las del país (`position`, `position_of`), también con filtro de sector.
+- **Nombre:** preguntarle cómo se llama devuelve siempre el mismo texto, sin usar el modelo.
+- **Indicadores experimentales** (Moctezuma, Ludita, Reina Roja, Sísifo; `assistant.web_search`):
+  - **Búsqueda afuera:** puede consultar Wikipedia y cita lo que usó. En cualquier otro tema esa herramienta no existe para el modelo. Lo que devuelve se trata como información de terceros, nunca como instrucciones.
+  - **Fórmulas:** lee la metodología de cada indicador. El chequeo de números acepta además 100 − un valor publicado, que esas fórmulas usan, y solo en estas preguntas.
+  - **Razonamiento:** el modelo piensa con más esfuerzo y más tokens (`providers.*.experimental`). El razonamiento se reenvía entre herramientas sin cambios y nunca se muestra.
+
+**Con una API hospedada** (producción: `nvidia/nemotron-3.5-super-vl:free` en OpenRouter), en `.env`:
+`ASSISTANT_PROVIDER=local`, `ASSISTANT_BASE_URL`, `ASSISTANT_MODEL` y `ASSISTANT_LOCAL_API_KEY`.
 
 **Con un modelo abierto en tu máquina** (`provider: local`, el valor por defecto; funciona en CPU):
 
@@ -277,17 +294,22 @@ Explorer ya incluye la misma vista de ofertas.
 **Hecho:**
 - API con datos oficiales de las fuentes de arriba, actualización automática y control de formato.
 - Tendencias, proyecciones orientativas y alertas.
-- ISE por ocupación (436 ocupaciones × 3 países).
+- ISE por ocupación (436 ocupaciones × 3 países), con demanda neta, salario y riesgo de automatización. La tasa de inserción salió del índice en la versión 0.3 porque no tiene fuente; los puntajes no cambiaron.
+- Titulados por carrera, institución y sexo en los tres países, con tendencia y proyección por sector.
+- Indicadores por sector: densidad profesional, salarios y brecha salarial. Indicadores de género: titulados y ocupados por sexo, brechas y diagnóstico de paridad.
+- Argentina: empleo privado registrado y salarios de CEP-XXI, en pesos, USD (dólar oficial mes a mes), USD PPA y salario real.
+- Habilidades por ocupación en dos niveles: el grupo CIUO y cada ocupación ESCO que junta, encontrable desde el buscador.
 - Brechas de habilidades de Argentina, Chile y Uruguay, con las carreras clasificadas por la CINE-F 2013 (UNESCO).
   La versión anterior, con correspondencias directas por país, está marcada como `v0.1`.
 - Desajuste educación-ocupación.
-- Indicadores temáticos: Moctezuma, Ludita, Reina Roja, Sísifo, Brecha generacional y las
-  burbujas de Tendencias (sección 7 de [`docs/fuentes_y_criterios.md`](docs/fuentes_y_criterios.md)).
+- Indicadores experimentales: Moctezuma, Ludita, Reina Roja y Sísifo. En Panorama, además, la Brecha
+  generacional y las burbujas de Ocupaciones en movimiento (sección 7 de [`docs/fuentes_y_criterios.md`](docs/fuentes_y_criterios.md)).
 - Carga manual de archivos: plantilla descargable, control del archivo real, errores agrupados y
   aviso de choque con datos oficiales. Historial de datos.
 - Inicio de sesión con roles (administrador, editor, consultas).
-- Asistente "Baqueano": respuestas por plantilla para las preguntas frecuentes y modelo abierto
-  local (o Claude) para el resto, con chequeo de números, límites diarios y registro.
+- Asistente "Baqueano": respuestas por plantilla para las preguntas frecuentes y modelo (hospedado,
+  local o Claude) para el resto, con chequeo de números, enlaces a cada ocupación, búsqueda externa
+  solo para los indicadores experimentales, límites diarios y registro.
 - Buscador tolerante: tildes, orden, plural y género, y nombres locales de ocupaciones.
 - Explorer.
 
@@ -295,18 +317,17 @@ Explorer ya incluye la misma vista de ofertas.
 - **Data Analytics** ([`docs/pendientes_analytics.md`](docs/pendientes_analytics.md)): revisar las
   tres correspondencias carrera → ocupación y verificar dos cifras del anuario 2024 de Uruguay antes
   de publicar las brechas.
-- **Tasa de inserción del ISE:** sin fuente oficial todavía. Hay que enviar el pedido al SIES.
+- **Actualización automática en producción:** falta elegir dónde corre (GitHub Action o cron pago de Render). Sin eso, las fuentes diarias como el dólar no avanzan solas.
+- **Tasa de inserción:** salió del ISE. El pedido al SIES queda en pausa por si se retoma.
+- **Buscador del SIES (salarios de Chile por carrera):** no tiene descarga pública.
+- **Segunda fuente externa del asistente:** a definir. The KPI Institute prohíbe el acceso automatizado en sus términos; OpenAlex es una alternativa abierta.
 - **Supabase y despliegue:** en curso, siguiendo [`docs/despliegue.md`](docs/despliegue.md). Ya se reactivó el proyecto de Supabase; faltan cargar la base en la nube, subir el código y crear los servicios en Render y Vercel.
 - **Fuentes sin conector:** CEPALSTAT y Banco Central de Chile.
-- **Asistente:** el modelo local de 7B a veces no completa el segundo paso (buscar y después
-  consultar), y el chequeo de números bloquea esas respuestas. Falta comparar con un modelo más
-  grande o con Claude, y decidir cuál usar.
+- **Asistente:** todavía no tiene una herramienta para responder sobre género.
 - **Búsqueda por significado:** entrenar el modelo del prototipo (`backend/ml/occupation_match/`)
   y conectarlo al buscador y al asistente.
 - **Carga manual, segunda etapa:** retirar una carga sin borrarla y marcar en las pantallas los
   datos que vienen de carga manual.
-- **Migraciones:** `0024_assistant_logs` se creó en paralelo con otras sesiones de trabajo; revisar
-  la numeración antes de unir las ramas.
 
 ## Problemas frecuentes
 

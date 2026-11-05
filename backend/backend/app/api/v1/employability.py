@@ -1,4 +1,5 @@
 import unicodedata
+from collections import defaultdict
 from typing import Literal
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
@@ -191,7 +192,7 @@ def employability(
     year: int | None = Query(None, description="Año de referencia (default: el último)"),
     view: View = Query("top", description="top: mejores · bottom: peores · all: todas"),
     sort_by: str = Query("score", description="score, una dimensión (net_demand, salary_ppp, "
-                                              "insertion_rate, automation_risk), coverage, "
+                                              "automation_risk), coverage, "
                                               "occupation (nombre), isco (código CIUO) o country"),
     order: Order | None = Query(None, description="asc | desc (default: desc para números, asc "
                                                   "para texto; bottom invierte)"),
@@ -248,11 +249,18 @@ def employability(
     lookup = _display_lookup(session, page)
     cohort = [s for s in session.scalars(stmt).all() if s.level != NOT_APPLICABLE]
     ranges = _dimension_ranges(cohort)
+    positions: dict = {}
+    scored: dict = defaultdict(int)
+    for s in sorted((s for s in cohort if s.score is not None), key=lambda s: (-s.score, s.occupation_code)):
+        scored[s.country_iso3] += 1
+        positions[s.score_id] = scored[s.country_iso3]
     return EmployabilityPage(
         year=year, available_years=years, view=view, sort_by=sort_by, order=order,
         total=len(rows), scored_total=sum(s.score is not None for s in rows), limit=page_size,
         offset=offset, dimension_ranges=ranges, no_source_note=_no_source_note(ranges),
-        items=[_item(s, method, hidden.get(s.score_id), lookup) for s in page])
+        items=[_item(s, method, hidden.get(s.score_id), lookup).model_copy(update={
+            "position": positions.get(s.score_id), "position_of": scored[s.country_iso3] if s.score_id in positions else None,
+        }) for s in page])
 
 
 def _pct(share: float) -> str:

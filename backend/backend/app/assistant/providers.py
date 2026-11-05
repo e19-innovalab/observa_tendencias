@@ -65,6 +65,8 @@ class LocalProvider:
                         "tools": self._tools(), "tool_choice": "none" if final else "auto"}
                 if self.p.temperature is not None:
                     body["temperature"] = self.p.temperature
+                if self.p.reasoning:
+                    body["reasoning"] = self.p.reasoning
                 data = await self._post(client, body)
                 usage = data.get("usage") or {}
                 reply.input_tokens += usage.get("prompt_tokens") or 0
@@ -74,7 +76,9 @@ class LocalProvider:
                 if not tool_calls or final:
                     reply.text = (msg.get("content") or "").strip()
                     return reply
-                msgs.append({"role": "assistant", "content": msg.get("content") or "", "tool_calls": tool_calls})
+                # the model's reasoning goes back unchanged between tool calls; it is never shown
+                kept = {k: msg[k] for k in ("reasoning_details",) if msg.get(k)}
+                msgs.append({"role": "assistant", "content": msg.get("content") or "", "tool_calls": tool_calls, **kept})
                 for tc in tool_calls:
                     fn = tc.get("function") or {}
                     if calls >= self.conf.max_tool_calls:

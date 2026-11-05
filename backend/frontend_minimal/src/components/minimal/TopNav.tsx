@@ -2,14 +2,14 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { SECTIONS } from './nav';
+import { inSection, SECTIONS } from './nav';
 
 export function TopNav() {
   const pathname = usePathname();
   return (
     <nav aria-label="Secciones" className="flex flex-wrap gap-0.5">
       {SECTIONS.map((s) => {
-        const active = pathname === s.href || pathname.startsWith(`${s.href}/`);
+        const active = inSection(pathname, s);
         return (
           <Link
             key={s.href}

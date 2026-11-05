@@ -1,22 +1,11 @@
 from datetime import date, datetime
+from typing import Literal
 
 from pydantic import BaseModel, ConfigDict
 
 from app.core.config_files import JobsView, app_config
 
 NOTICES = app_config().notices
-
-
-class CoverageItem(BaseModel):
-    model_config = ConfigDict(from_attributes=True)
-
-    pais: str
-    sector: str
-    n_anios_observados: int
-    anio_min: int | None
-    anio_max: int | None
-    elegible_proyeccion: bool
-    estado: str
 
 
 class JobItem(BaseModel):
@@ -68,6 +57,11 @@ class GraduateTrendItem(BaseModel):
     tendencia: str
     tiene_huecos: bool
     proyeccion: str
+    es_seguimiento: bool = False
+    sector: str | None = None
+    tema: str | None = None
+    n_instituciones: int | None = None
+    institucion_principal: str | None = None
 
 
 class GraduateProjectionItem(BaseModel):
@@ -93,16 +87,6 @@ class JobsCompetition(BaseModel):
     con_postulantes: int  # postings with applicant data
     mediana_postulantes: float | None  # None with fewer than jobs_view.competition_min_postings
     en_tope: float | None  # share of postings at the cap (LinkedIn's "200+")
-
-
-class JobsSummary(BaseModel):
-    total: int
-    scraped_at: datetime | None
-    por_provincia_sector: list[JobsSummaryCell]
-    competencia: list[JobsCompetition] = []  # overall first, then by sector, most competed first
-    source: str = NOTICES["jobs"]
-    # how to show it (app.yaml -> jobs_view): notice, sector order with "other" last, page size
-    view: JobsView = app_config().jobs_view
 
 
 class DensidadProfesionalItem(BaseModel):
@@ -152,16 +136,6 @@ class SalarioDualResponse(BaseModel):
     items: list[SalarioDualItem]
 
 
-class ISEMetodologiaInsercionResponse(BaseModel):
-    metodologia: str
-    version: str
-    tratamiento_insercion: str
-    justificacion_metodologica: str
-    pesos_nominales: dict[str, float]
-    pesos_efectivos_redistribuidos: dict[str, float]
-    disponibilidad_por_pais: dict[str, str]
-
-
 class MatrizHabilidadIAItem(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
@@ -201,3 +175,182 @@ class MatrizHabilidadIAResponse(BaseModel):
     items: list[MatrizHabilidadIAItem]
 
 
+class SectorKpiItem(BaseModel):
+    pais: str
+    sector: str
+    anio: int
+    graduados: float | None = None
+    densidad: float | None = None
+    ocupados: float | None = None
+    pct_mujeres_ocupadas: float | None = None
+    pct_mujeres_graduadas: float | None = None
+    graduados_con_sexo: float | None = None
+    f: float | None = None
+    m: float | None = None
+    nb: float | None = None
+    pct_varones_graduados: float | None = None
+    pct_nb_graduados: float | None = None
+    brecha_graduados_pct: float | None = None
+    diagnostico_paridad: str | None = None
+    brecha_empleo_pct: float | None = None
+    diagnostico_empleo: str | None = None
+    salario_total: float | None = None
+    salario_mujeres: float | None = None
+    salario_varones: float | None = None
+    brecha_salarial_pct: float | None = None
+
+
+class SectorProjectionItem(BaseModel):
+    pais: str
+    sector: str
+    anio: int
+    valor: float
+    limite_inferior: float | None = None
+    limite_superior: float | None = None
+
+
+class CepXxiItem(BaseModel):
+    sector: str
+    anio: int
+    puestos: float | None = None
+    meses: float | None = None
+    pct_mujeres: float | None = None
+    salario_ars: float | None = None
+    salario_usd: float | None = None
+    salario_usd_ppa: float | None = None
+    indice_real: float | None = None
+
+
+class DolarOficial(BaseModel):
+    nombre: str
+    fecha: date
+    valor: float
+
+
+class SectorKpis(BaseModel):
+    items: list[SectorKpiItem]
+    proyecciones: list[SectorProjectionItem]
+    nota: str
+    genero_nota: str = ""
+    cep_xxi: list[CepXxiItem] = []
+    cep_nota: str = ""
+    cep_base: int | None = None
+    dolar_oficial: DolarOficial | None = None
+
+
+class GraduateYearItem(BaseModel):
+    pais: str
+    nombre: str
+    anio: int
+    graduados: float
+    tipo: Literal["observado", "proyectado"]
+    limite_inferior: float | None = None
+    limite_superior: float | None = None
+    es_seguimiento: bool = False
+
+
+class GraduateSeriesPoint(BaseModel):
+    anio: int
+    graduados: float
+
+
+class GraduateSeries(BaseModel):
+    pais: str
+    nombre: str
+    puntos: list[GraduateSeriesPoint]
+
+
+class GraduateInstitution(BaseModel):
+    institucion: str
+    por_anio: dict[int, float]
+    total: float
+
+
+class GraduateInstitutions(BaseModel):
+    pais: str
+    nombre: str
+    anios: list[int]
+    instituciones: list[GraduateInstitution]
+    totales: dict[int, float]
+
+
+class InstitutionItem(BaseModel):
+    pais: str
+    institucion: str
+    n_carreras: int
+
+
+class InstitutionCareer(BaseModel):
+    pais: str
+    nombre: str
+    por_anio: dict[int, float]
+    es_seguimiento: bool = False
+    sector: str | None = None
+    tema: str | None = None
+
+
+class InstitutionCareers(BaseModel):
+    institucion: str
+    carreras: list[InstitutionCareer]
+
+
+class GraduateCountryTotal(BaseModel):
+    pais: str
+    por_anio: dict[int, float]
+
+
+class GraduateTotals(BaseModel):
+    anios: list[int]
+    paises: list[GraduateCountryTotal]
+
+
+class GraduatesByYear(BaseModel):
+    anio: int | None
+    anios_observados: list[int]
+    anios_proyectados: list[int]
+    items: list[GraduateYearItem]
+
+
+class UniversityGraduatesItem(BaseModel):
+    pais: str
+    institucion: str
+    tipo_gestion: str | None
+    tipo_institucion: str | None
+    anio: int
+    graduados: float
+    nivel: str
+    es_observado: bool
+    fuente_id: str
+
+
+class UniversityRankingItem(BaseModel):
+    posicion: int
+    pais: str
+    institucion: str
+    tipo_gestion: str | None
+    anio: str
+    graduados: float
+    nivel: str | None
+
+
+class UniversityGraduates(BaseModel):
+    total: int
+    nota: str
+    items: list[UniversityGraduatesItem]
+
+
+class UniversityRanking(BaseModel):
+    alcance: Literal["regional", "nacional"]
+    criterio: str
+    nota: str
+    items: list[UniversityRankingItem]
+
+
+class JobsSummary(BaseModel):
+    total: int
+    scraped_at: datetime | None
+    por_provincia_sector: list[JobsSummaryCell]
+    competencia: list[JobsCompetition] = []  # overall first, then by sector, most competed first
+    source: str = NOTICES["jobs"]
+    # how to show it (app.yaml -> jobs_view): notice, sector order with "other" last, page size
+    view: JobsView = app_config().jobs_view

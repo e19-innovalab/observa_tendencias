@@ -204,12 +204,15 @@ def recompute(session: Session, indicator_codes: list[str] | None = None) -> Rec
             session, ensure_methodology(session, "employability_index"))
         prune_superseded(session, EmployabilityScore, "employability_index")
         summary.skill_gaps = refresh_skill_gaps(session)
+    if indicator_codes is None or set(analytics_params("sector_kpis")["input_indicators"]) & set(indicator_codes):
+        refresh_sector_kpis(session)
     if indicator_codes is None or moctezuma_inputs() & set(indicator_codes):
         summary.moctezuma_scores = refresh_moctezuma(session)
     if indicator_codes is None or moctezuma_inputs("ludita") & set(indicator_codes):
         summary.ludita_scores = refresh_ludita(session)
     if indicator_codes is None:  # full recalculation: also the indicators without input indicators
         summary.red_queen_scores = refresh_red_queen(session)
+        refresh_graduate_trends(session)
     from app.analytics.sisyphus import input_indicators as sisyphus_inputs  # import cycle
     if indicator_codes is None or sisyphus_inputs() & set(indicator_codes):
         # computed on request: only the methodology row is kept current (traceability)
@@ -217,6 +220,20 @@ def recompute(session: Session, indicator_codes: list[str] | None = None) -> Rec
     session.flush()
     summary.alerts = evaluate_alerts(session, indicator_codes)
     return summary
+
+
+def refresh_graduate_trends(session: Session) -> int:
+    """Career trends and projections depend only on the graduates table."""
+    from app.analytics.graduate_trends_run import recompute_graduate_trends  # avoid an import cycle
+
+    return recompute_graduate_trends(session)
+
+
+def refresh_sector_kpis(session: Session) -> int:
+    """KPIs per sector depend on graduates and on ILOSTAT employment and earnings."""
+    from app.analytics.sector_kpis_run import recompute_sector_tables  # avoid an import cycle
+
+    return recompute_sector_tables(session)
 
 
 def refresh_skill_gaps(session: Session) -> int:

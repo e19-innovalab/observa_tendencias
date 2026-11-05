@@ -3,7 +3,9 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { Suspense } from 'react';
 import { HowCalculated } from '@/components/methodology/HowCalculated';
+import { GenderView } from '@/components/minimal/GenderView';
 import { GraduatesView } from '@/components/minimal/GraduatesView';
+import { SectorKpisView } from '@/components/minimal/SectorKpisView';
 import { ChartHeader, ChartLayout, ErrorNote, Eyebrow, Page, RailCard, SourceLine, Stat } from '@/components/minimal/ui';
 import { UrlSeg } from '@/components/minimal/UrlSeg';
 import { PageSkeleton } from '@/components/ui/layout/PageSkeleton';
@@ -14,7 +16,7 @@ import type { SectorUse } from '@/lib/schemas/skills';
 import { formatGrowth } from '@/lib/utils/format';
 
 export const metadata: Metadata = { title: 'Habilidades' };
-type SearchParams = { tab?: string; nivel?: string; anio?: string; country?: string; sector?: string; relacion?: string; sel?: string; q?: string; carrera?: string };
+type SearchParams = { tab?: string; nivel?: string; anio?: string; country?: string; sector?: string; relacion?: string; sel?: string; q?: string; carrera?: string; sector_kpi?: string };
 const PER_SIDE = 8;
 const BAR_ROOM = 82; // % del medio ancho que ocupa la barra más larga
 const one = new Intl.NumberFormat('es-AR', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
@@ -26,10 +28,6 @@ const RELATIONS = [
 const LEVELS = [
   { value: '', label: 'Grupos de habilidades' },
   { value: 'detalle', label: 'Habilidades detalladas' },
-];
-const TABS = [
-  { value: '', label: 'Brechas de habilidades' },
-  { value: 'titulados', label: 'Titulados y proyecciones' },
 ];
 
 /** Brecha (diferencia de fracciones) en puntos porcentuales con signo. */
@@ -48,17 +46,7 @@ async function HabilidadesContent({ searchParams }: { searchParams: Promise<Sear
   const sp = await searchParams;
   return (
     <Page>
-      <div className="mb-5 flex gap-6 border-b border-slate-200">
-        {TABS.map((t) => {
-          const on = (sp.tab ?? '') === t.value;
-          return (
-            <Link key={t.value || 'brechas'} href={t.value ? `/habilidades?tab=${t.value}` : '/habilidades'} aria-current={on ? 'page' : undefined} className={`-mb-px border-b-2 pb-2.5 text-sm ${on ? 'border-slate-900 font-semibold text-slate-900' : 'border-transparent font-medium text-slate-600 hover:text-slate-900'}`}>
-              {t.label}
-            </Link>
-          );
-        })}
-      </div>
-      {sp.tab === 'titulados' ? <GraduatesView sp={sp} /> : <Gaps sp={sp} />}
+      {sp.tab === 'titulados' ? <GraduatesView sp={sp} /> : sp.tab === 'sectores' ? <SectorKpisView sp={sp} /> : sp.tab === 'genero' ? <GenderView sp={sp} /> : <Gaps sp={sp} />}
     </Page>
   );
 }

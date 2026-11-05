@@ -1,5 +1,6 @@
 from collections import defaultdict
 from typing import Literal
+from urllib.parse import quote
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy import func, select, tuple_
@@ -13,6 +14,7 @@ from app.core.database import get_session
 from app.core.search import text_match
 from app.datasets.profiles import profiles
 from app.models import (
+    EscoOccupation,
     Graduate,
     IngestionRun,
     Methodology,
@@ -25,6 +27,8 @@ from app.models import (
     Source,
 )
 from app.schemas.observatory import (
+    EscoOccupationItem,
+    EscoOccupationLink,
     GapDataThrough,
     MethodologyRef,
     OccupationItem,
@@ -43,6 +47,7 @@ from app.schemas.observatory import (
     SkillSectorUse,
     SourceRef,
 )
+from app.skills.esco import skill_code
 
 ESSENTIAL = "essential"
 VIA_SHOWN = 3  # ESCO occupations named per CIUO group
@@ -57,24 +62,57 @@ def _reference_country() -> str:
     return catalog().countries[REFERENCE_COUNTRY_INDEX].iso3
 
 
-def _skill_item(skill: Skill, weight: float | None = None, occupations: int | None = None):
+def _skill_item(skill: Skill, weight: float | None = None, occupations: int | None = None,
+                relation: str | None = None):
     return SkillItem(skill_code=skill.skill_code, name=skill.name, skill_type=skill.skill_type,
                      skill_type_label=app_config().skills.types.get(skill.skill_type or ""),
                      esco_uri=skill.esco_uri, description=skill.description,
                      description_en=skill.description_en, description_origin=skill.description_origin,
-                     group_code=skill.group_code, weight=weight, occupations=occupations)
+                     group_code=skill.group_code, weight=weight, occupations=occupations,
+                     relation=relation, relation_label=app_config().skills.relations.get(relation or ""))
 
 
 def occupation_skills(session: Session, code: str, limit: int,
                       skill_type: str | None = None) -> tuple[int, list[SkillItem]]:
-    stmt = (select(Skill, OccupationSkill.weight)
+    stmt = (select(Skill, OccupationSkill.weight, OccupationSkill.relation)
             .join(OccupationSkill, OccupationSkill.skill_code == Skill.skill_code)
             .where(OccupationSkill.occupation_code == code,
                    OccupationSkill.country_iso3 == _reference_country()))
     if skill_type:
         stmt = stmt.where(Skill.skill_type == skill_type)
     rows = session.execute(stmt.order_by(OccupationSkill.weight.desc(), Skill.name)).all()
-    return len(rows), [_skill_item(s, float(w)) for s, w in rows[:limit]]
+    return len(rows), [_skill_item(s, float(w), relation=r) for s, w, r in rows[:limit]]
+
+
+def _esco_occupations(session: Session, code: str) -> list[EscoOccupationLink]:
+    template = app_config().skills.esco_occupation_url
+    rows = session.scalars(select(EscoOccupation).where(EscoOccupation.occupation_code == code)
+                           .order_by(EscoOccupation.name)).all()
+    if rows:
+        return [EscoOccupationLink(code=skill_code(o.esco_uri), name=o.name,
+                                   url=template.format(uri=quote(o.esco_uri, safe=""))) for o in rows]
+    # not loaded yet: the names the skills were read from, without a link
+    vias = session.scalars(select(OccupationSkill.via).where(
+        OccupationSkill.occupation_code == code,
+        OccupationSkill.country_iso3 == _reference_country())).all()
+    return [EscoOccupationLink(code=None, name=n, url=None)
+            for n in sorted({v["name"] for via in vias for v in via or []})]
+
+
+def _esco_occupation_skills(session: Session, code: str, name: str, limit: int,
+                            skill_type: str | None) -> tuple[int, list[SkillItem]]:
+    """Skills of one ESCO occupation, with its own relation: essential first, then by name."""
+    stmt = (select(Skill, OccupationSkill.via)
+            .join(OccupationSkill, OccupationSkill.skill_code == Skill.skill_code)
+            .where(OccupationSkill.occupation_code == code,
+                   OccupationSkill.country_iso3 == _reference_country()))
+    if skill_type:
+        stmt = stmt.where(Skill.skill_type == skill_type)
+    rows = [(skill, relation) for skill, via in session.execute(stmt).all()
+            for relation in [next((v["relation"] for v in via or [] if v["name"] == name), None)]
+            if relation]
+    rows.sort(key=lambda r: (r[1] != app_config().skills.sector_relation, r[0].name))
+    return len(rows), [_skill_item(s, relation=r) for s, r in rows[:limit]]
 
 
 def _skills_source(session: Session) -> tuple[SourceRef | None, object]:
@@ -93,19 +131,47 @@ def _skills_source(session: Session) -> tuple[SourceRef | None, object]:
 def skills_of_occupation(
     code: str,
     skill_type: str | None = Query(None, description="knowledge | skill"),
+    esco: str | None = Query(None, description="Solo una ocupación ESCO del grupo (code de esco_occupations)"),
     limit: int = Query(_pagination.default_limit, ge=1, le=_pagination.max_limit),
     session: Session = Depends(get_session),
 ):
-    """Skills of an ISCO occupation (ESCO), most relevant first."""
+    """Skills of an ISCO occupation or of one of its ESCO occupations, most relevant first."""
     occ = catalog().occupation(code)
     if occ is None:
         raise HTTPException(status.HTTP_404_NOT_FOUND,
                             app_config().messages["unknown_occupation"].format(code=code))
-    total, items = occupation_skills(session, code, limit, skill_type)
+    links = _esco_occupations(session, code)
+    selected = None
+    if esco:
+        selected = next((o for o in links if o.code == esco), None)
+        if selected is None:
+            raise HTTPException(status.HTTP_404_NOT_FOUND,
+                                app_config().messages["unknown_esco_occupation"].format(code=esco))
+        total, items = _esco_occupation_skills(session, code, selected.name, limit, skill_type)
+    else:
+        total, items = occupation_skills(session, code, limit, skill_type)
     source, updated = _skills_source(session)
+    conf = app_config().skills
     return OccupationSkills(occupation_code=code, occupation_name=occ.name, total=total,
-                            weight_note=app_config().skills.weight_note, source=source,
+                            relation_note=conf.esco_occupation_note if selected else conf.relation_note,
+                            relation_help=conf.relation_help,
+                            esco_occupations=links, esco_occupation=selected, source=source,
                             updated_at=updated, items=items)
+
+
+@router.get("/esco-occupations", response_model=list[EscoOccupationItem])
+def esco_occupations(
+    q: str = Query(..., description="Palabras a buscar en el nombre (en cualquier orden, sin importar tildes)"),
+    limit: int = Query(_pagination.default_limit, ge=1, le=_pagination.max_limit),
+    session: Session = Depends(get_session),
+):
+    """ESCO occupations by name, each with the ISCO group whose page shows it."""
+    match = text_match(EscoOccupation.name, q)
+    if match is None:
+        return []
+    rows = session.scalars(select(EscoOccupation).where(match).order_by(EscoOccupation.name).limit(limit)).all()
+    return [EscoOccupationItem(code=skill_code(o.esco_uri), name=o.name, occupation_code=o.occupation_code,
+                               occupation_name=catalog().occupation(o.occupation_code).name) for o in rows]
 
 
 @router.get("/skills", response_model=list[SkillItem])

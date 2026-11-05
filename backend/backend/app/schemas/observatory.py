@@ -247,6 +247,8 @@ class EmployabilityItem(BaseModel):
     methodology: MethodologyRef
     group_code: str  # ISCO group used to cap rankings
     group_hidden: int | None = None  # rankings: rows of the same group left out
+    position: int | None = None  # by ISE among all the country's scored occupations, whatever the filters
+    position_of: int | None = None
 
 
 class MoctezumaComponent(BaseModel):
@@ -587,15 +589,33 @@ class SkillItem(BaseModel):
     description_en: str | None = None  # ESCO's English original
     description_origin: str | None = None  # esco | translation (config/reference/esco_traducciones_es.yaml)
     group_code: str | None = None  # ESCO hierarchy group (analytics.yaml -> skill_gaps.group_level)
-    weight: float | None = None
+    weight: float | None = None  # only orders the list: ESCO does not score skills
+    relation: str | None = None  # strongest ESCO relation among the group's occupations
+    relation_label: str | None = None
     occupations: int | None = None
+
+
+class EscoOccupationLink(BaseModel):
+    code: str | None  # for ?esco= in /occupations/{code}/skills
+    name: str
+    url: str | None  # official ESCO page
+
+
+class EscoOccupationItem(BaseModel):
+    code: str
+    name: str
+    occupation_code: str  # the ISCO group it belongs to
+    occupation_name: str
 
 
 class OccupationSkills(BaseModel):
     occupation_code: str
     occupation_name: str
     total: int
-    weight_note: str
+    relation_note: str
+    relation_help: list[str]
+    esco_occupations: list[EscoOccupationLink]  # the ones the ISCO group brings together
+    esco_occupation: EscoOccupationLink | None = None  # the one asked for with ?esco=
     source: SourceRef | None
     updated_at: datetime | None
     items: list[SkillItem]
@@ -854,9 +874,15 @@ class MotionAxisInfo(BaseModel):
     domain: tuple[float, float] | None = None
 
 
+class MotionGroupOccupation(BaseModel):
+    code: str
+    name: str
+
+
 class MotionGroup(BaseModel):
     code: str
     name: str | None = None
+    occupations: list[MotionGroupOccupation] = []  # the ones the bubble rolls up
 
 
 class MotionPoint(BaseModel):

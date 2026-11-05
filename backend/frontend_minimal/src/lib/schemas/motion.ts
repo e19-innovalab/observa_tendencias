@@ -35,7 +35,11 @@ export const MotionPageSchema = z.object({
   y: MotionAxisSchema,
   size: MotionAxisSchema,
   y_options: z.array(MotionAxisSchema),
-  groups: z.array(z.object({ code: z.string(), name: z.string().nullable() })),
+  groups: z.array(z.object({
+    code: z.string(),
+    name: z.string().nullable(),
+    occupations: z.array(z.object({ code: z.string(), name: z.string() })).default([]),
+  })),
   points: z.array(MotionPointSchema),
   notes: z.array(z.string()),
 });

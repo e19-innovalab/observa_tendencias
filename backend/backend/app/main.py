@@ -9,7 +9,6 @@ from app.api.v1 import (
     assistant,
     auth,
     catalog,
-    coverage,
     datasets,
     education,
     employability,
@@ -41,7 +40,7 @@ app.add_middleware(
 )
 
 for module in (catalog, indicators, employability, moctezuma, ludita, motion, red_queen, sisyphus, generational, trends, skills, alerts, datasets, sources,
-               coverage, jobs, graduates, education, auth, users, assistant, analytics):
+               jobs, graduates, education, auth, users, assistant, analytics):
     app.include_router(module.router, prefix=conf.api_prefix)
 
 

@@ -11,10 +11,10 @@ from fastapi import HTTPException, status
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
-from app.assistant import numbers, scripted
+from app.assistant import numbers, scripted, web
 from app.assistant.providers import ProviderError, get_provider
 from app.assistant.tools import ToolRun, run_tool
-from app.core.config_files import AssistantConf, app_config
+from app.core.config_files import AssistantConf, app_config, catalog
 from app.models import AssistantLog, User
 from app.schemas.assistant import AnswerLink, AnswerOption, AskRequest, AskResponse, ToolCallItem
 
@@ -27,6 +27,8 @@ def _msg(key: str, **kw) -> str:
 DISCONNECT_POLL = 0.5
 # provider recorded for scripted answers (templates, no model)
 SCRIPT = "script"
+# top of the experimental indicators' 0-100 scale
+SCALE_MAX = 100.0
 # status for a question the person stopped (HTTP code nginx uses for "client closed request")
 CANCELLED = 499
 
@@ -116,16 +118,29 @@ async def ask(session: Session, user: User, req: AskRequest, authorization: str 
     known = set(re.findall(conf.known_code_pattern, said))
     started = time.perf_counter()
     headers = {"Authorization": authorization} if authorization else {}
+    ws = conf.web_search
+    previous = [t.content for t in req.history if t.role == "user"][-1:]
+    experimental = web.on_topic(ws, scripted.words(" ".join([question, *previous])),
+                                req.context.page if req.context else None)
+    searches_outside = ws.enabled and experimental
+    # the tool does not exist for the model on any other topic
+    seen_by_model = conf.model_copy(update={"tools": [*conf.tools, ws.tool]}) if searches_outside else conf
+    p = conf.providers.get(conf.provider)
+    if experimental and p and p.experimental:  # they think harder
+        seen_by_model = seen_by_model.model_copy(update={"providers": {
+            **conf.providers, conf.provider: p.model_copy(update=p.experimental)}})
     try:
         async with httpx.AsyncClient(transport=httpx.ASGITransport(app=api), base_url="http://assistant",
                                      headers=headers) as client:
 
             async def call_tool(name: str, args: dict) -> ToolRun:
-                run = await run_tool(client, conf, prefix, name, args, known)
+                outside = searches_outside and name == ws.tool.name
+                run = await (web.run(ws, args) if outside else run_tool(client, conf, prefix, name, args, known))
                 runs.append(run)
                 return run
 
-            if conf.scripted.enabled:
+            # the templates only know the ISE: the experimental indicators go to the model
+            if conf.scripted.enabled and not experimental:
                 script = await scripted.answer(conf.scripted, req, question, call_tool, known)
                 if script is not None:
                     log.provider, log.model, log.status, log.answer = SCRIPT, conf.scripted.model_label, "ok", script.text
@@ -133,10 +148,11 @@ async def ask(session: Session, user: User, req: AskRequest, authorization: str 
                     return _response(session, conf, log, runs, user, source=SCRIPT,
                                      options=[AnswerOption(**o) for o in script.options])
             _check_limits(session, conf, user)
-            provider = get_provider(conf)
+            provider = get_provider(seen_by_model)
             log.model = provider.model
+            system = conf.system_prompt + (ws.prompt_note if searches_outside else "")
             reply = await _until_done_or_stopped(
-                provider.answer(conf.system_prompt, _messages(conf, req, question), call_tool), is_disconnected)
+                provider.answer(system, _messages(conf, req, question), call_tool), is_disconnected)
     except ProviderError as e:
         log.error = str(e)
         _save(session, log, runs, started)
@@ -159,8 +175,11 @@ async def ask(session: Session, user: User, req: AskRequest, authorization: str 
             for r in runs:
                 if r.ok:
                     numbers.data_values(r.data, values)
+            if experimental:  # their formulas use 100 − a side's value (Moctezuma, Sísifo)
+                values |= {round(SCALE_MAX - v, 6) for v in values if 0 <= v <= SCALE_MAX}
             # numbers the person wrote, or that the instructions themselves give (e.g. "0 a 100")
-            asked = " ".join([question, *(t.content for t in req.history), conf.system_prompt])
+            outside = [i["extract"] for r in runs if r.external_links for i in r.data["resultados"]]
+            asked = " ".join([question, *(t.content for t in req.history), conf.system_prompt, *outside])
             bad = numbers.unverified(answer, values, check, also_allowed=asked)
         if bad and check.on_unverified == "block":
             log.status, answer = "blocked", _msg("blocked" if _links(conf, runs) else "blocked_no_links")
@@ -180,7 +199,45 @@ def _links(conf: AssistantConf, runs: list[ToolRun]) -> list[AnswerLink]:
         if r.ok and r.link and r.link not in seen:
             seen.add(r.link)
             links.append(AnswerLink(label=tools[r.tool].link.label, href=r.link))
+        for link in r.external_links:
+            if link["href"] not in seen:
+                seen.add(link["href"])
+                links.append(AnswerLink(**link, external=True))
     return links
+
+
+def _named_occupations(conf: AssistantConf, answer: str) -> list:
+    """The catalog occupations an answer names, by name or CIUO code, in the order it names them."""
+    padded = f" {' '.join(scripted.words(answer))} "
+    found = {}
+    for o in catalog().occupations:
+        if o.is_excluded:
+            continue
+        name = padded.find(f" {' '.join(scripted.words(o.name))} ")
+        code = padded.find(f" ciuo {o.occupation_code} ")
+        places = [p for p in (name, code) if p >= 0]
+        if places:
+            found[o.occupation_code] = (min(places), o)
+    return [o for _, o in sorted(found.values(), key=lambda f: f[0])][:conf.occupation_links_max]
+
+
+def _answer_links(conf: AssistantConf, answer: str, runs: list[ToolRun], page_country: str | None) -> list[AnswerLink]:
+    """A link to each occupation the answer names, then what the tools add (without repeating them)."""
+    asked = {r.args["country"] for r in runs if r.ok and r.args.get("country")}
+    country = next(iter(asked)) if len(asked) == 1 else page_country if not asked else None
+    query = f"?country={country}" if country else ""
+    named = _named_occupations(conf, answer)
+    named_paths = {f"/ocupaciones/{o.occupation_code}" for o in named}
+    links = _links(conf, runs)
+    # of what was read outside, what the answer mentions (or at least the best match)
+    padded = f" {' '.join(scripted.words(answer))} "
+    outside = [link for link in links if link.external]
+    cited = [link for link in outside
+             if f" {' '.join(scripted.words(link.label.split(': ', 1)[-1]))} " in padded] or outside[:1]
+    return [*(AnswerLink(label=conf.occupation_link_label.format(name=o.name, code=o.occupation_code),
+                         href=f"/ocupaciones/{o.occupation_code}{query}") for o in named),
+            *(link for link in links if link.href.split("?")[0] not in named_paths
+              and (not link.external or link in cited))]
 
 
 def _response(session: Session, conf: AssistantConf, log: AssistantLog, runs: list[ToolRun], user: User,
@@ -189,7 +246,8 @@ def _response(session: Session, conf: AssistantConf, log: AssistantLog, runs: li
     bad = bad or []
     return AskResponse(
         answer=log.answer or "", status=log.status, verified=not bad and log.status == "ok", warning=warning,
-        unverified_numbers=bad, links=_links(conf, runs), options=options or [],
+        unverified_numbers=bad, links=_answer_links(conf, log.answer or "", runs, log.context.get("country")),
+        options=options or [],
         tool_calls=[ToolCallItem(tool=r.tool, args=r.args, ok=r.ok) for r in runs],
         source=source, provider=log.provider, model=log.model, log_id=log.log_id,
         remaining_today=remaining_today(session, user.user_id))

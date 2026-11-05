@@ -17,7 +17,7 @@ revisada: false
 # Carreras técnicas (CINE 5: técnico, tecnólogo, tecnicatura...): usan las ocupaciones "tecnico" de
 # cine_f_ciuo.yaml. Se reconocen por el nombre, o por el nivel en los países donde el nivel lo dice
 # (niveles_tecnicos).
-patron_tecnico: '^(tecnic|tecnologo|tecnologa|tecnologo/a|analista|asistente|auxiliar|laboratorista|higienista|perito|operador|otros tecnicos|escalonada)|tecnicatura'
+patron_tecnico: '^(tecnic|tecnologo|tecnologa|tecnologo/a|analista|asistente|auxiliar|laboratorista|higienista|perito|operador|otros tecnicos|escalonada|acompanamiento terapeutico)|tecnicatura'
 niveles_tecnicos:
   ARG: [Pregrado]
 
@@ -77,7 +77,8 @@ reglas:
   - {patron: 'ciencia politica|ciencias politicas|relaciones internacionales|estudios internacionales|diplomacia|politica, filosofia', cine: "0312"}
   - {patron: 'psicolog|psicomotric', cine: "0313"}
   - {patron: 'sociolog|antropolog|ciencias sociales|demografia|geografia|desarrollo regional|licenciatura en desarrollo|licenciado en desarrollo', cine: "0314"}
-  - {patron: 'periodismo|comunicacion social|ciencias de la informacion y de la comunicacion|comunicacion$|^lic\. en comunicacion|licenciatura en comunicacion|licenciado en comunicacion|ciencias de la comunicacion|comunicacion global|comunicacion orientacion', cine: "0321"}
+  - {patron: 'comunicacion y marketing', cine: "0414"}
+  - {patron: 'periodismo|comunicacion social|ciencias de la informacion y de la comunicacion|(?<!tele)comunicacion$|^lic\. en comunicacion|licenciatura en comunicacion|licenciado en comunicacion|ciencias de la comunicacion|comunicacion global|comunicacion orientacion', cine: "0321"}
   - {patron: 'bibliotec|archivolog|archivologo|museolog|bienes culturales|centros de documentacion', cine: "0322"}
 
   # --- 04 Administración de empresas y derecho ------------------------------------------------
@@ -121,7 +122,7 @@ reglas:
   - {patron: 'madera|forestales', cine: "0722"}
   - {patron: 'textil', cine: "0723"}
   - {patron: 'minas|mineria|minero', cine: "0724"}
-  - {patron: 'industrial|de produccion|procesos industriales|proyectos de ingenieria|ingenieria civil, plan|^ingenieria$|ingenieria civil$|^industrias$', cine: "0719"}
+  - {patron: 'industrial|de produccion|procesos industriales|proyectos de ingenieria|ingenieria civil, plan|^ingenieria$|^industrias$', cine: "0719"}
   - {patron: 'arquitect|paisaj|areas verdes|urbanismo|dibujo arquitectonico', cine: "0731"}
   - {patron: 'construccion|obras civiles|ingenieria civil|ingeniero civil|proyectos estructurales|topografia|geomensura|geomatica|cartografia|agrimens|dibujo tecnico', cine: "0732"}
 

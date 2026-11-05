@@ -1,8 +1,7 @@
 """Endpoints analíticos dimensionales (Plan de Integración - Etapas 3 y 4).
 
 Proporciona acceso a la Tasa de Densidad Profesional por sector, series salariales
-duales (local vs regional PPA), justificación metodológica de inserción laboral
-y la matriz de habilidades ocupacionales vs impacto IA (OIT WP 140 / LinkedIn).
+duales (local vs regional PPA) y la matriz de habilidades ocupacionales vs impacto IA (OIT WP 140 / LinkedIn).
 """
 import csv
 from collections import Counter
@@ -13,16 +12,17 @@ from fastapi import APIRouter, Depends, Query
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from app.analytics.sector_kpis_run import sector_kpis
 from app.core.database import get_session
 from app.models import FactSalario, ReporteDensidadProfesional
 from app.schemas.analytics import (
     DensidadProfesionalItem,
     DensidadProfesionalResponse,
-    ISEMetodologiaInsercionResponse,
     MatrizHabilidadIAItem,
     MatrizHabilidadIAResponse,
     SalarioDualItem,
     SalarioDualResponse,
+    SectorKpis,
 )
 
 router = APIRouter(prefix="/analytics", tags=["analytics"])
@@ -31,6 +31,13 @@ router = APIRouter(prefix="/analytics", tags=["analytics"])
 ANIO_COMUN_REGIONAL = 2022
 ANIOS_COMUNES_TRIPARTITOS = [2018, 2020, 2021, 2022]
 ULTIMO_ANIO_OBSERVADO = {"ARG": 2022, "CHL": 2025, "URY": 2023}
+
+
+@router.get("/sectores", response_model=SectorKpis)
+def sectores(session: Session = Depends(get_session)):
+    """KPIs por país, sector y año: densidad profesional, empleo, participación de las mujeres y
+    salarios por sexo, más la proyección de titulados por sector."""
+    return SectorKpis(**sector_kpis(session))
 
 
 @router.get("/densidad-profesional", response_model=DensidadProfesionalResponse)
@@ -83,7 +90,7 @@ def densidad_profesional(
         )
         nota = (
             "Enfoque local con máxima actualidad observada por país para diagnóstico interno y planificación educativa "
-            "(ARG hasta 2022, URY hasta 2023, CHL hasta 2025)."
+            "(el último año disponible varía por país)."
         )
         ventana = "Serie histórica observada por país"
 
@@ -142,16 +149,16 @@ def salarios_dual(
             FactSalario.salario_usd_ppa.isnot(None),
         ).order_by(FactSalario.sector, FactSalario.pais)
         nota = (
-            "Comparativa regional tripartita armonizada OIT 2024 en USD PPA del PIB "
-            "(PA.NUS.PPP del Banco Mundial) para paridad de poder adquisitivo Cono Sur."
+            "Comparativa regional con la serie de la OIT en dólares a paridad de poder adquisitivo "
+            "(CUR_TYPE_PPP)."
         )
     elif enfoque == "local":
         stmt = stmt.where(
             ~FactSalario.fuente_id.ilike("%OIT%"),
         ).order_by(FactSalario.pais, FactSalario.sector, FactSalario.anio.desc())
         nota = (
-            "Series históricas locales en moneda constante (IPC 2016=100) y USD PPA por carrera/sector "
-            "(CEP-XXI Argentina 2016-2023, SIES Mi Futuro Chile 2016-2024)."
+            "Salarios del sector privado registrado de Argentina (CEP-XXI), hasta noviembre de 2023. "
+            "Los de Chile (Buscador del SIES) no se cargan: no tienen descarga pública."
         )
     else:
         stmt = stmt.order_by(FactSalario.pais, FactSalario.sector, FactSalario.anio.desc())
@@ -165,42 +172,6 @@ def salarios_dual(
         enfoque=enfoque,
         nota_metodologica=nota,
         items=items,
-    )
-
-
-@router.get("/ise/metodologia-insercion", response_model=ISEMetodologiaInsercionResponse)
-def ise_metodologia_insercion():
-    """Tratamiento metodológico formal del campo 'Tasa de Inserción Laboral' en el ISE regional."""
-    return ISEMetodologiaInsercionResponse(
-        metodologia="Índice Sintético de Empleabilidad (ISE) - Paridad Regional Tripartita",
-        version="0.2",
-        tratamiento_insercion="Redistribución proporcional de peso en comparativa regional tripartita",
-        justificacion_metodologica=(
-            "Chile cuenta con relevamiento censal anual de inserción laboral formal a 1 y 2 años vía SIES/Mi Futuro. "
-            "Argentina y Uruguay no disponen de relevamientos censales continuos homologables para el conjunto de sus "
-            "instituciones universitarias. Para garantizar el principio rector de 100% de datos observados sin penalizar "
-            "a países sin fuente censal ni generar imputaciones sintéticas, el 25% de peso nominal de la tasa de "
-            "inserción se redistribuye proporcionalmente entre las tres dimensiones con datos 100% observados en los 3 "
-            "países (Demanda Neta: 46.7%, Salario PPA: 33.3%, Riesgo de Automatización OIT: 20.0%). En las fichas locales, "
-            "Chile reporta la tasa observada de SIES de manera informativa."
-        ),
-        pesos_nominales={
-            "net_demand": 0.35,
-            "salary_ppp": 0.25,
-            "insertion_rate": 0.25,
-            "automation_risk": 0.15,
-        },
-        pesos_efectivos_redistribuidos={
-            "net_demand": 0.467,
-            "salary_ppp": 0.333,
-            "insertion_rate": 0.0,
-            "automation_risk": 0.200,
-        },
-        disponibilidad_por_pais={
-            "CHL": "Disponible oficialmente vía SIES / Mi Futuro (incorporada en ficha local y análisis complementario)",
-            "ARG": "No disponible en serie censal anual universitaria homogénea (peso redistribuido proporcionalmente)",
-            "URY": "No disponible en serie censal anual universitaria homogénea (peso redistribuido proporcionalmente)",
-        },
     )
 
 

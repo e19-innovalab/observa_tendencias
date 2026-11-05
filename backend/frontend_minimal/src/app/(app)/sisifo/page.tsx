@@ -136,7 +136,7 @@ async function SisyphusContent({ searchParams }: { searchParams: Promise<SearchP
                 </div>
               );
             })}
-            <p className="text-xs leading-relaxed text-slate-500">Ingresos mensuales medios de los asalariados (OIT). USD al tipo de cambio de mercado; USD PPA corrige las diferencias de precios entre países y es la medida que usa el indicador.</p>
+            <p className="text-xs leading-relaxed text-slate-500">Ingresos mensuales medios de los asalariados (OIT). USD al tipo de cambio oficial promedio del año; USD PPA corrige las diferencias de precios entre países y es la medida que usa el indicador.</p>
           </>
         }
       />

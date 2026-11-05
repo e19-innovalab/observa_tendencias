@@ -73,6 +73,16 @@ class SkillGroup(Base):
     esco_uri: Mapped[str | None] = mapped_column(Text)
 
 
+class EscoOccupation(Base):
+    """The ESCO occupations an ISCO group brings together, with their official address."""
+
+    __tablename__ = "esco_occupations"
+    occupation_code: Mapped[str] = mapped_column(ForeignKey("occupations.occupation_code"), primary_key=True)
+    esco_uri: Mapped[str] = mapped_column(Text, primary_key=True)
+    name: Mapped[str] = mapped_column(Text)
+    source_id: Mapped[int | None] = mapped_column(ForeignKey("sources.source_id"))
+
+
 class OccupationSkill(Base):
     __tablename__ = "occupation_skills"
     occupation_code: Mapped[str] = mapped_column(ForeignKey("occupations.occupation_code"), primary_key=True)

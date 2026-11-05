@@ -219,7 +219,14 @@ Se muestran siempre con su aviso (`notices` en `app.yaml`). **No entran en el IS
 | Dataset | Origen | Alcance |
 |---|---|---|
 | Ofertas de LinkedIn | Búsquedas de Apify del equipo de Data Analytics | 640 avisos del 6 al 13/10/2026, solo Buenos Aires, Córdoba y Santa Fe. Clasificados por reglas. |
-| Egresados y proyecciones | SIES (Chile) y datos.gob.ar (Argentina), procesado por Data Analytics | 19 carreras seleccionadas. Cuenta egresados; no tiene tasa de inserción laboral. Para las brechas se usa la base oficial completa de Mi Futuro (277 carreras). |
+
+La tendencia y la proyección de egresados por carrera ya no son de este grupo: se calculan con la tabla oficial `graduates` después de cada carga (`analytics.yaml -> graduate_trends`). Cubren Argentina (37 disciplinas), Chile (277 carreras genéricas) y Uruguay (carreras de grado de los anuarios del MEC), solo pregrado y grado; en Argentina salen de los anuarios del DIU, salvo 2015 y 2019, que salen del archivo CTI (el anuario 2015 omite disciplinas y no hay anuario de 2019 con estos cuadros). El archivo CTI queda 17-19 % por debajo de los anuarios en 2016-2018 y 2021; las brechas de habilidades todavía lo usan. El MEC cambia los nombres de las carreras entre anuarios (por ejemplo, "Doctor en Derecho y Ciencias Sociales" pasa a "Abogacía"), así que en Uruguay se unifican con `config/reference/carreras_uruguay_nombres.yaml`, un borrador sin revisar; las brechas de habilidades todavía no usan esa tabla. Cuentan egresados; no tienen tasa de inserción laboral.
+
+Con estas series y las de la OIT se calculan los indicadores por sector (`analytics.yaml -> sector_kpis`): densidad profesional (titulados por cada 1.000 ocupados), participación de las mujeres entre titulados y ocupados con su diagnóstico de paridad (40 % a 60 %, criterio EIGE / OIT; pestaña Género), salarios y brecha salarial por sexo, y una proyección de titulados por sector. La densidad es aproximada: el sector de una carrera sale de su campo CINE-F y el del empleo, de la actividad económica. Argentina publica el sexo de los titulados solo para el total del país. Argentina suma el empleo privado registrado, los salarios y la participación de las mujeres por actividad de CEP-XXI (`datos.produccion.gob.ar`), que llegan hasta noviembre de 2023; las actividades se agrupan con los códigos CIIU de cada sector del catálogo. El salario real descuenta el IPC del INDEC y `factores_macro_ppa` guarda además el factor PPA de consumo privado (`PA.NUS.PRVT.PP`, el que aplica la OIT; donde el Banco Mundial deja de publicarlo, como en Argentina desde 2022, se extiende como la OIT: factor anterior × IPC del país ÷ IPC de EE. UU.) y el tipo de cambio oficial del Banco Mundial, que se revisan cada mes aunque los archivos de CEP-XXI no cambien. Cada mes de salarios pasa a dólares con el promedio de ese mes del dólar oficial mayorista diario del BCRA (`api.bcra.gob.ar`, fuente `bcra_dolar`, tabla `tipo_cambio_diario`). 2023 tiene 11 meses: mantiene puestos, pesos y dólares, pero no recibe los factores anuales del dólar PPA ni del salario real, que incluyen la suba de precios de diciembre. No se cargan el Buscador del SIES, que no tiene descarga pública (pide iniciar sesión), ni Araucano, de origen sin confirmar.
+
+Cada carrera se muestra con el nombre que publica la fuente y su sector. El sector sale de su campo CINE-F (`config/reference/cine_f_sectores.yaml`), según las actividades económicas de cada sector en `catalog.yaml`; el campo que no entra en ninguno queda en "Otros". Es un borrador sin revisar.
+
+En Chile, 13 temas, como inteligencia artificial o ciberseguridad, buscan programas que Mi Futuro no publica como carrera genérica (`config/reference/carreras_seguimiento.yaml`). Se muestra cada programa con su nombre original; el tema es solo un filtro propio, no un título. Estos programas cuentan todos los niveles, también diplomados y posgrados, así que no se comparan con las carreras genéricas y no entran en el total por sector.
 
 ### 1.4 Archivos oficiales: descarga automática y carga manual
 
@@ -298,7 +305,7 @@ Hay 18 indicadores. El dominio corresponde a la pestaña del mockup: economic �
 | `registered_private_employment` | Asalariados registrados del sector privado (SIPA) | Miles | SIPA, hoja A.2.1: total, Turismo, Salud y Energía | Mensual (ARG) | 07/2026 (últimos 10 meses provisorios) |
 | `employment` | Personas ocupadas | Miles | ILOSTAT `DF_EMP_TEMP_SEX_ECO_NB` (total y por sector, 3 países). Por ocupación: ILOSTAT `DF_EMP_TEMP_SEX_OC2_NB` (2 dígitos, ARG y URY) y SIMEL `DF_OCUCIUO_CIUO_SEXO` (gran grupo, CHL) | Anual | 2025 |
 | `mean_monthly_earnings_ppp` | Ingreso laboral mensual promedio | USD PPA | ILOSTAT `DF_EAR_EMTA_SEX_ECO_CUR_NB` (sector) y `DF_EAR_EMTA_SEX_OCU_CUR_NB` (ocupación, 1 dígito), `CUR_TYPE_PPP` | Anual | 2025 ARG, 2024 URY y CHL |
-| `mean_monthly_earnings_usd` | Ingreso laboral mensual promedio (para mostrar) | USD | ILOSTAT, las mismas dos series con `CUR_TYPE_USD` (tipo de cambio de mercado) | Anual | 2025 ARG, 2024 URY y CHL |
+| `mean_monthly_earnings_usd` | Ingreso laboral mensual promedio (para mostrar) | USD | ILOSTAT, las mismas dos series con `CUR_TYPE_USD` (tipo de cambio oficial promedio del año) | Anual | 2025 ARG, 2024 URY y CHL |
 | `earnings_tertiary_ppp`, `earnings_tertiary_usd` | Ingreso laboral mensual promedio con educación superior | USD PPA y USD | ILOSTAT `DF_EAR_EMTA_SEX_EDU_CUR_NB`, `EDU_AGGREGATE_ADV` | Anual | 2025 ARG, 2024 URY y CHL |
 | `earnings_secondary_ppp`, `earnings_secondary_usd` | Ingreso laboral mensual promedio con secundaria | USD PPA y USD | ILOSTAT `DF_EAR_EMTA_SEX_EDU_CUR_NB`, `EDU_AGGREGATE_INT` | Anual | 2025 ARG, 2024 URY y CHL |
 | `genai_exposure` | Exposición a la IA generativa | Índice 0 a 1 | OIT WP 140, Tabla A1 | Estática (2025) | 2025 |
@@ -453,7 +460,7 @@ Configuración: `analytics.yaml → employability` (versión 0.2). Textos y rang
 ### 5.1 Fórmula
 
 ```
-ISE = 0,35·Demanda neta + 0,25·Salario PPA + 0,25·Tasa de inserción − 0,15·Riesgo de automatización
+ISE = 0,47·Demanda neta + 0,33·Salario PPA − 0,20·Riesgo de automatización
 ```
 
 Cada dimensión se escala de 0 a 100 con mínimo-máximo dentro del grupo comparado. El grupo
@@ -465,33 +472,24 @@ puntaje), y así se aplica el signo negativo.
 
 | Dimensión | Peso | Fuente | Cálculo | Unidad | Rango posible | Observado en 2025 |
 |---|---|---|---|---|---|---|
-| Demanda neta | 35 % | `employment` por ocupación (ARG y URY: ILOSTAT, 2 dígitos; CHL: SIMEL, 1 dígito) | Crecimiento anual promedio entre el primer y el último valor de una ventana de 3 años | % anual | Sin límite fijo | −16,9 % a +15,0 % |
-| Salario | 25 % | `mean_monthly_earnings_ppp` por ocupación (ILOSTAT, 1 dígito) | Último valor | USD PPA por mes | Desde 0 | 770 a 5.084 |
-| Tasa de inserción | 25 % | Sin fuente todavía | — | % | 0 a 100 % | Sin datos |
-| Riesgo de automatización | 15 % (se invierte) | `genai_exposure` (OIT WP 140) | Valor de la tabla | Índice 0 a 1 | 0 a 1 | 0,09 a 0,70 |
+| Demanda neta | 47 % | `employment` por ocupación (ARG y URY: ILOSTAT, 2 dígitos; CHL: SIMEL, 1 dígito) | Crecimiento anual promedio entre el primer y el último valor de una ventana de 3 años | % anual | Sin límite fijo | −16,9 % a +15,0 % |
+| Salario | 33 % | `mean_monthly_earnings_ppp` por ocupación (ILOSTAT, 1 dígito) | Último valor | USD PPA por mes | Desde 0 | 770 a 5.084 |
+| Riesgo de automatización | 20 % (se invierte) | `genai_exposure` (OIT WP 140) | Valor de la tabla | Índice 0 a 1 | 0 a 1 | 0,09 a 0,70 |
 
 **Salario que se muestra.** Las pantallas muestran primero el salario en dólares al tipo de cambio
-de mercado (`mean_monthly_earnings_usd`, ILOSTAT `CUR_TYPE_USD`) y debajo el valor en USD PPA. El
+oficial promedio del año (`mean_monthly_earnings_usd`, ILOSTAT `CUR_TYPE_USD`) y debajo el valor en USD PPA.
+La OIT publica el valor ya convertido: el observatorio no lo calcula. El tipo de cambio se comprobó
+dividiendo su serie en moneda local (`CUR_TYPE_LCU`) por la de dólares: coincide con `PA.NUS.FCRF` del
+Banco Mundial en los 11 países-año de 2021 a 2024 revisados y, en Argentina, en los 17 grupos de
+ocupación de los 16 años con ambas series. El promedio anual del dólar oficial mayorista diario del BCRA
+(`bcra_dolar`) queda a menos de 1 % de ese valor en los 19 años de 2007 a 2025. Puede diferir mucho del
+paralelo. El
 ISE sigue usando USD PPA, porque corrige las diferencias de precios entre países y permite comparar
 poder de compra. El valor en USD es el del mismo país, grupo CIUO y año que usó el índice; si
 ILOSTAT no lo publica para ese año, se muestra solo el de USD PPA. Se configura en
 `app.yaml → employability.display_values`.
 
-**Tasa de inserción: sin fuente oficial todavía.**
-- **Chile:** Mi Futuro (SIES, MINEDUC) calcula la empleabilidad al 1.er y 2.º año por carrera
-  genérica y tipo de institución, con datos del SII
-  ([metodología](https://mifuturo.cl/wp-content/uploads/2025/12/Metodologia-Estadisticas-por-Carrera_2025-2026.pdf)).
-  No la publica como archivo: el sitio la carga carrera por carrera con llamadas internas, cuyos
-  nombres de campo no coinciden con los años que muestra (por ejemplo, `emplea_1_2015` cuando la
-  página dice "cohortes 2018 a 2022"). Se decidió no usar esas llamadas y pedir la base al SIES:
-  borrador en [`solicitud_sies_empleabilidad.md`](solicitud_sies_empleabilidad.md). Cuando llegue,
-  se carga con un perfil de archivo oficial y la correspondencia carrera → ocupación.
-- **Argentina y Uruguay:** no se encontró una fuente oficial de inserción por carrera u ocupación.
-  ILOSTAT publica los desocupados por ocupación anterior solo para Uruguay.
-- **Mientras tanto:** el ISE se calcula con las otras tres dimensiones, que pasan a pesar 46,7 %
-  (demanda neta), 33,3 % (salario) y 20 % (riesgo de automatización). La API lo informa en
-  `/employability` (`no_source_note`, y `has_source`, `source_status` y `effective_weight` en cada
-  dimensión) y el Explorer lo muestra sobre el ranking.
+**Sin tasa de inserción.** La versión 0.3 quitó esta dimensión, que nunca tuvo datos: ninguna fuente oficial la publica como descarga. Chile (Mi Futuro, SIES) la muestra carrera por carrera, y no se encontró una fuente por carrera u ocupación en Argentina ni en Uruguay. Las otras tres dimensiones conservan sus proporciones, así que los puntajes no cambian. La solicitud al SIES ([`solicitud_sies_empleabilidad.md`](solicitud_sies_empleabilidad.md)) queda en pausa.
 
 Criterios de la demanda neta:
 - **Sin 2020 ni 2021** (`exclude_years`). La caída y el rebote de la pandemia se leían como demanda: Chile solo tenía 2020 y 2022, y daba +36 % anual.
@@ -505,8 +503,7 @@ Criterios de la demanda neta:
 - **Niveles:** Baja por debajo de 40, Alta por encima de 70, Media en el medio.
 - **Cobertura:** qué parte del peso total tiene datos para esa ocupación y país.
   - El peso de las dimensiones sin datos se reparte entre las demás.
-  - Hoy nadie tiene tasa de inserción, así que la cobertura máxima es **75 %**.
-  - Si la cobertura es menor que `min_coverage` (60 %), no hay puntaje y se muestra "Datos insuficientes".
+  - Si la cobertura es menor que `min_coverage` (75 %), no hay puntaje y se muestra "Datos insuficientes".
 - **Aporte:** cada dimensión informa valor original, valor escalado, peso y aporte. Los aportes suman el puntaje.
 - **Años:** se calcula para cada año de referencia desde `first_year` (2018) hasta el último con datos.
 - **Metodología:** cada combinación de parámetros tiene su id en `methodologies`, y la API solo muestra los puntajes de la combinación vigente.
@@ -529,7 +526,7 @@ Criterios de la demanda neta:
 - **Valores compartidos por grupo.** La demanda es por grupo de 2 dígitos (Argentina y Uruguay) o de 1 dígito (Chile), y el salario por grupo de 1 dígito. En Chile, por ejemplo, todos los profesionales (grupo 2) tienen la misma demanda. Dentro de un grupo, solo la exposición a IA diferencia a las ocupaciones. Por eso el top 20 está dominado por gerentes del grupo 13, y "Gerente de hotel" recibe el promedio de todos los directivos.
 - **EPH urbana y muestras chicas** para Argentina a 2 dígitos (ver ILOSTAT en 1.1).
 - **Exposición a IA ≠ automatización.** La medida de la OIT incluye tareas que la IA podría complementar.
-- **Sin tasa de inserción.** Mi Futuro (Chile) la publica por carrera; requiere un conector de descarga.
+- **Sin tasa de inserción.** Se quitó del índice en la versión 0.3 (ver sección 5.2).
 
 ---
 
@@ -790,7 +787,7 @@ http://localhost:8010/explorer.
 | `GET /trends?indicator=&domain=&country=&from_year=&to_year=&state=` | Estado de tendencia y valoración |
 | `GET /projections?indicator=&country=&from_year=` | Serie observada más la proyección con intervalo |
 | `GET /methodologies/{trend\|projection\|employability_index\|moctezuma_index\|ludita_index\|red_queen_index\|sisyphus_index}` | Texto y parámetros de cada metodología |
-| `GET /employability` | ISE. Parámetros: `view=top\|bottom\|all`, `sort_by=score\|net_demand\|salary_ppp\|insertion_rate\|automation_risk\|coverage\|occupation\|isco\|country`, `order=asc\|desc`, `country`, `sector`, `featured`, `q`, `year`, `limit`, `offset`. Devuelve también `dimension_ranges`. |
+| `GET /employability` | ISE. Parámetros: `view=top\|bottom\|all`, `sort_by=score\|net_demand\|salary_ppp\|automation_risk\|coverage\|occupation\|isco\|country`, `order=asc\|desc`, `country`, `sector`, `featured`, `q`, `year`, `limit`, `offset`. Devuelve también `dimension_ranges`. |
 | `GET /employability/history?occupation=&country=` | Evolución del ISE |
 | `GET /occupations/{código CIUO}` | Perfil: grupos usados, ISE por país, últimos valores |
 | `GET /alerts?country=&severity=&alert_type=&indicator=&sector=&occupation=&unread=` | Panel de alertas, con `unread` (para la campana) y `by_severity` |
@@ -842,7 +839,6 @@ Cada pregunta queda en `assistant_logs`: pregunta, contexto, consultas, respuest
 - **Scheduler en el despliegue:** como proceso aparte o como cron de Render/Railway.
 - **Más perfiles de archivos oficiales:** ECH (INE Uruguay), ANEP, SABE.
 - **Argentina:** registros de SIPA y promedio móvil de la EPH para estabilizar la demanda.
-- **Tasa de inserción:** enviar la solicitud al SIES y cargar la base cuando llegue (ver sección 5.2).
 - **Revisar la correspondencia carrera → ocupación de Chile** (`reviewed: false`) antes de publicar brechas: ver [`pendientes_analytics.md`](pendientes_analytics.md).
 - **Uruguay, más formación:** sumar la formación docente (ANEP, hoja II-6.2.1 del mismo anuario) y la terciaria no universitaria.
 - **Revisar exclusiones dudosas:** por ejemplo 9624 (acarreadores de agua y recolectores de leña), hoy incluida.

@@ -27,7 +27,7 @@ nota de los valores que se muestran primero, como el salario en USD).
 
 ### Países, períodos y filtros
 
-- **País:** siempre `country`, con código ISO3 (`ARG`, `URY`, `CHL`). En los endpoints de datos se aceptan varios separados por coma: `country=ARG,CHL`. La lista sale de `GET /countries`. Los endpoints anteriores (`/jobs`, `/coverage`, `/graduates/trends` y `/graduates/projections`) aceptan `country` y también `pais`, por compatibilidad.
+- **País:** siempre `country`, con código ISO3 (`ARG`, `URY`, `CHL`). En los endpoints de datos se aceptan varios separados por coma: `country=ARG,CHL`. La lista sale de `GET /countries`. Los endpoints anteriores (`/jobs`, `/graduates/trends` y `/graduates/projections`) aceptan `country` y también `pais`, por compatibilidad.
 - **Período:** cada valor trae `period` (texto para mostrar: `2025`, `2026-Q2`, `2026-08`), `period_start`, `period_end` y `frequency` (`A` anual, `Q` trimestral, `M` mensual).
 - **Rango de años** (filtro "Período" del mockup): `from_year` y `to_year`.
 - **Ocupaciones:** se identifican por su código CIUO-08 de 4 dígitos, como `2512`. Ver [`data/scripts/referencias/README.md`](../data/scripts/referencias/README.md) para cómo leerlo.
@@ -60,7 +60,7 @@ Todos los valores numéricos llegan como un **punto** con fuente y fechas. Así 
 | `percent` | `7,4 %`. Los cambios de un porcentaje se expresan en puntos (`change_kind: "absolute"`) |
 | `thousands_persons` | Miles de personas (`9.274` = 9,27 millones) |
 | `ppp_usd_month` | USD PPA por mes |
-| `usd_month` | USD por mes, al tipo de cambio de mercado |
+| `usd_month` | USD por mes, al tipo de cambio oficial promedio del año |
 | `ppp_usd` | USD PPA |
 | `index_0_1` | Índice de 0 a 1, con 2 decimales |
 
@@ -134,7 +134,7 @@ pendientes de autenticación.
 | Lista de indicadores por grupo | `GET /trends?domain=labor&country=ARG` | Todas las tendencias de un dominio |
 | Pestaña Proyecciones, gráfico "Tendencia actual / Proyección" | `GET /projections?indicator=...&country=...&from_year=` | `items[].observed` (línea continua) y `items[].projected` (línea punteada; `lower_bound` y `upper_bound` para la banda) |
 | Recuadro "Fuente, Actualización, Ver metodología" | `GET /methodologies/trend` o `/methodologies/projection` | `description_md` y `params` |
-| Burbujas "Las ocupaciones en movimiento" | `GET /occupation-groups/motion?y=growth\|ai_exposure\|employability&country=` | `points[]` por país, gran grupo y año: `x` (USD), `x_secondary` (USD PPA), `size` (ocupados), `y` y `carried` (valores repetidos del año anterior). `years`, `groups`, `y_options` para el selector, `x`, `y` y `size` con etiqueta, escala y dominio, y `notes` |
+| Burbujas "Las ocupaciones en movimiento" | `GET /occupation-groups/motion?y=growth\|ai_exposure\|employability&country=` | `groups[]` con el nombre de cada gran grupo y sus `occupations[]`; `points[]` por país, gran grupo y año: `x` (USD), `x_secondary` (USD PPA), `size` (ocupados), `y` y `carried` (valores repetidos del año anterior). `years`, `groups`, `y_options` para el selector, `x`, `y` y `size` con etiqueta, escala y dominio, y `notes` |
 
 ### Ocupaciones
 
@@ -144,8 +144,8 @@ Esta pantalla no tiene diseño en el mockup todavía. Esto es lo que ofrece la A
 |---|---|---|
 | Buscador y lista | `GET /occupations?featured=true` o `GET /occupations?q=enfermeria` | `q`: cada palabra tiene que coincidir con el comienzo de una palabra del nombre, en cualquier orden y sin importar tildes, plural ni género ("enfermera" encuentra "enfermería"); un número busca por código CIUO. También encuentra nombres locales ("remisero" → 8322, de `config/reference/ocupaciones_nombres_locales.yaml`). 436 ocupaciones CIUO-08. Las 20 destacadas tienen `is_featured: true`. Las que no aplican a la región, `is_excluded` y `exclusion_reason` |
 | Ranking del ISE (mejores y peores 20) | `GET /employability?view=top\|bottom&country=&sector=&featured=&year=` | Como mucho 2 ocupaciones por grupo CIUO. `group_hidden` dice cuántas del grupo quedaron afuera |
-| Tabla completa ordenable | `GET /employability?view=all&sort_by=score\|net_demand\|salary_ppp\|insertion_rate\|automation_risk\|coverage\|occupation\|isco\|country&order=asc\|desc&limit=50&offset=0` | |
-| Detalle del puntaje | El mismo, en `items[].components[]` | Por dimensión: `label`, `raw` (valor original), `normalized` (0-100), `weight`, `contribution` (los aportes suman el puntaje), `detail` (períodos y fuente) y `available`. Salario: `display` trae el valor a mostrar primero (USD al tipo de cambio de mercado, mismo período que `raw`, con `label` y `note`); `raw` sigue en USD PPA, que es lo que usa el ISE. Se configura en `app.yaml → employability.display_values`. En `/employability/sectors`, `salary_usd_average` junto a `salary_ppp_average`. `/occupations/{código}` y `/employability/sectors` traen `texts` (ver "Textos: siempre desde la API") |
+| Tabla completa ordenable | `GET /employability?view=all&sort_by=score\|net_demand\|salary_ppp\|automation_risk\|coverage\|occupation\|isco\|country&order=asc\|desc&limit=50&offset=0` | |
+| Detalle del puntaje | El mismo, en `items[].components[]` | Por dimensión: `label`, `raw` (valor original), `normalized` (0-100), `weight`, `contribution` (los aportes suman el puntaje), `detail` (períodos y fuente) y `available`. Salario: `display` trae el valor a mostrar primero (USD al tipo de cambio oficial promedio del año, mismo período que `raw`, con `label` y `note`); `raw` sigue en USD PPA, que es lo que usa el ISE. Se configura en `app.yaml → employability.display_values`. En `/employability/sectors`, `salary_usd_average` junto a `salary_ppp_average`. `/occupations/{código}` y `/employability/sectors` traen `texts` (ver "Textos: siempre desde la API") |
 | Rangos y definiciones de cada dimensión | El mismo, en `dimension_ranges[]` | `definition`, `unit`, `possible_range`, `observed_min` y `observed_max` |
 | Perfil de una ocupación | `GET /occupations/2512` | `hierarchy` (gran grupo › subgrupo › ocupación), `employability` (ISE por país), `latest` (empleo, salario y exposición por país), `groups` (de qué grupo CIUO sale cada dato) y `top_skills` |
 | Evolución del ISE | `GET /employability/history?occupation=2512&country=ARG,URY` | |
@@ -167,7 +167,15 @@ Esta pantalla tampoco tiene diseño todavía.
 | Buscar habilidades | `GET /skills?q=ganado asesorar` | Misma regla de `q` que `/occupations` (palabras en cualquier orden, sin tildes, plural ni género). Ordenadas por cuántas ocupaciones las usan |
 | Detalle de una habilidad | `GET /skills/{código}` | `used_by`: ocupaciones que la usan |
 | Carreras y ocupaciones para las que forman | `GET /graduates/crosswalk?country=CHL` (`&format=csv` para descargar) | Cada carrera trae su campo CINE-F 2013 (`cine_f`, `cine_f_name`), si es técnica (`technical`) y sus ocupaciones CIUO-08; `via` indica la tabla común campo → ocupación |
-| Egresados de las 19 carreras seleccionadas por Data Analytics | `GET /graduates/trends?country=CHL` y `/graduates/projections?country=CHL` | Los datos vienen con `pais` en minúsculas (`chile`), como los entrega Data Analytics |
+| Egresados por universidad | `GET /graduates/universities?country=URY&year=2022` | Valores y nombres tal como los publica cada fuente; cada fila trae su `nivel`, que no es el mismo en los tres países, y la respuesta trae una `nota` para mostrar |
+| Universidades con más egresados | `GET /graduates/universities/ranking` (top regional) y `?alcance=nacional&country=ARG` | El top regional usa el último año con datos de los tres países; el nacional, el último año de cada país. Solo universidades |
+| Tendencia y proyección de egresados por carrera (los tres países) | `GET /graduates/trends?country=CHL` y `/graduates/projections?country=CHL` | Se calculan con la tabla oficial `graduates` después de cada carga, solo con pregrado y grado. Los datos vienen con `pais` en minúsculas (`chile`). En Uruguay los nombres cambian entre anuarios y se unifican con `config/reference/carreras_uruguay_nombres.yaml`; con datos desde 2020, todavía no tiene proyección. `nombre` es el que publica la fuente y `sector` el código del catálogo (`null`: otras actividades). `es_seguimiento: true` marca un programa de Chile encontrado por `tema`: cuenta también diplomados y posgrados y no se compara con las demás |
+| Totales por país y año | `GET /graduates/totals?sector=health&tema=` | `sector`: código del catálogo u `otros`. Sin `tema` suma solo carreras genéricas y disciplinas; con `tema`, sus programas, con todos los niveles |
+| Una carrera por institución y año | `GET /graduates/institutions?country=CHL&nombre=Enfermería` | Chile: universidades, institutos profesionales y centros de formación técnica. Uruguay: anuarios del MEC, desde 2020. Argentina: anuarios del DIU de 2014 a 2024, salvo 2019, que no tiene anuario publicado con estos cuadros. En 2015 faltan algunas disciplinas en los cuadros publicados. Las series de Argentina usan estos anuarios, salvo 2015 y 2019, que salen del archivo CTI. En `/graduates/trends`, `institucion_principal` es la de más titulados en el último año con datos y `n_instituciones` cuántas hubo |
+| Indicadores por sector | `GET /analytics/sectores` | Por país, sector y año: densidad profesional, personas ocupadas, % de mujeres entre titulados y ocupados, salarios por sexo y brecha salarial. Más la proyección de titulados por sector. Argentina trae el sexo de titulados solo en la fila `Total`. `cep_xxi` trae el empleo privado registrado y los salarios de Argentina (hasta noviembre de 2023): `salario_ars`, `salario_usd`, `salario_usd_ppa` e `indice_real` sobre `cep_base`; estos dos últimos solo en años completos (`meses` = 12), y `salario_usd` convierte cada mes con el dólar oficial mayorista diario del BCRA. `dolar_oficial` trae la última cotización. Para género, cada ítem trae `f`, `m`, `nb`, `pct_varones_graduados`, `brecha_graduados_pct`, `diagnostico_paridad`, `brecha_empleo_pct` y `diagnostico_empleo` |
+| Filtro por institución | `GET /graduates/institutions/list?country=URY` y `GET /graduates/institutions/careers?institucion=Universidad CLAEH` | La lista trae cada institución y cuántas carreras tiene. El detalle trae solo los egresados de esa institución, por carrera y año, con `sector`, `tema` y `es_seguimiento`. La proyección es de la carrera en todo el país: no hay por institución |
+| Serie observada de una carrera | `GET /graduates/series?country=CHL&nombre=Técnico en Enfermería` | `puntos`: años desde el primero con egresados hasta el último del país. Un año sin egresados viene en 0. La proyección está aparte, en `/graduates/projections` |
+| Egresados por carrera en un año | `GET /graduates/by-year?year=2027&country=CHL` | Sin `year`, trae solo los años disponibles (`anios_observados`, `anios_proyectados`). Cada fila dice `tipo`: `observado` o `proyectado`, con su intervalo. La proyección existe solo para las carreras con al menos 12 años de historia sin huecos |
 
 ### Indicadores temáticos: Moctezuma, Ludita, Reina Roja y Sísifo
 
@@ -222,7 +230,7 @@ Responde preguntas con los datos del observatorio. Por dentro solo puede consult
 | Elemento | Endpoint | Notas |
 |---|---|---|
 | Estado y textos | `GET /assistant` | `enabled`; `texts` (título, ejemplo para el campo de texto, aviso); `max_question_chars`; `history_turns`; `remaining_today` (preguntas que le quedan hoy a quien inició sesión, `null` sin sesión) |
-| Preguntar | `POST /assistant/ask` con body `{"question", "context"?, "history"?}` | Requiere sesión (permiso `view`). Ver abajo |
+| Preguntar | `POST /assistant/ask` con body `{"question", "context"?, "history"?}` | Requiere sesión (permiso `view`). `links[]` trae primero la ficha de cada ocupación que nombra la respuesta; con `external: true`, las fuentes de afuera, que solo se consultan para los indicadores experimentales. Ver abajo |
 
 **Body.**
 - `context`: lo que la persona está mirando, todo opcional: `{"page": "/ocupaciones/2221", "country": "CHL", "occupation": "2221", "sector": "health"}`. Permite preguntas como "¿y en Uruguay?" desde una ficha.
@@ -258,13 +266,12 @@ El texto de cada error viene en `detail` (de `assistant.messages`). Con un model
 ### Otros endpoints
 
 - `GET /jobs?country=ARG&provincia=&sector=&q=&limit=&offset=` y `/jobs/summary?country=ARG`: ofertas de LinkedIn. **No son datos oficiales**; mostrar siempre el aviso. `/jobs/summary` trae también `view` (de `app.yaml → jobs_view`): el aviso completo, la nota al pie, el orden de los sectores (con "Otros" al final), el tamaño de página y las etiquetas de fuente y período. El Explorer (sección "Ofertas de empleo (LinkedIn)") reproduce la vista del primer prototipo en Next.js con esos datos: tarjetas, tabla sector × provincia que filtra al hacer clic, total por sector y listado paginado.
-- `GET /coverage?country=ARG`: cobertura por país y sector del equipo de Data Analytics.
 
 ---
 
 ## 3. Pendientes conocidos
 
 - **URL de producción:** se define con el despliegue y la base en Supabase.
-- **Dashboard viejo (`backend/frontend`):** usa solo `/jobs`, `/coverage` y `/graduates/*`. El frontend minimal (`backend/frontend_minimal`) ya usa los endpoints de esta guía, con inicio de sesión y roles (`/auth/login`, `/auth/me`).
+- **Dashboard viejo (`backend/frontend`):** usa solo `/jobs` y `/graduates/*`. El frontend minimal (`backend/frontend_minimal`) ya usa los endpoints de esta guía, con inicio de sesión y roles (`/auth/login`, `/auth/me`).
 - **Carga manual, segunda etapa:** retirar una carga y marcar en las pantallas los datos de carga manual. La API todavía no los distingue en las series: hay que agregar ese dato a la respuesta antes de mostrarlo.
 - **Asistente:** el modelo que responde lo que no cubren las plantillas está en evaluación. Los textos y el comportamiento de la pantalla no cambian, porque vienen de `GET /assistant`.

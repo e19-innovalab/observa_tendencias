@@ -25,7 +25,7 @@ El backend no va en Vercel por cuatro razones:
 | API | Render, plan gratuito |
 | Frontend | Vercel, plan gratuito |
 | Asistente en la nube | El mismo tipo de modelo abierto (familias Qwen o Llama), pero desde una **API hospedada** compatible con OpenAI (Groq, Together, OpenRouter…), porque ni Render ni Vercel pueden correr Ollama. En la computadora sigue Ollama |
-| Código | Se sube a GitHub desde un clon aparte, con un PR a `main` |
+| Código | Repo privado propio, [`paulajve/observa_tendencias`](https://github.com/paulajve/observa_tendencias) (rama `main`), con la misma estructura que el repo del equipo. Render y Vercel despliegan desde ahí, porque conectarlos al repo de la organización `e19-innovalab` requiere que un dueño de la organización autorice sus apps. El PR #28 al repo del equipo queda abierto |
 
 ## 1. Base de datos en Supabase
 
@@ -73,7 +73,7 @@ vacío: 46 tablas, migración `0025`, catálogo cargado.
 
 ## 2. API en Render
 
-En [render.com](https://render.com): **New → Web Service** → conectá el repositorio de GitHub.
+En [render.com](https://render.com): **New → Web Service** → conectá el repositorio `paulajve/observa_tendencias`.
 
 | Campo | Valor |
 |---|---|
@@ -124,7 +124,7 @@ Sin estas variables, solo responden las plantillas. Con Claude, la alternativa e
 
 ## 3. Frontend en Vercel
 
-En [vercel.com](https://vercel.com): **Add New → Project** → importá el repositorio de GitHub.
+En [vercel.com](https://vercel.com): **Add New → Project** → importá el repositorio `paulajve/observa_tendencias`.
 
 | Campo | Valor |
 |---|---|
@@ -142,6 +142,18 @@ servicio.
 3. Panorama, Sectores y Ocupaciones muestran datos.
 4. La pestaña "Preguntale al Baqueano" responde "¿Cómo se calcula el ISE?".
 5. En Carga de datos se baja la plantilla y el ejemplo con errores se rechaza.
+
+## 5. Después de publicar una versión con datos nuevos
+
+Render corre `alembic upgrade head` al arrancar: **al unir el PR, las migraciones se aplican solas en producción.** Conviene hacer una copia de la base antes. Las tablas nuevas quedan vacías hasta cargarlas, en este orden, con `python -m app.jobs.run --source <fuente>`:
+
+1. `universidades_egresados` y `carreras_seguimiento`: titulados por institución, sector y sexo. Recalculan las tendencias y los indicadores por sector y de género.
+2. `bcra_dolar`: el dólar oficial diario.
+3. `cep_xxi_argentina`: empleo y salarios de Argentina, que usan ese dólar. También carga los factores PPA.
+4. `esco` o, sin tocar las habilidades, `run_esco_occupations`: las ocupaciones ESCO de cada grupo para los enlaces y el buscador.
+5. `python -m app.jobs.recompute`: el ISE versión 0.3 y las tendencias de los indicadores nuevos. Puede generar alertas nuevas.
+
+Las fuentes diarias y mensuales solo avanzan si hay un programador de tareas. Si no lo hay, hay que correrlas a mano.
 
 ## Quién hace qué
 

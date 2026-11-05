@@ -2,11 +2,11 @@
 # Each section is versioned so results can record which parameters produced them.
 
 employability:
-  version: "0.2"
+  version: "0.3"
   name: Índice Sintético de Empleabilidad (ISE)
   description: >-
-    Índice orientativo por ocupación: ISE = 0,35·Demanda neta + 0,25·Salario PPA +
-    0,25·Tasa de inserción − 0,15·Riesgo de automatización.
+    Índice orientativo por ocupación: ISE = 0,47·Demanda neta + 0,33·Salario PPA −
+    0,20·Riesgo de automatización.
 
     Cada dimensión se escala de 0 a 100 dentro del grupo comparado (todas las ocupaciones de
     los 3 países en el mismo año, para que los puntajes sean comparables entre países). En el riesgo de
@@ -19,25 +19,24 @@ employability:
     muestras más chicas la encuesta varía mucho de un año a otro). Salario: ingreso mensual promedio en USD PPA
     del gran grupo ocupacional (CIUO-08, 1 dígito, OIT). Riesgo de automatización: exposición
     a la IA generativa de la OIT (2025), que mide cuánto de las tareas podría hacer la IA, sea
-    automatizándolas o complementándolas. Tasa de inserción: todavía sin fuente.
+    automatizándolas o complementándolas.
 
     Puntaje: de 0 a 100 y relativo. 100 es la mejor combinación del grupo comparado y 0 la
     peor; no es un porcentaje de nada. Niveles: Baja por debajo de levels.low, Alta por encima
     de levels.high, Media en el medio.
 
     Cobertura: qué parte del peso total del índice tiene datos para esa ocupación y país. Si
-    falta una dimensión, su peso se reparte entre las que tienen datos. Hoy ninguna ocupación
-    tiene tasa de inserción (25 %), así que la cobertura máxima es 75 %. Si la cobertura es
+    falta una dimensión, su peso se reparte entre las que tienen datos. Si la cobertura es
     menor que min_coverage, el índice no se calcula (Datos insuficientes). Las ocupaciones de un
     mismo grupo comparten los valores de ese grupo.
-  # ISE = 0.35·D_neta + 0.25·Salario_PPA + 0.25·Tasa_Inserción − 0.15·Riesgo_Automatización
+  # ISE = 0.47·D_neta + 0.33·Salario_PPA − 0.20·Riesgo_Automatización. Version 0.3 removed the
+  # insertion rate, which never had a source: same proportions as 0.35 / 0.25 / 0.15, same scores.
   # Each dimension is min-max scaled to 0-100 within the comparison cohort; dimensions where
   # lower is better (automation risk) are inverted, which applies the penalty.
   weights:
-    net_demand: 0.35
-    salary_ppp: 0.25
-    insertion_rate: 0.25
-    automation_risk: 0.15
+    net_demand: 0.466667
+    salary_ppp: 0.333333
+    automation_risk: 0.2
   # Where each dimension comes from. measure: latest (most recent value) or growth (average
   # annual growth over window_years). indicator: null means no source yet (counts as missing).
   dimensions:
@@ -53,9 +52,6 @@ employability:
       min_base: 10
     salary_ppp:
       indicator: mean_monthly_earnings_ppp
-      measure: latest
-    insertion_rate:
-      indicator: null
       measure: latest
     automation_risk:
       indicator: genai_exposure
@@ -73,13 +69,13 @@ employability:
   higher_is_better:
     net_demand: true
     salary_ppp: true
-    insertion_rate: true
     automation_risk: false
   levels:
     low: 40
     high: 70
-  # Below this share of total weight with data, the score is not computed.
-  min_coverage: 0.6
+  # Below this share of total weight with data, the score is not computed. Demand and salary
+  # (80 %) are enough; demand and risk (67 %) or salary and risk (53 %) are not, as in version 0.2.
+  min_coverage: 0.75
   # Score assigned when every member of the cohort has the same value for a dimension.
   flat_cohort_score: 50.0
   scale_max: 100.0
@@ -548,7 +544,7 @@ sisyphus:
   group_digits: 1
   # Groups whose required education is the highest band cannot be overeducated: left out.
   requirements_file: reference/isco_education_requirements.yaml
-  # Shown next to the earnings: the same figures in USD (market rate), as everywhere else.
+  # Shown next to the earnings: the same figures in USD (official rate), as everywhere else.
   display:
     group_earnings_usd: mean_monthly_earnings_usd
     tertiary_usd: earnings_tertiary_usd
@@ -638,6 +634,293 @@ alerts:
     new_skill_gap: "La brecha de habilidad superó el umbral por primera vez"
     stale_source: "Fuente sin actualizar desde {last_update:%Y-%m-%d}"
     source_format_changed: "El archivo {file} de {source} no tiene el formato validado: {reason}. No se cargó; se mantienen los datos anteriores."
+
+# Trends and projections per career from the graduates table (app/analytics/graduate_trends_run.py;
+# window and thresholds: trends and projections above). Levels: the undergraduate degrees each
+# source publishes, without postgraduate ones. Sources: in order of preference for a year that
+# two publish; the DIU yearbook adds the years the CTI file does not have yet.
+graduate_trends:
+  countries:
+    ARG:
+      levels: [Pregrado, Grado, Pregrado y grado]
+      sources: [anuarios_por_institucion, indicadores_cti_argentina, anuario_diu_argentina]
+      # The DIU yearbooks, added up from their institution tables (tracked_careers), are preferred:
+      # the CTI file falls 17-19 % short of them in 2016-2018 and 2021. 2015 stays on CTI because
+      # that yearbook's tables leave out disciplines; 2019 has no yearbook with these tables.
+      yearbook_series:
+        source: anuarios_por_institucion
+        level: Pregrado y grado
+        exclude_years: [2015]
+    CHL:
+      levels: [Pregrado]
+      sources: [mifuturo_chile]
+    URY:
+      levels: [Grado]
+      sources: [mec_uruguay]
+      # The MEC yearbooks rename degrees between years ("Doctor en Derecho y Ciencias Sociales" ->
+      # "Abogacía"): a series by the published name would show renames as growth.
+      names_file: reference/carreras_uruguay_nombres.yaml
+  sector_file: reference/cine_f_sectores.yaml
+  other_sector: otros
+  # Not a career: graduates the yearbook does not assign to a discipline.
+  skip_careers: [sin disciplina]
+  # Footnote marks at the end of published names.
+  name_marks: "*"
+
+# Argentina: registered private jobs and salaries per activity (app/datasets/cep_xxi.py, source
+# cep_xxi_argentina), and the factors of factores_macro_ppa. The files end in November 2023: they
+# are checked each month in case CEP-XXI publishes more.
+cep_xxi:
+  dataset_code: cep_xxi_actividad
+  source_label: AR_CEPXXI
+  allowed_hosts: [cdn.produccion.gob.ar, datos.produccion.gob.ar]
+  max_bytes: 20000000
+  api_max_bytes: 5000000
+  date_column: fecha
+  activity_column: clae2
+  suppressed: -99
+  total_label: Total
+  currency: ARS
+  wage_type: promedio_mensual_privado_registrado
+  real_base_year: 2017
+  files:
+    jobs:
+      page: https://datos.produccion.gob.ar/dataset/puestos-de-trabajo-por-sector-productivo
+      link_pattern: 'https://cdn\.produccion\.gob\.ar/cdn-cep/datos-por-actividad/puestos/puestos_privados_mensual_por_clae2\.csv'
+      value_column: puestos
+    mean_wage:
+      page: https://datos.produccion.gob.ar/dataset/salarios-promedio-y-mediano-por-sector-de-actividad
+      link_pattern: 'https://cdn\.produccion\.gob\.ar/cdn-cep/datos-por-actividad/salarios/w-mean/w_mean_privado_mensual_por_clae2\.csv'
+      value_column: w_mean
+    women:
+      page: https://datos.produccion.gob.ar/dataset/proporcion-segun-generos-por-sector-de-actividad
+      link_pattern: 'https://cdn\.produccion\.gob\.ar/cdn-cep/datos-por-actividad/share-mujer/share_mujer_privado_mensual_por_clae2\.csv'
+      value_column: share_mujer
+  # factores_macro_ppa
+  world_bank_url: 'https://api.worldbank.org/v2/country/{countries}/indicator/{indicator}?format=json&per_page=500'
+  # Private consumption, the factor the ILO applies to its earnings. Where the World Bank stops
+  # publishing it (Argentina, after 2021), it is extended as the ILO does: previous factor x country's
+  # prices / US prices.
+  ppp_indicator: PA.NUS.PRVT.PP
+  ppp_method: PA.NUS.PRVT.PP (Banco Mundial)
+  ppp_extended_method: PA.NUS.PRVT.PP extendido con la inflación del país y de EE. UU.
+  us_iso3: USA
+  fx_indicator: PA.NUS.FCRF
+  # Monthly wages to dollars: the month's average of the official daily quote (sources.yaml -> bcra_dolar).
+  fx_currency: USD
+  fx_label: Dólar oficial mayorista (BCRA), último día hábil anterior
+  cpi_base_year: 2016  # ipc_base_2016; Argentina has no value there, INDEC's index starts in December 2016
+  world_bank_cpi: {indicator: FP.CPI.TOTL, source: Banco Mundial (FP.CPI.TOTL), base: 2010=100}
+  indec_cpi:
+    url: 'https://apis.datos.gob.ar/series/api/series/?ids=145.3_INGNACNAL_DICI_M_15&limit=1000&format=json'
+    source: INDEC (IPC Nacional)
+    base: diciembre 2016=100
+  note: >-
+    Empleo privado registrado (CEP-XXI): no incluye empleo público ni informal, y los datos llegan hasta
+    noviembre de 2023. Los puestos, los pesos y los dólares de 2023 cubren 11 meses. El dólar PPA y el
+    salario real llegan hasta 2022, porque sus factores anuales de 2023 incluyen la suba de precios de
+    diciembre. Cada mes de salarios pasa a dólares con el promedio de ese mes del dólar oficial mayorista
+    diario (BCRA), que puede diferir mucho del paralelo; para comparar países, usá el dólar PPA. El
+    salario real descuenta el IPC del INDEC, que empieza en 2017.
+
+# KPIs per sector (app/analytics/sector_kpis_run.py). The sectors of graduates come from the CINE-F
+# field of each career and those of employment from ISIC, so density is an approximation.
+sector_kpis:
+  input_indicators: [employment, employment_women, mean_monthly_earnings_ppp, mean_monthly_earnings_ppp_women, mean_monthly_earnings_ppp_men]
+  total_label: Total
+  ilostat_source: OIT_ILOSTAT
+  graduates_source: {ARG: AR_DIU_ANUARIOS, CHL: CL_MIFUTURO, URY: UY_MEC_ANUARIO}
+  density_concept: Graduados anuales por cada 1.000 ocupados
+  earnings_type: promedio_mensual_usd_ppa
+  earnings_method: CUR_TYPE_PPP (OIT)
+  # % of women considered parity (EIGE / ILO criterion in the team's gender analysis). Below
+  # parity_min_people the share says little: no diagnosis is given.
+  parity_band: [40, 60]
+  parity_min_people: 30
+  parity_labels:
+    parity: Zona de paridad
+    women: Concentración femenina
+    men: Subrepresentación femenina
+    few: Pocos casos
+  parity_criterion: Entre 40 % y 60 % de mujeres (EIGE / OIT)
+  gender_note: >-
+    Titulados: Mi Futuro, anuarios del DIU y del MEC. Ocupados y salarios: OIT. Diagnóstico de paridad
+    con el criterio EIGE / OIT: entre 40 % y 60 % de mujeres es zona de paridad; por debajo,
+    subrepresentación femenina; por encima, concentración femenina. Con menos de 30 titulados no se da
+    diagnóstico. Los años pueden diferir entre columnas: cada una muestra su último dato.
+  projection_model: Holt (tendencia aditiva)
+  note: >-
+    Datos oficiales: titulados de Mi Futuro, los anuarios del DIU y del MEC; empleo y salarios de la
+    OIT. La densidad es aproximada: el sector de una carrera sale de su campo de estudio y el del
+    empleo, de la actividad económica. Cada país cuenta un nivel distinto de titulados. Argentina
+    publica el sexo de los titulados solo para el total del país, no por sector.
+
+# Careers per institution and programs per topic, from each country's official files (app/datasets/
+# tracked_careers.py, source carreras_seguimiento). columns (Chile), in this order: year, value,
+# program name, level, generic career, institution. Generic careers: the levels of graduate_trends.
+# total_tolerance: how far institution sums may be from the published totals before the load stops
+# (the MEC's 2024 yearbook leaves two programs empty while their campus counts them: 23 graduates,
+# 2.3 % of UCU).
+tracked_careers:
+  total_tolerance: 0.03
+  argentina:
+    # The latest yearbook comes from this profile; yearbooks lists the earlier ones. The official
+    # page links no yearbook with these tables for 2019. members: the workbooks of each zip with
+    # undergraduate tables (some zips repeat them under other names).
+    profile: arg_anuario_diu_egresados
+    names_file: reference/disciplinas_argentina.yaml
+    landing_page: https://www.argentina.gob.ar/educacion/universidades/informacion/publicaciones/anuarios
+    allowed_hosts: [www.argentina.gob.ar]
+    max_bytes: 80000000
+    title_pattern: 'egresad[a-z/]* de t[ií]tulos de pregrado y grado por (disciplina|rama (?!de estudio))'
+    year_pattern: '(?:A[nñ]o|,)\s*(20\d{2})'
+    value_kinds: [EGRE, EGR]
+    header_rows: 14
+    # Subtotal rows: some yearbooks do not label them as totals ("Universidades Privadas").
+    skip_names_pattern: '^(Total|Universidades (Nacionales|Provinciales|Privadas|Estatales|Extranjeras)|Institutos Universitarios|Instituciones)\b'
+    # Columns that are not a discipline: graduates the yearbook assigns to none, and field subtotals
+    # that some tables do not label as totals.
+    not_disciplines: [sin disciplina, sin rama, ciencias aplicadas, ciencias basicas, ciencias humanas, ciencias sociales, ciencias de la salud]
+    # Years whose tables were published without some disciplines: their total counts them but no
+    # column does, so those graduates have no institution. 2015: Ciencias Agropecuarias (public),
+    # Industrias and Ingeniería (private), about 3,800 graduates.
+    known_gaps: [2015]
+    # Graduates by sex: the first row of each table of "género", for the whole country.
+    sex_title_pattern: 'egresad[a-z/]* de t[ií]tulos de pregrado y grado por (g[eé]nero|sexo)\W*\d*\W*seg[uú]n instituci[oó]n'
+    sex_exclude_pattern: 'porcentaje|[ÍI]ndice Cuadros'
+    sex_group_pattern: '^egresad'
+    sex_labels: {F: '^mujeres', M: '^varones'}
+    sex_total_label: Total
+    yearbooks:
+      - {release: 2014, link_pattern: '/sites/default/files/(?:\d{4}/\d{2}/)?anuario_2014\.zip', members: 'Cap.{1,3}tulo 2\.[12] '}
+      - {release: 2015, link_pattern: '/sites/default/files/(?:\d{4}/\d{2}/)?anuario_2015\.zip', members: '^2\.[12] - pregado'}
+      - {release: 2016, link_pattern: '/sites/default/files/(?:\d{4}/\d{2}/)?anuario_2016\.zip', members: '^Cuadros_pregrado_grado_(estatal_2016\.xlsx|privado)'}
+      - {release: 2017, link_pattern: '/sites/default/files/(?:\d{4}/\d{2}/)?anuario_2017_2\.zip', members: '^2\.[12] Pregrado'}
+      - {release: 2018, link_pattern: '/sites/default/files/(?:\d{4}/\d{2}/)?anuario_2018_1\.zip', members: '^2\.[12] - Pregrado'}
+      - {release: 2020, link_pattern: '/sites/default/files/(?:\d{4}/\d{2}/)?anuario_2020\.zip', members: '^2\.[12] Pregrado'}
+      - {release: 2021, link_pattern: '/sites/default/files/(?:\d{4}/\d{2}/)?anuario_2021\.zip', members: '^2\.[12] Pregrado'}
+      - release: 2022
+        link_pattern: '/sites/default/files/(?:\d{4}/\d{2}/)?anuario_csv_2022\.zip'
+        csv:
+          folder: 'Anuario 2022/Capitulo 2 Pregrado Grado {management}/'
+          name_column: nombre_corto
+          graduates_prefix: e_
+          total_column: e
+          sex_tables: ['Estatal|Cuadro_2_1_4_a.csv', 'Privado|Cuadro_2_2_4_a.csv']
+          sex_columns: {F: e_mujeres, M: e_varones}
+          not_disciplines: [e_sin_rama]
+          tables:
+            - names_table: 'Estatal|Cuadro_2_1_9.csv'
+              members: ['Estatal|Cuadro_2_1_10.csv', 'Estatal|Cuadro_2_1_11.csv', 'Estatal|Cuadro_2_1_12.csv', 'Estatal|Cuadro_2_1_13.csv', 'Estatal|Cuadro_2_1_14.csv']
+            - names_table: 'Privado|Cuadro_2_2_9.csv'
+              members: ['Privado|Cuadro_2_2_10.csv', 'Privado|Cuadro_2_2_11.csv', 'Privado|Cuadro_2_2_12.csv', 'Privado|Cuadro_2_2_13.csv', 'Privado|Cuadro_2_2_14.csv']
+      - {release: 2023, link_pattern: '/sites/default/files/(?:\d{4}/\d{2}/)?rv_anuario_finales_todos\.zip', members: '^2\.[12] Pregrado'}
+  uruguay: {profile: mec_uy_egresados_grado, source: mec_uruguay, level: Grado, sex_columns: {M: 8, F: 9}}
+  file: reference/carreras_seguimiento.yaml
+  dataset_code: carreras_seguimiento
+  profile: mifuturo_titulados
+  source: mifuturo_chile
+  country: CHL
+  granularity: seguimiento
+  institution_granularity: generica_institucion
+  sex_granularity: sexo
+  sex_columns: {F: TITULACIONES MUJERES POR PROGRAMA, M: TITULACIONES HOMBRES POR PROGRAMA, NB: TITULACIONES NB E INDEFINIDO POR PROGRAMA}
+  generic_levels: [Pregrado]
+  columns: ["AÑO", "TOTAL TITULACIONES", "NOMBRE CARRERA", "NIVEL GLOBAL", "ÁREA CARRERA GENÉRICA", "NOMBRE INSTITUCIÓN"]
+
+# Graduates per university and rankings (app/datasets/universities.py, source
+# universidades_egresados, GET /graduates/universities). Every file comes from its publisher's
+# page. Names go through names_file; types of management stay as published: in Chile "Universidades
+# CRUCH" mixes public and private universities.
+universities:
+  dataset_code: universidades_egresados
+  names_file: reference/universidades_nombres.yaml
+  # Where each file is found: the page and pattern of a dataset profile, or its own.
+  inputs:
+    arg_latest: {profile: arg_anuario_diu_egresados}
+    arg_history:
+      # 2012-2013: the latest yearbook starts in 2014.
+      landing_page: https://www.argentina.gob.ar/educacion/universidades/informacion/publicaciones/anuarios
+      download:
+        link_pattern: '/sites/default/files/(?:\d{4}/\d{2}/)?anuario_csv_2022\.zip'
+        allowed_hosts: [www.argentina.gob.ar]
+        max_bytes: 80000000
+    chl: {profile: mifuturo_titulados}
+    ury: {profile: mec_uy_egresados_grado}
+    udelar:
+      landing_page: https://planeamiento.udelar.edu.uy/portal/egresados/egresados-de-grado/
+      download:
+        page_pattern: '/portal/publicacion_generica/egresos-totales-serie-(?P<release>[\d-]+)/'
+        link_pattern: '/portal/wp-content/uploads/sites/33/\d{4}/\d{2}/1\.Serie-Egresos-totales-Grado-por-Servicio-2000-\d{4}\.ods'
+        allowed_hosts: [planeamiento.udelar.edu.uy]
+        max_bytes: 5000000
+  missing_text: ["", "-", "s/d", "s/i", "n/a", "///", "None", "nan"]
+  # Institution sums may differ this much from the published total before the load stops.
+  total_tolerance: 0.02
+  control_pending: revisar
+  footnote_pattern: '(\s*\(\d+\))+$'
+  institute_type: instituto universitario
+  ranked_institution_type: universidad
+  arg:
+    source: anuario_diu_argentina
+    title_word: egresad
+    footnote_starts: ["Fuente", "Nota", "(", "*"]
+    latest_tables:
+      - {management: publica, member_prefix: "Z 2.1", sheet: "C 2.1.4"}
+      - {management: privada, member_prefix: "Z 2.2", sheet: "C2.2.4"}
+    history_name_column: nombre_corto
+    history_tables:
+      - {management: publica, member: "Anuario 2022/Capitulo 2 Pregrado Grado Estatal/Cuadro_2_1_3.csv"}
+      - {management: privada, member: "Anuario 2022/Capitulo 2 Pregrado Grado Privado/Cuadro_2_2_3.csv"}
+  chl:
+    source: mifuturo_chile
+    institution_type: Universidades
+    columns:
+      anio: AÑO
+      egresados: TOTAL TITULACIONES
+      tipo: CLASIFICACIÓN INSTITUCIÓN NIVEL 1
+      gestion: CLASIFICACIÓN INSTITUCIÓN NIVEL 2
+      institucion: NOMBRE INSTITUCIÓN
+      nivel: NIVEL GLOBAL
+  ury:
+    source: mec_uruguay
+    graduates_column: 7
+    sheets: ["II-7.2.1", "II-7.2.2", "II-7.2.3"]
+    total_pattern: '^TOTAL( PAÍS| UNIVERSIDADES P[ÚU]BLICAS)?$'
+    institutions:
+      - {sheet: "II-7.2.1", management: publica, pattern: '^(TOTAL UDELAR|UdelaR)$', name: "Universidad de la República (UdelaR)"}
+      - {sheet: "II-7.2.1", management: publica, pattern: '^(UNIVERSIDAD TECNOL[ÓO]GICA\s*-\s*UTEC|UTEC)$', name: "Universidad Tecnológica (UTEC)"}
+      - {sheet: "II-7.2.2", management: privada, pattern: '^UCU$', name: "Universidad Católica del Uruguay (UCU)"}
+      - {sheet: "II-7.2.2", management: privada, pattern: '^UNIVERSIDAD ORT URUGUAY$', name: "Universidad ORT Uruguay"}
+      - {sheet: "II-7.2.2", management: privada, pattern: '^UNIVERSIDAD DE MONTEVIDEO$', name: "Universidad de Montevideo"}
+      - {sheet: "II-7.2.2", management: privada, pattern: '^UNIVERSIDAD DE LA EMPRESA', name: "Universidad de la Empresa (UDE)"}
+      - {sheet: "II-7.2.2", management: privada, pattern: '^UNIVERSIDAD CLAEH$', name: "Universidad CLAEH"}
+    institute_sheet: "II-7.2.3"
+    institute_pattern: '^(INST\b|INSTITUTO\b(?!.*/ CARRERA)|FUNDACI[ÓO]N\b|ESCUELA NACIONAL DE POLIC[ÍI]A)'
+    public_institute_pattern: 'MILITAR|POLIC[ÍI]A'
+  udelar:
+    source: udelar_planeamiento
+    name: "Universidad de la República (UdelaR)"
+    management: publica
+    header_starts: Área/servicio
+    total_row: TOTAL UNIVERSIDAD
+    max_repeat: 40
+  # The files have no sector: every row is the institution's total.
+  sector_label: Total
+  top_n: 10
+  period_type: anual
+  ranking_type: mayor_volumen_egresados
+  regional_criterion: Último año con datos de los tres países
+  coverage: Solo universidades; no incluye institutos universitarios
+  levels:
+    ARG: Pregrado y grado
+    CHL: Pregrado
+    URY: Grado
+  max_rows: 5000
+  note: >-
+    Mide cantidad de egresados, no calidad. Cada país cuenta un nivel distinto (Argentina: pregrado
+    y grado; Chile: pregrado; Uruguay: grado), así que la comparación entre países es aproximada.
+    Los valores son los que publica cada fuente, sin ajustes.
 
 # Which occupation-level series get trends and projections after each update: featured | all |
 # none. Occupation series repeat the values of their ISCO group, so computing them for every

@@ -7,6 +7,15 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.analytics.employability_run import Point, dimension_value
+from app.analytics.graduate_trends_run import (
+    available_years,
+    career_institutions,
+    career_points,
+    institution_careers,
+    institution_list,
+    totals_by_country,
+    values_for_year,
+)
 from app.analytics.skill_gaps_run import (
     crosswalk_codes,
     crosswalk_levels,
@@ -16,8 +25,31 @@ from app.analytics.skill_gaps_run import (
 from app.core.config_files import analytics_params, app_config, catalog
 from app.core.database import get_session
 from app.datasets.profiles import normalize_text, profiles
-from app.models import Graduate, GraduateProjection, GraduateTrend, Source
-from app.schemas.analytics import GraduateProjectionItem, GraduateTrendItem, GraduateTrends
+from app.models import (
+    FactInstitucionesEgresados,
+    Graduate,
+    GraduateProjection,
+    GraduateTrend,
+    RankingUniversidadesNacional,
+    RankingUniversidadesRegional,
+    Source,
+)
+from app.schemas.analytics import (
+    GraduateInstitutions,
+    GraduateProjectionItem,
+    GraduatesByYear,
+    GraduateSeries,
+    GraduateTotals,
+    GraduateTrendItem,
+    GraduateTrends,
+    GraduateYearItem,
+    InstitutionCareers,
+    InstitutionItem,
+    UniversityGraduates,
+    UniversityGraduatesItem,
+    UniversityRanking,
+    UniversityRankingItem,
+)
 from app.schemas.observatory import (
     CrosswalkCareer,
     CrosswalkOccupation,
@@ -96,6 +128,132 @@ def _career_row(career, level, key, fields, series, year, growth, codes,
             occupation_code=c, name=catalog().occupation(c).name, share=1 / len(codes),
             hierarchy=isco_levels(c)) for c in codes],
     )
+
+
+@router.get("/series", response_model=GraduateSeries)
+def graduate_series(
+    nombre: str,
+    country: str | None = Query(None, description="ISO3 (ARG, CHL)"),
+    pais: str | None = Query(None, description="Igual que country (se mantiene por compatibilidad)"),
+    session: Session = Depends(get_session),
+):
+    """Observed graduates per year of one career; its projection is in /graduates/projections."""
+    key = _graduates_country(country, pais)
+    points = career_points(session, key, nombre) if key else None
+    if points is None:
+        raise HTTPException(status.HTTP_404_NOT_FOUND,
+                            app_config().messages["unknown_graduate_series"].format(name=nombre))
+    return GraduateSeries(pais=key, nombre=nombre, puntos=points)
+
+
+@router.get("/institutions/list", response_model=list[InstitutionItem])
+def graduate_institution_list(
+    country: str | None = Query(None, description="ISO3 (ARG, CHL, URY)"),
+    session: Session = Depends(get_session),
+):
+    """Institutions with graduates per career, for a filter."""
+    return institution_list(session, _graduates_country(country, None))
+
+
+@router.get("/institutions/careers", response_model=InstitutionCareers)
+def graduate_institution_careers(
+    institucion: str,
+    country: str | None = Query(None, description="ISO3 (ARG, CHL, URY)"),
+    session: Session = Depends(get_session),
+):
+    """One institution's graduates per career and year. Projections are per career in the whole
+    country, so they are not part of this."""
+    return InstitutionCareers(institucion=institucion, carreras=institution_careers(
+        session, institucion, _graduates_country(country, None)))
+
+
+@router.get("/institutions", response_model=GraduateInstitutions)
+def graduate_institutions(
+    nombre: str,
+    country: str | None = Query(None, description="ISO3 (ARG, CHL)"),
+    pais: str | None = Query(None, description="Igual que country (se mantiene por compatibilidad)"),
+    session: Session = Depends(get_session),
+):
+    """Graduates of one career per institution and year, largest first. Empty where the source
+    does not publish them by institution (Argentina)."""
+    key = _graduates_country(country, pais)
+    return GraduateInstitutions(pais=key or "", nombre=nombre, **career_institutions(session, key, nombre))
+
+
+@router.get("/totals", response_model=GraduateTotals)
+def graduate_totals(
+    sector: str | None = Query(None, description="sector_code del catálogo, u 'otros'"),
+    tema: str | None = None,
+    session: Session = Depends(get_session),
+):
+    """Observed graduates per country and year of the careers that match. Without a topic it adds up
+    careers of the source only: programs found by topic are part of them and also count diplomas."""
+    return GraduateTotals(**totals_by_country(session, sector, tema))
+
+
+@router.get("/by-year", response_model=GraduatesByYear)
+def graduates_by_year(
+    year: int | None = Query(None, description="Año; sin él, solo los años disponibles"),
+    country: str | None = Query(None, description="ISO3 (ARG, CHL)"),
+    session: Session = Depends(get_session),
+):
+    """Graduates per career in a year: observed where published, indicative projection after that."""
+    observed, projected = available_years(session)
+    items = values_for_year(session, year, _graduates_country(country, None)) if year else []
+    return GraduatesByYear(anio=year, anios_observados=observed, anios_proyectados=projected,
+                           items=[GraduateYearItem(**i) for i in items])
+
+
+@router.get("/universities", response_model=UniversityGraduates)
+def university_graduates(
+    country: str | None = Query(None, description="ISO3 del país"),
+    year: int | None = None,
+    session: Session = Depends(get_session),
+):
+    """Graduates per institution and year, as each official source publishes them. Most graduates
+    first within each year; latest year first."""
+    p = analytics_params("universities")
+    stmt = select(FactInstitucionesEgresados).order_by(
+        FactInstitucionesEgresados.anio.desc(), FactInstitucionesEgresados.graduados.desc(),
+        FactInstitucionesEgresados.institucion)
+    if country:
+        stmt = stmt.where(FactInstitucionesEgresados.pais == country.upper())
+    if year:
+        stmt = stmt.where(FactInstitucionesEgresados.anio == year)
+    rows = session.scalars(stmt.limit(p["max_rows"])).all()
+    return UniversityGraduates(total=len(rows), nota=p["note"], items=[UniversityGraduatesItem(
+        pais=r.pais, institucion=r.institucion, tipo_gestion=r.tipo_gestion,
+        tipo_institucion=r.tipo_institucion, anio=r.anio, graduados=r.graduados,
+        nivel=p["levels"][r.pais], es_observado=r.es_observado, fuente_id=r.fuente_id)
+        for r in rows])
+
+
+@router.get("/universities/ranking", response_model=UniversityRanking)
+def university_ranking(
+    alcance: Literal["regional", "nacional"] = "regional",
+    country: str | None = Query(None, description="ISO3 del país (solo alcance nacional)"),
+    session: Session = Depends(get_session),
+):
+    """Universities with the most graduates: the regional top in the last year all three countries
+    have, or each country's top in its latest year."""
+    p = analytics_params("universities")
+    if alcance == "regional":
+        rows = session.scalars(select(RankingUniversidadesRegional).order_by(
+            RankingUniversidadesRegional.ranking_regional)).all()
+        items = [(r.ranking_regional, r) for r in rows]
+        criterio = p["regional_criterion"]
+    else:
+        stmt = select(RankingUniversidadesNacional).order_by(
+            RankingUniversidadesNacional.pais, RankingUniversidadesNacional.ranking_nacional)
+        if country:
+            stmt = stmt.where(RankingUniversidadesNacional.pais == country.upper())
+        items = [(r.ranking_nacional, r) for r in session.scalars(stmt).all()]
+        criterio = p["coverage"]
+    return UniversityRanking(alcance=alcance, criterio=criterio, nota=p["note"], items=[
+        UniversityRankingItem(posicion=pos, pais=r.pais, institucion=r.institucion,
+                              tipo_gestion=r.tipo_gestion, anio=r.anio_evaluado,
+                              graduados=r.graduados, nivel=r.periodo_detalle)
+        for pos, r in items])
 
 
 @router.get("/crosswalk", response_model=CrosswalkReview)
