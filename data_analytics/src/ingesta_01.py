@@ -46,17 +46,27 @@ def auto_descomprimir_zips(directorio_base):
     """
     Inspecciona recursivamente el directorio y descomprime de forma autonoma
     cualquier archivo .zip encontrado en su carpeta de origen.
+    Para los paquetes SPU 2023 y 2024 (cuyas planillas estan en la raiz del zip),
+    los extrae ordenadamente en 'Anuario 2023/' y 'Anuario 2024/'.
     """
     if not directorio_base.exists():
         return
     zips_encontrados = list(directorio_base.glob('**/*.zip'))
     for zip_path in zips_encontrados:
         try:
-            destino = zip_path.parent
+            zn_low = zip_path.name.lower()
+            if '2023' in zn_low or 'rv_anuario_finales' in zn_low:
+                destino = zip_path.parent / 'Anuario 2023'
+            elif '2024' in zn_low or 'adelanto_anuario_24' in zn_low:
+                destino = zip_path.parent / 'Anuario 2024'
+            else:
+                destino = zip_path.parent
+
             with zipfile.ZipFile(zip_path, 'r') as zf:
                 miembros = [m for m in zf.namelist() if not m.startswith('__MACOSX') and not m.endswith('/')]
                 faltantes = [m for m in miembros if not (destino / m).exists()]
                 if faltantes:
+                    destino.mkdir(parents=True, exist_ok=True)
                     print(f"[Auto-ZIP] Descomprimiendo '{zip_path.name}' en '{destino.name}/'...")
                     zf.extractall(path=destino)
                     print(f"  ✅ Extraidos {len(miembros)} archivos de '{zip_path.name}'.")
@@ -206,27 +216,29 @@ def descargar_ilostat_indicador(indicador_id, paises, dir_raw):
 
 def descargar_spu_anuarios(dir_raw):
     """
-    Intenta descargar conjuntos de datos abiertos de los Anuarios Estadisticos Universitarios SPU
-    (Ministerio de Capital Humano / Datos Argentina) para anos faltantes (ej. 2019, 2018).
-    Si los servidores oficiales se encuentran temporalmente inaccesibles (404/502), reporta
-    el estado y continua con los anuarios consolidados ya existentes en el repositorio.
+    Descarga y verifica los paquetes de los Anuarios Estadisticos Universitarios SPU
+    (Ministerio de Capital Humano / Datos Argentina), incluyendo Anuario 2023
+    (anuario_2023_spu.zip) y Adelanto Anuario 2024 (adelanto_anuario_2024_spu.zip).
     """
     dir_arg = dir_raw / 'argentina'
     dir_arg.mkdir(parents=True, exist_ok=True)
 
     headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) ObservatorioPredictivo/1.0'}
     urls_candidatas = [
-        ('2019', 'https://www.argentina.gob.ar/sites/default/files/anuario_csv_2019.zip'),
-        ('2018', 'https://www.argentina.gob.ar/sites/default/files/anuario_csv_2018.zip'),
+        ('2023', 'anuario_2023_spu.zip', 'https://www.argentina.gob.ar/sites/default/files/rv_anuario_finales_todos.zip'),
+        ('2024', 'adelanto_anuario_2024_spu.zip', 'https://www.argentina.gob.ar/sites/default/files/2020/04/adelanto_anuario_24_14-08.zip'),
+        ('2022', 'anuario_csv_2022.zip', 'https://www.argentina.gob.ar/sites/default/files/2020/04/anuario_csv_2022.zip'),
+        ('2021', 'anuario_csv_2021.zip', 'https://www.argentina.gob.ar/sites/default/files/2020/04/anuario_csv_2021.zip'),
+        ('2020', 'anuario_csv_2020.zip', 'https://www.argentina.gob.ar/sites/default/files/2020/04/anuario_csv_2020.zip'),
     ]
 
-    for anio_tag, url in urls_candidatas:
-        target_zip = dir_arg / f"anuario_csv_{anio_tag}.zip"
+    for anio_tag, zip_filename, url in urls_candidatas:
+        target_zip = dir_arg / zip_filename
         if target_zip.exists():
             print(f"  ✅ [SPU Anuarios] Anuario {anio_tag} ya disponible en: {target_zip.name}")
             continue
         try:
-            r = requests.get(url, headers=headers, timeout=10, stream=True)
+            r = requests.get(url, headers=headers, timeout=25, stream=True)
             if r.status_code == 200 and int(r.headers.get('content-length', 0)) > 10000:
                 with open(target_zip, 'wb') as f:
                     for chunk in r.iter_content(chunk_size=8192):
@@ -236,6 +248,7 @@ def descargar_spu_anuarios(dir_raw):
                 print(f"  ℹ️ [SPU Anuarios] Anuario {anio_tag}: Endpoint oficial no disponible (HTTP {r.status_code}). Se utilizan anuarios locales consolidados.")
         except Exception as e:
             print(f"  ℹ️ [SPU Anuarios] Anuario {anio_tag}: Reintento omitido ({e}). Se utilizan anuarios locales consolidados.")
+    auto_descomprimir_zips(dir_arg)
 
 
 def descargar_indec_ipc(dir_raw):
@@ -332,21 +345,26 @@ def inspeccionar_fuentes_locales(dir_raw):
     verificar('chile/Buscador_Estadisticas_por_carrera_2024_2025_SIES.xlsx', 'CHL', 'SIES Estadisticas por Carrera', False, ['**/*Estadisticas*carrera*SIES*.xlsx'])
 
     print("--- ARGENTINA ---")
-    verificar('argentina/base_araucano_traducida.xlsx', 'ARG', 'Base SIU-Araucano Graduados', True, ['**/base_araucano*.csv', '**/base_araucano*.xlsx'])
-    verificar('argentina/anuario_csv_2022.zip', 'ARG', 'SPU Anuarios Universitarios Oficiales', False, ['**/anuario_csv*.zip'])
+    verificar('argentina/base_araucano_traducida.xlsx', 'ARG', 'Base SIU-Araucano Graduados (2016-2018)', True, ['**/base_araucano*.csv', '**/base_araucano*.xlsx'])
+    verificar('argentina/00._educ_superior_datos.csv', 'ARG', 'SPU Educacion Superior Serie Historica 2014-2023', True, ['**/*educ_superior_datos*.csv'])
+    verificar('argentina/anuario_csv_2022.zip', 'ARG', 'SPU Anuarios Universitarios Oficiales (2020-2022)', True, ['**/anuario_csv*.zip'])
+    verificar('argentina/anuario_2023_spu.zip', 'ARG', 'SPU Anuario Estadistico Universitario 2023', True, ['**/anuario_2023*.zip', '**/rv_anuario_finales*.zip'])
+    verificar('argentina/adelanto_anuario_2024_spu.zip', 'ARG', 'SPU Adelanto Anuario Estadistico Universitario 2024', True, ['**/adelanto_anuario_2024*.zip', '**/adelanto_anuario_24*.zip'])
     verificar('argentina/puestos_depto_priv_por_clae2.csv', 'ARG', 'CEP-XXI Puestos Privados por CLAE2', False, ['**/puestos*clae2*.csv'])
     verificar('argentina/w_mean_privado_mensual_por_clae2.csv', 'ARG', 'CEP-XXI Salario Medio Privado por CLAE2', False, ['**/w_mean*clae2*.csv'])
     verificar('argentina/w_median_privado_mensual_por_clae2.csv', 'ARG', 'CEP-XXI Salario Mediano Privado por CLAE2', False, ['**/w_median*clae2*.csv'])
     verificar('argentina/share_mujer_privado_mensual_por_clae2.csv', 'ARG', 'CEP-XXI Participacion Mujeres por CLAE2', False, ['**/share_mujer*clae2*.csv'])
 
     print("--- URUGUAY ---")
-    verificar('uruguay/00._educ_superior_datos.csv', 'URY', 'Educacion Superior Uruguay (Egresados)', True, ['**/*educ_superior_datos*.csv'])
-    verificar('uruguay/Anuario Estadístico de Educación 2024.xlsx', 'URY', 'MEC Anuario Estadistico de Educacion', False, ['**/*Anuario*Educaci*.xlsx'])
+    verificar('uruguay/1.Serie-Egresos-totales-Grado-por-Servicio-2000-2024.ods', 'URY', 'UdelaR Serie Historica Egresados 2000-2024', True, ['**/*Serie-Egresos*.ods'])
+    verificar('uruguay/Anuario Estadístico de Educación 2024.xlsx', 'URY', 'MEC Anuario Estadistico de Educacion (2020-2024)', True, ['**/*Anuario*Educaci*.xlsx'])
     verificar('uruguay/10235_distribucion_porcentual_de_las_personas_ocupadas_segun_sexo_por_rama_de_actividad_en_ocupa.csv', 'URY', 'INE Uruguay Empleo por Sexo y Rama', False, ['**/*distribucion*ocupadas*sexo*.csv'])
 
     print("--- REGIONAL / ILOSTAT ---")
     for p in ['ARG', 'CHL', 'URY']:
         verificar(f'ilostat/EAR_EMTA_SEX_ECO_NB_{p}.csv', p, f'ILOSTAT Salarios Medios por Rama y Sexo ({p})', False, [f'**/EAR_EMTA_SEX_ECO_NB_{p}.csv'])
+        verificar(f'ilostat/EMP_TEMP_SEX_ECO_NB_{p}.csv', p, f'ILOSTAT Personas Ocupadas por Rama y Sexo ({p})', False, [f'**/EMP_TEMP_SEX_ECO_NB_{p}.csv'])
+        verificar(f'ilostat/EMP_TEMP_SEX_ECO_EDU_NB_{p}.csv', p, f'ILOSTAT Ocupados con Educacion Superior por Rama y Sexo ({p})', False, [f'**/EMP_TEMP_SEX_ECO_EDU_NB_{p}.csv'])
 
     return pd.DataFrame(archivos_detectados)
 
@@ -406,6 +424,7 @@ def ejecutar_ingesta(base_dir=None):
     descargar_ilostat_indicador('EAP_TEAP_SEX_AGE_EDU_NB', paises_iso3, paths['data_raw'])
     descargar_ilostat_indicador('EAR_EMTA_SEX_ECO_NB', paises_iso3, paths['data_raw'])
     descargar_ilostat_indicador('EMP_TEMP_SEX_ECO_NB', paises_iso3, paths['data_raw'])
+    descargar_ilostat_indicador('EMP_TEMP_SEX_ECO_EDU_NB', paises_iso3, paths['data_raw'])
 
     # D. SPU Anuarios (Argentina - descarga de paquetes abiertos complementarios)
     print("  • Verificando paquetes abiertos SPU Anuarios...")

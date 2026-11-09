@@ -52,96 +52,136 @@ def resolver_hecho(nombre_archivo, paths):
     for c in candidatos:
         if c.exists():
             return c
+    return None
+
+
+def obtener_graduados_totales_por_genero(paths, df_egresados=None):
+    """
+    Carga la tabla normalizada graduados_totales_genero_limpio.csv generada en cleaning_02.py.
+    Si no existe aun en disco, invoca procesar_graduados_totales_genero de cleaning_02.py.
+    """
+    ruta_limpia = resolver_hecho('graduados_totales_genero_limpio.csv', paths)
+    if ruta_limpia is None or not ruta_limpia.exists():
+        from cleaning_02 import procesar_graduados_totales_genero
+        df_tot = procesar_graduados_totales_genero(paths)
+    else:
+        df_tot = pd.read_csv(ruta_limpia)
+
+    for col in ['F', 'M', 'NB', 'total', 'pct_mujeres', 'pct_varones', 'pct_nb', 'brecha_pct']:
+        if col in df_tot.columns:
+            df_tot[col] = pd.to_numeric(df_tot[col], errors='coerce').round(2)
+    return df_tot.sort_values(['pais', 'anio']).reset_index(drop=True)
+
+
+def obtener_empleo_sectorial_por_genero(paths):
+    """
+    Carga la tabla normalizada ilostat_empleo_sectorial_limpio.csv generada en cleaning_02.py.
+    """
+    ruta_limpia = resolver_hecho('ilostat_empleo_sectorial_limpio.csv', paths)
+    if ruta_limpia is None or not ruta_limpia.exists():
+        from cleaning_02 import procesar_ilostat_empleo
+        procesar_ilostat_empleo(paths)
+        ruta_limpia = resolver_hecho('ilostat_empleo_sectorial_limpio.csv', paths)
+    if ruta_limpia and ruta_limpia.exists():
+        df_emp = pd.read_csv(ruta_limpia)
+        for col in ['F', 'M', 'NB', 'total', 'pct_mujeres', 'pct_varones', 'brecha_pct']:
+            if col in df_emp.columns:
+                df_emp[col] = pd.to_numeric(df_emp[col], errors='coerce').round(2)
+        return df_emp
+    return pd.DataFrame()
+
+
+def obtener_ocupados_educ_superior_por_genero(paths):
+    """
+    Carga la tabla normalizada ilostat_ocupados_educ_superior_limpio.csv generada en cleaning_02.py
+    (personas ocupadas con Educacion Superior EDU_AGGREGATE_ADV por sector y sexo).
+    """
+    ruta_limpia = resolver_hecho('ilostat_ocupados_educ_superior_limpio.csv', paths)
+    if ruta_limpia is None or not ruta_limpia.exists():
+        from cleaning_02 import procesar_ilostat_empleo_educ_superior
+        df_edu = procesar_ilostat_empleo_educ_superior(paths)
+    else:
+        df_edu = pd.read_csv(ruta_limpia)
+
+    for col in ['F', 'M', 'NB', 'total', 'pct_mujeres', 'pct_varones', 'brecha_pct']:
+        if col in df_edu.columns:
+            df_edu[col] = pd.to_numeric(df_edu[col], errors='coerce').round(2)
+    return df_edu
+
+
 def generar_reporte_brechas_genero_detallado(paths, df_egresados):
     """
-    Genera el reporte detallado de brechas formativas y laborales por genero (Decision Etapa 5 Item 5.4 Opcion 1):
-    - Graduados por genero: serie observada por ano (ARG 2016-2018, CHL 2016-2018 y 2025, URY con total 'T' y ND).
-    - Empleo por genero: serie oficial tripartita armonizada OIT/ILOSTAT 2024 para los 3 paises x 5 sectores.
+    Genera el reporte detallado de brechas formativas y laborales por genero con las 3 dimensiones
+    normalizadas a 2 decimales:
+    1. graduados_universitarios_total: Total Universitario por genero en ventana comun 2020-2024 (SPU, SIES, MEC).
+    2. personas_ocupadas_miles: Empleo total por genero y sector en ano comun 2024 (OIT/ILOSTAT EMP_TEMP_SEX_ECO_NB).
+    3. ocupados_educ_superior_miles: Ocupados con Educacion Superior por genero y sector en ano comun 2024 (OIT/ILOSTAT EMP_TEMP_SEX_ECO_EDU_NB).
     """
     rows = []
-    # 1. Graduados universitarios ARG (2016, 2017, 2018 observados en Araucano)
-    sub_arg = df_egresados[(df_egresados['pais'] == 'ARG') & (df_egresados['anio'].isin([2016, 2017, 2018])) & (df_egresados['sexo'].isin(['F', 'M']))]
-    if not sub_arg.empty:
-        piv_arg = sub_arg.pivot_table(index=['pais', 'sector', 'anio'], columns='sexo', values='valor', aggfunc='sum').reset_index()
-        for _, r in piv_arg.iterrows():
-            f = float(r.get('F', 0))
-            m = float(r.get('M', 0))
-            tot = f + m
+
+    # 1. Graduados universitarios en TOTAL (2020-2024)
+    df_grad_tot = obtener_graduados_totales_por_genero(paths, df_egresados)
+    for _, r in df_grad_tot.iterrows():
+        rows.append({
+            'pais': r['pais'],
+            'sector': 'Total Universitario',
+            'tipo_indicador': 'graduados_universitarios_total',
+            'anio': int(r['anio']),
+            'F': round(float(r['F']), 2),
+            'M': round(float(r['M']), 2),
+            'otros': round(float(r['NB']), 2) if pd.notna(r['NB']) else np.nan,
+            'total': round(float(r['total']), 2),
+            'pct_mujeres': round(float(r['pct_mujeres']), 2),
+            'brecha_pct': round(float(r['brecha_pct']), 2),
+            'fuente': r['fuente'],
+            'nota_metodologica': r['nota_metodologica']
+        })
+
+    # 2. Empleo sectorial total OIT/ILOSTAT 2024 (en miles de personas)
+    df_emp_sec = obtener_empleo_sectorial_por_genero(paths)
+    if not df_emp_sec.empty:
+        sub_emp_24 = df_emp_sec[df_emp_sec['anio'] == 2024]
+        for _, r in sub_emp_24.iterrows():
             rows.append({
-                'pais': 'ARG', 'sector': r['sector'], 'tipo_indicador': 'graduados_universitarios',
-                'anio': int(r['anio']), 'F': f, 'M': m, 'otros': np.nan, 'total': tot,
-                'pct_mujeres': round((f / tot) * 100, 1) if tot > 0 else np.nan,
-                'brecha_pct': round(((f - m) / tot) * 100, 1) if tot > 0 else np.nan,
-                'fuente': 'AR_CAPITALHUMANO (Araucano)',
-                'nota_metodologica': 'Dato observado en base Araucano (sin categoria no binaria en fuente oficial)'
+                'pais': r['pais'],
+                'sector': r['sector'],
+                'tipo_indicador': 'personas_ocupadas_miles',
+                'anio': int(r['anio']),
+                'F': round(float(r['F']), 2),
+                'M': round(float(r['M']), 2),
+                'otros': np.nan,
+                'total': round(float(r['total']), 2),
+                'pct_mujeres': round(float(r['pct_mujeres']), 2),
+                'brecha_pct': round(float(r['brecha_pct']), 2),
+                'fuente': r['fuente'],
+                'nota_metodologica': r['nota_metodologica']
             })
 
-    # 2. Graduados universitarios CHL (2016, 2017, 2018 periodo comun y 2025 reciente)
-    sub_chl = df_egresados[(df_egresados['pais'] == 'CHL') & (df_egresados['anio'].isin([2016, 2017, 2018, 2025])) & (df_egresados['sexo'].isin(['F', 'M', 'NB']))]
-    if not sub_chl.empty:
-        piv_chl = sub_chl.pivot_table(index=['pais', 'sector', 'anio'], columns='sexo', values='valor', aggfunc='sum').reset_index()
-        for _, r in piv_chl.iterrows():
-            f = float(r.get('F', 0))
-            m = float(r.get('M', 0))
-            nb = float(r.get('NB', 0)) if pd.notna(r.get('NB')) else 0.0
-            tot = f + m + nb
+    # 3. Ocupados con Educacion Superior por sector OIT/ILOSTAT 2024 (en miles de personas)
+    df_edu_sec = obtener_ocupados_educ_superior_por_genero(paths)
+    if not df_edu_sec.empty:
+        sub_edu_24 = df_edu_sec[df_edu_sec['anio'] == 2024]
+        for _, r in sub_edu_24.iterrows():
             rows.append({
-                'pais': 'CHL', 'sector': r['sector'], 'tipo_indicador': 'graduados_universitarios',
-                'anio': int(r['anio']), 'F': f, 'M': m, 'otros': nb if nb > 0 else 0.0, 'total': tot,
-                'pct_mujeres': round((f / tot) * 100, 1) if tot > 0 else np.nan,
-                'brecha_pct': round(((f - m) / tot) * 100, 1) if tot > 0 else np.nan,
-                'fuente': 'CL_MIFUTURO (SIES)',
-                'nota_metodologica': 'Dato observado en SIES/Mi Futuro'
+                'pais': r['pais'],
+                'sector': r['sector'],
+                'tipo_indicador': 'ocupados_educ_superior_miles',
+                'anio': int(r['anio']),
+                'F': round(float(r['F']), 2),
+                'M': round(float(r['M']), 2),
+                'otros': np.nan,
+                'total': round(float(r['total']), 2),
+                'pct_mujeres': round(float(r['pct_mujeres']), 2),
+                'brecha_pct': round(float(r['brecha_pct']), 2),
+                'fuente': r['fuente'],
+                'nota_metodologica': r['nota_metodologica']
             })
-
-    # 3. Graduados universitarios URY (2016, 2017, 2018 y 2023 - Solo total 'T' observado)
-    sub_ury = df_egresados[(df_egresados['pais'] == 'URY') & (df_egresados['anio'].isin([2016, 2017, 2018, 2023])) & (df_egresados['sexo'] == 'T')]
-    if not sub_ury.empty:
-        piv_ury = sub_ury.groupby(['pais', 'sector', 'anio'])['valor'].sum().reset_index()
-        for _, r in piv_ury.iterrows():
-            tot = float(r['valor'])
-            rows.append({
-                'pais': 'URY', 'sector': r['sector'], 'tipo_indicador': 'graduados_universitarios',
-                'anio': int(r['anio']), 'F': np.nan, 'M': np.nan, 'otros': np.nan, 'total': tot,
-                'pct_mujeres': np.nan, 'brecha_pct': np.nan,
-                'fuente': 'UY_MEC_SUP',
-                'nota_metodologica': 'Sin apertura por sexo en fuente oficial MEC (solo total T observado)'
-            })
-
-    # 4. Empleo sectorial OIT/ILOSTAT 2024 (en miles de personas)
-    mapa_ilo_sec = {
-        'ECO_ISIC4_J': 'Tecnología',
-        'ECO_ISIC4_M': 'Economía del conocimiento',
-        'ECO_ISIC4_Q': 'Salud',
-        'ECO_ISIC4_D': 'Energía',
-        'ECO_ISIC4_I': 'Turismo',
-    }
-    carpeta_ilo = paths['data_raw'] / 'ilostat'
-    for p in ['ARG', 'CHL', 'URY']:
-        fpath = carpeta_ilo / f"EMP_TEMP_SEX_ECO_NB_{p}.csv"
-        if fpath.exists():
-            try:
-                df_i = pd.read_csv(fpath)
-                sub_i = df_i[(df_i['time'] == 2024) & (df_i['classif1'].isin(mapa_ilo_sec.keys()))]
-                piv_i = sub_i.pivot_table(index='classif1', columns='sex', values='obs_value', aggfunc='first').reset_index()
-                for _, r in piv_i.iterrows():
-                    sec = mapa_ilo_sec[r['classif1']]
-                    f = float(r.get('SEX_F', 0))
-                    m = float(r.get('SEX_M', 0))
-                    tot = float(r.get('SEX_T', f + m))
-                    rows.append({
-                        'pais': p, 'sector': sec, 'tipo_indicador': 'personas_ocupadas_miles',
-                        'anio': 2024, 'F': round(f, 2), 'M': round(m, 2), 'otros': np.nan,
-                        'total': round(tot, 2),
-                        'pct_mujeres': round((f / tot) * 100, 1) if tot > 0 else np.nan,
-                        'brecha_pct': round(((f - m) / tot) * 100, 1) if tot > 0 else np.nan,
-                        'fuente': f"OIT_ILOSTAT (EMP_TEMP_SEX_ECO_NB_{p})",
-                        'nota_metodologica': 'Empleo armonizado OIT por sexo y actividad CIIU Rev. 4 (sin categoria no binaria)'
-                    })
-            except Exception:
-                pass
 
     df_rep = pd.DataFrame(rows)
+    for col in ['F', 'M', 'otros', 'total', 'pct_mujeres', 'brecha_pct']:
+        if col in df_rep.columns:
+            df_rep[col] = pd.to_numeric(df_rep[col], errors='coerce').round(2)
+
     fout_proc = paths['data_processed'] / 'reporte_brechas_genero_detallado.csv'
     fout_out = paths['output'] / 'reporte_brechas_genero_detallado.csv'
     df_rep.to_csv(fout_proc, index=False, encoding='utf-8')
@@ -175,7 +215,7 @@ def generar_reporte_densidad_profesional(paths, df_egresados_sector):
         how='inner'
     )
     df_densidad['graduados_por_mil_ocupados'] = ((df_densidad['graduados_anuales'] / df_densidad['puestos_empleo']) * 1000).round(2)
-    df_densidad['ratio_graduados_vs_empleo_pct'] = ((df_densidad['graduados_anuales'] / df_densidad['puestos_empleo']) * 100).round(3)
+    df_densidad['ratio_graduados_vs_empleo_pct'] = ((df_densidad['graduados_anuales'] / df_densidad['puestos_empleo']) * 100).round(2)
     df_densidad['fuente_graduados'] = df_densidad['pais'].map({'ARG': 'Araucano_SPU', 'CHL': 'SIES_MiFuturo', 'URY': 'MEC_Superior'})
     df_densidad['fuente_empleo'] = 'OIT_ILOSTAT_EMP_TEMP_SEX_ECO_NB'
     df_densidad['concepto'] = 'Graduados anuales observados por cada 1.000 personas ocupadas en el sector (Presion formativa / Renovacion de talento)'
@@ -283,6 +323,8 @@ def ejecutar_indicadores(base_dir=None):
     std_var = df_egresados_sector.groupby(['pais', 'sector'])['var_pct_anual'].transform('std')
     df_indicadores = df_egresados_sector.copy()
     df_indicadores['zscore_dinamismo'] = np.where(std_var > 0, (df_indicadores['var_pct_anual'] - media_var) / std_var, np.nan)
+    df_indicadores['var_pct_anual'] = df_indicadores['var_pct_anual'].round(2)
+    df_indicadores['zscore_dinamismo'] = df_indicadores['zscore_dinamismo'].round(2)
 
     # Decision Etapa 6 Item 6.1: Umbral paritario homogeneo |Z| >= 1.4 (o 1.5 redondeado) para series de tamano moderado/corto
     umbral_z = 1.4
@@ -307,10 +349,15 @@ def ejecutar_indicadores(base_dir=None):
     print(f"  ✅ Indicadores interanuales y Z-score guardados en: {archivo_ind.name} (Umbral |Z| >= {umbral_z} aplicado con paridad tripartita)")
 
     # 3. Modelos Predictivos a 3 y 5 Anos con IC 95% (t-Student n-2 gl)
-    print("\n[Paso 3/6] Calculando proyecciones a 3 y 5 anos (Umbral n >= 5, t-Student)...")
+    print("\n[Paso 3/6] Calculando proyecciones a 3 y 5 anos (Umbral n >= 5, t-Student, ventana estructural reciente)...")
     proyecciones = []
     for (pais, sector), group in df_egresados_sector.groupby(['pais', 'sector']):
-        serie = group.dropna(subset=['graduados_anuales']).sort_values('anio')
+        serie_completa = group.dropna(subset=['graduados_anuales']).sort_values('anio')
+        # Acotar a la decada estructural reciente (>= 2015 para CHL, >= 2014 para ARG/URY) evitando sesgo de expansion inicial 2007-2014
+        anio_corte = 2015 if pais == 'CHL' else 2014
+        serie = serie_completa[serie_completa['anio'] >= anio_corte].copy()
+        if len(serie) < 5:
+            serie = serie_completa.copy()
         n_puntos = len(serie)
 
         # Decision D7 (Aprobado): Umbral estricto de minimo 5 puntos anuales continuos
@@ -374,11 +421,11 @@ def ejecutar_indicadores(base_dir=None):
                 'ultimo_valor_observado': y[-1],
                 'horizonte_anios': horizonte,
                 'anio_proyectado': anio_proy,
-                'valor_proyectado': round(y_proy, 1),
-                'limite_inferior_95': round(lim_inf, 1),
-                'limite_superior_95': round(lim_sup, 1),
+                'valor_proyectado': round(y_proy, 2),
+                'limite_inferior_95': round(lim_inf, 2),
+                'limite_superior_95': round(lim_sup, 2),
                 'pendiente_anual': round(pendiente, 2),
-                'r2': round(r_val**2, 4),
+                'r2': round(r_val**2, 2),
                 'n_puntos_base': n_puntos,
                 'modelo': f'Tendencia lineal con IC 95% (t-Student {n_puntos - 2} gl)',
                 'advertencia_tendencia': advertencia_txt
@@ -411,7 +458,7 @@ def ejecutar_indicadores(base_dir=None):
             else:
                 return 'BAJA PRIORIDAD (Oferta en Expansión)'
 
-        df_h5['crecimiento_esperado_5a_pct'] = ((df_h5['pendiente_anual'] * 5) / df_h5['ultimo_valor_observado'] * 100).round(1)
+        df_h5['crecimiento_esperado_5a_pct'] = ((df_h5['pendiente_anual'] * 5) / df_h5['ultimo_valor_observado'] * 100).round(2)
         df_h5['recomendacion_presupuesto'] = df_h5.apply(asignar_semaforo, axis=1)
         df_h5['tipo_indicador'] = 'Semaforo_Prioridad_Formativa_Predictiva'
         df_h5['metodologia'] = 'Recomendacion de asignacion de recursos formativos segun proyeccion a 5 anos de graduados (t-Student)'
@@ -419,6 +466,7 @@ def ejecutar_indicadores(base_dir=None):
 
         archivo_rep = paths['output'] / 'reporte_presupuesto_educativo.csv'
         df_reporte_gob.to_csv(archivo_rep, index=False, encoding='utf-8')
+        df_reporte_gob.to_csv(paths['data_processed'] / 'reporte_presupuesto_educativo.csv', index=False, encoding='utf-8')
         print(f"  ✅ Reporte de recomendacion presupuestaria guardado en: {archivo_rep.name}")
 
     # Graficos de proyecciones
@@ -479,10 +527,10 @@ def ejecutar_indicadores(base_dir=None):
                 val_medio = grp['salario_usd_ppa'].mean()
                 res_pais_sec.append({
                     'pais': pais, 'sector': sector,
-                    'salario_min_usd_ppa': round(float(grp['salario_usd_ppa'].min()), 1),
-                    'salario_mediano_usd_ppa': round(float(grp['salario_usd_ppa'].median()), 1),
-                    'salario_medio_usd_ppa': round(float(val_medio), 1),
-                    'salario_max_usd_ppa': round(float(grp['salario_usd_ppa'].max()), 1),
+                    'salario_min_usd_ppa': round(float(grp['salario_usd_ppa'].min()), 2),
+                    'salario_mediano_usd_ppa': round(float(grp['salario_usd_ppa'].median()), 2),
+                    'salario_medio_usd_ppa': round(float(val_medio), 2),
+                    'salario_max_usd_ppa': round(float(grp['salario_usd_ppa'].max()), 2),
                 })
             df_rangos_pais = pd.DataFrame(res_pais_sec)
         else:
@@ -492,10 +540,10 @@ def ejecutar_indicadores(base_dir=None):
 
     pivot_regional = df_rangos_pais.pivot(index='sector', columns='pais', values='salario_medio_usd_ppa')
     cols_p = [c for c in ['ARG', 'CHL', 'URY'] if c in pivot_regional.columns]
-    pivot_regional['Promedio_Cono_Sur_USD_PPA'] = pivot_regional[cols_p].mean(axis=1).round(1)
-    pivot_regional['Salario_Max_Pais'] = pivot_regional[cols_p].max(axis=1).round(1)
-    pivot_regional['Salario_Min_Pais'] = pivot_regional[cols_p].min(axis=1).round(1)
-    pivot_regional['Brecha_Regional_Pct'] = (((pivot_regional['Salario_Max_Pais'] - pivot_regional['Salario_Min_Pais']) / pivot_regional['Salario_Min_Pais']) * 100).round(1)
+    pivot_regional['Promedio_Cono_Sur_USD_PPA'] = pivot_regional[cols_p].mean(axis=1).round(2)
+    pivot_regional['Salario_Max_Pais'] = pivot_regional[cols_p].max(axis=1).round(2)
+    pivot_regional['Salario_Min_Pais'] = pivot_regional[cols_p].min(axis=1).round(2)
+    pivot_regional['Brecha_Regional_Pct'] = (((pivot_regional['Salario_Max_Pais'] - pivot_regional['Salario_Min_Pais']) / pivot_regional['Salario_Min_Pais']) * 100).round(2)
     pivot_regional['Pais_Lider_Salarial'] = pivot_regional[cols_p].idxmax(axis=1)
     pivot_regional['metodo_ppa'] = 'PPA_PIB_PA.NUS.PPP'
     pivot_regional['anio_evaluado'] = 2024
@@ -522,8 +570,8 @@ def ejecutar_indicadores(base_dir=None):
             res_loc.append({
                 'pais': pais, 'fuente_id': fuente, 'sector': sector,
                 'anio_observado': int(grp['anio'].iloc[0]),
-                'salario_medio_usd_ppa': round(float(val_mean), 1),
-                'salario_mediano_usd_ppa': round(float(val_med), 1),
+                'salario_medio_usd_ppa': round(float(val_mean), 2),
+                'salario_mediano_usd_ppa': round(float(val_med), 2),
                 'tipo_salario': tipo_sal,
                 'metodo_ppa': 'PPA_PIB_PA.NUS.PPP',
                 'concepto_salario': concepto,
@@ -590,79 +638,20 @@ def ejecutar_indicadores(base_dir=None):
     plt.close()
     print(f"  ✅ Grafico salarial regional guardado en: {ruta_img_sal.name}")
 
-    # 5. Analisis de Genero y Tasa de Feminizacion (Brechas Formativas y Laborales Observadas)
-    print("\n[Paso 5/6] Analizando paridad de genero y brechas formativas/laborales...")
+    # 5. Analisis de Genero y Tasa de Feminizacion (3 Dimensiones: Graduadas en Total 2020-2024, Empleo Sectorial 2024 y Ocupadas con Educ. Superior 2024)
+    print("\n[Paso 5/6] Analizando paridad de genero (Graduadas en Total 2020-2024, Empleo Sectorial y Educ. Superior OIT 2024)...")
 
     # Asegurar aislamiento estricto de 'T' (Total no es categoria de genero, Decision Etapa 5 Item 5.2 Opcion 1)
     assert 'T' not in ['F', 'M', 'NB'], "Inconsistencia de diseno: 'T' no debe incluirse en categorias de genero"
-    df_gen = df_egresados[df_egresados['sexo'].isin(['F', 'M', 'NB'])].copy()
-    if not df_gen.empty:
-        agrup_gen = df_gen.groupby(['pais', 'sector', 'sexo'])['valor'].sum().unstack().reset_index()
-        for col_s in ['F', 'M', 'NB']:
-            if col_s not in agrup_gen.columns:
-                agrup_gen[col_s] = np.nan
-        # Para Argentina, Araucano no midio categoria no binaria (Decision Etapa 5 Item 5.1 Opcion 1)
-        agrup_gen.loc[agrup_gen['pais'] == 'ARG', 'NB'] = np.nan
 
-        agrup_gen['Total_Graduados'] = agrup_gen[['F', 'M']].sum(axis=1) + agrup_gen['NB'].fillna(0)
-        agrup_gen['Pct_Mujeres_Graduadas'] = ((agrup_gen['F'] / agrup_gen['Total_Graduados']) * 100).round(1)
-        agrup_gen['Pct_Varones_Graduados'] = ((agrup_gen['M'] / agrup_gen['Total_Graduados']) * 100).round(1)
-        agrup_gen['Pct_NB_Graduados'] = np.where(agrup_gen['NB'].notna(), ((agrup_gen['NB'] / agrup_gen['Total_Graduados']) * 100).round(1), np.nan)
-        agrup_gen['Brecha_Graduados_Pct'] = (agrup_gen['Pct_Mujeres_Graduadas'] - agrup_gen['Pct_Varones_Graduados']).round(1)
-    else:
-        agrup_gen = pd.DataFrame(columns=['pais', 'sector', 'F', 'M', 'NB', 'Total_Graduados', 'Pct_Mujeres_Graduadas', 'Pct_Varones_Graduados', 'Pct_NB_Graduados', 'Brecha_Graduados_Pct'])
-
-    # Incorporar estratos de Uruguay (egresados sin apertura de sexo en fuente oficial, pero con empleo observado OIT)
+    df_grad_tot = obtener_graduados_totales_por_genero(paths, df_egresados)
+    df_emp_sec_limpio = obtener_empleo_sectorial_por_genero(paths)
+    df_edu_sec_limpio = obtener_ocupados_educ_superior_por_genero(paths)
     sectores_lista = ['Economía del conocimiento', 'Energía', 'Salud', 'Tecnología', 'Turismo']
-    paises_presentes_gen = agrup_gen['pais'].unique() if not agrup_gen.empty else []
-    if 'URY' not in paises_presentes_gen:
-        filas_ury = []
-        for sec in sectores_lista:
-            filas_ury.append({
-                'pais': 'URY', 'sector': sec,
-                'F': np.nan, 'M': np.nan, 'NB': np.nan,
-                'Total_Graduados': np.nan,
-                'Pct_Mujeres_Graduadas': np.nan,
-                'Pct_Varones_Graduados': np.nan,
-                'Pct_NB_Graduados': np.nan,
-                'Brecha_Graduados_Pct': np.nan
-            })
-        if filas_ury:
-            agrup_gen = pd.concat([agrup_gen, pd.DataFrame(filas_ury)], ignore_index=True)
 
-    # Periodos de referencia para graduados (Decision Etapa 5 Item 5.4 Opcion 1)
-    def asignar_periodo_grad(p):
-        if p == 'ARG':
-            return '2016-2018 (Araucano)'
-        elif p == 'CHL':
-            return '2007-2025 (SIES / Mi Futuro)'
-        else:
-            return 'ND (Sin apertura por sexo en fuente oficial MEC)'
-    agrup_gen['periodo_graduados'] = agrup_gen['pais'].map(asignar_periodo_grad)
-
-    ruta_ocup = resolver_hecho('hecho_ocupacion_terciarios.csv', paths)
-    if ruta_ocup:
-        df_oc = pd.read_csv(ruta_ocup)
-        if 'share_mujeres' in df_oc.columns and not df_oc['share_mujeres'].dropna().empty:
-            ult_oc = df_oc.dropna(subset=['share_mujeres']).sort_values(['pais', 'sector', 'anio']).groupby(['pais', 'sector']).last().reset_index()
-            agrup_gen = pd.merge(agrup_gen, ult_oc[['pais', 'sector', 'share_mujeres', 'anio']], on=['pais', 'sector'], how='left')
-            agrup_gen.rename(columns={'anio': 'anio_empleo'}, inplace=True)
-            agrup_gen['Pct_Mujeres_Empleadas'] = (agrup_gen['share_mujeres'] * 100).round(1)
-            agrup_gen['Brecha_Empleo_Pct'] = (agrup_gen['Pct_Mujeres_Empleadas'] - (100.0 - agrup_gen['Pct_Mujeres_Empleadas'])).round(1)
-        else:
-            agrup_gen['anio_empleo'] = 2024
-            agrup_gen['Pct_Mujeres_Empleadas'] = np.nan
-            agrup_gen['Brecha_Empleo_Pct'] = np.nan
-    else:
-        agrup_gen['anio_empleo'] = 2024
-        agrup_gen['Pct_Mujeres_Empleadas'] = np.nan
-        agrup_gen['Brecha_Empleo_Pct'] = np.nan
-
-    # Diagnostico de paridad segun estandar internacional EIGE / OIT (40% - 60%) (Decision Etapa 5 Item 5.3 Opcion 1)
-    def diagnostico_genero(row):
-        pct_f = row['Pct_Mujeres_Graduadas']
+    def diagnostico_paridad_val(pct_f):
         if pd.isna(pct_f):
-            return 'Sin dato de graduados por sexo (Empleo observado OIT)'
+            return 'Sin dato observado'
         elif pct_f < 40.0:
             return 'Sub-representacion Femenina / Masculinizacion (<40% EIGE-OIT)'
         elif pct_f > 60.0:
@@ -670,8 +659,92 @@ def ejecutar_indicadores(base_dir=None):
         else:
             return 'Zona de Paridad Equilibrada (40% - 60% EIGE-OIT)'
 
-    agrup_gen['Diagnostico_Paridad'] = agrup_gen.apply(diagnostico_genero, axis=1)
-    agrup_gen['Criterio_Referencia'] = 'EIGE_OIT_40_60'
+    filas_gen = []
+    # A. Filas de Total Universitario por pais en el periodo comun tripartito 2020-2024 (SPU, SIES, MEC)
+    for p in ['ARG', 'CHL', 'URY']:
+        sub_p = df_grad_tot[df_grad_tot['pais'] == p]
+        f_sum = round(float(sub_p['F'].sum()), 2) if not sub_p.empty else np.nan
+        m_sum = round(float(sub_p['M'].sum()), 2) if not sub_p.empty else np.nan
+        nb_sum = round(float(sub_p['NB'].dropna().sum()), 2) if (not sub_p.empty and sub_p['NB'].notna().any()) else (0.0 if p == 'CHL' else np.nan)
+        tot_g = round(f_sum + m_sum + (nb_sum if pd.notna(nb_sum) else 0.0), 2) if pd.notna(f_sum) else np.nan
+        pct_f_g = round((f_sum / tot_g) * 100.0, 2) if (pd.notna(tot_g) and tot_g > 0) else np.nan
+        pct_m_g = round((m_sum / tot_g) * 100.0, 2) if (pd.notna(tot_g) and tot_g > 0) else np.nan
+        pct_nb_g = round((nb_sum / tot_g) * 100.0, 2) if (pd.notna(nb_sum) and pd.notna(tot_g) and tot_g > 0 and nb_sum > 0) else (0.0 if p == 'CHL' else np.nan)
+        brecha_g = round(pct_f_g - pct_m_g, 2) if pd.notna(pct_f_g) else np.nan
+
+        # Empleo ponderado en los 5 sectores estrategicos (OIT 2024) para la fila resumen
+        pct_emp_tot = np.nan
+        brecha_emp_tot = np.nan
+        anio_emp_tot = 2024
+        if not df_emp_sec_limpio.empty:
+            oc_p = df_emp_sec_limpio[(df_emp_sec_limpio['pais'] == p) & (df_emp_sec_limpio['anio'] == 2024)]
+            if not oc_p.empty and oc_p['total'].sum() > 0:
+                pct_emp_tot = round(float((oc_p['F'].sum() / oc_p['total'].sum()) * 100.0), 2)
+                brecha_emp_tot = round(pct_emp_tot - (100.0 - pct_emp_tot), 2)
+
+        filas_gen.append({
+            'pais': p,
+            'sector': 'Total Universitario',
+            'periodo_graduados': '2020-2024 (Ventana Común Tripartita SPU/SIES/MEC)',
+            'F': f_sum,
+            'M': m_sum,
+            'NB': nb_sum,
+            'Total_Graduados': tot_g,
+            'Pct_Mujeres_Graduadas': pct_f_g,
+            'Pct_Varones_Graduados': pct_m_g,
+            'Pct_NB_Graduados': pct_nb_g,
+            'Brecha_Graduados_Pct': brecha_g,
+            'anio_empleo': anio_emp_tot,
+            'Pct_Mujeres_Empleadas': pct_emp_tot,
+            'Brecha_Empleo_Pct': brecha_emp_tot,
+            'Diagnostico_Paridad': diagnostico_paridad_val(pct_f_g),
+            'Criterio_Referencia': 'EIGE_OIT_40_60'
+        })
+
+    # B. Filas por Sector Estrategico (Año Comun 2024 OIT/ILOSTAT: Ocupados con Educ. Superior vs Empleo Total del Sector)
+    for p in ['ARG', 'CHL', 'URY']:
+        for sec in sectores_lista:
+            f_edu, m_edu, tot_edu = np.nan, np.nan, np.nan
+            pct_f_edu, pct_m_edu, brecha_edu = np.nan, np.nan, np.nan
+            if not df_edu_sec_limpio.empty:
+                ed_ps = df_edu_sec_limpio[(df_edu_sec_limpio['pais'] == p) & (df_edu_sec_limpio['sector'] == sec) & (df_edu_sec_limpio['anio'] == 2024)]
+                if not ed_ps.empty:
+                    r_ed = ed_ps.iloc[0]
+                    f_edu = round(float(r_ed['F']), 2)
+                    m_edu = round(float(r_ed['M']), 2)
+                    tot_edu = round(float(r_ed['total']), 2)
+                    pct_f_edu = round(float(r_ed['pct_mujeres']), 2)
+                    pct_m_edu = round(float(r_ed['pct_varones']), 2)
+                    brecha_edu = round(float(r_ed['brecha_pct']), 2)
+
+            pct_emp = np.nan
+            brecha_emp = np.nan
+            anio_emp = 2024
+            if not df_emp_sec_limpio.empty:
+                oc_ps = df_emp_sec_limpio[(df_emp_sec_limpio['pais'] == p) & (df_emp_sec_limpio['sector'] == sec) & (df_emp_sec_limpio['anio'] == 2024)]
+                if not oc_ps.empty:
+                    r_oc = oc_ps.iloc[0]
+                    pct_emp = round(float(r_oc['pct_mujeres']), 2)
+                    brecha_emp = round(float(r_oc['brecha_pct']), 2)
+
+            filas_gen.append({
+                'pais': p,
+                'sector': sec,
+                'periodo_graduados': '2024 (Ocupados Educ. Superior OIT en miles)',
+                'F': f_edu,
+                'M': m_edu,
+                'NB': np.nan,
+                'Total_Graduados': tot_edu,
+                'Pct_Mujeres_Graduadas': pct_f_edu,
+                'Pct_Varones_Graduados': pct_m_edu,
+                'Pct_NB_Graduados': np.nan,
+                'Brecha_Graduados_Pct': brecha_edu,
+                'anio_empleo': anio_emp,
+                'Pct_Mujeres_Empleadas': pct_emp,
+                'Brecha_Empleo_Pct': brecha_emp,
+                'Diagnostico_Paridad': diagnostico_paridad_val(pct_f_edu if pd.notna(pct_f_edu) else pct_emp),
+                'Criterio_Referencia': 'EIGE_OIT_40_60'
+            })
 
     cols_gen_rep = [
         'pais', 'sector', 'periodo_graduados', 'F', 'M', 'NB', 'Total_Graduados',
@@ -680,58 +753,86 @@ def ejecutar_indicadores(base_dir=None):
         'anio_empleo', 'Pct_Mujeres_Empleadas', 'Brecha_Empleo_Pct',
         'Diagnostico_Paridad', 'Criterio_Referencia'
     ]
-    df_gen_final = agrup_gen[[c for c in cols_gen_rep if c in agrup_gen.columns]].sort_values(['pais', 'sector'])
+    df_gen_final = pd.DataFrame(filas_gen)[cols_gen_rep]
+    for col_f in ['F', 'M', 'NB', 'Total_Graduados', 'Pct_Mujeres_Graduadas', 'Pct_Varones_Graduados', 'Pct_NB_Graduados', 'Brecha_Graduados_Pct', 'Pct_Mujeres_Empleadas', 'Brecha_Empleo_Pct']:
+        df_gen_final[col_f] = pd.to_numeric(df_gen_final[col_f], errors='coerce').round(2)
 
     archivo_gen = paths['output'] / 'analisis_genero_integral.csv'
     df_gen_final.to_csv(archivo_gen, index=False, encoding='utf-8')
     df_gen_final.to_csv(paths['data_processed'] / 'analisis_genero_integral.csv', index=False, encoding='utf-8')
-    print(f"  ✅ Analisis de genero (brecha formativa y laboral observada) exportado a: {archivo_gen.name}")
+    print(f"  ✅ Analisis de genero (Total Universitario 2020-2024, Empleo Sectorial y Educ. Superior 2024) exportado a: {archivo_gen.name}")
 
-    # Generacion del reporte detallado de brechas de genero (Decision Etapa 5 Item 5.4 Opcion 1)
+    # Generacion del reporte detallado de brechas de genero
     generar_reporte_brechas_genero_detallado(paths, df_egresados)
 
-    # Grafico de genero (2 paneles: Graduados universitarios y Empleo formal tripartito OIT)
-    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(16, 6))
+    # Grafico de genero (3 paneles: 1. Graduados universitarios en TOTAL 2020-2024, 2. Empleo Total por Sector OIT 2024, 3. Ocupados con Educ. Superior por Sector OIT 2024)
+    fig, (ax1, ax2, ax3) = plt.subplots(1, 3, figsize=(22, 6.5))
 
-    # Panel 1: Graduados universitarios
-    df_gen_graf = df_gen_final.dropna(subset=['Pct_Mujeres_Graduadas'])
-    pivot_g = df_gen_graf.pivot(index='sector', columns='pais', values='Pct_Mujeres_Graduadas')
+    # Panel 1: Graduados universitarios en TOTAL (% Mujeres) en el periodo comun 2020-2024 + Acumulado 2020-2024
+    df_graf_tot = df_grad_tot[['pais', 'anio', 'pct_mujeres']].copy()
+    df_graf_tot['periodo'] = df_graf_tot['anio'].astype(str)
+    filas_acum = []
+    for _, r_tot in df_gen_final[df_gen_final['sector'] == 'Total Universitario'].iterrows():
+        filas_acum.append({
+            'pais': r_tot['pais'],
+            'anio': 9999,
+            'pct_mujeres': r_tot['Pct_Mujeres_Graduadas'],
+            'periodo': 'Total\n2020-2024'
+        })
+    df_graf_tot = pd.concat([df_graf_tot, pd.DataFrame(filas_acum)], ignore_index=True)
+    orden_periodos = ['2020', '2021', '2022', '2023', '2024', 'Total\n2020-2024']
+    pivot_g = df_graf_tot.pivot(index='periodo', columns='pais', values='pct_mujeres').reindex(orden_periodos)
     cols_g = [c for c in ['ARG', 'CHL', 'URY'] if c in pivot_g.columns]
 
     if not pivot_g.empty:
-        pivot_g[cols_g].plot(kind='bar', ax=ax1, color=[colores_pais[c] for c in cols_g], width=0.60)
+        pivot_g[cols_g].plot(kind='bar', ax=ax1, color=[colores_pais[c] for c in cols_g], width=0.68)
     ax1.axhline(50, color='black', linestyle='--', linewidth=1.2, label='Paridad Exacta (50%)')
     ax1.axhspan(40, 60, color='green', alpha=0.12, label='Franja Paridad EIGE/OIT (40%-60%)')
-    ax1.set_title("1. Graduados Universitarios (% Mujeres)\n[ARG 2016-2018, CHL 2007-2025]", fontsize=11, pad=10)
-    ax1.set_xlabel("Sector Estratégico", fontsize=10)
-    ax1.set_ylabel("% Mujeres Graduadas", fontsize=10)
+    ax1.set_title("1. Graduados Universitarios en Total (% Mujeres)\n[Ventana Común Tripartita 2020-2024 - SPU / SIES / MEC]", fontsize=10.5, pad=10)
+    ax1.set_xlabel("Año Común Observado (Total Nacional por Sexo)", fontsize=9.5)
+    ax1.set_ylabel("% Mujeres Graduadas (Total Universitario)", fontsize=10)
     ax1.set_ylim(0, 100)
-    ax1.legend(loc='upper left', fontsize=9)
-    ax1.set_xticklabels(ax1.get_xticklabels(), rotation=20, ha='right')
-    ax1.text(0.02, 0.03, "* Uruguay: Sin apertura por sexo en fuente oficial MEC", transform=ax1.transAxes, fontsize=8, fontstyle='italic', color='#555555')
+    ax1.legend(loc='upper left', fontsize=8.5)
+    ax1.set_xticklabels(ax1.get_xticklabels(), rotation=0, ha='center')
 
-    # Panel 2: Empleo formal observado OIT 2024
-    pivot_emp = df_gen_final.pivot(index='sector', columns='pais', values='Pct_Mujeres_Empleadas')
+    # Panel 2: Empleo total observado OIT 2024 por sector
+    df_emp_sec = df_gen_final[df_gen_final['sector'].isin(sectores_lista)]
+    pivot_emp = df_emp_sec.pivot(index='sector', columns='pais', values='Pct_Mujeres_Empleadas').reindex(sectores_lista)
     cols_emp = [c for c in ['ARG', 'CHL', 'URY'] if c in pivot_emp.columns]
 
     if not pivot_emp.empty:
         pivot_emp[cols_emp].plot(kind='bar', ax=ax2, color=[colores_pais[c] for c in cols_emp], width=0.65)
     ax2.axhline(50, color='black', linestyle='--', linewidth=1.2, label='Paridad Exacta (50%)')
     ax2.axhspan(40, 60, color='green', alpha=0.12, label='Franja Paridad EIGE/OIT (40%-60%)')
-    ax2.set_title("2. Personas Ocupadas (% Mujeres)\n[Año Común Tripartito 2024 - OIT/ILOSTAT]", fontsize=11, pad=10)
-    ax2.set_xlabel("Sector Estratégico", fontsize=10)
-    ax2.set_ylabel("% Mujeres Empleadas", fontsize=10)
+    ax2.set_title("2. Personas Ocupadas por Sector (% Mujeres)\n[Año Común Tripartito 2024 - OIT / ILOSTAT]", fontsize=10.5, pad=10)
+    ax2.set_xlabel("Sector Estratégico (Empleo Total)", fontsize=9.5)
+    ax2.set_ylabel("% Mujeres Empleadas (Total Sector)", fontsize=10)
     ax2.set_ylim(0, 100)
-    ax2.legend(loc='upper left', fontsize=9)
+    ax2.legend(loc='upper left', fontsize=8.5)
     ax2.set_xticklabels(ax2.get_xticklabels(), rotation=20, ha='right')
 
-    plt.suptitle("Observatorio Predictivo: Brechas Formativas y Laborales por Género (Referencia: EIGE / OIT 40%-60%)", fontsize=13, y=0.98)
+    # Panel 3: Personas ocupadas con Educacion Superior OIT 2024 por sector
+    pivot_edu = df_emp_sec.pivot(index='sector', columns='pais', values='Pct_Mujeres_Graduadas').reindex(sectores_lista)
+    cols_edu = [c for c in ['ARG', 'CHL', 'URY'] if c in pivot_edu.columns]
+
+    if not pivot_edu.empty:
+        pivot_edu[cols_edu].plot(kind='bar', ax=ax3, color=[colores_pais[c] for c in cols_edu], width=0.65)
+    ax3.axhline(50, color='black', linestyle='--', linewidth=1.2, label='Paridad Exacta (50%)')
+    ax3.axhspan(40, 60, color='green', alpha=0.12, label='Franja Paridad EIGE/OIT (40%-60%)')
+    ax3.set_title("3. Ocupados con Educación Superior por Sector (% Mujeres)\n[Año Común Tripartito 2024 - OIT / ILOSTAT]", fontsize=10.5, pad=10)
+    ax3.set_xlabel("Sector Estratégico (Nivel Terciario / Universitario)", fontsize=9.5)
+    ax3.set_ylabel("% Mujeres con Educación Superior", fontsize=10)
+    ax3.set_ylim(0, 100)
+    ax3.legend(loc='upper left', fontsize=8.5)
+    ax3.set_xticklabels(ax3.get_xticklabels(), rotation=20, ha='right')
+
+    plt.suptitle("Observatorio Predictivo: Brechas Formativas (Total Universitario), Laborales y de Profesionales por Género (EIGE / OIT 40%-60%)", fontsize=13, y=0.98)
     plt.tight_layout()
 
     ruta_gen_img = paths['graficos'] / "analisis_genero_empleabilidad_brecha.png"
     plt.savefig(ruta_gen_img, dpi=200)
     plt.close()
-    print(f"  ✅ Grafico de genero guardado en: {ruta_gen_img.name}")
+    print(f"  ✅ Grafico de genero (3 paneles) guardado en: {ruta_gen_img.name}")
 
     # 6. Rankings Universitarios (Tanda 4: 100% datos observados)
     print("\n[Paso 6/6] Construyendo rankings universitarios regionales y nacionales (datos 100% observados)...")
@@ -756,14 +857,15 @@ def ejecutar_indicadores(base_dir=None):
             grp_reg_anual['periodo_tipo'] = 'anual_comun'
             grp_reg_anual['periodo_detalle'] = f"Ano {anio_comun_regional} (Ultimo ano comun observado ARG, CHL, URY)"
 
-            # 2. Acumulado historico observado
-            grp_reg_acum = df_inst_raw.groupby(['institucion', 'pais', 'tipo_gestion'], as_index=False)['graduados'].sum()
+            # 2. Acumulado trienal en ventana comun tripartita observada (2020-2022)
+            df_inst_comun_3a = df_inst_raw[df_inst_raw['anio'].isin([2020, 2021, 2022])]
+            grp_reg_acum = df_inst_comun_3a.groupby(['institucion', 'pais', 'tipo_gestion'], as_index=False)['graduados'].sum()
             grp_reg_acum = grp_reg_acum.sort_values('graduados', ascending=False).head(10).reset_index(drop=True)
             grp_reg_acum['ranking_regional'] = grp_reg_acum.index + 1
-            grp_reg_acum['anio_evaluado'] = '2007-2025'
-            grp_reg_acum['criterio_paridad'] = 'acumulado_historico_total'
+            grp_reg_acum['anio_evaluado'] = '2020-2022'
+            grp_reg_acum['criterio_paridad'] = 'acumulado_ventana_comun_tripartita'
             grp_reg_acum['periodo_tipo'] = 'acumulado'
-            grp_reg_acum['periodo_detalle'] = 'Ventana historica completa observada'
+            grp_reg_acum['periodo_detalle'] = 'Acumulado ventana comun tripartita 2020-2022 (ARG, CHL, URY en los 5 sectores)'
 
             df_top_regional = pd.concat([grp_reg_anual, grp_reg_acum], ignore_index=True)
             archivo_reg = paths['output'] / 'ranking_universidades_regional.csv'

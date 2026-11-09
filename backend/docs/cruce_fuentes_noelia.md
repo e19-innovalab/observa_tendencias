@@ -60,8 +60,7 @@ entrega en `GET /graduates/universities` y `GET /graduates/universities/ranking`
 
 ## Lo que no se consolidó
 
-- **`00._educ_superior_datos.csv`:** es el archivo CTI de Argentina. El README de Noelia y
-  `cleaning_02.py:853` lo rotulan como Uruguay.
+- **`00._educ_superior_datos.csv`:** es el archivo CTI/SPU de Argentina (2014-2023). En una versión inicial figuraba en Uruguay; en la versión actual de `data_analytics` (`cleaning_02.py`, `fuentes.yaml` y `README.md`) ya fue reubicado en Argentina y para Uruguay se integraron los 5 Anuarios Estadísticos de Educación del MEC (2020-2024) junto con la serie histórica de UdelaR (2000-2024).
 - **`base_araucano_traducida.xlsx`:** son microdatos individuales (id, año de nacimiento, salario),
   de origen sin confirmar. No es un censo: en 2018 tiene unos 100.000 egresados de pregrado y grado,
   contra 132.744 del anuario.
