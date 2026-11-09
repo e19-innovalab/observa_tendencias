@@ -62,10 +62,10 @@ El diseño de la arquitectura de información se abordó mediante una metodolog�
 
 * **Experiencia de Descubrimiento (Onboarding):** Diagramación de la narrativa visual y de contenido en la zona pública para comunicar la propuesta de valor del Observatorio y facilitar el acceso a la plataforma.
 * **Gestión de Accesos y Roles:** Modelado de la navegación y permisos del sistema estructurados en tres perfiles clave:
-  * **Consultas:** Acceso a las vistas públicas y privadas (incluyendo análisis y alertas) en modo lectura, sin acceso al área de gestión ni administración.
-  * **Editor:** Permisos idénticos al rol de Consultas, sumando el acceso al módulo de **Gestión de Datos** para la carga, actualización y eliminación de datasets.
-  * **Administrador:** Control total del sistema. Incluye todos los permisos anteriores más el acceso exclusivo a **Gestión de Usuarios** para crear, editar, asignar roles y eliminar usuarios de la plataforma.
-* **Modelado de Módulos y Taxonomía de Datos:** Definición conceptual de las pantallas clave (*Panorama Regional, Sectores, Ocupaciones, Habilidades y Alertas*), estableciendo la jerarquía de filtros, la organización de métricas socioeconómicas, laborales y educativas, y la estructura para la gestión de fuentes de datos.
+  * **Consultas:** Acceso a las vistas públicas y privadas (incluyendo análisis, indicadores y alertas) en modo lectura, sin permisos de edición ni gestión.
+  * **Editor:** Permisos de consulta sumando el acceso exclusivo al módulo de **Gestión de Datos** para la carga, actualización y administración de datasets.
+  * **Administrador:** Control total del sistema, incluyendo todos los permisos anteriores más el acceso exclusivo a **Gestión de Usuarios** para la administración de accesos y roles de la plataforma.
+* **Modelado de Módulos y Taxonomía de Datos:** Definición conceptual de las pantallas y secciones clave (*Panorama Regional, Sectores, Ocupaciones, Habilidades y formación, Índices & Pulsos, Metodología y fuentes, y Alertas*), estableciendo la jerarquía de filtros, la organización de métricas socioeconómicas, laborales y educativas, y la estructura para la administración de fuentes de datos.
 ---
 
 ## 3. Diseño de Interfaz (UI) y Prototipado
@@ -79,20 +79,26 @@ Se trabaja en la maquetación progresiva de pantallas, componentes y prototipos 
 | :--- | :---: | :---: |
 | Landing Page | 🟢 `COMPLETADO` | ⚪ `PENDIENTE` |
 | Iniciar sesión *(Login)* | 🟢 `COMPLETADO` | ⚪ `PENDIENTE` |
-| Registrarse *(Sign Up)* | ⚪ `PENDIENTE` | ⚪ `PENDIENTE` |
+| Registrarse *(Sign Up)* | 🟢 `COMPLETADO` | ⚪ `PENDIENTE` |
 
 #### Navegación Privada
 | Vista / Módulo | Wireframes | Diseño Final |
 | :--- | :---: | :---: |
-| Inicio *(Dashboard principal)* | 🟢 `COMPLETADO` | ⚪ `PENDIENTE` |
-| Panorama regional | 🟢 `COMPLETADO` | ⚪ `PENDIENTE` |
+| Panorama regional | 🟢 `COMPLETADO` | 🟢 `COMPLETADO` |
 | Sectores | 🟢 `COMPLETADO` | ⚪ `PENDIENTE` |
-| Ocupaciones | 🟢 `COMPLETADO` | ⚪ `PENDIENTE` |
+| Ocupaciones *(Listado principal)* | 🟢 `COMPLETADO` | ⚪ `PENDIENTE` |
 | └─ *Detalle de Ocupación* | 🟢 `COMPLETADO` | ⚪ `PENDIENTE` |
 | Habilidades | 🟢 `COMPLETADO` | ⚪ `PENDIENTE` |
-| Metodologías | 🟢 `COMPLETADO` | ⚪ `PENDIENTE` |
-| Alertas | ⚪ `PENDIENTE` | ⚪ `PENDIENTE` |
-| Gestión / Administración | 🟢 `COMPLETADO` | ⚪ `PENDIENTE` |
+| Género | 🟡 `EN PROCESO` | ⚪ `PENDIENTE` |
+| **Índices & Pulsos** *(Módulo Principal / Submenú)* | ⚪ `PENDIENTE` | ⚪ `PENDIENTE` |
+| ├─ *Pulso Laboral* | ⚪ `PENDIENTE` | ⚪ `PENDIENTE` |
+| ├─ *Moctezuma* | ⚪ `PENDIENTE` | ⚪ `PENDIENTE` |
+| ├─ *Ludita* | ⚪ `PENDIENTE` | ⚪ `PENDIENTE` |
+| ├─ *Reina Roja* | ⚪ `PENDIENTE` | ⚪ `PENDIENTE` |
+| └─ *Sísifo* | ⚪ `PENDIENTE` | ⚪ `PENDIENTE` |
+| Alertas | 🟡 `EN PROCESO` | ⚪ `PENDIENTE` |
+| Metodología y fuentes | 🟢 `COMPLETADO` | ⚪ `PENDIENTE` |
+| **Gestión / Administración** *(Módulo Principal / Submenú)* | 🟢 `COMPLETADO` | ⚪ `PENDIENTE` |
 | ├─ *Gestión de Usuarios* | 🟢 `COMPLETADO` | ⚪ `PENDIENTE` |
 | └─ *Gestión de Datos* | 🟢 `COMPLETADO` | ⚪ `PENDIENTE` |
 
@@ -101,7 +107,7 @@ Se trabaja en la maquetación progresiva de pantallas, componentes y prototipos 
 | :--- | :---: | :---: |
 | Paleta de colores, Logo e Identidad definitiva | 🟡 `EN PROCESO` | ⚪ `PENDIENTE` |
 | Componentes del UI Kit | 🟡 `EN PROCESO` | ⚪ `PENDIENTE` |
-| Estados de interacción *(Hover, Active, Disabled, etc.)* | ⚪ `PENDIENTE` | ⚪ `PENDIENTE` |
+| Estados de interacción *(Hover, Active, Disabled, etc.)* | 🟡 `EN PROCESO` | ⚪ `PENDIENTE` |
 
 ---
 
