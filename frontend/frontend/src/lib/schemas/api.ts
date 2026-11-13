@@ -297,6 +297,10 @@ export const SkillItemSchema = z.object({
   skill_type: z.string().nullable(),
   skill_type_label: z.string().nullable(),
   esco_uri: z.string().nullable(),
+  description: z.string().nullable().optional(),
+  description_en: z.string().nullable().optional(),
+  description_origin: z.string().nullable().optional(),
+  group_code: z.string().nullable().optional(),
   weight: z.number().nullable().optional(),
   occupations: z.number().nullable().optional(),
 });
@@ -347,8 +351,36 @@ export const SkillDetailSchema = SkillItemSchema.extend({
 });
 
 /* ---------- Brechas de habilidades ---------- */
+const SkillDescriptionSchema = z.object({
+  description: z.string().nullable().optional(),
+  description_en: z.string().nullable().optional(),
+  description_origin: z.string().nullable().optional(),
+  group_code: z.string().nullable().optional(),
+});
+
+export const SectorUseSchema = z.object({
+  sector_code: z.string().nullable(),
+  name: z.string(),
+  relation: z.string(),
+  relation_label: z.string(),
+  occupations: z.array(
+    z.object({
+      occupation_code: z.string(),
+      name: z.string(),
+      relation: z.string(),
+      relation_label: z.string(),
+      via: z.array(z.string()).default([]),
+    }),
+  ),
+});
+export type SectorUse = z.infer<typeof SectorUseSchema>;
+
+const OccupationNameSchema = z
+  .object({ occupation: z.string().optional(), name: z.string().optional() })
+  .loose();
+
 export const SkillGapItemSchema = z.object({
-  skill: SkillItemSchema,
+  skill: SkillItemSchema.extend(SkillDescriptionSchema.shape),
   country_iso3: z.string(),
   year: z.number(),
   demand_growth: z.number().nullable(),
@@ -357,23 +389,86 @@ export const SkillGapItemSchema = z.object({
   is_emerging: z.boolean(),
   data_sufficiency: z.string(),
   data_sufficiency_label: z.string(),
-  demand_coverage: z.number(),
-  supply_coverage: z.number(),
+  demand_coverage: z.number().default(1),
+  supply_coverage: z.number().default(1),
   occupations: z.number(),
-  top_occupations: z.array(z.record(z.string(), z.unknown())),
-  data_type: z.string(),
-  data_type_label: z.string(),
+  top_occupations: z.array(OccupationNameSchema).default([]),
+  sectors: z.array(SectorUseSchema).default([]),
+  is_cross_sector: z.boolean().default(false),
+  unstable_supply: z.array(OccupationNameSchema).default([]),
+  data_type: z.string().optional(),
+  data_type_label: z.string().optional(),
   methodology: MethodologyRefSchema,
 });
 
-export const SkillGapsPageSchema = z.object({
-  view: z.string(),
-  sort_by: z.string(),
-  order: z.string(),
-  min_occupations: z.number(),
+export const SkillGroupGapsPageSchema = z.object({
   total: z.number(),
   full_total: z.number(),
   year: z.number().nullable(),
+  available_years: z.array(z.number()).default([]),
+  data_through: z
+    .array(
+      z.object({
+        country_iso3: z.string(),
+        demand: z.number().nullable(),
+        supply: z.number().nullable(),
+        supplemented_years: z.array(z.number()).default([]),
+        supply_note: z.string().nullable().default(null),
+      }),
+    )
+    .default([]),
+  group_level: z.number(),
+  crosswalk_reviewed: z.record(z.string(), z.boolean()),
+  items: z.array(
+    z.object({
+      group: z.object({
+        group_code: z.string(),
+        name: z.string(),
+        description: z.string().nullable(),
+        description_en: z.string().nullable(),
+        description_origin: z.string().nullable(),
+        level: z.number(),
+        parent: z.string().nullable(),
+      }),
+      country_iso3: z.string(),
+      year: z.number(),
+      demand_growth: z.number().nullable(),
+      supply_growth: z.number().nullable(),
+      gap: z.number().nullable(),
+      is_emerging: z.boolean(),
+      data_sufficiency: z.string(),
+      occupations: z.number(),
+      skills: z.number(),
+      top_skills: z.array(SkillItemSchema),
+      top_occupations: z.array(OccupationNameSchema).default([]),
+      sectors: z.array(SectorUseSchema).default([]),
+      is_cross_sector: z.boolean().default(false),
+      unstable_supply: z.array(OccupationNameSchema).default([]),
+    }),
+  ),
+});
+export type SkillGroupGapsPage = z.infer<typeof SkillGroupGapsPageSchema>;
+
+export const SkillGapsPageSchema = z.object({
+  view: z.string().default('all'),
+  sort_by: z.string().default('gap'),
+  order: z.string().default('desc'),
+  min_occupations: z.number().default(3),
+  total: z.number(),
+  full_total: z.number(),
+  year: z.number().nullable(),
+  available_years: z.array(z.number()).default([]),
+  data_through: z
+    .array(
+      z.object({
+        country_iso3: z.string(),
+        demand: z.number().nullable(),
+        supply: z.number().nullable(),
+        supplemented_years: z.array(z.number()).default([]),
+        supply_note: z.string().nullable().default(null),
+      }),
+    )
+    .default([]),
   limit: z.number(),
   offset: z.number(),
   crosswalk_reviewed: z.record(z.string(), z.boolean()),
@@ -410,6 +505,77 @@ export const GraduateProjectionItemSchema = z.object({
   limite_superior: z.number(),
 });
 
+/* ---------- Ofertas de empleo (LinkedIn / Apify) ---------- */
+export const JobItemSchema = z
+  .object({
+    id: z.string(),
+    pais: z.string().optional(),
+    provincia: z.string(),
+    sector: z.string(),
+    regla_clasificacion: z.string().optional(),
+    titulo: z.string(),
+    empresa: z.string().nullable(),
+    ubicacion: z.string().nullable().optional(),
+    fecha_publicacion: z.string().nullable(),
+    nivel_experiencia: z.string().nullable(),
+    tipo_empleo: z.string().nullable(),
+    industria: z.string().nullable().optional(),
+    postulantes: z.number().nullable().optional(),
+    url: z.string(),
+    scraped_at: z.string().optional(),
+  })
+  .loose();
+
+export const JobsPageSchema = z
+  .object({
+    total: z.number(),
+    limit: z.number(),
+    offset: z.number(),
+    items: z.array(JobItemSchema),
+    source: z.string().optional(),
+  })
+  .loose();
+
+export const JobsSummaryCellSchema = z
+  .object({ provincia: z.string(), sector: z.string(), n: z.number() })
+  .loose();
+
+export const JobsCompetitionSchema = z
+  .object({
+    sector: z.string().nullable(),
+    ofertas: z.number(),
+    con_postulantes: z.number(),
+    mediana_postulantes: z.number().nullable(),
+    en_tope: z.number().nullable(),
+  })
+  .loose();
+
+export const JobsViewSchema = z
+  .object({
+    notice: z.string(),
+    footnote: z.string(),
+    source_label: z.string(),
+    period_label: z.string(),
+    sector_order: z.array(z.string()),
+    other_sector: z.string(),
+    no_level: z.string(),
+    page_size: z.number(),
+    applicants_cap: z.number(),
+    competition_min_postings: z.number(),
+  })
+  .loose();
+
+export const JobsSummarySchema = z
+  .object({
+    total: z.number(),
+    scraped_at: z.string().nullable(),
+    por_provincia_sector: z.array(JobsSummaryCellSchema),
+    competencia: z.array(JobsCompetitionSchema).default([]),
+    source: z.string(),
+    view: JobsViewSchema,
+  })
+  .loose();
+
 /* ---------- Tipos inferidos ---------- */
 export type Country = z.infer<typeof CountrySchema>;
 export type Sector = z.infer<typeof SectorSchema>;
@@ -437,5 +603,8 @@ export type SkillItem = z.infer<typeof SkillItemSchema>;
 export type OccupationSkills = z.infer<typeof OccupationSkillsSchema>;
 export type SkillGapItem = z.infer<typeof SkillGapItemSchema>;
 export type SkillGapsPage = z.infer<typeof SkillGapsPageSchema>;
+export type JobItem = z.infer<typeof JobItemSchema>;
+export type JobsPage = z.infer<typeof JobsPageSchema>;
+export type JobsSummary = z.infer<typeof JobsSummarySchema>;
 export type GraduateTrendItem = z.infer<typeof GraduateTrendItemSchema>;
 export type GraduateProjectionItem = z.infer<typeof GraduateProjectionItemSchema>;

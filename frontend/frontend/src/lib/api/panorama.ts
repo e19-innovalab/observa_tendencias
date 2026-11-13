@@ -1,10 +1,13 @@
 import { z } from 'zod';
 import {
+  CompareResultSchema,
   CountrySchema,
   DashboardSummarySchema,
   IndicatorSchema,
   ObservationsPageSchema,
+  ProjectionResultSchema,
   SectorSchema,
+  TrendItemSchema,
 } from '../schemas/api';
 import { apiGet } from './client';
 
@@ -35,4 +38,24 @@ export const getObservations = (params: {
       limit: 1000,
     },
     60,
+  );
+
+export const getCompare = (indicator: string, countries: string[], sector?: string) =>
+  apiGet('/compare', CompareResultSchema, { indicator, countries, sector }, 300);
+
+export const getTrends = (indicator: string, countries: string[], sector?: string) =>
+  apiGet('/trends', z.array(TrendItemSchema), { indicator, country: countries, sector }, 300);
+
+export const getProjections = (
+  indicator: string,
+  countries: string[],
+  sector?: string,
+  fromYear?: string,
+  toYear?: string,
+) =>
+  apiGet(
+    '/projections',
+    ProjectionResultSchema,
+    { indicator, country: countries, sector, from_year: fromYear, to_year: toYear },
+    300,
   );

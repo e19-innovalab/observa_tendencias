@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { ArrowRight, Briefcase, Globe2, GraduationCap, Layers, TrendingUp } from 'lucide-react';
+import { ArrowRight, Activity, Briefcase, Globe2, GraduationCap, Layers, Sparkles, TrendingUp } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { QuickAccess } from '@/lib/ui-types';
 
@@ -9,6 +9,8 @@ const ICONS = {
   briefcase: Briefcase,
   graduation: GraduationCap,
   trend: TrendingUp,
+  pulse: Activity,
+  sparkles: Sparkles,
 };
 
 /** Accesos rápidos del inicio: 4 tarjetas y una destacada de ancho completo. */

@@ -24,16 +24,23 @@ export function AppHeader({ userName, userRole, unreadAlerts }: Props) {
         </Link>
 
         <div className="flex items-center gap-2 sm:gap-4">
-          <button
-            type="button"
-            className="flex items-center gap-2 rounded-md bg-surface-2 px-3 py-2 text-sm font-medium text-body hover:bg-surface-alt focus-visible:outline-2 focus-visible:outline-focus sm:px-4"
-          >
-            Administración
-            <ChevronDown className="size-4" aria-hidden />
-          </button>
+          <details className="relative">
+            <summary className="flex cursor-pointer list-none items-center gap-2 rounded-md bg-surface-2 px-3 py-2 text-sm font-medium text-body hover:bg-surface-alt focus-visible:outline-2 focus-visible:outline-focus sm:px-4 [&::-webkit-details-marker]:hidden">
+              Administración
+              <ChevronDown className="size-4" aria-hidden />
+            </summary>
+            <div className="absolute right-0 z-20 mt-2 w-56 overflow-hidden rounded-md border border-line bg-surface py-1 shadow-lg">
+              <Link
+                href="/admin/datos"
+                className="block px-4 py-2 text-sm text-body hover:bg-surface-2 focus-visible:outline-2 focus-visible:outline-focus"
+              >
+                Carga de datos
+              </Link>
+            </div>
+          </details>
 
-          <button
-            type="button"
+          <Link
+            href="/alertas"
             className="relative rounded-md p-2 text-brand hover:bg-surface-2 focus-visible:outline-2 focus-visible:outline-focus"
             aria-label={`Notificaciones, ${unreadAlerts} sin leer`}
           >
@@ -43,7 +50,7 @@ export function AppHeader({ userName, userRole, unreadAlerts }: Props) {
                 {unreadAlerts > 9 ? '9+' : unreadAlerts}
               </span>
             )}
-          </button>
+          </Link>
 
           <div className="flex items-center gap-3 border-l border-line pl-3 sm:pl-4">
             <span className="flex size-9 items-center justify-center rounded-full bg-brand/15 text-brand">

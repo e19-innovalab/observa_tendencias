@@ -47,6 +47,6 @@ export type QuickAccess = {
   title: string;
   description: string;
   href: string;
-  icon: 'globe' | 'layers' | 'briefcase' | 'graduation' | 'trend';
+  icon: 'globe' | 'layers' | 'briefcase' | 'graduation' | 'trend' | 'pulse' | 'sparkles';
   featured?: boolean;
 };

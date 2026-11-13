@@ -27,6 +27,18 @@ export const QUICK_ACCESS: QuickAccess[] = [
     icon: 'graduation',
   },
   {
+    title: 'Pulso laboral',
+    description: 'Ofertas y demanda del mercado',
+    href: '/pulso',
+    icon: 'pulse',
+  },
+  {
+    title: 'Indicadores experimentales',
+    description: 'Moctezuma, Ludita, Reina Roja y Sísifo',
+    href: '/moctezuma',
+    icon: 'sparkles',
+  },
+  {
     title: 'Tendencias',
     description: 'Seguí la evolución de los indicadores',
     href: '/tendencias',

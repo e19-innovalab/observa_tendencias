@@ -45,6 +45,17 @@ export function formatSignedPoints(fraction: number, digits = 1): string {
   return `${fraction > 0 ? '+' : ''}${n} pp`;
 }
 
+/** Puntaje de los índices 0-100 con un decimal. */
+export function formatScore(value: number | null | undefined): string {
+  return value === null || value === undefined ? '—' : decimal(1).format(value);
+}
+
+/** Fracción de crecimiento 0,047 → "+4,7%" (sin decimales fijos). */
+export function formatGrowth(value: number | null | undefined): string {
+  if (value === null || value === undefined) return '—';
+  return `${value > 0 ? '+' : ''}${formatNumber(value * 100, 1)}%`;
+}
+
 /** Fracción 0,032 → "+3,2%". */
 export function formatSignedPercent(fraction: number, digits = 2): string {
   const n = decimal(digits).format(fraction * 100);

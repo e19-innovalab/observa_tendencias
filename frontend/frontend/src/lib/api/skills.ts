@@ -3,6 +3,7 @@ import {
   OccupationSkillsSchema,
   SkillDetailSchema,
   SkillGapsPageSchema,
+  SkillGroupGapsPageSchema,
   SkillItemSchema,
 } from '../schemas/api';
 import { apiGet } from './client';
@@ -11,6 +12,10 @@ export type GapView = 'top' | 'bottom' | 'all';
 
 export const getSkillGaps = (params: {
   countries?: string[];
+  country?: string;
+  sector?: string;
+  relation?: string;
+  year?: string;
   view?: GapView;
   sortBy?: 'gap' | 'demand_growth' | 'supply_growth' | 'occupations';
   order?: 'asc' | 'desc';
@@ -24,7 +29,10 @@ export const getSkillGaps = (params: {
     '/skills/gaps',
     SkillGapsPageSchema,
     {
-      country: params.countries,
+      country: params.country ?? params.countries,
+      sector: params.sector,
+      relation: params.relation,
+      year: params.year,
       view: params.view,
       sort_by: params.sortBy,
       order: params.order,
@@ -35,6 +43,41 @@ export const getSkillGaps = (params: {
       offset: params.offset,
     },
     60,
+  );
+
+/** Brechas por grupo de habilidades de ESCO. */
+export const getSkillGroupGaps = (params: {
+  country?: string;
+  sector?: string;
+  relation?: string;
+  view?: GapView;
+  q?: string;
+  year?: string;
+  limit?: number;
+  offset?: number;
+} = {}) =>
+  apiGet(
+    '/skills/groups/gaps',
+    SkillGroupGapsPageSchema,
+    {
+      country: params.country,
+      sector: params.sector,
+      relation: params.relation,
+      view: params.view,
+      q: params.q,
+      year: params.year,
+      limit: params.limit,
+      offset: params.offset,
+    },
+    60,
+  );
+
+export const getOccupations = (sector?: string) =>
+  apiGet(
+    '/occupations',
+    z.array(z.object({ occupation_code: z.string(), name: z.string() }).loose()),
+    { sector },
+    3600,
   );
 
 export const getOccupationSkills = (
