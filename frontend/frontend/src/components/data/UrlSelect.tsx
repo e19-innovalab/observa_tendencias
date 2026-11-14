@@ -18,12 +18,12 @@ export function UrlSelect({ name, label, options, value, reset = [] }: { name: s
     router.push(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
   };
   return (
-    <label className="inline-flex items-center gap-2 text-[13px] text-muted-text">
+    <label className="inline-flex items-center gap-2 text-[10.5px] font-bold tracking-[0.08em] text-label uppercase">
       {label}
       <select
         value={value}
         onChange={(e) => change(e.target.value)}
-        className="h-9 rounded-lg border border-line bg-canvas px-2.5 text-[13px] text-heading focus-visible:outline-2 focus-visible:outline-focus"
+        className="h-9 rounded-lg border border-card-border bg-canvas px-2.5 text-[12.5px] font-semibold tracking-normal text-heading focus-visible:border-brand focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
       >
         {options.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
       </select>

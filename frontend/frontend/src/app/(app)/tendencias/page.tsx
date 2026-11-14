@@ -1,11 +1,14 @@
 import type { Metadata } from 'next';
 import { io } from 'next/cache';
+import { ChipGroup, CountTabs } from '@/components/data/UrlControls';
+import { CountryFilter } from '@/components/data/CountryFilter';
 import { ChartCard } from '@/components/ui/charts/ChartCard';
 import { TrendLineChart } from '@/components/ui/charts/TrendLineChart';
 import { OptionPills } from '@/components/ui/controls/OptionPills';
 import { ApiErrorNote, EmptyDataNote } from '@/components/ui/feedback/ApiErrorNote';
 import { InfoNote } from '@/components/ui/feedback/InfoNote';
 import { FilterBar, type FilterConfig } from '@/components/ui/filters/FilterBar';
+import { FilterLabel, FilterPanel } from '@/components/ui/filters/FilterPanel';
 import { PageHero } from '@/components/ui/layout/PageHero';
 import { SectionTabs } from '@/components/ui/navigation/SectionTabs';
 import { ApiError } from '@/lib/api/client';
@@ -215,7 +218,7 @@ export default async function TendenciasPage({ searchParams }: { searchParams: P
         description="Seguí la evolución de los indicadores socioeconómicos, laborales y educativos de Argentina, Chile y Uruguay, y compará su proyección."
       />
 
-      <div className="mx-auto max-w-7xl space-y-6 px-4 py-6 sm:px-6">
+      <div className="mx-auto max-w-7xl space-y-4 px-4 py-6 sm:px-6">
         <SectionTabs
           tabs={[
             { id: 'trends', label: 'Tendencias' },
@@ -224,29 +227,36 @@ export default async function TendenciasPage({ searchParams }: { searchParams: P
           active={tab}
         />
 
-        <div className="space-y-5 rounded-lg border border-line bg-surface p-4 sm:p-5">
-          <div>
-            <p className="mb-2 text-[11px] font-semibold uppercase tracking-wide text-muted-text">
-              Países
-            </p>
-            <OptionPills
-              param="country"
-              label="Países"
-              options={[
-                { value: 'all', label: `Todos (${countries.length})` },
-                ...countries.map((country) => ({ value: country.iso3, label: country.iso3 })),
-              ]}
-              defaultValue="all"
+        <FilterPanel>
+          <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-3">
+            <div className="flex flex-wrap items-center gap-2.5">
+              <FilterLabel>Países</FilterLabel>
+              <CountryFilter
+                countries={countries}
+                value={sp.country && sp.country !== 'all' ? sp.country : ''}
+                reset={['page']}
+              />
+            </div>
+            <FilterBar filters={filters} />
+          </div>
+
+          <div className="mt-4">
+            <CountTabs
+              name="group"
+              label="Grupo de indicadores"
+              options={domains.map((item) => ({
+                value: item.id,
+                label: item.label,
+                count: item.count,
+              }))}
+              value={domain}
+              reset={['indicator']}
             />
           </div>
 
-          <FilterBar filters={filters} />
-
-          <div className="grid gap-5 lg:grid-cols-[auto_1fr] lg:items-center">
-            <div className="flex flex-wrap items-center gap-3">
-              <span className="text-[11px] font-semibold uppercase tracking-wide text-muted-text">
-                Frecuencia
-              </span>
+          <div className="mt-3.5 flex flex-wrap items-center gap-x-6 gap-y-3">
+            <div className="flex items-center gap-2.5">
+              <FilterLabel>Frecuencia</FilterLabel>
               <OptionPills
                 param="freq"
                 label="Frecuencia"
@@ -255,37 +265,19 @@ export default async function TendenciasPage({ searchParams }: { searchParams: P
                 variant="segment"
               />
             </div>
-
-            <div className="flex flex-wrap items-center gap-3">
-              <span className="text-[11px] font-semibold uppercase tracking-wide text-muted-text">
-                Grupo de indicadores
-              </span>
-              <OptionPills
-                param="group"
-                label="Grupo de indicadores"
-                options={domains.map((item) => ({
-                  value: item.id,
-                  label: item.label,
-                  hint: String(item.count),
-                }))}
-                defaultValue={domains[0].id}
-                variant="segment"
+            <div className="flex min-w-0 flex-wrap items-center gap-2">
+              <FilterLabel>Indicador</FilterLabel>
+              <ChipGroup
+                name="indicator"
+                label="Indicador"
+                hideLabel
+                withAll={false}
+                options={inDomain.map((item) => ({ value: item.code, label: item.name }))}
+                value={indicator.code}
               />
             </div>
           </div>
-
-          <div className="flex flex-wrap items-center gap-2">
-            <span className="text-[11px] font-semibold uppercase tracking-wide text-muted-text">
-              Indicador
-            </span>
-            <OptionPills
-              param="indicator"
-              label="Indicador"
-              options={inDomain.map((item) => ({ value: item.code, label: item.name }))}
-              defaultValue={inDomain[0].code}
-            />
-          </div>
-        </div>
+        </FilterPanel>
 
         {error && <ApiErrorNote message={error} />}
 

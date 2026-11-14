@@ -18,7 +18,8 @@ export const metadata: Metadata = { title: 'Inicio' };
 type Kpi = {
   label: string;
   value: string;
-  caption: string;
+  year: string;
+  codes: string;
   changeText: string | null;
   negative: boolean;
 };
@@ -57,14 +58,14 @@ function buildRegionalKpis(summaries: DashboardSummary[]): Kpi[] {
     const periods = [
       ...new Set(items.flatMap((item) => (item.current ? [item.current.period] : []))),
     ].sort();
-    const periodText =
-      periods.length <= 1 ? (periods[0] ?? '') : `${periods[0]}–${periods.at(-1)}`;
+    const year = periods.at(-1)?.slice(0, 4) ?? '';
 
     return [
       {
         label: indicator.name,
         value: formatValue(value, indicator.unit),
-        caption: `${countryCodes.join(', ')} · ${periodText}`,
+        year,
+        codes: countryCodes.join(', '),
         changeText: formatChange(change, items[0]?.change_kind ?? 'absolute', indicator.unit),
         negative: change !== null && change < 0,
       },
@@ -123,7 +124,8 @@ export default async function InicioPage() {
                 key={kpi.label}
                 label={kpi.label}
                 value={kpi.value}
-                caption={kpi.caption}
+                year={kpi.year}
+                codes={kpi.codes}
                 changeText={kpi.changeText}
                 negative={kpi.negative}
               />
@@ -152,7 +154,7 @@ export default async function InicioPage() {
         {feed.length > 0 ? (
           <TrendsFeed items={feed} />
         ) : (
-          <p className="rounded-lg border border-line bg-surface px-4 py-6 text-center text-sm text-muted-text">
+          <p className="rounded-xl border border-card-border bg-rail px-4 py-6 text-center text-sm text-muted-text">
             No hay novedades recientes para mostrar.
           </p>
         )}

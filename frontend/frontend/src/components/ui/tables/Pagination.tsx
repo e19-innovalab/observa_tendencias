@@ -46,7 +46,7 @@ export function Pagination({ page, totalPages, total, pageSize, baseHref }: Prop
           href={hrefFor(baseHref, Math.max(1, page - 1))}
           aria-disabled={page === 1}
           className={cn(
-            'inline-flex size-9 items-center justify-center rounded-md border border-line text-body hover:bg-surface-alt',
+            'inline-flex size-9 items-center justify-center rounded-lg border border-card-border text-body hover:bg-surface-alt',
             page === 1 && 'pointer-events-none opacity-40',
           )}
         >
@@ -65,10 +65,10 @@ export function Pagination({ page, totalPages, total, pageSize, baseHref }: Prop
               href={hrefFor(baseHref, item)}
               aria-current={item === page ? 'page' : undefined}
               className={cn(
-                'inline-flex size-9 items-center justify-center rounded-md border text-sm font-medium',
+                'inline-flex size-9 items-center justify-center rounded-lg border text-sm font-medium',
                 item === page
-                  ? 'border-heading bg-heading text-white'
-                  : 'border-line text-body hover:bg-surface-alt',
+                  ? 'border-brand bg-brand text-white'
+                  : 'border-card-border text-body hover:bg-surface-alt',
               )}
             >
               {item}
@@ -80,7 +80,7 @@ export function Pagination({ page, totalPages, total, pageSize, baseHref }: Prop
           href={hrefFor(baseHref, Math.min(totalPages, page + 1))}
           aria-disabled={page === totalPages}
           className={cn(
-            'inline-flex h-9 items-center gap-1 rounded-md border border-line px-3 text-body hover:bg-surface-alt',
+            'inline-flex h-9 items-center gap-1 rounded-lg border border-card-border px-3 text-body hover:bg-surface-alt',
             page === totalPages && 'pointer-events-none opacity-40',
           )}
         >

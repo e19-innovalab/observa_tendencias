@@ -9,7 +9,7 @@ export function ApiErrorNote({ message, className }: Props) {
       role="alert"
       className={
         className ??
-        'rounded-lg border border-red-300 bg-red-50 px-4 py-3 text-sm text-red-900'
+        'rounded-xl border border-alert-critical-border bg-alert-critical-bg px-4 py-3 text-[12.5px] text-alert-critical-text'
       }
     >
       <p className="font-semibold">No se pudieron cargar los datos.</p>
@@ -21,7 +21,7 @@ export function ApiErrorNote({ message, className }: Props) {
 /** Mensaje neutro para combinaciones de filtros sin resultados. */
 export function EmptyDataNote({ children }: { children: ReactNode }) {
   return (
-    <div className="rounded-lg border border-dashed border-line bg-surface px-4 py-10 text-center text-sm text-muted-text">
+    <div className="rounded-xl border border-dashed border-card-border bg-rail px-4 py-10 text-center text-[12.5px] text-muted-text">
       {children}
     </div>
   );

@@ -217,7 +217,7 @@ export function Legend({ items }: { items: { label: string; color?: string; zone
     <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-text">
       {items.map((i) => (
         <span key={i.label} className="inline-flex items-center gap-1.5">
-          <i className={`inline-block size-2.5 ${i.zone ? 'rounded-sm border border-line' : 'rounded-full'}`} style={{ background: i.zone ? ZONE : i.color }} />
+          <i className={`inline-block size-2.5 ${i.zone ? 'rounded-sm border border-card-border' : 'rounded-full'}`} style={{ background: i.zone ? ZONE : i.color }} />
           {i.label}
         </span>
       ))}
@@ -227,10 +227,10 @@ export function Legend({ items }: { items: { label: string; color?: string; zone
 
 export function Panel({ era, title, tag, real, children, read }: { era: string; title: string; tag: string; real?: boolean; children: ReactNode; read: string }) {
   return (
-    <div className="flex min-w-0 flex-col gap-2.5 rounded-xl border border-line p-5">
+    <div className="flex min-w-0 flex-col gap-2.5 rounded-xl border border-card-border p-5">
       <p className="text-xs text-muted-text">{era}</p>
       <h3 className="font-semibold text-heading">{title}</h3>
-      <span className={`self-start rounded border px-2 py-0.5 text-[11px] font-medium uppercase tracking-wide ${real ? 'border-brand text-brand' : 'border-line text-muted-text'}`}>{tag}</span>
+      <span className={`self-start rounded border px-2 py-0.5 text-[11px] font-medium uppercase tracking-wide ${real ? 'border-brand text-brand' : 'border-card-border text-muted-text'}`}>{tag}</span>
       {children}
       <p className="text-sm text-muted-text">{read}</p>
     </div>

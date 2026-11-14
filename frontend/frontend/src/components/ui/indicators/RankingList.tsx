@@ -5,11 +5,11 @@ import { formatNumber } from '@/lib/utils/format';
 /** Ranking vertical con barra de progreso y valor sobre 100. */
 export function RankingList({ items }: { items: RankingItem[] }) {
   return (
-    <ol className="divide-y divide-line rounded-lg border border-line bg-canvas">
+    <ol className="divide-y divide-card-border rounded-xl border border-card-border bg-canvas">
       {items.map((item) => (
         <li key={item.rank} className="p-4 sm:p-5">
           <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-            <span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-brand/10 text-xs font-bold text-brand">
+            <span className="flex size-7 shrink-0 items-center justify-center rounded-lg bg-brand/8 text-[11px] font-bold text-brand">
               {item.rank}
             </span>
             <h3 className="text-sm font-semibold text-heading">{item.title}</h3>
@@ -23,7 +23,7 @@ export function RankingList({ items }: { items: RankingItem[] }) {
           <p className="mt-1 pl-10 text-xs text-muted-text">{item.meta}</p>
 
           {item.score !== null && (
-            <div className="mt-2 ml-10 h-2 overflow-hidden rounded-full bg-surface-2">
+            <div className="mt-2.5 ml-10 h-1.5 overflow-hidden rounded-full bg-surface-2">
               <div
                 className="h-full rounded-full bg-brand"
                 style={{ width: `${item.score}%` }}

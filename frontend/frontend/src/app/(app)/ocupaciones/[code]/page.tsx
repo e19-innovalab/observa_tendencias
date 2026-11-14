@@ -275,7 +275,7 @@ export default async function OcupacionDetallePage({ params, searchParams }: Pro
             {profile.top_skills.map((skill) => (
               <li
                 key={skill.skill_code}
-                className="rounded-lg border border-line bg-canvas p-4 text-sm"
+                className="rounded-xl border border-card-border bg-canvas p-4 text-sm"
               >
                 <p className="font-medium text-heading">{skill.name}</p>
                 <p className="mt-1 text-xs text-muted-text">
@@ -296,10 +296,10 @@ export default async function OcupacionDetallePage({ params, searchParams }: Pro
             title="Últimos datos de la ocupación"
             description="Observaciones más recientes informadas por la API para esta ocupación."
           />
-          <div className="overflow-x-auto rounded-lg border border-line bg-canvas">
+          <div className="overflow-x-auto rounded-xl border border-card-border bg-canvas">
             <table className="w-full min-w-[40rem] border-collapse text-left text-sm">
               <thead>
-                <tr className="border-b border-line bg-surface-2 text-[11px] uppercase tracking-wide text-muted-text">
+                <tr className="border-b border-card-border bg-surface-2 text-[11px] uppercase tracking-wide text-muted-text">
                   <th scope="col" className="px-4 py-3 font-semibold">País</th>
                   <th scope="col" className="px-4 py-3 font-semibold">Indicador</th>
                   <th scope="col" className="px-4 py-3 font-semibold">Período</th>
@@ -307,7 +307,7 @@ export default async function OcupacionDetallePage({ params, searchParams }: Pro
                   <th scope="col" className="px-4 py-3 font-semibold">Fuente</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-line">
+              <tbody className="divide-y divide-card-border">
                 {profile.latest.map((point) => (
                   <tr key={`${point.country_iso3}-${point.indicator_code}-${point.period}`} className="hover:bg-surface">
                     <td className="px-4 py-3">

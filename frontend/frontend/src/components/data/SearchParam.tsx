@@ -42,12 +42,12 @@ export function SearchParam({
 
   return (
     <label className="block">
-      <span className="mb-1.5 block text-[11px] font-semibold tracking-wide text-muted-text uppercase">
+      <span className="mb-1.5 block text-[10.5px] font-bold tracking-[0.08em] text-label uppercase">
         {label}
       </span>
       <span className="relative block">
         <Search
-          className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-text"
+          className="pointer-events-none absolute top-1/2 left-3 size-3.5 -translate-y-1/2 text-placeholder"
           aria-hidden
         />
         <input
@@ -55,7 +55,7 @@ export function SearchParam({
           value={value}
           onChange={(e) => onChange(e.target.value)}
           placeholder={placeholder}
-          className="w-full rounded-md border border-line bg-surface py-2 pr-3 pl-9 text-sm text-body placeholder:text-placeholder focus-visible:outline-2 focus-visible:outline-focus"
+          className="h-9 w-full rounded-lg border border-card-border bg-canvas py-1.5 pr-3 pl-9 text-[12.5px] text-body placeholder:text-placeholder hover:border-line focus-visible:border-brand focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
         />
       </span>
     </label>

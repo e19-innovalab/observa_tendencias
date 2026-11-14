@@ -4,7 +4,7 @@ import { Suspense } from 'react';
 import { HowCalculated } from '@/components/methodology/HowCalculated';
 import { CareerFilter } from '@/components/data/CareerFilter';
 import { ChipList } from '@/components/data/ChipList';
-import { ChartHeader, ChartLayout, ErrorNote, Eyebrow, Page, SourceLine } from '@/components/data/ui';
+import { ChartHeader, ChartLayout, ErrorNote, Eyebrow, Page, RailCard, SourceLine } from '@/components/data/ui';
 import { UrlSeg } from '@/components/data/UrlSeg';
 import { PageSkeleton } from '@/components/data/PageSkeleton';
 import { ApiError } from '@/lib/api/client';
@@ -19,11 +19,11 @@ export const metadata: Metadata = { title: 'Indicador Reina Roja' };
 type SearchParams = { ocupacion?: string; vista?: string; pais?: string; carrera?: string };
 /** Tope de filas al listar todas las ocupaciones (pagination.max_limit del backend). */
 const ALL_LIMIT = 500;
-const LEVEL_BAR: Record<string, string> = { high: 'bg-rose-700', medium: 'bg-rose-400', low: 'bg-rose-200' };
+const LEVEL_BAR: Record<string, string> = { high: 'bg-brand', medium: 'bg-brand/55', low: 'bg-brand/25' };
 const LEVEL_BADGE: Record<string, string> = {
-  high: 'bg-rose-100 text-rose-900',
+  high: 'bg-brand/10 text-brand',
   medium: 'bg-surface-2 text-body',
-  low: 'bg-sky-50 text-sky-800',
+  low: 'bg-surface-2 text-muted-text',
 };
 const VIEWS = [
   { value: '', label: 'Destacadas' },
@@ -116,7 +116,7 @@ async function RedQueenContent({ searchParams }: { searchParams: Promise<SearchP
                   <li key={i.occupation.occupation_code}>
                     <Link
                       href={`/reina-roja?${new URLSearchParams({ ...keep, ocupacion: i.occupation.occupation_code }).toString()}#detalle`}
-                      className={`grid grid-cols-[1.5rem_minmax(0,1fr)] items-center gap-x-2 rounded-lg px-2 py-1.5 sm:grid-cols-[1.5rem_minmax(0,16rem)_minmax(0,1fr)] ${selected ? 'bg-rose-50' : 'hover:bg-surface'}`}
+                      className={`grid grid-cols-[1.5rem_minmax(0,1fr)] items-center gap-x-2 rounded-lg px-2 py-1.5 sm:grid-cols-[1.5rem_minmax(0,16rem)_minmax(0,1fr)] ${selected ? 'bg-brand/6' : 'hover:bg-surface'}`}
                     >
                       <span className="text-xs tabular-nums text-muted-text">{k + 1}</span>
                       <span className="truncate text-sm text-heading">{i.occupation.name}</span>
@@ -137,10 +137,10 @@ async function RedQueenContent({ searchParams }: { searchParams: Promise<SearchP
           </>
         }
         rail={
-          <>
+          <RailCard>
             <Eyebrow>Mediana de las ocupaciones</Eyebrow>
             {latest && (
-              <div className="rounded-xl border border-line p-3.5">
+              <div className="rounded-xl border border-card-border p-3.5">
                 <p className="text-xs text-muted-text">{latest.year} · {latest.scored} ocupaciones</p>
                 <p className="mt-1 text-2xl font-semibold tabular-nums text-heading">{latest.median_half_life != null ? `${num(latest.median_half_life, 0)} años` : '—'}</p>
                 <p className="text-xs text-muted-text">vida media del perfil: en ese tiempo cambia la mitad</p>
@@ -154,7 +154,7 @@ async function RedQueenContent({ searchParams }: { searchParams: Promise<SearchP
                 <thead><tr className="text-left text-muted-text"><th className="py-1 font-medium">Año</th><th className="py-1 text-right font-medium">Vida media</th>{ranking.dimensions.map((d) => <th key={d.dimension} className="py-1 text-right font-medium">{shortSource(d.dimension)}</th>)}</tr></thead>
                 <tbody className="text-body">
                   {years.map((y) => (
-                    <tr key={y.year} className="border-t border-line/60">
+                    <tr key={y.year} className="border-t border-card-border">
                       <td className="py-1">{y.year}</td>
                       <td className="py-1 text-right">{y.median_half_life != null ? num(y.median_half_life, 0) : '—'}</td>
                       {ranking.dimensions.map((d) => <td key={d.dimension} className="py-1 text-right">{perYear(y.median_new_per_year[d.dimension])}</td>)}
@@ -164,7 +164,7 @@ async function RedQueenContent({ searchParams }: { searchParams: Promise<SearchP
               </table>
             </div>
             <p className="text-xs leading-relaxed text-muted-text">Vida media en años; las columnas por fuente son novedades por año. Cada año compara versiones separadas por unos {params.window_years} años.</p>
-          </>
+          </RailCard>
         }
       />
 
@@ -172,7 +172,7 @@ async function RedQueenContent({ searchParams }: { searchParams: Promise<SearchP
 
       <section className="mt-12 grid gap-4 sm:grid-cols-2">
         {ranking.dimensions.map((d) => (
-          <div key={d.dimension} className="rounded-xl border border-line p-5">
+          <div key={d.dimension} className="rounded-xl border border-card-border bg-canvas p-5 shadow-[var(--shadow-card)]">
             <h3 className="font-semibold text-heading">{d.label}</h3>
             {d.definition && <p className="mt-1.5 text-sm text-body">{d.definition}</p>}
             {d.source_url && <a href={d.source_url} target="_blank" rel="noopener noreferrer" className="mt-2 inline-block text-sm font-medium text-link hover:underline">{d.source_name}</a>}
@@ -194,7 +194,7 @@ function Detail({ item, page, params }: { item: RedQueenItem; page: RedQueenPage
   const sources = item.components;
   const comp = (c: RedQueenComponent) => c.available && c.from_version;
   return (
-    <section id="detalle" className="mt-12 flex scroll-mt-24 flex-col gap-4 border-t border-line pt-8">
+    <section id="detalle" className="mt-12 flex scroll-mt-24 flex-col gap-4 border-t border-card-border pt-8">
       <div className="flex flex-wrap items-baseline justify-between gap-3">
         <div>
           <Eyebrow>Qué entró y qué salió · {item.year}</Eyebrow>
@@ -209,7 +209,7 @@ function Detail({ item, page, params }: { item: RedQueenItem; page: RedQueenPage
       </div>
       <div className="grid gap-5 lg:grid-cols-2">
         {sources.map((c) => (
-          <div key={c.dimension} className="flex min-w-0 flex-col gap-3 rounded-xl border border-line p-5">
+          <div key={c.dimension} className="flex min-w-0 flex-col gap-3 rounded-xl border border-card-border p-5">
             <div>
               <h3 className="font-semibold text-heading">{c.label}</h3>
               {comp(c) ? (
@@ -254,7 +254,7 @@ function HowItsCalculated({ page, params, shortSource }: { page: RedQueenPage; p
   const minItems = [...new Set(Object.values(params.dimensions).map((d) => d.min_items))];
   const weights = [...new Set(Object.values(params.dimensions).map((d) => d.weight))];
   return (
-    <section className="mt-12 flex flex-col gap-4 border-t border-line pt-8">
+    <section className="mt-12 flex flex-col gap-4 border-t border-card-border pt-8">
       <h2 className="text-xl font-bold text-heading">Cómo se calcula</h2>
       <ol className="flex max-w-3xl list-decimal flex-col gap-2 pl-5 text-sm text-body">
         <li><strong>Perfil</strong>: lo que cada fuente lista para la ocupación en cada versión ({listText(page.dimensions.map((d) => `${shortSource(d.dimension)}: ${lowerFirst(d.label.replace(/ \(.*\)$/, '').replace('Recambio de ', ''))}`))}).</li>

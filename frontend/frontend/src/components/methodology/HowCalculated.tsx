@@ -23,7 +23,7 @@ function Params({ m }: { m: MethodologyItem }) {
       ).map(([k, v]) => (
         <code
           key={k}
-          className="max-w-full truncate rounded border border-line bg-surface px-1.5 py-0.5 text-[11px] text-body"
+          className="max-w-full truncate rounded-md border border-card-border bg-rail px-1.5 py-0.5 text-[11px] text-body"
           title={`${k} = ${v}`}
         >
           {k} = {v}
@@ -55,13 +55,16 @@ export async function HowCalculated({
   const blocks = lists.map((list) => list.filter((m) => m.is_current)).filter((list) => list.length > 0);
   if (blocks.length === 0) return null;
   return (
-    <details open={open} className="group rounded-lg border border-line bg-canvas">
+    <details
+      open={open}
+      className="group rounded-xl border border-card-border bg-canvas shadow-[var(--shadow-card)]"
+    >
       <summary className="flex cursor-pointer list-none items-center justify-between gap-4 p-5 [&::-webkit-details-marker]:hidden">
-        <span className="text-lg font-semibold text-heading">{title}</span>
+        <span className="text-[13px] font-semibold text-heading">{title}</span>
         <ChevronDown className="size-5 text-muted-text transition-transform group-open:rotate-180" aria-hidden />
       </summary>
       <div
-        className={`grid grid-cols-1 gap-6 border-t border-line p-5 ${blocks.length > 1 ? 'lg:grid-cols-2' : ''}`}
+        className={`grid grid-cols-1 gap-6 border-t border-card-border p-5 ${blocks.length > 1 ? 'lg:grid-cols-2' : ''}`}
       >
         {blocks.map((current) => (
           <section key={current[0].methodology_type} className="min-w-0">

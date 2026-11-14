@@ -4,11 +4,11 @@ import type { TrendFeedItem } from '@/lib/ui-types';
 /** Feed de últimas novedades del observatorio. */
 export function TrendsFeed({ items }: { items: TrendFeedItem[] }) {
   return (
-    <ul className="divide-y divide-line rounded-lg border border-line bg-canvas">
+    <ul className="divide-y divide-card-border overflow-hidden rounded-xl border border-card-border bg-canvas">
       {items.map((item, index) => (
         <li
           key={item.id ?? `${item.title}-${item.date}-${item.country}-${index}`}
-          className="flex flex-wrap items-start gap-3 p-4 sm:px-5"
+          className="flex flex-wrap items-start gap-3 p-4 hover:bg-surface sm:px-5"
         >
           <span className="mt-1.5 size-2 shrink-0 rounded-full bg-brand" aria-hidden />
           <div className="min-w-0 flex-1">

@@ -170,7 +170,7 @@ export async function GraduatesView({ sp }: { sp: SearchParams }) {
     label: country ? i.institucion : `${i.institucion} (${COUNTRY_ISO[i.pais] ?? i.pais})`,
   }));
   const filters = (
-    <section className="rounded-lg border border-line bg-canvas p-4">
+    <section className="rounded-xl border border-card-border bg-canvas p-4">
       <ChipGroup
         name="country"
         label="País"
@@ -215,7 +215,7 @@ export async function GraduatesView({ sp }: { sp: SearchParams }) {
     return (
       <>
         {filters}
-        <section className="rounded-lg border border-line bg-surface p-4 text-sm text-body">
+        <section className="rounded-xl border border-card-border bg-rail p-4 text-sm text-body">
           <p className="flex items-center gap-2 font-semibold text-heading">
             <Info className="size-4" aria-hidden /> Sin series por carrera para este país
           </p>
@@ -291,7 +291,7 @@ export async function GraduatesView({ sp }: { sp: SearchParams }) {
     <>
       {filters}
 
-      <section className="rounded-lg border border-line bg-surface p-4 text-sm text-body">
+      <section className="rounded-xl border border-card-border bg-rail p-4 text-sm text-body">
         <p className="flex items-center gap-2 font-semibold text-heading">
           <Info className="size-4" aria-hidden /> Alcance
         </p>
@@ -307,8 +307,8 @@ export async function GraduatesView({ sp }: { sp: SearchParams }) {
         </p>
       </section>
 
-      <section className="overflow-hidden rounded-lg border border-line bg-canvas">
-        <div className="border-b border-line/70 p-5">
+      <section className="overflow-hidden rounded-xl border border-card-border bg-canvas">
+        <div className="border-b border-card-border p-5">
           <h2 className="text-lg font-semibold text-heading">
             Titulados por sector{institution ? ` · ${institution.institucion}` : ''}
           </h2>
@@ -323,7 +323,7 @@ export async function GraduatesView({ sp }: { sp: SearchParams }) {
         {(institution || !projectedYear) && (
           <div className="overflow-x-auto">
             <table className="w-full min-w-[32rem] text-sm">
-              <thead className="bg-surface-2 text-left text-[11px] font-semibold tracking-wide text-muted-text uppercase">
+              <thead className="bg-surface-2 text-left text-[10.5px] font-bold tracking-[0.08em] text-label uppercase">
                 <tr>
                   <th scope="col" className="px-4 py-3">
                     Sector
@@ -335,7 +335,7 @@ export async function GraduatesView({ sp }: { sp: SearchParams }) {
                   ))}
                 </tr>
               </thead>
-              <tbody className="divide-y divide-line/60">
+              <tbody className="divide-y divide-card-border">
                 {sectorOptions.map((s) => (
                   <tr key={s.value} className="hover:bg-surface">
                     <th scope="row" className="px-4 py-3 text-left font-medium text-heading">
@@ -371,8 +371,8 @@ export async function GraduatesView({ sp }: { sp: SearchParams }) {
         )}
       </section>
 
-      <section className="overflow-hidden rounded-lg border border-line bg-canvas">
-        <div className="border-b border-line/70 p-5">
+      <section className="overflow-hidden rounded-xl border border-card-border bg-canvas">
+        <div className="border-b border-card-border p-5">
           <h2 className="text-lg font-semibold text-heading">
             {institution
               ? `Totales por año · ${institution.institucion}`
@@ -398,7 +398,7 @@ export async function GraduatesView({ sp }: { sp: SearchParams }) {
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
-              <thead className="bg-surface-2 text-left text-[11px] font-semibold tracking-wide text-muted-text uppercase">
+              <thead className="bg-surface-2 text-left text-[10.5px] font-bold tracking-[0.08em] text-label uppercase">
                 <tr>
                   <th scope="col" className="sticky left-0 bg-surface-2 px-4 py-3">
                     País
@@ -410,7 +410,7 @@ export async function GraduatesView({ sp }: { sp: SearchParams }) {
                   ))}
                 </tr>
               </thead>
-              <tbody className="divide-y divide-line/60">
+              <tbody className="divide-y divide-card-border">
                 {countryTotals.map((c) => (
                   <tr key={c.pais}>
                     <th
@@ -436,7 +436,7 @@ export async function GraduatesView({ sp }: { sp: SearchParams }) {
       </section>
 
       {selected && (
-        <section className="rounded-lg border border-line bg-canvas p-5">
+        <section className="rounded-xl border border-card-border bg-canvas p-5">
           <div className="flex flex-wrap items-end justify-between gap-4">
             <div>
               <h2 className="text-lg font-semibold text-heading">
@@ -514,7 +514,7 @@ export async function GraduatesView({ sp }: { sp: SearchParams }) {
                   </p>
                   <div className="mt-2 overflow-x-auto">
                     <table className="w-full text-sm">
-                      <thead className="bg-surface-2 text-left text-[11px] font-semibold tracking-wide text-muted-text uppercase">
+                      <thead className="bg-surface-2 text-left text-[10.5px] font-bold tracking-[0.08em] text-label uppercase">
                         <tr>
                           <th scope="col" className="sticky left-0 bg-surface-2 px-4 py-2">
                             Institución
@@ -526,7 +526,7 @@ export async function GraduatesView({ sp }: { sp: SearchParams }) {
                           ))}
                         </tr>
                       </thead>
-                      <tbody className="divide-y divide-line/60">
+                      <tbody className="divide-y divide-card-border">
                         {institutions.instituciones.slice(0, TOP_INSTITUTIONS).map((i) => (
                           <tr key={i.institucion}>
                             <th
@@ -567,8 +567,8 @@ export async function GraduatesView({ sp }: { sp: SearchParams }) {
         </section>
       )}
 
-      <section className="overflow-hidden rounded-lg border border-line bg-canvas">
-        <div className="border-b border-line/70 p-5">
+      <section className="overflow-hidden rounded-xl border border-card-border bg-canvas">
+        <div className="border-b border-card-border p-5">
           <h2 className="text-lg font-semibold text-heading">Tendencia de titulados por carrera</h2>
           <p className="mt-1 text-sm text-muted-text">
             {whole.format(items.length)} de {whole.format(allItems.length)} carreras
@@ -581,7 +581,7 @@ export async function GraduatesView({ sp }: { sp: SearchParams }) {
         </div>
         <div className="overflow-x-auto">
           <table className="w-full min-w-[64rem] text-sm">
-            <thead className="bg-surface-2 text-left text-[11px] font-semibold tracking-wide text-muted-text uppercase">
+            <thead className="bg-surface-2 text-left text-[10.5px] font-bold tracking-[0.08em] text-label uppercase">
               <tr>
                 <th scope="col" className="px-4 py-3">
                   Carrera
@@ -620,7 +620,7 @@ export async function GraduatesView({ sp }: { sp: SearchParams }) {
                 </th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-line/60">
+            <tbody className="divide-y divide-card-border">
               {items.length === 0 && (
                 <tr>
                   <td
@@ -639,7 +639,7 @@ export async function GraduatesView({ sp }: { sp: SearchParams }) {
                     <td className="px-4 py-3 font-medium text-heading">
                       {t.nombre}
                       {t.tema && (
-                        <span className="ml-2 rounded border border-line px-1.5 py-0.5 text-xs font-normal text-muted-text">
+                        <span className="ml-2 rounded border border-card-border px-1.5 py-0.5 text-xs font-normal text-muted-text">
                           Tema: {t.tema}
                         </span>
                       )}
@@ -662,7 +662,7 @@ export async function GraduatesView({ sp }: { sp: SearchParams }) {
                     </td>
                     <td className="px-4 py-3 text-muted-text">{sectorLabel(t.sector)}</td>
                     <td className="px-4 py-3">
-                      <span className="rounded border border-line px-1.5 py-0.5 text-xs font-medium">
+                      <span className="rounded border border-card-border px-1.5 py-0.5 text-xs font-medium">
                         {COUNTRY_ISO[t.pais] ?? t.pais}
                       </span>
                     </td>

@@ -11,11 +11,11 @@ export function IndicatorSidebar({ items, active }: Props) {
   const pathname = usePathname();
   const search = useSearchParams();
   return (
-    <nav aria-label="Indicadores">
-      <h2 className="bg-gray-300 px-4 py-3 text-center text-sm font-semibold text-gray-900">
+    <nav aria-label="Indicadores" className="overflow-hidden rounded-xl border border-card-border bg-canvas">
+      <h2 className="border-b border-card-border px-4 py-3 text-[10.5px] font-bold tracking-[0.08em] text-label uppercase">
         Indicadores
       </h2>
-      <ul>
+      <ul className="max-h-[32rem] overflow-y-auto py-1">
         {items.map((item) => {
           const isActive = item.code === active;
           return (
@@ -23,10 +23,10 @@ export function IndicatorSidebar({ items, active }: Props) {
               <Link
                 href={`${pathname}${withParam(search, 'indicator', item.code)}`}
                 aria-current={isActive ? 'true' : undefined}
-                className={`block border-l-4 px-4 py-3 text-sm transition-colors focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-blue-600 ${
+                className={`block border-l-2 px-4 py-2.5 text-[12.5px] leading-snug transition-colors focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-focus ${
                   isActive
-                    ? 'border-blue-600 bg-indigo-50 font-medium text-blue-700'
-                    : 'border-transparent text-gray-700 hover:bg-gray-50'
+                    ? 'border-brand bg-brand/6 font-semibold text-brand'
+                    : 'border-transparent text-body hover:bg-surface-alt'
                 }`}
               >
                 {item.name}

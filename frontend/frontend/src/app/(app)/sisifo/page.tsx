@@ -6,7 +6,7 @@ import { LinesChart, type LineSeries } from '@/components/data/LinesChart';
 import { Legend } from '@/components/data/MoctezumaCharts';
 import { SisyphusChart, type SisyphusDot } from '@/components/data/SisyphusChart';
 import { UrlSelect } from '@/components/data/UrlSelect';
-import { ChartHeader, ChartLayout, ErrorNote, Eyebrow, Page, SourceLine } from '@/components/data/ui';
+import { ChartHeader, ChartLayout, ErrorNote, Eyebrow, Page, RailCard, SourceLine } from '@/components/data/ui';
 import { COUNTRY_COLORS, FALLBACK_COLOR } from '@/components/ui/charts/chartTheme';
 import { PageSkeleton } from '@/components/data/PageSkeleton';
 import { ApiError } from '@/lib/api/client';
@@ -19,7 +19,7 @@ import { formatScore as fmt1 } from '@/lib/utils/format';
 export const metadata: Metadata = { title: 'Indicador Sísifo' };
 
 const QUADRANT_BADGE: Record<string, string> = {
-  sisyphus: 'bg-rose-100 text-rose-900',
+  sisyphus: 'bg-alert-critical-bg text-alert-critical-text',
   overqualified_paid: 'bg-alert-warning-bg text-alert-warning-text',
   low_pay: 'bg-surface-2 text-body',
   fits: 'bg-alert-positive-bg text-alert-positive-text',
@@ -114,14 +114,14 @@ async function SisyphusContent({ searchParams }: { searchParams: Promise<SearchP
           </>
         }
         rail={
-          <>
+          <RailCard>
             <Eyebrow>Por país · {page.year} o el último dato anterior</Eyebrow>
             {byCountry.map((c) => {
               const upTo = c.points.filter((p) => page.year == null || p.year <= page.year).reverse();
               const below = upTo.find((p) => p.graduates_below_share != null);
               const prem = upTo.find((p) => p.premium != null);
               return (
-                <div key={c.country_iso3} className="rounded-xl border border-line p-3.5">
+                <div key={c.country_iso3} className="rounded-xl border border-card-border bg-rail p-3.5">
                   <p className="text-sm font-semibold text-heading">{names[c.country_iso3]}</p>
                   {below && (
                     <p className="mt-1.5 text-sm text-body">
@@ -137,11 +137,11 @@ async function SisyphusContent({ searchParams }: { searchParams: Promise<SearchP
               );
             })}
             <p className="text-xs leading-relaxed text-muted-text">Ingresos mensuales medios de los asalariados (OIT). USD al tipo de cambio oficial promedio del año; USD PPA corrige las diferencias de precios entre países y es la medida que usa el indicador.</p>
-          </>
+          </RailCard>
         }
       />
 
-      <section className="mt-12 grid gap-8 border-t border-line pt-8 lg:grid-cols-2">
+      <section className="mt-12 grid gap-8 border-t border-card-border pt-8 lg:grid-cols-2">
         <div className="flex min-w-0 flex-col gap-2">
           <h2 className="text-lg font-bold text-heading">Graduados en puestos que no piden título</h2>
           <p className="text-sm text-muted-text">Ocupados con educación superior que trabajan en un gran grupo que no la pide, como % de todos los ocupados con educación superior.</p>
@@ -156,7 +156,7 @@ async function SisyphusContent({ searchParams }: { searchParams: Promise<SearchP
 
       <section className="mt-12 grid gap-3 sm:grid-cols-2">
         {page.quadrants.map((q) => (
-          <div key={q.path} className="rounded-xl border border-line p-4">
+          <div key={q.path} className="rounded-xl border border-card-border p-4">
             <span className={`rounded-full px-2 py-0.5 text-xs font-semibold ${QUADRANT_BADGE[q.path] ?? 'bg-surface-2 text-body'}`}>{q.label}</span>
             <p className="mt-2 text-xs font-medium text-muted-text">{q.short}</p>
             <p className="mt-1 text-sm text-body">{q.description}</p>
@@ -166,7 +166,7 @@ async function SisyphusContent({ searchParams }: { searchParams: Promise<SearchP
 
       <section className="mt-12 grid gap-4 sm:grid-cols-2">
         {page.sides.map((s) => (
-          <div key={s.side} className="rounded-xl border border-line p-5">
+          <div key={s.side} className="rounded-xl border border-card-border bg-canvas p-5 shadow-[var(--shadow-card)]">
             <h3 className="font-semibold text-heading">{s.label}</h3>
             <p className="mt-1.5 text-sm text-body">{s.definition}</p>
             <ul className="mt-3 flex flex-col gap-2">
@@ -182,7 +182,7 @@ async function SisyphusContent({ searchParams }: { searchParams: Promise<SearchP
         <div className="mt-4 overflow-x-auto">
           <table className="w-full min-w-[860px] text-sm tabular-nums">
             <thead>
-              <tr className="border-b border-line text-left text-xs text-muted-text">
+              <tr className="border-b border-card-border text-left text-xs text-muted-text">
                 <th className="py-2 pr-3 font-medium">Grupo</th>
                 <th className="py-2 pr-3 font-medium">País</th>
                 <th className="py-2 pr-3 text-right font-medium">Indicador</th>
@@ -194,7 +194,7 @@ async function SisyphusContent({ searchParams }: { searchParams: Promise<SearchP
             </thead>
             <tbody>
               {scored.map((i) => (
-                <tr key={`${i.country_iso3}-${i.group_code}`} className="border-b border-line/60">
+                <tr key={`${i.country_iso3}-${i.group_code}`} className="border-b border-card-border">
                   <td className="py-2 pr-3 text-heading">
                     <a href={`#grupo-${i.group_code}`} className="hover:text-link-hover hover:underline"><span className="font-semibold">{i.group_code}</span> {i.group_name}</a>
                   </td>
@@ -211,7 +211,7 @@ async function SisyphusContent({ searchParams }: { searchParams: Promise<SearchP
         </div>
       </section>
 
-      <section className="mt-12 flex flex-col gap-4 border-t border-line pt-8">
+      <section className="mt-12 flex flex-col gap-4 border-t border-card-border pt-8">
         <h2 className="text-xl font-bold text-heading">Cómo se calcula</h2>
         <ol className="flex max-w-3xl list-decimal flex-col gap-2 pl-5 text-sm text-body">
           <li><strong>Unidad</strong>: gran grupo de ocupación (CIUO-08, 1 dígito) por país y año, porque la OIT publica así la sobreeducación y los ingresos por ocupación. Se usa el último dato de hasta {params.max_age_years} años antes.</li>
@@ -242,7 +242,7 @@ function GroupList({ groups, source }: { groups: SisyphusData['groups']; source:
       <ul className="grid gap-x-6 gap-y-1.5 sm:grid-cols-2">
         {groups.map((g) => (
           <li key={g.code} id={`grupo-${g.code}`} className="scroll-mt-24">
-            <details className="group rounded-lg border border-line px-3 py-2 text-xs open:bg-surface">
+            <details className="group rounded-xl border border-card-border px-3 py-2 text-xs open:bg-surface">
               <summary className="cursor-pointer list-none [&::-webkit-details-marker]:hidden">
                 <span className="flex items-start gap-1.5">
                   <span className="mt-px text-[10px] text-muted-text transition-transform group-open:rotate-90" aria-hidden>▶</span>

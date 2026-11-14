@@ -20,10 +20,10 @@ const HEADERS = [
 /** Tabla de ranking de ocupaciones con el desglose del ISE. */
 export function RankingTable({ rows }: { rows: OccupationRow[] }) {
   return (
-    <div className="overflow-x-auto rounded-lg border border-line bg-canvas">
+    <div className="overflow-x-auto rounded-xl border border-card-border bg-canvas">
       <table className="w-full min-w-[64rem] border-collapse text-left text-sm">
         <thead>
-          <tr className="border-b border-line bg-surface-2 text-[11px] uppercase tracking-wide text-muted-text">
+          <tr className="border-b border-card-border bg-surface-2 text-[10.5px] font-semibold tracking-[0.04em] text-label uppercase">
             {HEADERS.map((header) => (
               <th key={header} scope="col" className="whitespace-nowrap px-4 py-3 font-semibold">
                 {header}
@@ -31,7 +31,7 @@ export function RankingTable({ rows }: { rows: OccupationRow[] }) {
             ))}
           </tr>
         </thead>
-        <tbody className="divide-y divide-line">
+        <tbody className="divide-y divide-card-border">
           {rows.map((row) => (
             <tr key={`${row.country}-${row.ciuo}`} className="align-middle hover:bg-surface">
               <td className="px-4 py-4 font-semibold text-heading">{row.rank}</td>

@@ -23,7 +23,7 @@ function useHref() {
 
 function Label({ children }: { children: ReactNode }) {
   return (
-    <span className="mb-1.5 block text-[11px] font-semibold tracking-wide text-muted-text uppercase">
+    <span className="mb-1.5 block text-[10.5px] font-bold tracking-[0.08em] text-label uppercase">
       {children}
     </span>
   );
@@ -38,6 +38,7 @@ export function ChipGroup({
   allLabel = 'Todos',
   reset = [],
   withAll = true,
+  hideLabel = false,
 }: {
   name: string;
   label: string;
@@ -46,12 +47,13 @@ export function ChipGroup({
   allLabel?: string;
   reset?: string[];
   withAll?: boolean;
+  hideLabel?: boolean;
 }) {
   const href = useHref();
   const chips = withAll ? [{ value: '', label: `${allLabel} (${options.length})` }, ...options] : options;
   return (
     <div>
-      <Label>{label}</Label>
+      {!hideLabel && <Label>{label}</Label>}
       <div className="flex flex-wrap gap-2" role="group" aria-label={label}>
         {chips.map((o) => {
           const active = o.value === value;
@@ -61,10 +63,10 @@ export function ChipGroup({
               href={href(name, o.value, reset)}
               scroll={false}
               aria-pressed={active}
-              className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-medium focus-visible:outline-2 focus-visible:outline-focus ${
+              className={`inline-flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-[12px] font-medium transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus ${
                 active
-                  ? 'border-brand bg-brand/10 text-brand'
-                  : 'border-line text-muted-text hover:border-brand'
+                  ? 'border-brand bg-brand text-white'
+                  : 'border-card-border bg-canvas text-body hover:border-line'
               }`}
             >
               {o.value && (
@@ -108,7 +110,7 @@ export function SelectParam({
         <select
           value={value}
           onChange={(e) => router.replace(href(name, e.target.value, reset), { scroll: false })}
-          className="w-full appearance-none rounded-md border border-line bg-surface px-3 py-2 pr-9 text-sm text-body focus-visible:outline-2 focus-visible:outline-focus"
+          className="h-9 w-full appearance-none rounded-lg border border-card-border bg-canvas px-2.5 pr-8 text-[12.5px] font-semibold text-heading focus-visible:border-brand focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
         >
           {placeholder !== undefined && <option value="">{placeholder}</option>}
           {options.map((o) => (
@@ -145,7 +147,7 @@ export function Segmented({
     <div>
       <Label>{label}</Label>
       <div
-        className="inline-flex rounded-md border border-line bg-surface-2 p-0.5"
+        className="inline-flex rounded-lg bg-surface-2 p-0.5"
         role="group"
         aria-label={label}
       >
@@ -155,7 +157,7 @@ export function Segmented({
             href={href(name, o.value, reset)}
             scroll={false}
             aria-pressed={o.value === value}
-            className={`rounded px-3 py-1 text-xs font-semibold focus-visible:outline-2 focus-visible:outline-focus ${
+            className={`rounded-md px-3 py-1.5 text-[12px] font-semibold transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus ${
               o.value === value
                 ? 'bg-canvas text-brand shadow-sm'
                 : 'text-muted-text hover:text-heading'
@@ -185,9 +187,9 @@ export function CountTabs({
 }) {
   const href = useHref();
   return (
-    <div className="flex flex-wrap items-center gap-x-6 gap-y-2 border-b border-line">
-      <span className="py-2 pr-4 text-sm font-medium tracking-wide text-muted-text uppercase sm:border-r sm:border-line">
-        {label}:
+    <div className="flex flex-wrap items-center gap-x-6 gap-y-2 border-b border-card-border">
+      <span className="py-2.5 pr-5 text-[10.5px] font-bold tracking-[0.08em] text-label uppercase sm:border-r sm:border-card-border">
+        {label}
       </span>
       {options.map((o) => {
         const active = o.value === value;
@@ -197,7 +199,7 @@ export function CountTabs({
             href={href(name, o.value, reset)}
             scroll={false}
             aria-current={active ? 'page' : undefined}
-            className={`-mb-px flex items-center gap-2 border-b-2 py-2 text-sm focus-visible:outline-2 focus-visible:outline-focus ${
+            className={`-mb-px flex items-center gap-2 border-b-2 py-2.5 text-[12.5px] transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus ${
               active
                 ? 'border-brand font-semibold text-heading'
                 : 'border-transparent text-muted-text hover:text-heading'
@@ -205,7 +207,11 @@ export function CountTabs({
           >
             {o.label}
             {o.count !== undefined && (
-              <span className="rounded-full bg-surface-2 px-2 text-[11px] font-semibold text-muted-text">
+              <span
+                className={`rounded-md px-1.5 py-0.5 text-[10.5px] font-semibold ${
+                  active ? 'bg-brand/10 text-brand' : 'bg-surface-2 text-muted-text'
+                }`}
+              >
                 {o.count}
               </span>
             )}
@@ -241,10 +247,10 @@ export function PillGroup({
             href={href(name, o.value, reset)}
             scroll={false}
             aria-pressed={active}
-            className={`inline-flex items-center gap-1.5 rounded-md border px-3 py-1.5 text-xs font-medium focus-visible:outline-2 focus-visible:outline-focus ${
+            className={`inline-flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-[12px] font-medium transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus ${
               active
-                ? 'border-heading bg-heading text-white'
-                : 'border-line text-body hover:border-brand'
+                ? 'border-brand bg-brand/8 font-semibold text-brand'
+                : 'border-card-border bg-canvas text-body hover:border-line'
             }`}
           >
             {active && <Check className="size-3" aria-hidden />}

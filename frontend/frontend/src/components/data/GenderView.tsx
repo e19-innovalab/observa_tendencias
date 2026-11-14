@@ -27,7 +27,7 @@ function Table({
   return (
     <div className="overflow-x-auto">
       <table className="w-full min-w-[46rem] text-sm">
-        <thead className="bg-surface-2 text-left text-[11px] font-semibold tracking-wide text-muted-text uppercase">
+        <thead className="bg-surface-2 text-left text-[10.5px] font-bold tracking-[0.08em] text-label uppercase">
           <tr>
             {head.map((h, i) => (
               <th key={h} scope="col" className={`px-3 py-3 ${i > 1 ? 'text-right' : ''}`}>
@@ -36,7 +36,7 @@ function Table({
             ))}
           </tr>
         </thead>
-        <tbody className="divide-y divide-line/60">
+        <tbody className="divide-y divide-card-border">
           {rows.map((r) => (
             <tr key={r.key} className={r.total ? 'bg-surface-2 font-semibold' : 'hover:bg-surface'}>
               {r.cells.map((c, i) => (
@@ -54,8 +54,8 @@ function Table({
 
 function Section({ title, text, children }: { title: string; text: string; children: React.ReactNode }) {
   return (
-    <section className="overflow-hidden rounded-lg border border-line bg-canvas">
-      <div className="border-b border-line/70 p-5">
+    <section className="overflow-hidden rounded-xl border border-card-border bg-canvas">
+      <div className="border-b border-card-border p-5">
         <h2 className="text-lg font-semibold text-heading">{title}</h2>
         <p className="mt-1 text-sm text-muted-text">{text}</p>
       </div>
@@ -120,7 +120,7 @@ export async function GenderView({ sp }: { sp: SearchParams }) {
 
   return (
     <>
-      <section className="rounded-lg border border-line bg-canvas p-4">
+      <section className="rounded-xl border border-card-border bg-canvas p-4">
         <ChipGroup name="country" label="País" value={country ?? ''} options={countryOptions} />
         <div className="mt-4 grid gap-3 sm:grid-cols-2">
           <SelectParam
@@ -139,7 +139,7 @@ export async function GenderView({ sp }: { sp: SearchParams }) {
         </div>
       </section>
 
-      <section className="rounded-lg border border-line bg-surface p-4 text-sm text-body">
+      <section className="rounded-xl border border-card-border bg-rail p-4 text-sm text-body">
         <p className="flex items-center gap-2 font-semibold text-heading">
           <Info className="size-4" aria-hidden /> Cómo leerlo
         </p>
@@ -168,7 +168,7 @@ export async function GenderView({ sp }: { sp: SearchParams }) {
             ],
           }))}
         />
-        <div className="grid gap-6 border-t border-line/70 p-5">
+        <div className="grid gap-6 border-t border-card-border p-5">
           <div>
             <h3 className="mb-2 text-sm font-semibold text-heading">
               {sector}: % de mujeres entre titulados
@@ -197,7 +197,7 @@ export async function GenderView({ sp }: { sp: SearchParams }) {
             ],
           }))}
         />
-        <div className="border-t border-line/70 p-5">
+        <div className="border-t border-card-border p-5">
           <h3 className="mb-2 text-sm font-semibold text-heading">
             {sector}: % de mujeres entre ocupados
           </h3>

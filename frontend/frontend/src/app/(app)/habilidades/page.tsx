@@ -184,7 +184,7 @@ async function ProjectionsContent() {
         {chartRows.length > 0 ? (
           <TrendLineChart data={chartRows} series={chartSeries} unit="persons" />
         ) : (
-          <p className="rounded-lg border border-dashed border-line bg-surface px-4 py-10 text-center text-sm text-muted-text">
+          <p className="rounded-lg border border-dashed border-card-border bg-surface px-4 py-10 text-center text-sm text-muted-text">
             La API no devolvió proyecciones de egresados.
           </p>
         )}
@@ -196,10 +196,10 @@ async function ProjectionsContent() {
             title="Proyección por carrera"
             description="Valores proyectados y variación entre el primer y el último año disponible."
           />
-          <div className="overflow-x-auto rounded-lg border border-line bg-canvas">
+          <div className="overflow-x-auto rounded-xl border border-card-border bg-canvas">
             <table className="w-full min-w-[52rem] border-collapse text-left text-sm">
               <thead>
-                <tr className="border-b border-line bg-surface-2 text-[11px] tracking-wide text-muted-text uppercase">
+                <tr className="border-b border-card-border bg-surface-2 text-[10.5px] font-bold tracking-[0.08em] text-label uppercase">
                   <th scope="col" className="px-4 py-3 font-semibold">
                     Carrera
                   </th>
@@ -217,7 +217,7 @@ async function ProjectionsContent() {
                   </th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-line">
+              <tbody className="divide-y divide-card-border">
                 {careerRows.map((row) => (
                   <tr key={row.career} className="hover:bg-surface">
                     <td className="px-4 py-3 font-medium text-heading capitalize">{row.career}</td>

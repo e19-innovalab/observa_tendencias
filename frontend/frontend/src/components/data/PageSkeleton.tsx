@@ -5,7 +5,7 @@ export function PageSkeleton({ blocks = 3 }: { blocks?: number }) {
       {Array.from({ length: blocks }, (_, i) => (
         <div
           key={i}
-          className={`animate-pulse rounded-lg bg-surface-2 ${i === 0 ? 'h-40' : 'h-64'}`}
+          className={`animate-pulse rounded-xl bg-surface-2 ${i === 0 ? 'h-40' : 'h-64'}`}
         />
       ))}
       <span className="sr-only">Cargando datos…</span>

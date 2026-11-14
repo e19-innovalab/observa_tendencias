@@ -13,7 +13,10 @@
   --color-canvas: #ffffff; /* --bg */
   --color-surface-alt: #f5f7fd; /* --bg-alt */
   --color-surface: #fafbfe; /* --surface */
-  --color-surface-2: #edf2fc; /* --surface-2 */
+  --color-surface-2: #f1f5f9; /* --surface-2 */
+  --color-rail: #f9fbfd; /* fondo de la columna de lectura */
+  --color-card-border: #e6ebf5; /* borde suave de tarjetas */
+  --color-label: #64748b; /* etiquetas en mayúsculas */
 
   /* Texto */
   --color-heading: #050c1e; /* --heading */
@@ -30,10 +33,10 @@
   --color-link-hover: #0f00a2; /* --link-hover */
 
   /* Estructura y controles */
-  --color-line: #aebdde; /* --border, --input-border */
+  --color-line: #dfe6f2; /* --border, --input-border */
   --color-focus: #172bc4; /* --ring */
   --color-selection: #b1c5f3; /* --selection-bg */
-  --color-placeholder: #666e7f; /* --input-placeholder */
+  --color-placeholder: #94a3b8; /* --input-placeholder */
   --color-code-bg: #f3f0ff; /* --code-bg */
   --color-code-text: #6d28d9; /* --code-text */
 
@@ -48,11 +51,11 @@
   --color-info-soft: #dbeafe; /* --info-soft */
 
   /* Data viz: países */
-  --color-country-arg: #38bdf8; /* --country-arg */
-  --color-country-arg-soft: #e0f2fe; /* --country-arg-soft */
-  --color-country-chl: #b91c1c; /* --country-chl */
-  --color-country-chl-soft: #fee2e2; /* --country-chl-soft */
-  --color-country-ury: #d97706; /* --country-ury */
+  --color-country-arg: #22b8e6; /* --country-arg */
+  --color-country-arg-soft: #e0f6fe; /* --country-arg-soft */
+  --color-country-chl: #d92d20; /* --country-chl */
+  --color-country-chl-soft: #fee4e2; /* --country-chl-soft */
+  --color-country-ury: #f0a800; /* --country-ury */
   --color-country-ury-soft: #fef3c7; /* --country-ury-soft */
 
   /* Data viz: sectores */
@@ -97,8 +100,9 @@
 /* Valores que no son colores simples (no generan utilidades de color) */
 :root {
   --overlay: rgb(0 0 0 / 0.5); /* --overlay */
-  --shadow-color: rgb(0 0 0 / 0.08); /* --shadow-color */
-  --gradient-hero: linear-gradient(135deg, #5075db, #5c79c2); /* --gradient-hero */
+  --shadow-color: rgb(15 23 42 / 0.06); /* --shadow-color */
+  --shadow-card: 0 1px 2px rgb(15 23 42 / 0.04), 0 12px 32px -24px rgb(15 23 42 / 0.28);
+  --gradient-hero: linear-gradient(103deg, #172bc4 0%, #0f179f 48%, #080168 100%); /* --gradient-hero */
 
   /* Alinea los componentes de shadcn con la marca (pisa sus valores por defecto) */
   --primary: #172bc4;

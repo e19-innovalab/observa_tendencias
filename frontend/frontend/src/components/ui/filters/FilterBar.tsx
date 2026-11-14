@@ -24,32 +24,37 @@ function Selects({
   disabled?: boolean;
 }) {
   return (
-    <div className="grid gap-4 [grid-template-columns:repeat(auto-fit,minmax(14rem,1fr))]">
+    <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
       {filters.map((f) => (
-        <div key={f.name} className="relative">
-          <select
-            aria-label={f.label}
-            value={values[f.name] ?? ''}
-            disabled={disabled}
-            onChange={onChange ? (e) => onChange(f.name, e.target.value) : undefined}
-            className={cn(
-              'w-full appearance-none rounded-md border border-line bg-surface-alt px-4 py-3 pr-10 text-sm text-body',
-              'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus',
-              disabled && 'opacity-70',
-            )}
-          >
-            <option value="">{f.label}</option>
-            {f.options.map((o) => (
-              <option key={o.value} value={o.value}>
-                {o.label}
-              </option>
-            ))}
-          </select>
-          <ChevronDown
-            className="pointer-events-none absolute right-3 top-1/2 size-4 -translate-y-1/2 text-muted-text"
-            aria-hidden
-          />
-        </div>
+        <label key={f.name} className="flex items-center gap-2">
+          <span className="text-[10.5px] font-bold tracking-[0.08em] text-label uppercase">
+            {f.label}
+          </span>
+          <span className="relative">
+            <select
+              aria-label={f.label}
+              value={values[f.name] ?? ''}
+              disabled={disabled}
+              onChange={onChange ? (e) => onChange(f.name, e.target.value) : undefined}
+              className={cn(
+                'h-9 appearance-none rounded-lg border border-card-border bg-canvas pr-8 pl-2.5 text-[12.5px] font-semibold text-heading',
+                'hover:border-line focus-visible:border-brand focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus',
+                disabled && 'opacity-70',
+              )}
+            >
+              <option value="">{f.label}</option>
+              {f.options.map((o) => (
+                <option key={o.value} value={o.value}>
+                  {o.label}
+                </option>
+              ))}
+            </select>
+            <ChevronDown
+              className="pointer-events-none absolute top-1/2 right-2.5 size-3.5 -translate-y-1/2 text-muted-text"
+              aria-hidden
+            />
+          </span>
+        </label>
       ))}
     </div>
   );

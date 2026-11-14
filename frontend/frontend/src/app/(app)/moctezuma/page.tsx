@@ -164,7 +164,7 @@ async function MoctezumaContent({ searchParams }: { searchParams: Promise<Search
           <>
             <Eyebrow>Último año por país</Eyebrow>
             {latest.map(({ iso, p, prev }) => (
-              <div key={iso} className="rounded-xl border border-line p-3.5">
+              <div key={iso} className="rounded-xl border border-card-border p-3.5">
                 <div className="flex items-center justify-between gap-2">
                   <span className="text-sm font-semibold text-heading">{names[iso]}</span>
                   <span className={`rounded-full px-2 py-0.5 text-xs font-semibold ${LEVEL_BADGE[p.level] ?? 'bg-surface-2 text-body'}`}>{p.level_label}</span>
@@ -232,7 +232,7 @@ async function MoctezumaContent({ searchParams }: { searchParams: Promise<Search
 
       <Ranking page={ranking} names={names} pais={sp.pais ?? ''} countries={countries.map((c) => ({ value: c.iso3, label: c.name_es }))} />
 
-      <section className="mt-12 flex flex-col gap-3 border-t border-line pt-8">
+      <section className="mt-12 flex flex-col gap-3 border-t border-card-border pt-8">
         <h2 className="text-xl font-bold text-heading">Cómo leer la comparación</h2>
         <ul className="flex max-w-3xl list-disc flex-col gap-2 pl-5 text-sm leading-relaxed text-muted-text">
           <li><strong className="text-heading">Las dos columnas no se miden en la misma escala.</strong> Hoy, ritmo y capacidad son puntajes relativos al grupo de los {countries.length} países (0 = el menor, {num(params.scale_max)} = el mayor). En {ref.contact_year} son proxies absolutos. La comparación es de forma y dirección, no de magnitud.</li>
@@ -356,19 +356,19 @@ function ReadingGuide({ page, byCountry, names, params, reference: ref, methodVe
   const nationalDims = page.sides.flatMap((s) => s.dimensions.filter((d) => d.scope === 'country').map((d) => lowerFirst(d.label)));
 
   return (
-    <section className="mt-12 rounded-xl border border-line bg-surface p-5 sm:p-7">
+    <section className="mt-12 rounded-xl border border-card-border bg-surface p-5 sm:p-7">
       <Eyebrow>Anexo · cómo se lee</Eyebrow>
       <h2 className="mt-1 text-xl font-bold text-heading">Ejemplo de lectura: los {n} países y {occName} en {year}</h2>
       <p className="mt-1 max-w-3xl text-sm text-muted-text">Círculo lleno: promedio del país. Círculo punteado: {occName} en ese país. El gráfico y las lecturas se arman con los datos vigentes: si llegan datos nuevos, cambian con ellos.</p>
       <div className="mt-5 flex flex-wrap items-start gap-7">
         <figure className="m-0 min-w-0 flex-[1_1_380px] lg:max-w-[560px]">
-          <div className="rounded-lg border border-line bg-canvas p-3">
+          <div className="rounded-xl border border-card-border bg-canvas p-3">
             <PlaneChart diagonalLabel={`equilibrio (${num(params.scale_max / 2)})`} series={[]} marks={marks} ariaLabel={`Plano ritmo contra capacidad con los ${n} países y ${occName} numerados`} />
           </div>
           <figcaption className="mt-2 text-xs text-muted-text">Datos {year}{methodVersion ? ` · metodología vigente v${methodVersion}` : ''}.</figcaption>
         </figure>
         <div className="flex min-w-0 flex-[1_1_380px] flex-col gap-4">
-          <div className="rounded-lg border border-brand/30 bg-canvas p-4">
+          <div className="rounded-xl border border-brand/30 bg-canvas p-4">
             <h3 className="font-semibold text-heading">La regla para leer cualquier punto</h3>
             {equal && <p className="mt-1 text-sm leading-relaxed text-muted-text">Sobre la diagonal el indicador vale {num(params.scale_max * w.counter)}. Cada punto de distancia vertical por debajo suma {num(w.push)} punto (el cambio va más rápido que la respuesta) y cada punto por encima resta {num(w.push)} punto (la respuesta acompaña).</p>}
             <div className="mt-2.5"><Formula>{diagonalRule(params, { side: push.side, label: short(push) }, { side: counter.side, label: short(counter) })}</Formula></div>
@@ -423,7 +423,7 @@ function Chronology({ reference: ref }: { reference: MoctezumaReference }) {
   return (
     <div className="mt-2 max-w-3xl">
       <h3 className="text-sm font-semibold text-heading">Cronología</h3>
-      <ol className="mt-2 flex flex-col gap-2.5 border-l-2 border-line pl-4">
+      <ol className="mt-2 flex flex-col gap-2.5 border-l-2 border-card-border pl-4">
         {rows.map((r) => (
           <li key={`${r.year}-${r.title}`} className="relative text-sm leading-relaxed">
             <span className={`absolute -left-[23px] top-1 size-3.5 rounded-full ${r.n ? 'border-2 border-brand bg-canvas' : 'bg-line'}`} />
@@ -467,7 +467,7 @@ function Ranking({ page, names, pais, countries }: { page: MoctezumaPage; names:
       <div className="mt-4 overflow-x-auto">
         <table className="w-full min-w-[640px] text-sm tabular-nums">
           <thead>
-            <tr className="border-b border-line text-left text-xs text-muted-text">
+            <tr className="border-b border-card-border text-left text-xs text-muted-text">
               <th className="py-2 pr-3 font-medium">Ocupación</th>
               <th className="py-2 pr-3 font-medium">País</th>
               <th className="py-2 pr-3 text-right font-medium">Indicador</th>
@@ -478,7 +478,7 @@ function Ranking({ page, names, pais, countries }: { page: MoctezumaPage; names:
           </thead>
           <tbody>
             {page.items.map((i) => (
-              <tr key={`${i.country_iso3}-${i.occupation.occupation_code}`} className="border-b border-line/60">
+              <tr key={`${i.country_iso3}-${i.occupation.occupation_code}`} className="border-b border-card-border">
                 <td className="py-2 pr-3 text-heading">{i.occupation.name}</td>
                 <td className="py-2 pr-3 text-muted-text">{names[i.country_iso3]}</td>
                 <td className="py-2 pr-3 text-right font-semibold text-heading">{i.score !== null ? fmt1(i.score) : '—'}</td>
@@ -495,7 +495,7 @@ function Ranking({ page, names, pais, countries }: { page: MoctezumaPage; names:
 }
 
 const Formula = ({ children }: { children: React.ReactNode }) => (
-  <div className="overflow-x-auto rounded-md border border-line bg-surface px-3.5 py-2.5 font-mono text-[13px] leading-relaxed text-heading">{children}</div>
+  <div className="overflow-x-auto rounded-md border border-card-border bg-surface px-3.5 py-2.5 font-mono text-[13px] leading-relaxed text-heading">{children}</div>
 );
 
 /** Pasos del cálculo armados con los parámetros vigentes, y un ejemplo con los datos vigentes de la API. */
@@ -560,7 +560,7 @@ function HowItsCalculated({ page, names, params, reference: ref }: { page: Mocte
     },
   ];
   return (
-    <section className="mt-12 flex flex-col gap-5 border-t border-line pt-8">
+    <section className="mt-12 flex flex-col gap-5 border-t border-card-border pt-8">
       <h2 className="text-xl font-bold text-heading">Cómo se calcula</h2>
       <ol className="flex flex-col gap-5">
         {steps.map((s, i) => (
@@ -579,7 +579,7 @@ function HowItsCalculated({ page, names, params, reference: ref }: { page: Mocte
           <div className="overflow-x-auto">
             <table className="w-full min-w-[960px] text-sm tabular-nums">
               <thead>
-                <tr className="border-b border-line text-xs text-muted-text">
+                <tr className="border-b border-card-border text-xs text-muted-text">
                   <th className="py-2 pr-3 text-left font-medium">Dimensión</th>
                   <th className="py-2 pr-3 text-left font-medium">Lado</th>
                   <th className="py-2 pr-3 text-right font-medium">Mín. grupo</th>
@@ -594,7 +594,7 @@ function HowItsCalculated({ page, names, params, reference: ref }: { page: Mocte
                   const r = page.dimension_ranges[d.dimension];
                   const measure = comp(example[0], d.dimension)?.measure ?? 'latest';
                   return (
-                    <tr key={d.dimension} className="border-b border-line/60">
+                    <tr key={d.dimension} className="border-b border-card-border">
                       <td className="py-2 pr-3 text-heading">{d.label}{d.higher_is_more ? '' : ' · invertida'}</td>
                       <td className="py-2 pr-3 text-muted-text">{short(sideOf(d.side))}</td>
                       <td className="py-2 pr-3 text-right text-muted-text">{rawText(measure, d.indicator, r?.observed_min)}</td>

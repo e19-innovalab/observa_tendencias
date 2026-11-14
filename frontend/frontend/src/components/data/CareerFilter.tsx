@@ -19,7 +19,7 @@ export function CareerFilter({ countries, careers, pais, carrera }: { countries:
     const qs = params.toString();
     router.push(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
   };
-  const select = 'h-9 min-w-0 rounded-lg border border-line bg-canvas px-2.5 text-[13px] text-heading focus-visible:outline-2 focus-visible:outline-focus';
+  const select = 'h-9 min-w-0 rounded-lg border border-card-border bg-canvas px-2.5 text-[12.5px] font-medium text-heading hover:border-line focus-visible:border-brand focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus';
   return (
     <div className="flex flex-wrap items-center gap-2" role="group" aria-label="Filtrar por carrera">
       <select aria-label="País de la carrera" className={select} value={pais} onChange={(e) => go({ pais: e.target.value, carrera: '' })}>

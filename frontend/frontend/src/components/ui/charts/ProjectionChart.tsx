@@ -11,7 +11,7 @@ import {
   XAxis,
   YAxis,
 } from 'recharts';
-import { CHART_GRID } from './chartTheme';
+import { CHART_AXIS, CHART_GRID } from './chartTheme';
 
 export type ProjectionRow = {
   anio: number;
@@ -28,14 +28,14 @@ const whole = new Intl.NumberFormat('es-AR', { maximumFractionDigits: 0 });
 export function ProjectionChart({ data, color }: { data: ProjectionRow[]; color: string }) {
   const hasProjection = data.some((row) => row.valor !== undefined);
   return (
-    <div className="h-72 w-full">
+    <div className="h-80 w-full">
       <ResponsiveContainer width="100%" height="100%">
         <ComposedChart data={data} margin={{ top: 8, right: 16, bottom: 0, left: 0 }}>
           <CartesianGrid stroke={CHART_GRID} vertical={false} />
-          <XAxis dataKey="anio" tick={{ fontSize: 12, fill: '#4b5563' }} tickLine={false} />
+          <XAxis dataKey="anio" tick={{ fontSize: 11.5, fill: CHART_AXIS }} tickLine={false} axisLine={{ stroke: CHART_GRID }} tickMargin={10} />
           <YAxis
             width={56}
-            tick={{ fontSize: 12, fill: '#4b5563' }}
+            tick={{ fontSize: 11.5, fill: CHART_AXIS }}
             tickLine={false}
             axisLine={false}
             tickFormatter={(value: number) => whole.format(value)}
@@ -47,7 +47,7 @@ export function ProjectionChart({ data, color }: { data: ProjectionRow[]; color:
                 : [whole.format(Number(value)), name]
             }
           />
-          <Legend wrapperStyle={{ fontSize: 12 }} />
+          <Legend wrapperStyle={{ fontSize: 11.5, paddingTop: 8 }} iconType="plainline" />
           {hasProjection && (
             <Area
               dataKey="banda"
@@ -62,7 +62,7 @@ export function ProjectionChart({ data, color }: { data: ProjectionRow[]; color:
             dataKey="observado"
             name="Observado"
             stroke={color}
-            strokeWidth={2}
+            strokeWidth={2.5}
             dot={{ r: 3 }}
             isAnimationActive={false}
           />
@@ -70,7 +70,7 @@ export function ProjectionChart({ data, color }: { data: ProjectionRow[]; color:
             <Line
               dataKey="union"
               stroke={color}
-              strokeWidth={2}
+              strokeWidth={2.5}
               strokeDasharray="5 4"
               dot={false}
               legendType="none"
@@ -84,7 +84,7 @@ export function ProjectionChart({ data, color }: { data: ProjectionRow[]; color:
               dataKey="valor"
               name="Proyección"
               stroke={color}
-              strokeWidth={2}
+              strokeWidth={2.5}
               strokeDasharray="5 4"
               dot={{ r: 3 }}
               isAnimationActive={false}

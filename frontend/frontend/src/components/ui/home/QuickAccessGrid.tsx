@@ -24,12 +24,12 @@ export function QuickAccessGrid({ items }: { items: QuickAccess[] }) {
             key={item.href}
             href={item.href}
             className={cn(
-              'group flex items-center gap-4 rounded-lg border border-line bg-surface p-5 transition-colors',
-              'hover:border-brand/50 hover:bg-surface-alt focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus',
+              'group flex items-center gap-4 rounded-xl border border-card-border bg-canvas p-5 transition-all',
+              'hover:border-line hover:shadow-[var(--shadow-card)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus',
               item.featured && 'sm:col-span-2',
             )}
           >
-            <span className="flex size-12 shrink-0 items-center justify-center rounded-full bg-brand/10 text-brand">
+            <span className="flex size-12 shrink-0 items-center justify-center rounded-xl bg-brand/8 text-brand">
               <Icon className="size-6" aria-hidden />
             </span>
             <span className="min-w-0">

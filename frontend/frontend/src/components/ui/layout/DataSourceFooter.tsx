@@ -18,17 +18,17 @@ export function DataSourceFooter({
   return (
     <footer
       className={cn(
-        'flex flex-wrap items-center justify-center gap-x-10 gap-y-2 rounded-lg border border-line bg-surface px-4 py-3 text-sm text-body',
+        'flex flex-wrap items-center justify-between gap-x-6 gap-y-2 rounded-xl border border-card-border bg-rail px-4 py-3 text-[11.5px] text-muted-text',
         className,
       )}
     >
       <p>
-        <span className="font-semibold">Fuente</span> {source}
+        <span className="font-semibold text-body">Fuente</span> · {source}
       </p>
       <p>
-        <span className="font-semibold">Actualización</span> {updatedAt}
+        <span className="font-semibold text-body">Actualización</span> · {updatedAt}
       </p>
-      <Link href={methodologyHref} className="font-medium text-link hover:text-link-hover hover:underline">
+      <Link href={methodologyHref} className="font-semibold text-link hover:text-link-hover hover:underline">
         Ver fuente y metodología
       </Link>
     </footer>

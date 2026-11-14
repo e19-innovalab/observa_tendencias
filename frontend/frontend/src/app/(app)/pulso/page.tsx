@@ -143,22 +143,22 @@ async function PulsoContent({ searchParams }: { searchParams: Promise<SearchPara
         chart={
           <>
             <section aria-label="Ofertas por sector y provincia">
-              <h2 className="text-sm font-semibold text-heading">Ofertas por sector y provincia</h2>
+              <h2 className="text-[13px] font-semibold text-heading">Ofertas por sector y provincia</h2>
               <div className="mt-2 overflow-x-auto">
                 <table className="w-full min-w-[32rem] border-separate border-spacing-1 text-sm">
                   <thead>
                     <tr>
-                      <th className="text-left text-xs font-medium text-muted-text" scope="col">
+                      <th className="text-left text-[10.5px] font-bold tracking-[0.08em] text-label uppercase" scope="col">
                         Sector
                       </th>
                       {provinces.map((p) => (
-                        <th key={p} scope="col" className="text-xs font-medium text-muted-text">
+                        <th key={p} scope="col" className="text-[10.5px] font-bold tracking-[0.08em] text-label uppercase">
                           <Link href={href({ provincia: p })} scroll={false} className="hover:text-link">
                             {p}
                           </Link>
                         </th>
                       ))}
-                      <th scope="col" className="text-right text-xs font-medium text-muted-text">
+                      <th scope="col" className="text-right text-[10.5px] font-bold tracking-[0.08em] text-label uppercase">
                         Total
                       </th>
                     </tr>
@@ -182,7 +182,7 @@ async function PulsoContent({ searchParams }: { searchParams: Promise<SearchPara
                                   href={href({ provincia: p, sector: s })}
                                   scroll={false}
                                   title={`${s} · ${p}: ${n} ofertas`}
-                                  className={`flex h-11 items-center justify-center rounded-md text-[13px] font-semibold ${on ? 'ring-2 ring-heading' : ''}`}
+                                  className={`flex h-11 items-center justify-center rounded-md text-[13px] font-semibold ${on ? 'ring-2 ring-brand' : ''}`}
                                   style={{
                                     background: `rgba(23, 43, 196, ${0.08 + share * 0.82})`,
                                     color: share > 0.45 ? '#fff' : '#080067',
@@ -210,7 +210,7 @@ async function PulsoContent({ searchParams }: { searchParams: Promise<SearchPara
 
             {bySector.length > 0 && (
               <section aria-label="Competencia por oferta" className="mt-8">
-                <h2 className="text-sm font-semibold text-heading">
+                <h2 className="text-[13px] font-semibold text-heading">
                   Competencia por oferta: postulantes por oferta (mediana)
                 </h2>
                 <p className="mt-0.5 text-xs text-muted-text">
@@ -321,9 +321,9 @@ async function PulsoContent({ searchParams }: { searchParams: Promise<SearchPara
           </div>
         </div>
 
-        <div className="mt-3 overflow-x-auto rounded-lg border border-line">
+        <div className="mt-3 overflow-x-auto rounded-xl border border-card-border">
           <table className="w-full min-w-[52rem] text-sm">
-            <thead className="bg-surface-2 text-left text-[11px] font-semibold tracking-wide text-muted-text uppercase">
+            <thead className="bg-surface-2 text-left text-[10.5px] font-bold tracking-[0.08em] text-label uppercase">
               <tr>
                 <th scope="col" className="px-4 py-2.5">Puesto</th>
                 <th scope="col" className="px-4 py-2.5">Empresa</th>
@@ -334,9 +334,9 @@ async function PulsoContent({ searchParams }: { searchParams: Promise<SearchPara
                 <th scope="col" className="px-4 py-2.5">Publicada</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-line">
+            <tbody className="divide-y divide-card-border">
               {jobs?.items.map((j) => (
-                <tr key={j.id} className="align-top hover:bg-surface">
+                <tr key={j.id} className="align-top hover:bg-surface-2">
                   <td className="px-4 py-2.5">
                     <a
                       href={j.url}

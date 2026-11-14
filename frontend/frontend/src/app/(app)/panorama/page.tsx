@@ -1,7 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { io } from 'next/cache';
-import { FitViewport } from '@/components/data/FitViewport';
 import { IndicatorPicker } from '@/components/data/IndicatorPicker';
 import { LinesChart, type LineSeries } from '@/components/data/LinesChart';
 import { MotionChart } from '@/components/data/MotionChart';
@@ -12,6 +11,7 @@ import {
   ErrorNote,
   Eyebrow,
   Page,
+  RailCard,
   SourceLine,
   linkCls,
 } from '@/components/data/ui';
@@ -39,6 +39,7 @@ export const metadata: Metadata = { title: 'Panorama' };
 
 type SearchParams = {
   indicator?: string;
+  q?: string;
   periodo?: string;
   desde?: string;
   hasta?: string;
@@ -120,8 +121,15 @@ async function PanoramaContent({ sp }: { sp: SearchParams }) {
     const highlight = countries[0]
       ? (await getDashboardSummary(countries[0].iso3)).highlights[0]?.indicator.code
       : undefined;
+    const query = sp.q?.trim().toLowerCase();
+    const byQuery = query
+      ? indicators.find((i) =>
+          `${i.name} ${i.code} ${i.domain_label} ${i.description ?? ''}`.toLowerCase().includes(query),
+        )
+      : undefined;
     const indicator =
       indicators.find((i) => i.code === sp.indicator) ??
+      byQuery ??
       indicators.find((i) => i.code === highlight) ??
       indicators[0];
     const others = indicators
@@ -259,7 +267,7 @@ async function PanoramaContent({ sp }: { sp: SearchParams }) {
 
   return (
     <>
-      <FitViewport className="mx-auto flex max-w-7xl flex-col px-4 pt-7 pb-12 sm:px-6 lg:pt-5 lg:pb-4">
+      <div className="mx-auto max-w-7xl px-4 py-6 pb-12 sm:px-6">
         <ChartHeader
           eyebrow={`${indicator.domain_label} · ${FREQUENCIES[frequency] ?? frequency}`}
           title={<IndicatorPicker current={indicator} indicators={indicators} />}
@@ -287,14 +295,13 @@ async function PanoramaContent({ sp }: { sp: SearchParams }) {
           }
         />
         <ChartLayout
-          className="items-start lg:min-h-[270px] lg:flex-1 lg:flex-nowrap lg:items-stretch lg:[&>aside]:overflow-y-auto"
+          className="items-start"
           chart={
-            <div className="flex h-full flex-col">
+            <div className="flex min-h-[420px] flex-col">
               {series.length ? (
                 <div className="lg:flex-1">
                   <LinesChart
                     key={indicator.code}
-                    fill
                     series={series}
                     unit={indicator.unit}
                     mode={hasProjection ? 'focus' : 'toggle'}
@@ -316,14 +323,14 @@ async function PanoramaContent({ sp }: { sp: SearchParams }) {
             </div>
           }
           rail={
-            <>
+            <RailCard>
               <div>
                 <Eyebrow>{custom ? 'Último dato del período elegido' : 'Último dato'}</Eyebrow>
                 <div className="mt-2">
                   {rows.map((r) => (
                     <div
                       key={r.iso}
-                      className="flex items-baseline justify-between gap-3 border-b border-line py-2.5 lg:py-2"
+                      className="flex items-baseline justify-between gap-3 border-b border-card-border py-2.5 lg:py-2"
                     >
                       <span className="text-sm text-body">{names[r.iso] ?? r.iso}</span>
                       <span className="text-right">
@@ -346,7 +353,7 @@ async function PanoramaContent({ sp }: { sp: SearchParams }) {
                   {withTrend.map((t) => {
                     const end = series.find((s) => s.key === t.country_iso3)?.projected.at(-1);
                     return (
-                      <div key={t.country_iso3} className="rounded-lg border border-line p-3">
+                      <div key={t.country_iso3} className="rounded-xl border border-card-border p-3">
                         <div className="flex items-center justify-between gap-2">
                           <span className="text-sm font-semibold text-heading">
                             {names[t.country_iso3]}
@@ -392,7 +399,7 @@ async function PanoramaContent({ sp }: { sp: SearchParams }) {
                   Ver alertas recientes →
                 </Link>
               </div>
-            </>
+            </RailCard>
           }
         />
         {sparks.length > 0 && (
@@ -412,7 +419,7 @@ async function PanoramaContent({ sp }: { sp: SearchParams }) {
                     ...(sp.hasta ? { hasta: sp.hasta } : {}),
                   })}`}
                   scroll={false}
-                  className="flex flex-col gap-1 rounded-lg border border-line p-3.5 hover:border-brand lg:px-3 lg:py-2"
+                  className="flex flex-col gap-1 rounded-xl border border-card-border p-3.5 hover:border-brand lg:px-3 lg:py-2"
                 >
                   <span className="truncate text-[13px] font-semibold text-heading" title={s.name}>
                     {s.name}
@@ -426,7 +433,7 @@ async function PanoramaContent({ sp }: { sp: SearchParams }) {
             </div>
           </section>
         )}
-      </FitViewport>
+      </div>
       <div className="mx-auto max-w-7xl px-4 pb-12 sm:px-6">
         <div className="mt-10">
           <HowCalculated
@@ -540,7 +547,7 @@ function GenerationalGapSection({ gap, names }: { gap: GenerationalGap; names: R
       <p className="mt-1 max-w-3xl text-sm text-body">{gap.description}</p>
       <div className="mt-4 grid gap-3 md:grid-cols-3">
         {withData.map((c) => (
-          <div key={c.country_iso3} className="rounded-lg border border-line p-4">
+          <div key={c.country_iso3} className="rounded-xl border border-card-border p-4">
             <div className="flex items-baseline justify-between gap-2">
               <span className="text-sm font-semibold text-heading">
                 {names[c.country_iso3] ?? c.country_iso3}

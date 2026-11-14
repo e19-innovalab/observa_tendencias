@@ -28,7 +28,7 @@ export function Pager({
   const from = total === 0 ? 0 : (page - 1) * pageSize + 1;
   const to = Math.min(page * pageSize, total);
   const btn =
-    'inline-flex size-8 items-center justify-center rounded-md border border-line text-sm focus-visible:outline-2 focus-visible:outline-focus';
+    'inline-flex size-8 items-center justify-center rounded-lg border border-card-border text-sm hover:bg-surface-alt focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus';
   return (
     <nav
       aria-label="Paginación"

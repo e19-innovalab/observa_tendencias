@@ -29,11 +29,11 @@ type Props = {
 };
 
 const W = 900;
-const H = 400;
+const H = 470;
 const L = 52;
 const R = 760;
 const T = 16;
-const B = 368;
+const B = 438;
 const MAX_X_LABELS = 12;
 const MIN_H = 160;
 
@@ -192,10 +192,13 @@ export function LinesChart({ series, unit, mode = 'toggle', ariaLabel, fill = fa
   return (
     <div className={fill ? 'flex h-full flex-col' : undefined}>
       <div
-        className="mb-3 flex flex-wrap gap-2"
+        className="mb-2 flex flex-wrap items-center gap-x-4 gap-y-1.5"
         role="group"
         aria-label={mode === 'focus' ? 'País con intervalo' : 'Países (también es la leyenda)'}
       >
+        <span className="text-[10.5px] font-bold tracking-[0.08em] text-label uppercase">
+          Países
+        </span>
         {series.map((s) => {
           const pressed = mode === 'focus' ? s.key === focus : !off[s.key];
           return (
@@ -206,19 +209,13 @@ export function LinesChart({ series, unit, mode = 'toggle', ariaLabel, fill = fa
               onClick={() =>
                 mode === 'focus' ? setFocus(s.key) : setOff((o) => ({ ...o, [s.key]: !o[s.key] }))
               }
-              className={`inline-flex h-9 items-center gap-2 rounded-full border px-3 text-[13px] font-medium ${
-                mode === 'focus'
-                  ? pressed
-                    ? 'border-heading text-heading ring-1 ring-heading'
-                    : 'border-line text-body'
-                  : pressed
-                    ? 'border-line bg-canvas text-body'
-                    : 'border-line bg-surface text-muted-text'
+              className={`inline-flex items-center gap-2 rounded-md px-1.5 py-1 text-[11.5px] font-semibold tracking-[0.02em] transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus ${
+                pressed ? 'text-heading' : 'text-placeholder hover:text-body'
               }`}
             >
               <span
-                className="size-2.5 rounded-full"
-                style={{ background: mode === 'toggle' && !pressed ? '#cbd5e1' : s.color }}
+                className="h-0.5 w-4 rounded-full"
+                style={{ background: pressed ? s.color : '#cbd5e1' }}
                 aria-hidden
               />
               {s.label}
@@ -244,23 +241,43 @@ export function LinesChart({ series, unit, mode = 'toggle', ariaLabel, fill = fa
                 y={T}
                 width={R - x(firstProjected - 1)}
                 height={bottom - T}
-                fill="#fafbfe"
+                fill="#f7faff"
+              />
+              <line
+                x1={x(firstProjected - 1)}
+                x2={x(firstProjected - 1)}
+                y1={T}
+                y2={bottom}
+                stroke="#cbd5e1"
+                strokeDasharray="4 4"
+              />
+              <rect
+                x={(x(firstProjected - 1) + R) / 2 - 82}
+                y={T + 8}
+                width={164}
+                height={20}
+                rx={5}
+                fill="#ffffff"
+                stroke="#bcd0f7"
+                strokeDasharray="3 3"
               />
               <text
                 x={(x(firstProjected - 1) + R) / 2}
-                y={T + 14}
+                y={T + 22}
                 textAnchor="middle"
-                fontSize="11"
-                fill="#475569"
+                fontSize="9"
+                fontWeight="700"
+                letterSpacing="0.06em"
+                fill="#172bc4"
               >
-                Proyección
+                {`ÁREA PROYECTADA (${periods[firstProjected]}–${periods[periods.length - 1]})`}
               </text>
             </>
           )}
           {ticks.map((t) => (
             <g key={t}>
-              <line x1={L} x2={R} y1={y(t)} y2={y(t)} stroke="#e2e8f0" />
-              <text x={L - 8} y={y(t) + 4} textAnchor="end" fontSize="12" fill="#475569">
+              <line x1={L} x2={R} y1={y(t)} y2={y(t)} stroke="#eef2f9" />
+              <text x={L - 10} y={y(t) + 4} textAnchor="end" fontSize="11.5" fill="#94a3b8">
                 {formatValue(t, unit)}
               </text>
             </g>
@@ -268,7 +285,17 @@ export function LinesChart({ series, unit, mode = 'toggle', ariaLabel, fill = fa
           {periods.map(
             (p, i) =>
               (i % step === 0 || i === periods.length - 1) && (
-                <text key={p} x={x(i)} y={h - 8} textAnchor="middle" fontSize="12" fill="#475569">
+                <text
+                  key={p}
+                  x={x(i)}
+                  y={h - 8}
+                  textAnchor="middle"
+                  fontSize="11.5"
+                  fontWeight={Number.isFinite(firstProjected) && i === firstProjected - 1 ? 700 : 500}
+                  fill={
+                    Number.isFinite(firstProjected) && i >= firstProjected ? '#172bc4' : '#64748b'
+                  }
+                >
                   {p}
                 </text>
               ),
@@ -353,7 +380,7 @@ export function LinesChart({ series, unit, mode = 'toggle', ariaLabel, fill = fa
         </svg>
         {hover !== null && hoverRows.length > 0 && (
           <div
-            className="pointer-events-none absolute top-2 z-10 min-w-40 rounded-lg border border-line bg-canvas px-3 py-2 text-xs shadow-md"
+            className="pointer-events-none absolute top-2 z-10 min-w-44 rounded-xl border border-card-border bg-canvas px-3 py-2 text-[11.5px] shadow-[0_10px_30px_-18px_rgba(15,23,42,.35)]"
             style={{
               left: `${(x(hover) / W) * 100}%`,
               transform:

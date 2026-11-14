@@ -9,11 +9,15 @@ export type ChartSeries = {
 
 /** Colores de país del Design System (--country-arg, --country-chl, --country-ury). */
 export const COUNTRY_COLORS: Record<string, string> = {
-  ARG: '#38bdf8',
-  CHL: '#b91c1c',
-  URY: '#d97706',
+  ARG: '#22b8e6',
+  CHL: '#d92d20',
+  URY: '#f0a800',
 };
-export const FALLBACK_COLOR = '#475569'; // --text-muted
+export const FALLBACK_COLOR = '#64748b'; // --color-label
 
 /** Estructura de gráficos (--chart-grid-line). */
-export const CHART_GRID = '#e2e8f0';
+export const CHART_GRID = '#eef2f9';
+
+/** Ejes y tooltips del rediseño. */
+export const CHART_AXIS = '#94a3b8';
+export const CHART_TOOLTIP_BORDER = '#e6ebf5';

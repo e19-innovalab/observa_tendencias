@@ -26,21 +26,21 @@ export function StatCard({
   return (
     <article
       className={cn(
-        'flex min-h-36 flex-col justify-between gap-3 rounded-lg border border-line bg-canvas p-5 shadow-[0_1px_2px_var(--shadow-color)]',
+        'flex min-h-[120px] flex-col justify-between gap-3 rounded-xl border border-card-border bg-canvas px-4 py-4',
         className,
       )}
     >
       <div className="flex items-start justify-between gap-2">
-        <p className="text-[11px] font-semibold tracking-wide text-muted-text uppercase">{label}</p>
+        <p className="text-[10.5px] leading-snug font-bold tracking-[0.06em] text-label uppercase">{label}</p>
         {badge}
       </div>
 
       <div>
-        <p className={cn('text-2xl font-semibold text-heading', valueClassName)}>
+        <p className={cn('text-[23px] leading-tight font-bold tracking-tight text-heading', valueClassName)}>
           {value}
-          {unit && <span className="ml-1 text-sm font-normal text-muted-text">{unit}</span>}
+          {unit && <span className="ml-1 text-[13px] font-medium text-muted-text">{unit}</span>}
         </p>
-        {hint && <p className="mt-1 text-xs leading-relaxed text-muted-text">{hint}</p>}
+        {hint && <p className="mt-1 text-[11.5px] leading-relaxed text-muted-text">{hint}</p>}
       </div>
 
       {action}

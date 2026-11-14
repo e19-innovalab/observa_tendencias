@@ -82,11 +82,11 @@ async function DatosContent({ searchParams }: { searchParams: Promise<SearchPara
         la autenticación no esté conectada, esta pantalla muestra el historial en modo lectura.
       </InfoNote>
 
-      <section className="overflow-hidden rounded-lg border border-line bg-surface">
-        <div className="flex flex-wrap items-end justify-between gap-4 border-b border-line/70 p-4">
+      <section className="overflow-hidden rounded-xl border border-card-border bg-rail">
+        <div className="flex flex-wrap items-end justify-between gap-4 border-b border-card-border p-4">
           <h2 className="text-sm font-semibold uppercase tracking-wide text-heading">
             Historial de archivos{' '}
-            <span className="ml-2 rounded-full border border-line px-2 py-0.5 text-xs font-medium normal-case text-muted-text">
+            <span className="ml-2 rounded-full border border-card-border px-2 py-0.5 text-xs font-medium normal-case text-muted-text">
               {files.length}
             </span>
           </h2>
@@ -110,7 +110,7 @@ async function DatosContent({ searchParams }: { searchParams: Promise<SearchPara
         </div>
         <div className="overflow-x-auto">
           <table className="w-full min-w-[60rem] text-sm">
-            <thead className="bg-surface-2 text-left text-[11px] font-semibold uppercase tracking-wide text-muted-text">
+            <thead className="bg-surface-2 text-left text-[10.5px] font-bold tracking-[0.08em] text-label uppercase">
               <tr>
                 <th scope="col" className="px-4 py-3">
                   ID
@@ -135,7 +135,7 @@ async function DatosContent({ searchParams }: { searchParams: Promise<SearchPara
                 </th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-line/60">
+            <tbody className="divide-y divide-card-border">
               {files.map((f) => {
                 const warnings = f.report.warnings?.length ?? 0;
                 const errors = f.report.errors?.length ?? 0;
@@ -182,7 +182,7 @@ async function DatosContent({ searchParams }: { searchParams: Promise<SearchPara
                     <td className="px-4 py-3 text-right">{whole.format(f.records)}</td>
                     <td className="px-4 py-3">
                       <span
-                        className={`whitespace-nowrap rounded-full border px-2 py-0.5 text-xs font-medium ${STATUS_STYLES[f.status] ?? 'border-line bg-surface text-body'}`}
+                        className={`whitespace-nowrap rounded-full border px-2 py-0.5 text-xs font-medium ${STATUS_STYLES[f.status] ?? 'border-card-border bg-surface text-body'}`}
                       >
                         {STATUS_LABELS[f.status] ?? f.status}
                       </span>

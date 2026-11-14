@@ -2,12 +2,14 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { ArrowRight } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
+import { ChipGroup } from '@/components/data/UrlControls';
+import { CountryFilter } from '@/components/data/CountryFilter';
 import { ChartCard } from '@/components/ui/charts/ChartCard';
 import { SectorBarChart } from '@/components/ui/charts/SectorBarChart';
-import { OptionPills } from '@/components/ui/controls/OptionPills';
 import { ApiErrorNote } from '@/components/ui/feedback/ApiErrorNote';
 import { InfoNote } from '@/components/ui/feedback/InfoNote';
 import { FilterBar, type FilterConfig } from '@/components/ui/filters/FilterBar';
+import { FilterLabel, FilterPanel } from '@/components/ui/filters/FilterPanel';
 import { RankingList } from '@/components/ui/indicators/RankingList';
 import { StatCard } from '@/components/ui/indicators/StatCard';
 import { WeightBar } from '@/components/ui/indicators/WeightBar';
@@ -270,39 +272,33 @@ export default async function SectoresPage({
       />
 
       <div className="mx-auto max-w-7xl space-y-8 px-4 py-6 sm:px-6">
-        <section aria-label="Filtros" className="space-y-4 rounded-lg border border-line bg-surface p-4 sm:p-5">
-          <div>
-            <p className="mb-2 text-[11px] font-semibold uppercase tracking-wide text-muted-text">
-              Países
-            </p>
-            <OptionPills
-              param="country"
-              label="Países"
-              options={[
-                { value: 'all', label: `Todos (${countries.length})` },
-                ...countries.map((country) => ({ value: country.iso3, label: country.iso3 })),
-              ]}
-              defaultValue="all"
-            />
+        <FilterPanel className="space-y-4">
+          <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-3">
+            <div className="flex flex-wrap items-center gap-2.5">
+              <FilterLabel>Países</FilterLabel>
+              <CountryFilter
+                countries={countries}
+                value={sp.country && sp.country !== 'all' ? sp.country : ''}
+                reset={['page']}
+              />
+            </div>
+            <FilterBar filters={filters} />
           </div>
 
-          <FilterBar filters={filters} />
-
-          <div>
-            <p className="mb-2 text-[11px] font-semibold uppercase tracking-wide text-muted-text">
-              Sector
-            </p>
-            <OptionPills
-              param="sector"
+          <div className="border-t border-card-border pt-3">
+            <ChipGroup
+              name="sector"
               label="Sector"
+              hideLabel
+              withAll={false}
               options={sectors.map((sector) => ({
                 value: sector.sector_code,
                 label: sector.name,
               }))}
-              defaultValue={sectorCode}
+              value={sectorCode}
             />
           </div>
-        </section>
+        </FilterPanel>
 
         {dataError && <ApiErrorNote message={dataError} />}
 
@@ -357,7 +353,7 @@ export default async function SectoresPage({
         </section>
 
         {weights.length > 0 && (
-          <section className="space-y-4 rounded-lg border border-line bg-canvas p-5">
+          <section className="rounded-xl border border-card-border bg-canvas p-5">
             <WeightBar
               title="Índice orientativo por ocupación"
               description="El ISE combina cuatro componentes. Si un componente no tiene fuente disponible, su peso se redistribuye entre los demás y queda documentado."
@@ -375,7 +371,7 @@ export default async function SectoresPage({
           {ranking.length > 0 ? (
             <RankingList items={ranking} />
           ) : (
-            <p className="rounded-lg border border-dashed border-line bg-surface px-4 py-8 text-center text-sm text-muted-text">
+            <p className="rounded-xl border border-dashed border-card-border bg-rail px-4 py-8 text-center text-[12.5px] text-muted-text">
               No hay componentes disponibles para este sector.
             </p>
           )}
@@ -388,9 +384,9 @@ export default async function SectoresPage({
           />
           <div className="grid gap-4 md:grid-cols-3">
             {definitions.map((definition) => (
-              <article key={definition.title} className="rounded-lg border border-line bg-surface p-5">
-                <h3 className="text-sm font-semibold text-heading">{definition.title}</h3>
-                <p className="mt-2 text-sm leading-relaxed text-muted-text">{definition.text}</p>
+              <article key={definition.title} className="rounded-xl border border-card-border bg-canvas p-5">
+                <h3 className="text-[13px] font-semibold text-heading">{definition.title}</h3>
+                <p className="mt-2 text-[12.5px] leading-relaxed text-muted-text">{definition.text}</p>
               </article>
             ))}
           </div>

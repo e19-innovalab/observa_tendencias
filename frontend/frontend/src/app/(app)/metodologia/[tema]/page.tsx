@@ -56,7 +56,7 @@ const STATUS: Record<string, { label: string; style: string }> = {
     label: 'Con errores',
     style: 'border-alert-critical-border bg-alert-critical-bg text-alert-critical-text',
   },
-  never_run: { label: 'Sin descargas', style: 'border-line bg-surface text-muted-text' },
+  never_run: { label: 'Sin descargas', style: 'border-card-border bg-surface text-muted-text' },
 };
 const FREQUENCY: Record<string, string> = {
   daily: 'Diaria',
@@ -106,15 +106,19 @@ async function MetodologiaContent({ params }: { params: Promise<{ tema: string }
   const topic = TOPICS[tema];
   if (!topic) notFound();
   return (
-    <div className="mx-auto grid max-w-7xl gap-8 px-4 py-8 sm:px-6 lg:grid-cols-[14rem_1fr]">
+    <div className="mx-auto grid max-w-7xl gap-6 px-4 py-6 sm:px-6 lg:grid-cols-[14rem_1fr]">
       <nav aria-label="Temas de metodología">
-        <ul className="space-y-1 text-sm">
+        <ul className="space-y-1 rounded-xl border border-card-border bg-canvas p-2 shadow-[var(--shadow-card)]">
           {Object.entries(TOPICS).map(([key, t]) => (
             <li key={key}>
               <Link
                 href={`/metodologia/${key}`}
                 aria-current={key === tema ? 'page' : undefined}
-                className={`block rounded-md px-3 py-2 ${key === tema ? 'bg-heading font-medium text-white' : 'text-body hover:bg-surface'}`}
+                className={`block rounded-lg px-3 py-2 text-[12.5px] transition-colors ${
+                  key === tema
+                    ? 'bg-brand font-semibold text-white'
+                    : 'text-muted-text hover:bg-surface-2 hover:text-heading'
+                }`}
               >
                 {t.label}
               </Link>
@@ -122,10 +126,12 @@ async function MetodologiaContent({ params }: { params: Promise<{ tema: string }
           ))}
         </ul>
       </nav>
-      <div className="min-w-0 space-y-6">
+      <div className="min-w-0 space-y-5">
         <div>
-          <h2 className="text-2xl font-semibold text-heading">{topic.label}</h2>
-          <p className="mt-1 text-body">{topic.intro}</p>
+          <h2 className="text-[22px] leading-tight font-semibold tracking-tight text-heading">
+            {topic.label}
+          </h2>
+          <p className="mt-1.5 text-[13px] leading-relaxed text-muted-text">{topic.intro}</p>
         </div>
         {topic.types ? (
           <HowCalculated types={topic.types} title="Método vigente" open />
@@ -145,9 +151,9 @@ async function Indicators() {
   return (
     <div className="space-y-6">
       {domains.map(([domain, label]) => (
-        <section key={domain} className="overflow-hidden rounded-lg border border-line bg-surface">
-          <h3 className="border-b border-line/70 p-4 font-semibold text-heading">{label}</h3>
-          <dl className="divide-y divide-line/60">
+        <section key={domain} className="overflow-hidden rounded-xl border border-card-border bg-canvas shadow-[var(--shadow-card)]">
+          <h3 className="border-b border-card-border px-4 py-3 text-[10.5px] font-bold tracking-[0.08em] text-label uppercase">{label}</h3>
+          <dl className="divide-y divide-card-border">
             {indicators
               .filter((i) => i.domain === domain)
               .map((i) => (
@@ -184,12 +190,12 @@ async function Sources() {
   return (
     <>
       {notes.map((block) => (
-        <section key={block.title} className="overflow-hidden rounded-lg border border-line bg-surface">
-          <div className="border-b border-line/70 p-4">
-            <h3 className="font-semibold text-heading">{block.title}</h3>
+        <section key={block.title} className="overflow-hidden rounded-xl border border-card-border bg-canvas shadow-[var(--shadow-card)]">
+          <div className="border-b border-card-border p-4">
+            <h3 className="text-[13px] font-semibold text-heading">{block.title}</h3>
             <p className="mt-1 text-sm text-body">{block.intro}</p>
           </div>
-          <dl className="divide-y divide-line/60">
+          <dl className="divide-y divide-card-border">
             {block.items.map((n) => (
               <div key={n.label} className="grid gap-1 p-4 text-sm md:grid-cols-[14rem_1fr]">
                 <dt className="font-medium text-heading">{n.label}</dt>
@@ -202,10 +208,10 @@ async function Sources() {
           </dl>
         </section>
       ))}
-      <section className="overflow-hidden rounded-lg border border-line bg-surface">
+      <section className="overflow-hidden rounded-xl border border-card-border bg-canvas shadow-[var(--shadow-card)]">
         <div className="overflow-x-auto">
           <table className="w-full min-w-[48rem] text-sm">
-            <thead className="bg-surface-2 text-left text-[11px] font-semibold uppercase tracking-wide text-muted-text">
+            <thead className="bg-surface-2 text-left text-[10.5px] font-bold tracking-[0.08em] text-label uppercase">
               <tr>
                 <th scope="col" className="px-4 py-3">
                   Fuente
@@ -224,9 +230,9 @@ async function Sources() {
                 </th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-line/60">
+            <tbody className="divide-y divide-card-border">
               {sources.map((s) => {
-                const st = STATUS[s.status] ?? { label: s.status, style: 'border-line' };
+                const st = STATUS[s.status] ?? { label: s.status, style: 'border-card-border' };
                 return (
                   <tr key={s.code} className="align-top">
                     <td className="px-4 py-3">

@@ -41,7 +41,7 @@ function SectorTable({
   return (
     <div className="overflow-x-auto">
       <table className="w-full min-w-[40rem] text-sm">
-        <thead className="bg-surface-2 text-left text-[11px] font-semibold tracking-wide text-muted-text uppercase">
+        <thead className="bg-surface-2 text-left text-[10.5px] font-bold tracking-[0.08em] text-label uppercase">
           <tr>
             <th scope="col" className="sticky left-0 bg-surface-2 px-4 py-3">
               Sector
@@ -56,7 +56,7 @@ function SectorTable({
             )}
           </tr>
         </thead>
-        <tbody className="divide-y divide-line/60">
+        <tbody className="divide-y divide-card-border">
           {sectors.map((s) => (
             <tr key={s} className={s === TOTAL ? 'bg-surface-2 font-semibold' : 'hover:bg-surface'}>
               <th
@@ -88,8 +88,8 @@ function SectorTable({
 
 function Section({ title, text, children }: { title: string; text: string; children: React.ReactNode }) {
   return (
-    <section className="overflow-hidden rounded-lg border border-line bg-canvas">
-      <div className="border-b border-line/70 p-5">
+    <section className="overflow-hidden rounded-xl border border-card-border bg-canvas">
+      <div className="border-b border-card-border p-5">
         <h2 className="text-lg font-semibold text-heading">{title}</h2>
         <p className="mt-1 text-sm text-muted-text">{text}</p>
       </div>
@@ -197,7 +197,7 @@ export async function SectorKpisView({ sp }: { sp: SearchParams }) {
 
   return (
     <>
-      <section className="rounded-lg border border-line bg-canvas p-4">
+      <section className="rounded-xl border border-card-border bg-canvas p-4">
         <ChipGroup name="country" label="País" value={country ?? ''} options={countryOptions} />
         <div className="mt-4 grid gap-3 sm:grid-cols-2">
           <SelectParam
@@ -216,7 +216,7 @@ export async function SectorKpisView({ sp }: { sp: SearchParams }) {
         </div>
       </section>
 
-      <section className="rounded-lg border border-line bg-surface p-4 text-sm text-body">
+      <section className="rounded-xl border border-card-border bg-rail p-4 text-sm text-body">
         <p className="flex items-center gap-2 font-semibold text-heading">
           <Info className="size-4" aria-hidden /> Alcance
         </p>
@@ -233,7 +233,7 @@ export async function SectorKpisView({ sp }: { sp: SearchParams }) {
           columns={[{ key: 'v', label: '' }]}
           cell={cellFor('densidad', (v) => one.format(v))}
         />
-        <div className="border-t border-line/70 p-5">
+        <div className="border-t border-card-border p-5">
           <h3 className="mb-2 text-sm font-semibold text-heading">
             {sector}: titulados por cada 1.000 ocupados
           </h3>
@@ -261,7 +261,7 @@ export async function SectorKpisView({ sp }: { sp: SearchParams }) {
                 : cellFor('brecha_salarial_pct', percent)(s, c)
           }
         />
-        <div className="border-t border-line/70 p-5">
+        <div className="border-t border-card-border p-5">
           <h3 className="mb-2 text-sm font-semibold text-heading">{sector}: brecha salarial por año</h3>
           <TrendLineChart data={lineRows('brecha_salarial_pct')} series={lineSeries} unit="percent" />
         </div>
@@ -282,7 +282,7 @@ export async function SectorKpisView({ sp }: { sp: SearchParams }) {
       {(!country || country === 'ARG') && kpis.cep_xxi.length > 0 && (
         <Section title="Argentina: empleo privado registrado y salarios (CEP-XXI)" text={kpis.cep_nota}>
           {kpis.dolar_oficial && (
-            <p className="border-b border-line/70 px-5 py-3 text-sm text-body">
+            <p className="border-b border-card-border px-5 py-3 text-sm text-body">
               {kpis.dolar_oficial.nombre}:{' '}
               <strong>
                 $ {new Intl.NumberFormat('es-AR', { maximumFractionDigits: 2 }).format(kpis.dolar_oficial.valor)}
@@ -299,7 +299,7 @@ export async function SectorKpisView({ sp }: { sp: SearchParams }) {
               return column ? cepCell(column.key, column.format)(s) : null;
             }}
           />
-          <div className="grid gap-6 border-t border-line/70 p-5 lg:grid-cols-2">
+          <div className="grid gap-6 border-t border-card-border p-5 lg:grid-cols-2">
             <div>
               <h3 className="mb-2 text-sm font-semibold text-heading">{sector}: puestos de trabajo</h3>
               <TrendLineChart data={cepLine('puestos')} series={cepSeries('Puestos')} unit="number" />

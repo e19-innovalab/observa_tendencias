@@ -15,22 +15,22 @@ type Props = {
   className?: string;
 };
 
-const BASE = 'inline-flex items-center gap-2 rounded-full border transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus';
+const BASE = 'inline-flex items-center gap-2 border transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus';
 
 function pillClass(variant: Props['variant'], active: boolean) {
   if (variant === 'segment') {
     return cn(
       BASE,
-      'border-transparent px-4 py-1.5 text-sm font-medium',
-      active ? 'bg-brand text-white shadow-sm' : 'bg-transparent text-body hover:bg-surface-2',
+      'rounded-md border-transparent px-3 py-1.5 text-[12px] font-semibold',
+      active ? 'bg-canvas text-brand shadow-sm' : 'bg-transparent text-muted-text hover:text-heading',
     );
   }
   return cn(
     BASE,
-    'px-4 py-2 text-sm font-medium',
+    'rounded-lg px-3 py-1.5 text-[12px] font-medium',
     active
-      ? 'border-heading bg-heading text-white'
-      : 'border-line bg-canvas text-body hover:border-brand/50 hover:bg-surface-alt',
+      ? 'border-brand bg-brand font-semibold text-white'
+      : 'border-card-border bg-canvas text-body hover:border-line',
   );
 }
 
@@ -47,7 +47,7 @@ function PillGroup({ options, current, variant, label, onSelect }: {
       aria-label={label}
       className={cn(
         'flex flex-wrap gap-2',
-        variant === 'segment' && 'inline-flex flex-nowrap rounded-full bg-surface-2 p-1',
+        variant === 'segment' && 'inline-flex flex-nowrap rounded-lg bg-surface-2 p-0.5',
       )}
     >
       {options.map((option) => {
@@ -65,7 +65,11 @@ function PillGroup({ options, current, variant, label, onSelect }: {
               <span
                 className={cn(
                   'rounded-full px-1.5 py-0.5 text-[10px] font-semibold',
-                  active ? 'bg-white/20 text-white' : 'bg-surface-2 text-muted-text',
+                  active
+                    ? variant === 'segment'
+                      ? 'bg-brand/10 text-brand'
+                      : 'bg-white/20 text-white'
+                    : 'bg-surface-2 text-muted-text',
                 )}
               >
                 {option.hint}

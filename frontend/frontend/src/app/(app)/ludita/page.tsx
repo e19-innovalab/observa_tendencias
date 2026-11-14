@@ -193,7 +193,7 @@ async function LuditaContent({ searchParams }: { searchParams: Promise<SearchPar
               const p = c.points[c.points.length - 1];
               const scored = Object.values(p.paths).reduce((a, b) => a + b, 0) || 1;
               return (
-                <div key={c.country_iso3} className="rounded-xl border border-line p-3.5">
+                <div key={c.country_iso3} className="rounded-xl border border-card-border p-3.5">
                   <div className="flex items-baseline justify-between gap-2">
                     <span className="text-sm font-semibold text-heading">{names[c.country_iso3]}</span>
                     <span className="text-lg font-semibold tabular-nums text-heading">{fmt1(p.score)}</span>
@@ -217,7 +217,7 @@ async function LuditaContent({ searchParams }: { searchParams: Promise<SearchPar
         }
       />
 
-      <section className="mt-12 flex flex-col gap-3 border-t border-line pt-8">
+      <section className="mt-12 flex flex-col gap-3 border-t border-card-border pt-8">
         <h2 className="text-xl font-bold text-heading">Los primeros años: ¿dónde estamos?</h2>
         <p className="max-w-3xl text-sm text-muted-text">
           {todayLabel} en los {zoomToday.length} países desde {history.today[0]?.arrival_year ?? ''} ({history.today[0]?.technology}), con 100 = ese año. Estamos en el año {yearsToday}.{zoomRef.length > 0 && ` De referencia, en gris, ${listText(zoomRef.map((s) => shortCase(history.cases.find((c) => c.key === s.key)!).toLowerCase()))} en sus primeros ${zoomTo} años.`}{fallText && ` Para comparar: ${fallText}.`} {yearsToday} años de datos no alcanzan para saber qué camino sigue una ocupación.
@@ -235,7 +235,7 @@ async function LuditaContent({ searchParams }: { searchParams: Promise<SearchPar
         )}
       </section>
 
-      <section className="mt-12 flex flex-col gap-3 border-t border-line pt-8">
+      <section className="mt-12 flex flex-col gap-3 border-t border-card-border pt-8">
         <h2 className="text-xl font-bold text-heading">¿Qué camino sigue cada ocupación?</h2>
         <p className="max-w-3xl text-sm text-muted-text">
           Ocupaciones destacadas en {year}. A la derecha de la línea vertical, la IA puede hacer buena parte de sus tareas (exposición desde {num(rules.exposed_from)}); debajo de la horizontal, el empleo y la formación crecen menos de {num(rules.retreat_below * 100)} % por año en promedio. La zona rosa es el camino del tejedor
@@ -257,7 +257,7 @@ async function LuditaContent({ searchParams }: { searchParams: Promise<SearchPar
         ))}
         <div className="mt-2 grid gap-3 sm:grid-cols-2">
           {featured.paths.map((p) => (
-            <div key={p.path} className="rounded-xl border border-line p-4">
+            <div key={p.path} className="rounded-xl border border-card-border p-4">
               <span className={`rounded-full px-2 py-0.5 text-xs font-semibold ${PATH_BADGE[p.path]}`}>{p.label}</span>
               <p className="mt-2 text-xs font-medium text-muted-text">{p.short}</p>
               <p className="mt-1 text-sm text-body">{p.description}</p>
@@ -268,7 +268,7 @@ async function LuditaContent({ searchParams }: { searchParams: Promise<SearchPar
 
       <section className="mt-12 grid gap-4 sm:grid-cols-2">
         {featured.sides.map((s) => (
-          <div key={s.side} className="rounded-xl border border-line p-5">
+          <div key={s.side} className="rounded-xl border border-card-border p-5">
             <h3 className="font-semibold text-heading">{s.label}</h3>
             <p className="mt-1.5 text-sm text-body">{s.definition}</p>
             <ul className="mt-3 flex flex-col gap-2">
@@ -285,7 +285,7 @@ async function LuditaContent({ searchParams }: { searchParams: Promise<SearchPar
 
       <Ranking page={ranking} names={names} pais={sp.pais ?? ''} countries={countries.map((c) => ({ value: c.iso3, label: c.name_es }))} />
 
-      <section className="mt-12 flex flex-col gap-5 border-t border-line pt-8">
+      <section className="mt-12 flex flex-col gap-5 border-t border-card-border pt-8">
         <h2 className="text-xl font-bold text-heading">Cómo se calcula</h2>
         <ol className="flex max-w-3xl list-decimal flex-col gap-2 pl-5 text-sm text-body">
           {featured.sides.map((s) => (
@@ -337,7 +337,7 @@ function Ranking({ page, names, pais, countries }: { page: LuditaPage; names: Re
       <div className="mt-4 overflow-x-auto">
         <table className="w-full min-w-[680px] text-sm tabular-nums">
           <thead>
-            <tr className="border-b border-line text-left text-xs text-muted-text">
+            <tr className="border-b border-card-border text-left text-xs text-muted-text">
               <th className="py-2 pr-3 font-medium">Ocupación</th>
               <th className="py-2 pr-3 font-medium">País</th>
               <th className="py-2 pr-3 text-right font-medium">Indicador</th>
@@ -348,7 +348,7 @@ function Ranking({ page, names, pais, countries }: { page: LuditaPage; names: Re
           </thead>
           <tbody>
             {page.items.map((i) => (
-              <tr key={`${i.country_iso3}-${i.occupation.occupation_code}`} className="border-b border-line/60">
+              <tr key={`${i.country_iso3}-${i.occupation.occupation_code}`} className="border-b border-card-border">
                 <td className="py-2 pr-3 text-heading">{i.occupation.name}</td>
                 <td className="py-2 pr-3 text-muted-text">{names[i.country_iso3]}</td>
                 <td className="py-2 pr-3 text-right font-semibold text-heading">{i.score !== null ? fmt1(i.score) : '—'}</td>

@@ -31,7 +31,7 @@ export function UrlSeg({
   };
   return (
     <div
-      className="inline-flex rounded-lg border border-line bg-surface p-0.5"
+      className="inline-flex rounded-lg bg-surface-2 p-0.5"
       role="group"
       aria-label={label}
     >
@@ -41,9 +41,9 @@ export function UrlSeg({
           href={href(o.value)}
           scroll={false}
           aria-pressed={o.value === value}
-          className={`rounded-md px-3 py-1.5 text-[13px] font-medium ${
+          className={`rounded-md px-3 py-1.5 text-[12px] font-semibold transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus ${
             o.value === value
-              ? 'bg-canvas text-heading shadow-sm'
+              ? 'bg-canvas text-brand shadow-sm'
               : 'text-muted-text hover:text-heading'
           }`}
         >

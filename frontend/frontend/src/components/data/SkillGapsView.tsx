@@ -280,7 +280,7 @@ export async function SkillGapsView({ sp: params }: { sp: SearchParams }) {
             </div>
           ) : (
             <>
-              <div className="grid grid-cols-2 border-b border-line pb-2 text-xs font-semibold">
+              <div className="grid grid-cols-2 border-b border-card-border pb-2 text-xs font-semibold">
                 <span className="pr-3 text-right text-brand">
                   ← La formación crece más rápido (posible excedente)
                 </span>
@@ -432,7 +432,7 @@ function RowPanel({ row, country, groups }: { row: Row; country: string; groups:
         </details>
       )}
       {row.description && (
-        <div className="border-t border-line/60 pt-3">
+        <div className="border-t border-card-border pt-3">
           <details className="group">
             <summary className="cursor-pointer list-none [&::-webkit-details-marker]:hidden">
               <EscoText
@@ -474,7 +474,7 @@ function RowPanel({ row, country, groups }: { row: Row; country: string; groups:
       {row.skillsTotal ? (
         <a
           href="#habilidades-del-grupo"
-          className="border-t border-line/60 pt-3 text-sm font-medium text-brand hover:underline"
+          className="border-t border-card-border pt-3 text-sm font-medium text-brand hover:underline"
         >
           Ver las {row.skillsTotal} habilidades que incluye ↓
         </a>
@@ -482,7 +482,7 @@ function RowPanel({ row, country, groups }: { row: Row; country: string; groups:
       {count > 0 && (
         <a
           href="#ocupaciones"
-          className={`${row.skillsTotal ? '-mt-1.5' : 'border-t border-line/60 pt-3'} text-sm font-medium text-brand hover:underline`}
+          className={`${row.skillsTotal ? '-mt-1.5' : 'border-t border-card-border pt-3'} text-sm font-medium text-brand hover:underline`}
         >
           Ver las {count} ocupaciones que {groups ? 'lo usan' : 'la usan'} ↓
         </a>
@@ -526,7 +526,7 @@ function OccupationsBySector({ row, iso3, groups }: { row: Row; iso3: string; gr
             <li key={u.sector_code ?? 'otras'}>
               <a
                 href={`#sector-${u.sector_code ?? 'otras'}`}
-                className="inline-flex items-center gap-2 rounded-full border border-line px-3 py-1.5 text-[13px] hover:border-brand"
+                className="inline-flex items-center gap-2 rounded-full border border-card-border px-3 py-1.5 text-[13px] hover:border-brand"
               >
                 <span className="font-semibold text-heading">{u.name}</span>
                 <span className="text-muted-text">
@@ -567,7 +567,7 @@ function OccupationsBySector({ row, iso3, groups }: { row: Row; iso3: string; gr
             <div
               key={u.sector_code ?? 'otras'}
               id={`sector-${u.sector_code ?? 'otras'}`}
-              className="scroll-mt-20 rounded-xl border border-line p-4"
+              className="scroll-mt-20 rounded-xl border border-card-border p-4"
             >
               <div className="flex items-baseline justify-between gap-2">
                 <h3 className="font-semibold text-heading">{u.name}</h3>
@@ -611,7 +611,7 @@ function GroupSkills({ row }: { row: Row }) {
       </p>
       <ul className="mt-4 grid gap-3 md:grid-cols-2 lg:grid-cols-4">
         {skills.map((k) => (
-          <li key={k.name} className="rounded-xl border border-line p-4">
+          <li key={k.name} className="rounded-xl border border-card-border p-4">
             <p className="text-[14px] leading-snug font-semibold text-heading">{cap(k.name)}</p>
             {k.description && (
               <p className="mt-1.5 text-[13px] leading-relaxed text-muted-text">{k.description}</p>

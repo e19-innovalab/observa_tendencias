@@ -39,7 +39,7 @@ const SEVERITY_STYLES: Record<string, { dot: string; badge: string }> = {
     dot: 'bg-alert-warning-icon',
     badge: 'border-alert-warning-border bg-alert-warning-bg text-alert-warning-text',
   },
-  low: { dot: 'bg-alert-positive-icon', badge: 'border-line bg-surface text-body' },
+  low: { dot: 'bg-alert-positive-icon', badge: 'border-card-border bg-surface text-body' },
 };
 
 export default function AlertasPage({
@@ -112,18 +112,18 @@ async function AlertasContent({ searchParams }: { searchParams: Promise<SearchPa
   return (
     <div className="mx-auto max-w-7xl space-y-8 px-4 py-8 sm:px-6">
       <section aria-label="Resumen" className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
-        <div className="rounded-lg border border-line bg-surface p-4">
+        <div className="rounded-xl border border-card-border bg-rail p-4">
           <p className="text-xs font-semibold uppercase tracking-wide text-muted-text">Alertas</p>
           <p className="mt-2 text-2xl font-semibold text-heading">{all.total}</p>
         </div>
-        <div className="rounded-lg border border-line bg-surface p-4">
+        <div className="rounded-xl border border-card-border bg-rail p-4">
           <p className="text-xs font-semibold uppercase tracking-wide text-muted-text">No leídas</p>
           <p className="mt-2 text-2xl font-semibold text-heading">{all.unread}</p>
         </div>
         {rules.severities.map((s) => (
           <div
             key={s.code}
-            className="rounded-lg border border-line bg-surface p-4"
+            className="rounded-xl border border-card-border bg-rail p-4"
             title={s.definition ?? undefined}
           >
             <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-muted-text">
@@ -142,7 +142,7 @@ async function AlertasContent({ searchParams }: { searchParams: Promise<SearchPa
 
       <section
         aria-label="Filtros"
-        className="flex flex-wrap items-end gap-6 rounded-lg border border-line bg-surface p-5"
+        className="flex flex-wrap items-end gap-6 rounded-xl border border-card-border bg-rail p-5"
       >
         <ChipGroup
           name="country"
@@ -177,8 +177,8 @@ async function AlertasContent({ searchParams }: { searchParams: Promise<SearchPa
         />
       </section>
 
-      <section className="overflow-hidden rounded-lg border border-line bg-surface">
-        <div className="flex flex-wrap items-center justify-between gap-4 border-b border-line/70 p-5">
+      <section className="overflow-hidden rounded-xl border border-card-border bg-rail">
+        <div className="flex flex-wrap items-center justify-between gap-4 border-b border-card-border p-5">
           <div>
             <h2 className="text-lg font-semibold text-heading">Alertas detectadas</h2>
             <p className="mt-1 text-sm text-muted-text">
@@ -186,7 +186,7 @@ async function AlertasContent({ searchParams }: { searchParams: Promise<SearchPa
             </p>
           </div>
         </div>
-        <ul className="divide-y divide-line/60">
+        <ul className="divide-y divide-card-border">
           {data.items.map((a) => {
             const style = SEVERITY_STYLES[a.severity];
             const target = targetOf(a);
@@ -197,7 +197,7 @@ async function AlertasContent({ searchParams }: { searchParams: Promise<SearchPa
             return (
               <li
                 key={a.alert_id}
-                className={`flex flex-wrap items-start gap-4 p-5 ${a.is_read ? '' : 'bg-surface-2/60'}`}
+                className={`flex flex-wrap items-start gap-4 p-5 ${a.is_read ? '' : 'bg-brand/4'}`}
               >
                 <span
                   className={`mt-1.5 size-2.5 shrink-0 rounded-full ${style?.dot ?? 'bg-info'}`}
@@ -206,7 +206,7 @@ async function AlertasContent({ searchParams }: { searchParams: Promise<SearchPa
                 <div className="min-w-0 flex-1 text-sm">
                   <div className="flex flex-wrap items-center gap-2">
                     <span
-                      className={`rounded border px-1.5 py-0.5 text-[11px] font-semibold ${style?.badge ?? 'border-line'}`}
+                      className={`rounded border px-1.5 py-0.5 text-[11px] font-semibold ${style?.badge ?? 'border-card-border'}`}
                     >
                       {severityLabel[a.severity] ?? a.severity_label}
                     </span>
@@ -237,7 +237,7 @@ async function AlertasContent({ searchParams }: { searchParams: Promise<SearchPa
                   {target && (
                     <Link
                       href={target.href}
-                      className="inline-flex items-center gap-1 rounded-md border border-line px-2.5 py-1.5 text-xs font-medium text-heading hover:border-brand"
+                      className="inline-flex items-center gap-1 rounded-md border border-card-border px-2.5 py-1.5 text-xs font-medium text-heading hover:border-brand"
                     >
                       {target.label} <ArrowRight className="size-3" aria-hidden />
                     </Link>
@@ -252,7 +252,7 @@ async function AlertasContent({ searchParams }: { searchParams: Promise<SearchPa
             </li>
           )}
         </ul>
-        <div className="border-t border-line/70 p-4">
+        <div className="border-t border-card-border p-4">
           <Pager total={data.total} pageSize={PAGE_SIZE} label="alertas" />
         </div>
       </section>
@@ -265,7 +265,7 @@ async function AlertasContent({ searchParams }: { searchParams: Promise<SearchPa
 
       <HowCalculated types={['alert']} title="¿Cómo se generan las alertas?" />
 
-      <section className="rounded-lg border border-line bg-surface p-5">
+      <section className="rounded-xl border border-card-border bg-rail p-5">
         <h2 className="text-lg font-semibold text-heading">Tipos de alerta y umbrales</h2>
         <p className="mt-1 text-sm text-muted-text">
           Las reglas y sus umbrales están en la configuración del backend (analytics.yaml) y se
@@ -273,11 +273,11 @@ async function AlertasContent({ searchParams }: { searchParams: Promise<SearchPa
         </p>
         <dl className="mt-4 grid gap-4 md:grid-cols-2">
           {rules.rules.map((r) => (
-            <div key={r.alert_type} className="rounded-md border border-line p-4">
+            <div key={r.alert_type} className="rounded-md border border-card-border p-4">
               <dt className="flex items-center justify-between gap-2 font-medium text-heading">
                 {r.label}
                 {!r.active && (
-                  <span className="rounded border border-dashed border-line px-1.5 py-0.5 text-[11px] font-normal text-muted-text">
+                  <span className="rounded border border-dashed border-card-border px-1.5 py-0.5 text-[11px] font-normal text-muted-text">
                     Inactiva
                   </span>
                 )}
