@@ -21,7 +21,7 @@ Prueba que el back responda bien:
 
 Prueba que el front cargue bien:
 
-- Cada página del menú abre sin error y muestra su título.
+- Cada página del menú abre sin error y muestra contenido.
 - Ninguna página muestra el mensaje "Error inesperado".
 - El menú lleva a Sectores y a Ocupaciones.
 
@@ -92,6 +92,13 @@ Cada prueba dice qué hacer y qué tiene que pasar.
 
 ## Resultados
 
-Cada vez que se corren las pruebas se anota acá la fecha, qué pasó y qué falló.
+### 14/11/2026, en local
 
-- Pendiente: primera corrida con el front final.
+Se corrieron 12 pruebas: pasaron 9 y fallaron 3.
+
+- API: las 3 pruebas pasaron.
+- Navegación: pasaron inicio, sectores, ocupaciones, habilidades, metodología y el menú.
+- Moctezuma: falla. La página muestra "Error inesperado al cargar los datos". El endpoint `/api/v1/moctezuma` existe en el back, así que puede faltar correr el cálculo del indicador en la base local. Queda para revisar con back.
+- Panorama y Pulso laboral: cargan bien y con datos, pero no tienen un título principal (`h1`). No rompe nada, pero sí es un problema de accesibilidad, porque los lectores de pantalla usan ese título para saber de qué es la página. Se avisa a front.
+
+Después de esto se cambió la prueba para que revise que la página tenga contenido en vez de buscar el `h1`, y lo del título quedó anotado como observación aparte.

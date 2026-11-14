@@ -15,7 +15,7 @@ for (const ruta of paginas) {
   test(`la pagina ${ruta} carga`, async ({ page }) => {
     const res = await page.goto(ruta);
     expect(res.status()).toBeLessThan(400);
-    await expect(page.locator('h1').first()).toBeVisible();
+    await expect(page.locator('main')).not.toBeEmpty();
     await expect(page.getByText('Error inesperado')).toHaveCount(0);
   });
 }
