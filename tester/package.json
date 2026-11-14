@@ -1,0 +1,13 @@
+{
+  "name": "tester",
+  "private": true,
+  "scripts": {
+    "test": "playwright test",
+    "test:api": "playwright test api",
+    "test:front": "playwright test navegacion",
+    "reporte": "playwright show-report"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.56.1"
+  }
+}
