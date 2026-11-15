@@ -98,7 +98,14 @@ function Section({ title, text, children }: { title: string; text: string; child
   );
 }
 
-export async function SectorKpisView({ sp }: { sp: SearchParams }) {
+export async function SectorKpisView({
+  sp,
+  mode = 'all',
+}: {
+  sp: SearchParams;
+  /** Acota la vista a una de las pestañas de Sectores. */
+  mode?: 'all' | 'densidad' | 'ocupados';
+}) {
   let kpis: Kpis, catalog;
   try {
     [kpis, catalog] = await Promise.all([getSectorKpis(), getCountries()]);
@@ -223,63 +230,69 @@ export async function SectorKpisView({ sp }: { sp: SearchParams }) {
         <p className="mt-1">{kpis.nota}</p>
       </section>
 
-      <Section
-        title="Densidad profesional"
-        text="Titulados del año por cada 1.000 personas ocupadas en el sector. Alto significa que se forma mucha gente en relación con el empleo actual. Es aproximada: en Energía compara carreras que incluyen electricidad y minería con el empleo de electricidad y gas, así que no se lee como valor absoluto."
-      >
-        <SectorTable
-          sectors={allSectors}
-          countries={countries}
-          columns={[{ key: 'v', label: '' }]}
-          cell={cellFor('densidad', (v) => one.format(v))}
-        />
-        <div className="border-t border-card-border p-5">
-          <h3 className="mb-2 text-sm font-semibold text-heading">
-            {sector}: titulados por cada 1.000 ocupados
-          </h3>
-          <TrendLineChart data={lineRows('densidad')} series={lineSeries} unit="number" />
-        </div>
-      </Section>
+      {(mode === 'all' || mode === 'densidad') && (
+        <Section
+          title="Densidad profesional"
+          text="Titulados del año por cada 1.000 personas ocupadas en el sector. Alto significa que se forma mucha gente en relación con el empleo actual. Es aproximada: en Energía compara carreras que incluyen electricidad y minería con el empleo de electricidad y gas, así que no se lee como valor absoluto."
+        >
+          <SectorTable
+            sectors={allSectors}
+            countries={countries}
+            columns={[{ key: 'v', label: '' }]}
+            cell={cellFor('densidad', (v) => one.format(v))}
+          />
+          <div className="border-t border-card-border p-5">
+            <h3 className="mb-2 text-sm font-semibold text-heading">
+              {sector}: titulados por cada 1.000 ocupados
+            </h3>
+            <TrendLineChart data={lineRows('densidad')} series={lineSeries} unit="number" />
+          </div>
+        </Section>
+      )}
 
-      <Section
-        title="Salarios y brecha salarial"
-        text="Ingreso mensual promedio de las personas asalariadas en dólares a paridad de poder adquisitivo (OIT). La brecha es cuánto menos ganan las mujeres que los varones; negativa significa que ganan más. Compara promedios sin ajustar por ocupación ni horas, y en sectores chicos puede variar mucho."
-      >
-        <SectorTable
-          sectors={allSectors}
-          countries={countries}
-          columns={[
-            { key: 'f', label: 'Mujeres' },
-            { key: 'm', label: 'Varones' },
-            { key: 'b', label: 'Brecha' },
-          ]}
-          cell={(s, c, col) =>
-            col === 'f'
-              ? cellFor('salario_mujeres', number)(s, c)
-              : col === 'm'
-                ? cellFor('salario_varones', number)(s, c)
-                : cellFor('brecha_salarial_pct', percent)(s, c)
-          }
-        />
-        <div className="border-t border-card-border p-5">
-          <h3 className="mb-2 text-sm font-semibold text-heading">{sector}: brecha salarial por año</h3>
-          <TrendLineChart data={lineRows('brecha_salarial_pct')} series={lineSeries} unit="percent" />
-        </div>
-      </Section>
+      {mode === 'all' && (
+        <Section
+          title="Salarios y brecha salarial"
+          text="Ingreso mensual promedio de las personas asalariadas en dólares a paridad de poder adquisitivo (OIT). La brecha es cuánto menos ganan las mujeres que los varones; negativa significa que ganan más. Compara promedios sin ajustar por ocupación ni horas, y en sectores chicos puede variar mucho."
+        >
+          <SectorTable
+            sectors={allSectors}
+            countries={countries}
+            columns={[
+              { key: 'f', label: 'Mujeres' },
+              { key: 'm', label: 'Varones' },
+              { key: 'b', label: 'Brecha' },
+            ]}
+            cell={(s, c, col) =>
+              col === 'f'
+                ? cellFor('salario_mujeres', number)(s, c)
+                : col === 'm'
+                  ? cellFor('salario_varones', number)(s, c)
+                  : cellFor('brecha_salarial_pct', percent)(s, c)
+            }
+          />
+          <div className="border-t border-card-border p-5">
+            <h3 className="mb-2 text-sm font-semibold text-heading">{sector}: brecha salarial por año</h3>
+            <TrendLineChart data={lineRows('brecha_salarial_pct')} series={lineSeries} unit="percent" />
+          </div>
+        </Section>
+      )}
 
-      <Section
-        title="Personas ocupadas"
-        text="Personas ocupadas por sector según la OIT. Un sector de Economía del conocimiento incluye Información y comunicación, que también es Tecnología, así que los sectores no se suman."
-      >
-        <SectorTable
-          sectors={allSectors}
-          countries={countries}
-          columns={[{ key: 'v', label: '' }]}
-          cell={cellFor('ocupados', number)}
-        />
-      </Section>
+      {(mode === 'all' || mode === 'ocupados') && (
+        <Section
+          title="Personas ocupadas"
+          text="Personas ocupadas por sector según la OIT. Un sector de Economía del conocimiento incluye Información y comunicación, que también es Tecnología, así que los sectores no se suman."
+        >
+          <SectorTable
+            sectors={allSectors}
+            countries={countries}
+            columns={[{ key: 'v', label: '' }]}
+            cell={cellFor('ocupados', number)}
+          />
+        </Section>
+      )}
 
-      {(!country || country === 'ARG') && kpis.cep_xxi.length > 0 && (
+      {mode === 'all' && (!country || country === 'ARG') && kpis.cep_xxi.length > 0 && (
         <Section title="Argentina: empleo privado registrado y salarios (CEP-XXI)" text={kpis.cep_nota}>
           {kpis.dolar_oficial && (
             <p className="border-b border-card-border px-5 py-3 text-sm text-body">
@@ -314,25 +327,27 @@ export async function SectorKpisView({ sp }: { sp: SearchParams }) {
         </Section>
       )}
 
-      <Section
-        title="Titulados por sector, con proyección"
-        text="Serie de titulados del sector y proyección orientativa. Solo hay proyección con al menos 12 años de historia sin huecos, por eso hoy es solo para Chile. Elegí el sector arriba."
-      >
-        {projectionCharts.length === 0 ? (
-          <p className="p-5 text-sm text-muted-text">
-            No hay proyección para {sector} con estos filtros. Probá con un sector y Chile.
-          </p>
-        ) : (
-          projectionCharts.map((chart) => (
-            <div key={chart.country} className="p-5">
-              <h3 className="mb-2 text-sm font-semibold text-heading">
-                {sector} · {chart.country}
-              </h3>
-              <ProjectionChart data={chart.rows} color={COUNTRY_COLORS[chart.country] ?? FALLBACK_COLOR} />
-            </div>
-          ))
-        )}
-      </Section>
+      {mode === 'all' && (
+        <Section
+          title="Titulados por sector, con proyección"
+          text="Serie de titulados del sector y proyección orientativa. Solo hay proyección con al menos 12 años de historia sin huecos, por eso hoy es solo para Chile. Elegí el sector arriba."
+        >
+          {projectionCharts.length === 0 ? (
+            <p className="p-5 text-sm text-muted-text">
+              No hay proyección para {sector} con estos filtros. Probá con un sector y Chile.
+            </p>
+          ) : (
+            projectionCharts.map((chart) => (
+              <div key={chart.country} className="p-5">
+                <h3 className="mb-2 text-sm font-semibold text-heading">
+                  {sector} · {chart.country}
+                </h3>
+                <ProjectionChart data={chart.rows} color={COUNTRY_COLORS[chart.country] ?? FALLBACK_COLOR} />
+              </div>
+            ))
+          )}
+        </Section>
+      )}
     </>
   );
 }

@@ -15,6 +15,8 @@ type TableData = {
 type Props = {
   title: string;
   subtitle?: string;
+  icon?: React.ReactNode;
+  meta?: React.ReactNode;
   legend?: LegendItem[];
   sourceName?: string | null;
   updatedAt: string | null; // fecha ya formateada
@@ -36,6 +38,8 @@ function toCsv({ columns, rows }: TableData) {
 export function ChartCard({
   title,
   subtitle,
+  icon,
+  meta,
   legend = [],
   sourceName,
   updatedAt,
@@ -61,51 +65,59 @@ export function ChartCard({
   return (
     <section className="overflow-hidden rounded-xl border border-card-border bg-canvas shadow-[var(--shadow-card)]">
       <div className="flex flex-wrap items-start justify-between gap-3 px-5 pt-5">
-        <div className="min-w-0">
-          <h3 className="text-[19px] leading-tight font-semibold text-heading">{title}</h3>
-          {subtitle && <p className="mt-1 text-[12.5px] leading-relaxed text-muted-text">{subtitle}</p>}
+        <div className="flex min-w-0 items-start gap-2.5">
+          {icon && <span className="mt-0.5 shrink-0 text-brand">{icon}</span>}
+          <div className="min-w-0">
+            <h3 className="text-[19px] leading-tight font-semibold text-heading">{title}</h3>
+            {subtitle && <p className="mt-1 text-[12.5px] leading-relaxed text-muted-text">{subtitle}</p>}
+          </div>
         </div>
 
-        {table && (
-          <div className="flex shrink-0 items-center gap-2">
-            <div
-              className="inline-flex rounded-lg bg-surface-2 p-0.5"
-              role="group"
-              aria-label="Vista del gráfico"
-            >
-              <button
-                type="button"
-                aria-pressed={view === 'chart'}
-                onClick={() => setView('chart')}
-                className={cn(
-                  'inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-[12.5px] font-semibold transition-colors',
-                  view === 'chart' ? 'bg-canvas text-brand shadow-sm' : 'text-muted-text hover:text-heading',
-                )}
-              >
-                <LineChartIcon className="size-4" aria-hidden />
-                Gráfico
-              </button>
-              <button
-                type="button"
-                aria-pressed={view === 'table'}
-                onClick={() => setView('table')}
-                className={cn(
-                  'inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-[12.5px] font-semibold transition-colors',
-                  view === 'table' ? 'bg-canvas text-brand shadow-sm' : 'text-muted-text hover:text-heading',
-                )}
-              >
-                <Table2 className="size-4" aria-hidden />
-                Tabla
-              </button>
-            </div>
-            <button
-              type="button"
-              onClick={download}
-              className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-card-border bg-canvas px-3 text-[12.5px] font-semibold text-body hover:bg-surface-alt focus-visible:outline-2 focus-visible:outline-focus"
-            >
-              <Download className="size-4 text-muted-text" aria-hidden />
-              Descargar CSV
-            </button>
+        {(meta || table) && (
+          <div className="flex shrink-0 flex-wrap items-center justify-end gap-2">
+            {meta}
+            {table && (
+              <>
+                <div
+                  className="inline-flex rounded-lg bg-surface-2 p-0.5"
+                  role="group"
+                  aria-label="Vista del gráfico"
+                >
+                  <button
+                    type="button"
+                    aria-pressed={view === 'chart'}
+                    onClick={() => setView('chart')}
+                    className={cn(
+                      'inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-[12.5px] font-semibold transition-colors',
+                      view === 'chart' ? 'bg-canvas text-brand shadow-sm' : 'text-muted-text hover:text-heading',
+                    )}
+                  >
+                    <LineChartIcon className="size-4" aria-hidden />
+                    Gráfico
+                  </button>
+                  <button
+                    type="button"
+                    aria-pressed={view === 'table'}
+                    onClick={() => setView('table')}
+                    className={cn(
+                      'inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-[12.5px] font-semibold transition-colors',
+                      view === 'table' ? 'bg-canvas text-brand shadow-sm' : 'text-muted-text hover:text-heading',
+                    )}
+                  >
+                    <Table2 className="size-4" aria-hidden />
+                    Tabla
+                  </button>
+                </div>
+                <button
+                  type="button"
+                  onClick={download}
+                  className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-card-border bg-canvas px-3 text-[12.5px] font-semibold text-body hover:bg-surface-alt focus-visible:outline-2 focus-visible:outline-focus"
+                >
+                  <Download className="size-4 text-muted-text" aria-hidden />
+                  Descargar CSV
+                </button>
+              </>
+            )}
           </div>
         )}
       </div>

@@ -19,11 +19,14 @@ export function CountryFilter({
   value,
   name = 'country',
   reset = [],
+  compact = false,
 }: {
   countries: Country[];
   value: string;
   name?: string;
   reset?: string[];
+  /** Muestra solo el código ISO3 (para paneles compactos). */
+  compact?: boolean;
 }) {
   const pathname = usePathname();
   const search = useSearchParams();
@@ -74,7 +77,7 @@ export function CountryFilter({
               className={cn('size-2.5 rounded-full', DOTS[country.iso3] ?? 'bg-brand')}
               aria-hidden
             />
-            {country.name_es} ({country.iso3})
+            {compact ? country.iso3 : `${country.name_es} (${country.iso3})`}
             {active && <Check className="size-3.5" aria-hidden />}
           </Link>
         );

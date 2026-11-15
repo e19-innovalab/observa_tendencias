@@ -17,6 +17,9 @@
   --color-rail: #f9fbfd; /* fondo de la columna de lectura */
   --color-card-border: #e6ebf5; /* borde suave de tarjetas */
   --color-label: #64748b; /* etiquetas en mayúsculas */
+  --color-nav: #edeff2; /* fondo de la barra de secciones */
+  --color-nav-hover: #e1e5ea;
+  --color-nav-active: #2563eb; /* sección activa, continúa en el héroe */
 
   /* Texto */
   --color-heading: #050c1e; /* --heading */
@@ -102,7 +105,7 @@
   --overlay: rgb(0 0 0 / 0.5); /* --overlay */
   --shadow-color: rgb(15 23 42 / 0.06); /* --shadow-color */
   --shadow-card: 0 1px 2px rgb(15 23 42 / 0.04), 0 12px 32px -24px rgb(15 23 42 / 0.28);
-  --gradient-hero: linear-gradient(103deg, #172bc4 0%, #0f179f 48%, #080168 100%); /* --gradient-hero */
+  --gradient-hero: linear-gradient(110deg, #2563eb 0%, #1d4ed8 55%, #2563eb 100%); /* --gradient-hero */
 
   /* Alinea los componentes de shadcn con la marca (pisa sus valores por defecto) */
   --primary: #172bc4;

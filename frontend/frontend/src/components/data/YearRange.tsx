@@ -50,8 +50,8 @@ export function YearRange({
   const label = 'text-[10.5px] font-bold tracking-[0.08em] text-label uppercase';
 
   return (
-    <div className="flex flex-wrap items-center gap-3">
-      <label className="flex items-center gap-2">
+    <div className="flex flex-wrap items-end gap-3">
+      <label className="flex flex-col gap-1.5">
         <span className={label}>Desde</span>
         <select value={desde ?? ''} onChange={(e) => set('desde', e.target.value)} className={select}>
           <option value="">—</option>
@@ -62,7 +62,7 @@ export function YearRange({
           ))}
         </select>
       </label>
-      <label className="flex items-center gap-2">
+      <label className="flex flex-col gap-1.5">
         <span className={label}>Hasta</span>
         <select value={hasta ?? ''} onChange={(e) => set('hasta', e.target.value)} className={select}>
           <option value="">Último</option>

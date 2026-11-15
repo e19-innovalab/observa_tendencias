@@ -211,6 +211,15 @@ export const AlertsPageSchema = z.object({
 });
 
 /* ---------- Empleabilidad (ISE) ---------- */
+export const DisplayValueSchema = z.object({
+  indicator: z.string(),
+  label: z.string(),
+  unit: z.string(),
+  value: z.number(),
+  period: z.string(),
+  note: z.string().nullable().optional(),
+});
+
 export const EmployabilityComponentSchema = z.object({
   dimension: z.string(),
   label: z.string(),
@@ -223,6 +232,7 @@ export const EmployabilityComponentSchema = z.object({
   measure: z.string(),
   detail: z.record(z.string(), z.unknown()),
   available: z.boolean(),
+  display: DisplayValueSchema.nullable().optional(),
 });
 
 export const EmployabilityItemSchema = z.object({
@@ -241,6 +251,8 @@ export const EmployabilityItemSchema = z.object({
   methodology: MethodologyRefSchema,
   group_code: z.string(),
   group_hidden: z.number().nullable().optional(),
+  position: z.number().nullable().optional(),
+  position_of: z.number().nullable().optional(),
 });
 
 export const DimensionRangeSchema = z.object({
@@ -258,6 +270,53 @@ export const DimensionRangeSchema = z.object({
   has_source: z.boolean(),
   source_status: z.string().nullable(),
   effective_weight: z.number(),
+});
+
+export const SectorTopOccupationSchema = z.object({
+  occupation_code: z.string(),
+  name: z.string(),
+  country_iso3: z.string(),
+  score: z.number(),
+});
+
+export const SectorSummarySchema = z.object({
+  sector_code: z.string(),
+  name: z.string(),
+  occupations: z.number(),
+  scored: z.number(),
+  average_score: z.number().nullable(),
+  previous_average: z.number().nullable(),
+  change: z.number().nullable(),
+  level: z.string().nullable(),
+  level_label: z.string().nullable(),
+  top_occupation: SectorTopOccupationSchema.nullable(),
+  salary_ppp_average: z.number().nullable(),
+  salary_usd_average: z.number().nullable().optional(),
+  automation_average: z.number().nullable(),
+  dimensions: z.record(z.string(), z.number().nullable()),
+});
+
+export const EmployabilityTextsSchema = z.object({
+  terms: z.record(z.string(), z.string()),
+  unit_formats: z.record(z.string(), z.string()),
+  display: z.record(
+    z.string(),
+    z.object({
+      label: z.string().nullable(),
+      note: z.string().nullable(),
+    }),
+  ),
+});
+
+export const SectorsPageSchema = z.object({
+  year: z.number().nullable(),
+  available_years: z.array(z.number()),
+  countries: z.array(z.string()),
+  regional_average: z.number().nullable(),
+  dimension_ranges: z.array(DimensionRangeSchema),
+  no_source_note: z.string().nullable().optional(),
+  items: z.array(SectorSummarySchema),
+  texts: EmployabilityTextsSchema.nullable().optional(),
 });
 
 export const EmployabilityPageSchema = z.object({
@@ -593,10 +652,15 @@ export type MethodologyItem = z.infer<typeof MethodologyItemSchema>;
 export type AlertItem = z.infer<typeof AlertItemSchema>;
 export type AlertsPage = z.infer<typeof AlertsPageSchema>;
 export type CoverageItem = z.infer<typeof CoverageItemSchema>;
+export type DisplayValue = z.infer<typeof DisplayValueSchema>;
 export type EmployabilityComponent = z.infer<typeof EmployabilityComponentSchema>;
 export type EmployabilityItem = z.infer<typeof EmployabilityItemSchema>;
 export type DimensionRange = z.infer<typeof DimensionRangeSchema>;
 export type EmployabilityPage = z.infer<typeof EmployabilityPageSchema>;
+export type SectorTopOccupation = z.infer<typeof SectorTopOccupationSchema>;
+export type SectorSummary = z.infer<typeof SectorSummarySchema>;
+export type SectorsPage = z.infer<typeof SectorsPageSchema>;
+export type EmployabilityTexts = z.infer<typeof EmployabilityTextsSchema>;
 export type EmployabilityHistory = z.infer<typeof EmployabilityHistorySchema>;
 export type OccupationProfile = z.infer<typeof OccupationProfileSchema>;
 export type SkillItem = z.infer<typeof SkillItemSchema>;

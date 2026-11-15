@@ -3,6 +3,7 @@ import {
   EmployabilityHistorySchema,
   EmployabilityPageSchema,
   OccupationProfileSchema,
+  SectorsPageSchema,
 } from '../schemas/api';
 import { apiGet } from './client';
 
@@ -35,6 +36,18 @@ export const getEmployability = (params: {
       limit: params.limit,
       offset: params.offset,
     },
+    60,
+  );
+
+/** Resumen del ISE por sector estratégico (incluye líder, salario y dimensiones). */
+export const getSectorSummaries = (params: {
+  countries?: string[];
+  year?: number;
+} = {}) =>
+  apiGet(
+    '/employability/sectors',
+    SectorsPageSchema,
+    { country: params.countries, year: params.year },
     60,
   );
 

@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import {
+  OccupationSchema,
   OccupationSkillsSchema,
   SkillDetailSchema,
   SkillGapsPageSchema,
@@ -73,12 +74,7 @@ export const getSkillGroupGaps = (params: {
   );
 
 export const getOccupations = (sector?: string) =>
-  apiGet(
-    '/occupations',
-    z.array(z.object({ occupation_code: z.string(), name: z.string() }).loose()),
-    { sector },
-    3600,
-  );
+  apiGet('/occupations', z.array(OccupationSchema), { sector }, 3600);
 
 export const getOccupationSkills = (
   code: string,
