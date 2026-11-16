@@ -1,43 +1,47 @@
 import { Suspense } from 'react';
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { ArrowRight, BarChart3, Sparkles } from 'lucide-react';
-import { Badge } from '@/components/ui/badge';
-import { SectorPicker } from '@/components/data/SectorPicker';
+import {
+  Activity,
+  BrainCircuit,
+  MonitorPlay,
+  Plane,
+  Zap,
+  type LucideIcon,
+} from 'lucide-react';
 import { CountryFilter } from '@/components/data/CountryFilter';
-import { YearRange } from '@/components/data/YearRange';
+import { PageSkeleton } from '@/components/data/PageSkeleton';
 import { SectorKpisView } from '@/components/data/SectorKpisView';
-import { ChartCard } from '@/components/ui/charts/ChartCard';
-import { SectorBarChart } from '@/components/ui/charts/SectorBarChart';
-import { ApiErrorNote } from '@/components/ui/feedback/ApiErrorNote';
-import { FilterLabel, FilterPanel } from '@/components/ui/filters/FilterPanel';
-import { MetricCard } from '@/components/ui/indicators/MetricCard';
-import { SectorDimensionsPanel } from '@/components/ui/indicators/SectorDimensionsPanel';
-import { WeightBar } from '@/components/ui/indicators/WeightBar';
-import { PageHero } from '@/components/ui/layout/PageHero';
+import {
+  ChartHeader,
+  ChartLayout,
+  ErrorNote,
+  Eyebrow,
+  Page,
+  RailCard,
+  SourceLine,
+  Stat,
+  buttonCls,
+} from '@/components/data/ui';
+import { UrlSeg } from '@/components/data/UrlSeg';
+import { HowCalculated } from '@/components/methodology/HowCalculated';
 import { SectionTabs } from '@/components/ui/navigation/SectionTabs';
 import { ApiError } from '@/lib/api/client';
 import { getSectorSummaries } from '@/lib/api/employability';
 import { getCountries, getSectors } from '@/lib/api/panorama';
-import { DIMENSION_COLORS } from '@/lib/constants';
 import type { Country, Sector, SectorsPage } from '@/lib/schemas/api';
 import { cn } from '@/lib/utils';
-import {
-  formatIndex01,
-  formatNumber,
-  formatSignedPercent,
-  formatUsd,
-  riskLabel,
-} from '@/lib/utils/format';
+import { formatIndex01, formatNumber, formatScore, formatUsd } from '@/lib/utils/format';
 
 export const metadata: Metadata = { title: 'Sectores' };
 
 type SearchParams = {
   country?: string;
   sector?: string;
-  desde?: string;
-  hasta?: string;
+  year?: string;
   tab?: string;
+  anio?: string;
+  sector_kpi?: string;
 };
 
 const TABS = [
@@ -46,72 +50,80 @@ const TABS = [
   { id: 'ocupados', label: 'Personas ocupadas' },
 ];
 
+const YEARS_OFFERED = 3;
+
+const SECTOR_STYLE: Record<string, { icon: LucideIcon; className: string }> = {
+  technology: { icon: MonitorPlay, className: 'bg-sector-tech-soft text-sector-tech' },
+  energy: { icon: Zap, className: 'bg-sector-energy-soft text-sector-energy' },
+  health: { icon: Activity, className: 'bg-sector-health-soft text-sector-health' },
+  knowledge_economy: {
+    icon: BrainCircuit,
+    className: 'bg-sector-knowledge-soft text-sector-knowledge',
+  },
+  tourism: { icon: Plane, className: 'bg-sector-tourism-soft text-sector-tourism' },
+};
+
+const DEFAULT_SECTOR_STYLE = { icon: Activity, className: 'bg-surface-2 text-brand' };
+
+const clamp = (value: number) => Math.max(0, Math.min(100, value));
+
 function countryCodes(sp: SearchParams): string[] | undefined {
   return sp.country && sp.country !== 'all' ? [sp.country] : undefined;
 }
 
 function sectorHref(sp: SearchParams, sectorCode: string): string {
   const params = new URLSearchParams();
-  if (sp.country) params.set('country', sp.country);
-  if (sp.desde) params.set('desde', sp.desde);
-  if (sp.hasta) params.set('hasta', sp.hasta);
-  if (sp.tab && sp.tab !== 'ise') params.set('tab', sp.tab);
+  if (sp.country && sp.country !== 'all') params.set('country', sp.country);
+  if (sp.year) params.set('year', sp.year);
   params.set('sector', sectorCode);
   return `/sectores?${params.toString()}`;
 }
 
-export default async function SectoresPage({
+function signedPoints(value: number): string {
+  return `${value > 0 ? '+' : ''}${formatNumber(value, 1)}`;
+}
+
+export default function SectoresPage({
   searchParams,
 }: {
   searchParams: Promise<SearchParams>;
 }) {
+  return (
+    <Suspense fallback={<PageSkeleton />}>
+      <SectoresContent searchParams={searchParams} />
+    </Suspense>
+  );
+}
+
+async function SectoresContent({ searchParams }: { searchParams: Promise<SearchParams> }) {
   const sp = await searchParams;
   const tab: 'ise' | 'densidad' | 'ocupados' =
     sp.tab === 'densidad' || sp.tab === 'ocupados' ? sp.tab : 'ise';
 
   let countries: Country[] = [];
   let sectors: Sector[] = [];
-  let errorMessage = '';
-
   try {
     [countries, sectors] = await Promise.all([getCountries(), getSectors()]);
   } catch (error) {
-    errorMessage =
-      error instanceof ApiError ? error.message : 'Error inesperado al cargar los catálogos.';
-  }
-
-  const hero = (
-    <PageHero
-      title="Sectores"
-      description="Explorá el índice de empleabilidad sectorial (ISE), la densidad profesional y las personas ocupadas en los cinco sectores estratégicos del Cono Sur."
-    />
-  );
-
-  if (errorMessage || sectors.length === 0) {
     return (
-      <>
-        {hero}
-        <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6">
-          <ApiErrorNote message={errorMessage} />
-        </div>
-      </>
+      <ErrorNote
+        message={
+          error instanceof ApiError ? error.message : 'Error inesperado al cargar los catálogos.'
+        }
+      />
     );
   }
 
-  const countryLabel =
-    sp.country && sp.country !== 'all'
-      ? (countries.find((country) => country.iso3 === sp.country)?.name_es ?? sp.country)
-      : 'los 3 países';
+  if (sectors.length === 0) {
+    return <ErrorNote message="No hay sectores disponibles en este momento." />;
+  }
 
-  const tabs = (
-    <SectionTabs tabs={TABS} active={tab} />
-  );
+  const tabs = <SectionTabs tabs={TABS} active={tab} />;
 
   if (tab !== 'ise') {
     return (
-      <>
-        {hero}
-        <div className="mx-auto max-w-7xl space-y-6 px-4 py-6 sm:px-6">
+      <Page>
+        <div className="space-y-6">
           {tabs}
           <Suspense
             fallback={
@@ -123,337 +135,241 @@ export default async function SectoresPage({
             <SectorKpisView sp={sp} mode={tab} />
           </Suspense>
         </div>
-      </>
+      </Page>
     );
   }
 
-  let payload: SectorsPage | null = null;
-  let dataError = '';
-
+  let data: SectorsPage;
   try {
-    payload = await getSectorSummaries({
-      countries: countryCodes(sp),
-      year: sp.hasta ? Number(sp.hasta) : undefined,
-    });
+    const year =
+      sp.year && /^\d{4}$/.test(sp.year) ? Number(sp.year) : undefined;
+    data = await getSectorSummaries({ countries: countryCodes(sp), year });
   } catch (error) {
-    dataError =
-      error instanceof ApiError ? error.message : 'Error inesperado al cargar el sector.';
+    return (
+      <ErrorNote
+        message={
+          error instanceof ApiError ? error.message : 'Error inesperado al cargar los datos.'
+        }
+      />
+    );
   }
 
-  const year = payload?.year ?? null;
-  const availableYears = payload?.available_years ?? [];
-  const previousYear =
-    [...availableYears].sort((a, b) => a - b).filter((value) => year === null || value < year).at(-1) ??
-    (year !== null ? year - 1 : null);
-
-  const desdeValue = Number(sp.desde);
-  const hastaValue = Number(sp.hasta);
-  const desde = sp.desde && Number.isFinite(desdeValue) ? desdeValue : previousYear;
-  const hasta = sp.hasta && Number.isFinite(hastaValue) ? hastaValue : year;
-
-  let baseline: SectorsPage | null = null;
-  if (payload && desde !== null && year !== null && desde !== year) {
-    try {
-      baseline = await getSectorSummaries({
-        countries: countryCodes(sp),
-        year: desde,
-      });
-    } catch {
-      baseline = null;
-    }
-  }
-
-  const summaries = payload?.items ?? [];
-  const sectorCode =
-    summaries.find((item) => item.sector_code === sp.sector)?.sector_code ??
-    (summaries.some((item) => item.sector_code === 'knowledge_economy')
-      ? 'knowledge_economy'
-      : (summaries[0]?.sector_code ?? sectors[0].sector_code));
-  const selected = summaries.find((item) => item.sector_code === sectorCode) ?? null;
-  const baselineSelected = baseline?.items.find((item) => item.sector_code === sectorCode) ?? null;
-
-  const sectorName =
-    selected?.name ?? sectors.find((sector) => sector.sector_code === sectorCode)?.name ?? sectorCode;
-  const sectorOptions = summaries.length
-    ? summaries.map((item) => ({ sector_code: item.sector_code, name: item.name }))
-    : sectors.map((sector) => ({ sector_code: sector.sector_code, name: sector.name }));
-
-  const ranges = payload?.dimension_ranges ?? [];
-  const weights = ranges.map((range, index) => ({
-    label: range.label,
-    value: Number((range.weight * 100).toFixed(1)),
-    color:
-      DIMENSION_COLORS[range.dimension] ??
-      ['#172bc4', '#38bdf8', '#8b5cf6', '#f59e0b'][index % 4],
+  const names = Object.fromEntries(countries.map((country) => [country.iso3, country.name_es]));
+  const items = [...data.items].sort(
+    (a, b) => (b.average_score ?? -1) - (a.average_score ?? -1),
+  );
+  const selected = items.find((item) => item.sector_code === sp.sector) ?? items[0];
+  const average = data.regional_average;
+  const scope =
+    sp.country && sp.country !== 'all' ? (names[sp.country] ?? sp.country) : 'los 3 países';
+  const years = data.available_years.slice(-YEARS_OFFERED);
+  const latestYear = data.available_years.at(-1);
+  const yearOptions = years.map((value) => ({
+    value: value === latestYear ? '' : String(value),
+    label: String(value),
   }));
+  const yearValue =
+    sp.year && data.available_years.includes(Number(sp.year)) ? sp.year : '';
 
-  const scoreDelta =
-    selected?.average_score !== null &&
-    selected?.average_score !== undefined &&
-    baselineSelected?.average_score !== null &&
-    baselineSelected?.average_score !== undefined
-      ? selected.average_score - baselineSelected.average_score
-      : (selected?.change ?? null);
-
-  const salary =
-    selected?.salary_ppp_average ?? selected?.salary_usd_average ?? null;
-  const baselineSalary =
-    baselineSelected?.salary_ppp_average ?? baselineSelected?.salary_usd_average ?? null;
-  const salaryChange =
-    salary !== null && baselineSalary !== null && baselineSalary > 0
-      ? salary / baselineSalary - 1
-      : null;
-
-  const chartItems = summaries.map((item) => ({
-    label: item.name,
-    value: item.average_score ?? 0,
-    active: item.sector_code === sectorCode,
-  }));
-  const chartAverage = payload?.regional_average ?? 0;
-
-  const definitions = ranges
-    .filter(
-      (range) =>
-        range.definition && ['salary_ppp', 'automation_risk'].includes(range.dimension),
-    )
-    .map((range) => ({
-      title:
-        range.dimension === 'automation_risk'
-          ? 'Índice de exposición a la IA'
-          : `Definición de ${range.label}`,
-      text: range.definition!,
-    }));
-  definitions.push({
-    title: 'Gobernanza de calibración',
-    text:
-      payload?.no_source_note ??
-      'Los pesos del ISE se recalibran cada año con fuentes oficiales. Si falta un componente, su peso se redistribuye entre los disponibles y queda documentado en la ficha metodológica.',
-  });
-
-  const updatedAt = formatDateLabel(year);
+  const salaryUsd = selected?.salary_usd_average ?? null;
+  const salaryPpp = selected?.salary_ppp_average ?? null;
 
   return (
-    <>
-      {hero}
-
-      <div className="mx-auto max-w-7xl space-y-6 px-4 py-6 sm:px-6">
+    <Page>
+      <div className="space-y-4">
         {tabs}
 
-        <FilterPanel className="space-y-4">
-          <div className="flex flex-wrap items-start justify-between gap-x-6 gap-y-3">
-            <div className="flex flex-wrap items-center gap-2.5">
-              <FilterLabel>Países</FilterLabel>
+        <ChartHeader
+          eyebrow={`Índice de empleabilidad (ISE) · ${data.year ?? ''} · ${scope}`}
+          title="¿Qué sector ofrece mejor empleabilidad?"
+          subtitle={`Promedio del ISE (0 a 100) de las ocupaciones de cada sector. La marca gris es ${data.year ? data.year - 1 : 'el año anterior'}.`}
+          controls={
+            <>
               <CountryFilter
                 countries={countries}
                 value={sp.country && sp.country !== 'all' ? sp.country : ''}
-                reset={['page']}
                 compact
               />
-            </div>
-            <div className="flex flex-wrap items-end gap-4">
-              <div>
-                <FilterLabel>Período</FilterLabel>
-                <YearRange
-                  years={availableYears.length ? [...availableYears].reverse() : year ? [year] : []}
-                  desde={desde !== null ? String(desde) : undefined}
-                  hasta={hasta !== null ? String(hasta) : undefined}
+              {yearOptions.length > 1 && (
+                <UrlSeg
+                  name="year"
+                  label="Año"
+                  value={yearValue}
+                  options={yearOptions}
+                  reset={[]}
                 />
-              </div>
-            </div>
-          </div>
+              )}
+            </>
+          }
+        />
 
-          <div className="border-t border-card-border pt-4">
-            <FilterLabel className="mb-2.5 block">Sectores</FilterLabel>
-            <SectorPicker
-              sectors={sectorOptions}
-              active={sectorCode}
-              hrefFor={(code) => sectorHref(sp, code)}
-            />
-          </div>
-        </FilterPanel>
-
-        {dataError && <ApiErrorNote message={dataError} />}
-
-        {selected ? (
-          <>
-            <section
-              aria-label="Indicadores del sector"
-              className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4"
-            >
-              <MetricCard
-                label={`ISE promedio · ${sectorName}`}
-                value={
-                  selected.average_score === null ? '—' : formatNumber(selected.average_score, 1)
-                }
-                unit="/ 100 pts"
-                badge={
-                  selected.level_label ? <Badge tone="brand">{selected.level_label}</Badge> : undefined
-                }
-                chip={
-                  scoreDelta !== null && scoreDelta !== undefined ? (
-                    <span
-                      className={cn(
-                        'inline-flex items-center gap-1 rounded-md border px-2 py-0.5 text-[11px] font-semibold',
-                        scoreDelta >= 0
-                          ? 'border-success/25 bg-success-soft text-success'
-                          : 'border-danger/25 bg-danger-soft text-danger',
-                      )}
-                    >
-                      {formatSignedPoints(scoreDelta)} pts
-                    </span>
-                  ) : undefined
-                }
-                meta={desde !== null ? `vs ${desde}` : undefined}
-                hint={`${selected.scored} ocupaciones con puntaje · ${countryLabel}`}
-              />
-
-              <MetricCard
-                label="Ocupación líder (rank #1)"
-                value={selected.top_occupation?.name ?? 'Sin datos'}
-                valueClassName="text-[17px] leading-snug"
-                unit={
-                  selected.top_occupation
-                    ? `${formatNumber(selected.top_occupation.score, 1)} pts`
-                    : undefined
-                }
-                hint={
-                  selected.top_occupation
-                    ? `${selected.top_occupation.country_iso3} · CIUO ${selected.top_occupation.occupation_code}`
-                    : 'No hay ocupaciones con puntaje para este filtro.'
-                }
-                action={
-                  selected.top_occupation ? (
+        <ChartLayout
+          stickyRail
+          chart={
+            items.length === 0 ? (
+              <p className="py-24 text-center text-sm text-muted-text">
+                No hay datos del ISE sectorial para esta combinación de filtros.
+              </p>
+            ) : (
+              <>
+                <div className="grid grid-cols-[minmax(6.5rem,200px)_minmax(4rem,1fr)_5.5rem] gap-4 px-3 pb-2 text-[11px] text-label">
+                  <span>Sector</span>
+                  <span className="flex justify-between">
+                    <span>0</span>
+                    <span>25</span>
+                    <span>50</span>
+                    <span>75</span>
+                    <span>100</span>
+                  </span>
+                  <span className="text-right">ISE · cambio</span>
+                </div>
+                <ul className="flex flex-col gap-1">
+                  {items.map((item) => {
+                    const on = item.sector_code === selected?.sector_code;
+                    const style = SECTOR_STYLE[item.sector_code] ?? DEFAULT_SECTOR_STYLE;
+                    const Icon = style.icon;
+                    return (
+                      <li key={item.sector_code}>
+                        <Link
+                          href={sectorHref(sp, item.sector_code)}
+                          scroll={false}
+                          aria-current={on ? 'true' : undefined}
+                          className={cn(
+                            'grid grid-cols-[minmax(6.5rem,200px)_minmax(4rem,1fr)_5.5rem] items-center gap-4 rounded-xl px-3 py-3.5 transition-colors',
+                            'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus',
+                            on ? 'bg-brand/8' : 'hover:bg-surface',
+                          )}
+                        >
+                          <span className="flex min-w-0 items-center gap-2.5 text-[14px] font-semibold text-heading">
+                            <span
+                              className={cn(
+                                'flex size-7 shrink-0 items-center justify-center rounded-md',
+                                style.className,
+                              )}
+                            >
+                              <Icon className="size-4" aria-hidden />
+                            </span>
+                            <span className="truncate">{item.name}</span>
+                          </span>
+                          <span className="relative block h-7 rounded-md bg-surface-2">
+                            {item.average_score !== null && (
+                              <span
+                                className={cn(
+                                  'absolute inset-y-0 left-0 rounded-md',
+                                  on ? 'bg-brand' : 'bg-brand/45',
+                                )}
+                                style={{ width: `${clamp(item.average_score)}%` }}
+                              />
+                            )}
+                            {item.previous_average !== null && (
+                              <span
+                                className="absolute -inset-y-1 w-[3px] rounded bg-label"
+                                style={{
+                                  left: `calc(${clamp(item.previous_average)}% - 1px)`,
+                                }}
+                                title={`Año anterior: ${formatScore(item.previous_average)}`}
+                              />
+                            )}
+                            {average !== null && (
+                              <span
+                                className="absolute -inset-y-1.5 w-0.5 bg-heading"
+                                style={{ left: `${clamp(average)}%` }}
+                                title={`Promedio regional: ${formatScore(average)}`}
+                              />
+                            )}
+                          </span>
+                          <span className="text-right">
+                            <span className="text-xl font-bold text-heading">
+                              {formatScore(item.average_score)}
+                            </span>
+                            {item.change !== null && (
+                              <span
+                                className={cn(
+                                  'ml-1.5 text-xs font-semibold',
+                                  item.change >= 0 ? 'text-success' : 'text-danger',
+                                )}
+                              >
+                                {signedPoints(item.change)}
+                              </span>
+                            )}
+                          </span>
+                        </Link>
+                      </li>
+                    );
+                  })}
+                </ul>
+                {average !== null && (
+                  <p className="mx-3 mt-3 text-[11px] text-muted-text">
+                    Línea vertical oscura: promedio de todas las ocupaciones (
+                    {formatScore(average)}).
+                  </p>
+                )}
+                <SourceLine source="Fuentes: ILOSTAT, SIMEL (INE Chile) y OIT (2025)">
+                  <Link href="/metodologia/ise" className="text-link hover:underline">
+                    ¿Cómo se calcula el ISE?
+                  </Link>
+                </SourceLine>
+              </>
+            )
+          }
+          rail={
+            selected && (
+              <RailCard>
+                <Eyebrow>Sector elegido</Eyebrow>
+                <h2 className="text-[22px] leading-tight font-bold text-heading">
+                  {selected.name}
+                </h2>
+                <div className="grid grid-cols-2 gap-3">
+                  <Stat label="Ocupaciones" value={String(selected.occupations)} />
+                  <Stat label="Nivel" value={selected.level_label ?? '—'} />
+                  {salaryUsd !== null ? (
+                    <Stat
+                      label="Salario medio"
+                      value={formatUsd(salaryUsd)}
+                      sub={salaryPpp !== null ? `${formatUsd(salaryPpp)} PPA` : undefined}
+                    />
+                  ) : salaryPpp !== null ? (
+                    <Stat label="Salario medio (PPA)" value={formatUsd(salaryPpp)} />
+                  ) : (
+                    <Stat label="Salario medio" value="—" />
+                  )}
+                  <Stat
+                    label="Exposición a la IA"
+                    value={`${selected.automation_average === null ? '—' : formatIndex01(selected.automation_average)} de 1`}
+                  />
+                </div>
+                {selected.top_occupation && (
+                  <div className="border-t border-card-border pt-3">
+                    <p className="text-[11px] text-label">Ocupación con mayor ISE</p>
                     <Link
                       href={`/ocupaciones/${selected.top_occupation.occupation_code}?country=${selected.top_occupation.country_iso3}`}
-                      className="inline-flex items-center gap-1.5 rounded-lg border border-card-border bg-canvas px-3 py-1.5 text-[12px] font-semibold text-link transition-colors hover:bg-surface-alt hover:text-link-hover"
+                      className="mt-1 block text-sm leading-snug font-semibold text-heading hover:text-link"
                     >
-                      Ver desglose ISE de la ocupación
-                      <ArrowRight className="size-3.5" aria-hidden />
+                      {selected.top_occupation.name}
                     </Link>
-                  ) : undefined
-                }
-              />
-
-              <MetricCard
-                label="Salario PPA promedio"
-                value={salary === null ? '—' : formatUsd(salary, 2)}
-                unit="/ mes"
-                chip={
-                  salaryChange !== null ? (
-                    <span
-                      className={cn(
-                        'inline-flex items-center gap-1 rounded-md border px-2 py-0.5 text-[11px] font-semibold',
-                        salaryChange >= 0
-                          ? 'border-success/25 bg-success-soft text-success'
-                          : 'border-danger/25 bg-danger-soft text-danger',
-                      )}
-                    >
-                      {formatSignedPercent(salaryChange, 1)}
-                      <span className="font-normal">vs {desde ?? 'año anterior'}</span>
-                    </span>
-                  ) : undefined
-                }
-                hint={`Ingreso mensual promedio de las ocupaciones del sector · ${countryLabel}`}
-              />
-
-              <MetricCard
-                label="Riesgo de automatización (exposición a la IA generativa)"
-                value={
-                  selected.automation_average === null
-                    ? '—'
-                    : formatIndex01(selected.automation_average)
-                }
-                unit="escala 0 a 1"
-                chip={
-                  <Badge tone="warning">
-                    {riskLabel(selected.automation_average)}
-                  </Badge>
-                }
-                meta={selected.scored ? `${selected.scored} ocupaciones` : undefined}
-                hint="Penalización por tareas cognitivas rutinarias expuestas a LLMs."
-              />
-            </section>
-
-            {weights.length > 0 && (
-              <section className="rounded-xl border border-card-border bg-rail px-5 py-4">
-                <WeightBar
-                  title="Índice orientativo por ocupación"
-                  description="El ISE combina las dimensiones con fuente disponible. Si falta una, su peso se redistribuye entre las demás y queda documentado en la metodología."
-                  segments={weights}
-                />
-              </section>
-            )}
-
-            <SectorDimensionsPanel
-              ranges={ranges}
-              dimensions={selected.dimensions}
-              salaryAverage={selected.salary_ppp_average}
-              automationAverage={selected.automation_average}
-              title="Índice de empleabilidad (ISE) sectorial"
-              description={`Estructura de las ${ranges.length} dimensiones analíticas que componen el puntaje de ${sectorName}.`}
-              referenceYear={year}
-              noSourceNote={payload?.no_source_note}
-              methodologyHref="/metodologia/ise"
-              breakdownHref={
-                selected.top_occupation
-                  ? `/ocupaciones/${selected.top_occupation.occupation_code}?country=${selected.top_occupation.country_iso3}`
-                  : undefined
-              }
-            />
-
-            <section className="space-y-4">
-              <div className="grid gap-4 md:grid-cols-3">
-                {definitions.map((definition) => (
-                  <article
-                    key={definition.title}
-                    className="rounded-xl border border-card-border bg-canvas p-4"
-                  >
-                    <h3 className="flex items-center gap-2 text-[13px] font-semibold text-heading">
-                      <Sparkles className="size-4 text-brand" aria-hidden />
-                      {definition.title}
-                    </h3>
-                    <p className="mt-2 text-[12px] leading-relaxed text-muted-text">
-                      {definition.text}
+                    <p className="mt-0.5 text-[13px] text-body">
+                      {names[selected.top_occupation.country_iso3] ??
+                        selected.top_occupation.country_iso3}{' '}
+                      · ISE {formatScore(selected.top_occupation.score)}
                     </p>
-                  </article>
-                ))}
-              </div>
-            </section>
+                  </div>
+                )}
+                <Link
+                  href={`/ocupaciones?${new URLSearchParams({
+                    sector: selected.sector_code,
+                    ...(sp.year ? { year: sp.year } : {}),
+                  })}`}
+                  className={buttonCls}
+                >
+                  Ver las ocupaciones del sector{data.year ? ` en ${data.year}` : ''} →
+                </Link>
+              </RailCard>
+            )
+          }
+        />
 
-            {chartItems.some((item) => item.value > 0) && (
-              <ChartCard
-                title={`Comparativa intersectorial de empleabilidad (ISE ${year ?? ''})`}
-                subtitle={`Puntaje sintético promedio y competitividad relativa en los ${summaries.length} sectores estratégicos evaluados.`}
-                icon={<BarChart3 className="size-5" />}
-                meta={
-                  <span className="inline-flex items-center gap-1.5 rounded-lg border border-card-border bg-canvas px-2.5 py-1 text-[11px] font-semibold text-body">
-                    <BarChart3 className="size-3.5 text-brand" aria-hidden />
-                    Promedio ponderado regional: {formatNumber(chartAverage, 1)} pts
-                  </span>
-                }
-                sourceName="Observatorio · Índice de Empleabilidad Sectorial"
-                updatedAt={updatedAt}
-                methodologyHref="/metodologia/ise"
-              >
-                <SectorBarChart items={chartItems} average={chartAverage} />
-              </ChartCard>
-            )}
-
-          </>
-        ) : (
-          <p className="rounded-xl border border-dashed border-card-border bg-rail px-4 py-12 text-center text-[12.5px] text-muted-text">
-            No hay datos del ISE sectorial para esta combinación de filtros.
-          </p>
-        )}
+        <HowCalculated types={['employability_index']} title="¿Cómo se calcula el ISE?" />
       </div>
-    </>
+    </Page>
   );
-}
-
-function formatSignedPoints(value: number): string {
-  return `${value > 0 ? '+' : ''}${formatNumber(value, 1)}`;
-}
-
-function formatDateLabel(year: number | null): string | null {
-  return year === null ? null : String(year);
 }
