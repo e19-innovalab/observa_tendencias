@@ -7,6 +7,7 @@ import { ChipList } from '@/components/data/ChipList';
 import { ChartHeader, ChartLayout, ErrorNote, Eyebrow, Page, RailCard, SourceLine } from '@/components/data/ui';
 import { UrlSeg } from '@/components/data/UrlSeg';
 import { PageSkeleton } from '@/components/data/PageSkeleton';
+import { InfoNote } from '@/components/ui/feedback/InfoNote';
 import { ApiError } from '@/lib/api/client';
 import { getCountries } from '@/lib/api/panorama';
 import { getRedQueen, getRedQueenCareers, getRedQueenParams, getRedQueenYears } from '@/lib/api/redQueen';
@@ -74,6 +75,8 @@ async function RedQueenContent({ searchParams }: { searchParams: Promise<SearchP
   const keep = Object.fromEntries(Object.entries({ vista: all ? 'todas' : '', pais: sp.pais ?? '', carrera: sp.carrera ?? '' }).filter(([, v]) => v));
   const method = ranking.items[0]?.methodology;
   const latest = years[years.length - 1];
+  const hasItems = ranking.items.length > 0;
+  const hasYears = years.length > 0;
   const dimLabel = Object.fromEntries(ranking.dimensions.map((d) => [d.dimension, d.label]));
   const shortSource = (d: string) => dimLabel[d]?.match(/\(([^)]+)\)/)?.[1] ?? d;
   const sourcesText = listText(ranking.dimensions.map((d) => shortSource(d.dimension)));
@@ -101,10 +104,12 @@ async function RedQueenContent({ searchParams }: { searchParams: Promise<SearchP
           <>
             <div id="ranking" className="scroll-mt-24">
               <Eyebrow>
-                {ranking.year} ·{' '}
-                {byCareer
-                  ? `ocupaciones a las que lleva ${sp.carrera} (${countryName ?? sp.pais}): ${ranking.total}`
-                  : `${all ? `todas las ocupaciones (${ranking.scored_total} con datos)` : 'ocupaciones destacadas'} con más novedades por año`}
+                {ranking.year != null && <>{ranking.year} · </>}
+                {hasItems
+                  ? byCareer
+                    ? `ocupaciones a las que lleva ${sp.carrera} (${countryName ?? sp.pais}): ${ranking.total}`
+                    : `${all ? `todas las ocupaciones (${ranking.scored_total} con datos)` : 'ocupaciones destacadas'} con más novedades por año`
+                  : 'sin datos para calcular el indicador'}
               </Eyebrow>
               <p className="mt-1 text-xs text-muted-text">Tocá una ocupación para ver qué entró y qué salió de su perfil.</p>
             </div>
@@ -132,14 +137,23 @@ async function RedQueenContent({ searchParams }: { searchParams: Promise<SearchP
                 );
               })}
             </ol>
-            {ranking.items.length === 0 && <p className="py-10 text-center text-sm text-muted-text">Esta carrera no lleva a ocupaciones con datos de la Reina Roja.</p>}
+            {!hasItems && (
+              <InfoNote
+                className="mt-4"
+                title={byCareer ? 'Esta carrera no lleva a ocupaciones con datos' : 'Todavía no hay datos de la Reina Roja'}
+              >
+                {byCareer
+                  ? 'Ninguna de las ocupaciones asociadas a esta carrera tiene dos versiones comparables de los perfiles de O*NET o ESCO.'
+                  : 'El indicador necesita al menos dos versiones publicadas de los perfiles de O*NET o ESCO. Cuando se carguen, acá van a aparecer las ocupaciones con más novedades por año.'}
+              </InfoNote>
+            )}
             <SourceLine source={`${ranking.dimensions.map((d) => d.source_name).filter(Boolean).join(' · ')}${method ? ` · metodología #${method.methodology_id} v${method.version}` : ''}`} />
           </>
         }
         rail={
           <RailCard>
             <Eyebrow>Mediana de las ocupaciones</Eyebrow>
-            {latest && (
+            {latest ? (
               <div className="rounded-xl border border-card-border p-3.5">
                 <p className="text-xs text-muted-text">{latest.year} · {latest.scored} ocupaciones</p>
                 <p className="mt-1 text-2xl font-semibold tabular-nums text-heading">{latest.median_half_life != null ? `${num(latest.median_half_life, 0)} años` : '—'}</p>
@@ -148,22 +162,30 @@ async function RedQueenContent({ searchParams }: { searchParams: Promise<SearchP
                   {Object.entries(latest.median_new_per_year).map(([d, v]) => <li key={d}>{shortSource(d)}: {perYear(v)} novedades por año</li>)}
                 </ul>
               </div>
+            ) : (
+              <p className="text-xs leading-relaxed text-muted-text">
+                Todavía no hay años calculados. La vida media y las novedades por año aparecen cuando existen al menos dos versiones comparables de los perfiles.
+              </p>
             )}
-            <div className="overflow-x-auto">
-              <table className="w-full text-xs tabular-nums">
-                <thead><tr className="text-left text-muted-text"><th className="py-1 font-medium">Año</th><th className="py-1 text-right font-medium">Vida media</th>{ranking.dimensions.map((d) => <th key={d.dimension} className="py-1 text-right font-medium">{shortSource(d.dimension)}</th>)}</tr></thead>
-                <tbody className="text-body">
-                  {years.map((y) => (
-                    <tr key={y.year} className="border-t border-card-border">
-                      <td className="py-1">{y.year}</td>
-                      <td className="py-1 text-right">{y.median_half_life != null ? num(y.median_half_life, 0) : '—'}</td>
-                      {ranking.dimensions.map((d) => <td key={d.dimension} className="py-1 text-right">{perYear(y.median_new_per_year[d.dimension])}</td>)}
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-            <p className="text-xs leading-relaxed text-muted-text">Vida media en años; las columnas por fuente son novedades por año. Cada año compara versiones separadas por unos {params.window_years} años.</p>
+            {hasYears && (
+              <>
+                <div className="overflow-x-auto">
+                  <table className="w-full text-xs tabular-nums">
+                    <thead><tr className="text-left text-muted-text"><th className="py-1 font-medium">Año</th><th className="py-1 text-right font-medium">Vida media</th>{ranking.dimensions.map((d) => <th key={d.dimension} className="py-1 text-right font-medium">{shortSource(d.dimension)}</th>)}</tr></thead>
+                    <tbody className="text-body">
+                      {years.map((y) => (
+                        <tr key={y.year} className="border-t border-card-border">
+                          <td className="py-1">{y.year}</td>
+                          <td className="py-1 text-right">{y.median_half_life != null ? num(y.median_half_life, 0) : '—'}</td>
+                          {ranking.dimensions.map((d) => <td key={d.dimension} className="py-1 text-right">{perYear(y.median_new_per_year[d.dimension])}</td>)}
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+                <p className="text-xs leading-relaxed text-muted-text">Vida media en años; las columnas por fuente son novedades por año. Cada año compara versiones separadas por unos {params.window_years} años.</p>
+              </>
+            )}
           </RailCard>
         }
       />

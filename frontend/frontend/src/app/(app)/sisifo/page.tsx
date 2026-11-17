@@ -9,6 +9,7 @@ import { UrlSelect } from '@/components/data/UrlSelect';
 import { ChartHeader, ChartLayout, ErrorNote, Eyebrow, Page, RailCard, SourceLine } from '@/components/data/ui';
 import { COUNTRY_COLORS, FALLBACK_COLOR } from '@/components/ui/charts/chartTheme';
 import { PageSkeleton } from '@/components/data/PageSkeleton';
+import { InfoNote } from '@/components/ui/feedback/InfoNote';
 import { ApiError } from '@/lib/api/client';
 import { getCountries } from '@/lib/api/panorama';
 import { getSisyphus, getSisyphusCountries } from '@/lib/api/sisyphus';
@@ -76,6 +77,10 @@ async function SisyphusContent({ searchParams }: { searchParams: Promise<SearchP
       points: c.points.filter((p) => pick(p) != null).map((p) => ({ period: String(p.year), start: `${p.year}-01-01`, value: pick(p)! * 100 })),
     })).filter((s) => s.points.length);
   const sisyphusNow = withData.filter((i) => i.quadrant === 'sisyphus');
+  const belowSeries = series((p) => p.graduates_below_share);
+  const premiumSeries = series((p) => p.premium);
+  const hasData = withData.length > 0;
+  const hasPremium = premiumSeries.length > 0;
 
   return (
     <Page>
@@ -84,38 +89,50 @@ async function SisyphusContent({ searchParams }: { searchParams: Promise<SearchP
         title="Indicador Sísifo"
         subtitle={`¿Dónde estudiar más no rinde? ${formulaText(params, stone, reward)}. Por encima de ${num(params.scale_max / 2)}, mucha gente tiene más estudios de los que pide el puesto y el puesto paga poco frente a un título.`}
         controls={
-          <UrlSelect
-            name="anio"
-            label="Año"
-            value={sp.anio && page.available_years.includes(Number(sp.anio)) ? sp.anio : ''}
-            options={[...page.available_years].reverse().map((y, i) => ({ value: i === 0 ? '' : String(y), label: i === 0 ? `${y} (último)` : String(y) }))}
-          />
+          page.available_years.length ? (
+            <UrlSelect
+              name="anio"
+              label="Año"
+              value={sp.anio && page.available_years.includes(Number(sp.anio)) ? sp.anio : ''}
+              options={[...page.available_years].reverse().map((y, i) => ({ value: i === 0 ? '' : String(y), label: i === 0 ? `${y} (último)` : String(y) }))}
+            />
+          ) : undefined
         }
       />
       <ChartLayout
         chart={
           <>
-            <Eyebrow>{page.year} · grandes grupos de ocupación por país</Eyebrow>
+            <Eyebrow>{page.year != null ? `${page.year} · grandes grupos de ocupación por país` : 'Grandes grupos de ocupación por país'}</Eyebrow>
             <p className="mt-1 max-w-3xl text-sm text-muted-text">
               Cada círculo es un gran grupo de ocupación en un país (el número es el grupo). A la derecha de la línea vertical, al menos {num(rules.overeducated_from)} % tiene más estudios de los que pide el puesto; debajo de la horizontal, el grupo paga menos de {num(rules.paid_below, 2)} de lo que gana en promedio quien tiene educación superior. La zona roja es la piedra que vuelve a caer{sisyphusNow.length ? `: ${listText(sisyphusNow.map((i) => `${i.group_code} en ${names[i.country_iso3]}`))}` : ''}.
             </p>
             <div className="mt-3 flex flex-col gap-2">
-              <Legend items={countryLegend} />
-              <div className="hidden sm:block">
-                <SisyphusChart dots={dots} overFrom={rules.overeducated_from} paidBelow={rules.paid_below} labels={qLabel} ariaLabel="Sobreeducación contra ingreso frente a un título, por grupo y país" />
-              </div>
-              <div className="sm:hidden">
-                <SisyphusChart dots={dots} overFrom={rules.overeducated_from} paidBelow={rules.paid_below} labels={qLabel} width={440} height={420} ariaLabel="Sobreeducación contra ingreso frente a un título" />
-              </div>
-              <GroupList groups={page.groups.filter((g) => groups.some(([code]) => code === g.code))} source={page.groups_source} />
-              <p className="text-xs text-muted-text">Los grupos {listText(page.excluded_groups)} no aparecen: piden educación superior, así que nadie puede tener más estudios de los que piden.</p>
+              {hasData ? (
+                <>
+                  <Legend items={countryLegend} />
+                  <div className="hidden sm:block">
+                    <SisyphusChart dots={dots} overFrom={rules.overeducated_from} paidBelow={rules.paid_below} labels={qLabel} ariaLabel="Sobreeducación contra ingreso frente a un título, por grupo y país" />
+                  </div>
+                  <div className="sm:hidden">
+                    <SisyphusChart dots={dots} overFrom={rules.overeducated_from} paidBelow={rules.paid_below} labels={qLabel} width={440} height={420} ariaLabel="Sobreeducación contra ingreso frente a un título" />
+                  </div>
+                  {groups.length > 0 && (
+                    <GroupList groups={page.groups.filter((g) => groups.some(([code]) => code === g.code))} source={page.groups_source} />
+                  )}
+                  <p className="text-xs text-muted-text">Los grupos {listText(page.excluded_groups)} no aparecen: piden educación superior, así que nadie puede tener más estudios de los que piden.</p>
+                </>
+              ) : (
+                <InfoNote title="Todavía no hay datos para el indicador Sísifo">
+                  Se necesitan, para el mismo país, año y gran grupo de ocupación, la sobreeducación (OIT) y el ingreso medio del grupo frente al ingreso medio de quienes tienen educación superior. Cuando estén disponibles, los grupos aparecen acá y en la tabla.
+                </InfoNote>
+              )}
             </div>
             <SourceLine source={`OIT (ILOSTAT): ocupados por ocupación y educación, ingresos por ocupación y por nivel educativo${page.methodology ? ` · metodología #${page.methodology.methodology_id} v${page.methodology.version}` : ''}`} />
           </>
         }
         rail={
           <RailCard>
-            <Eyebrow>Por país · {page.year} o el último dato anterior</Eyebrow>
+            <Eyebrow>Por país · {page.year != null ? `${page.year} o el último dato anterior` : 'último dato disponible'}</Eyebrow>
             {byCountry.map((c) => {
               const upTo = c.points.filter((p) => page.year == null || p.year <= page.year).reverse();
               const below = upTo.find((p) => p.graduates_below_share != null);
@@ -123,6 +140,7 @@ async function SisyphusContent({ searchParams }: { searchParams: Promise<SearchP
               return (
                 <div key={c.country_iso3} className="rounded-xl border border-card-border bg-rail p-3.5">
                   <p className="text-sm font-semibold text-heading">{names[c.country_iso3]}</p>
+                  {!below && !prem && <p className="mt-1 text-xs text-muted-text">Sin datos para este país.</p>}
                   {below && (
                     <p className="mt-1.5 text-sm text-body">
                       <span className="text-xl font-semibold tabular-nums text-heading">{pct(below.graduates_below_share)}</span> de quienes tienen educación superior trabaja en un puesto que no la pide ({below.year}).
@@ -136,6 +154,11 @@ async function SisyphusContent({ searchParams }: { searchParams: Promise<SearchP
                 </div>
               );
             })}
+            {!hasPremium && (
+              <p className="text-xs leading-relaxed text-muted-text">
+                La prima salarial del título todavía no está disponible: faltan los ingresos medios por nivel educativo. El indicador y la tabla usan solo la sobreeducación y el ingreso del grupo.
+              </p>
+            )}
             <p className="text-xs leading-relaxed text-muted-text">Ingresos mensuales medios de los asalariados (OIT). USD al tipo de cambio oficial promedio del año; USD PPA corrige las diferencias de precios entre países y es la medida que usa el indicador.</p>
           </RailCard>
         }
@@ -145,12 +168,20 @@ async function SisyphusContent({ searchParams }: { searchParams: Promise<SearchP
         <div className="flex min-w-0 flex-col gap-2">
           <h2 className="text-lg font-bold text-heading">Graduados en puestos que no piden título</h2>
           <p className="text-sm text-muted-text">Ocupados con educación superior que trabajan en un gran grupo que no la pide, como % de todos los ocupados con educación superior.</p>
-          <LinesChart series={series((p) => p.graduates_below_share)} unit="percent" ariaLabel="Graduados en puestos que no piden título, por país" />
+          {belowSeries.length ? (
+            <LinesChart series={belowSeries} unit="percent" ariaLabel="Graduados en puestos que no piden título, por país" />
+          ) : (
+            <InfoNote className="mt-2" title="Sin datos">No hay datos de ocupados con educación superior en puestos que no la piden.</InfoNote>
+          )}
         </div>
         <div className="flex min-w-0 flex-col gap-2">
           <h2 className="text-lg font-bold text-heading">La prima salarial del título</h2>
           <p className="text-sm text-muted-text">Cuánto más gana en promedio quien tiene educación superior que quien tiene secundaria (USD PPA). Si sube a la vez que los graduados en puestos por debajo de su nivel, el título paga pero no a todos.</p>
-          <LinesChart series={series((p) => p.premium)} unit="percent" ariaLabel="Prima salarial de la educación superior, por país" />
+          {premiumSeries.length ? (
+            <LinesChart series={premiumSeries} unit="percent" ariaLabel="Prima salarial de la educación superior, por país" />
+          ) : (
+            <InfoNote className="mt-2" title="Sin datos">Faltan los ingresos medios de quienes tienen educación superior y secundaria para calcular la prima salarial.</InfoNote>
+          )}
         </div>
       </section>
 
@@ -177,38 +208,44 @@ async function SisyphusContent({ searchParams }: { searchParams: Promise<SearchP
       </section>
 
       <section className="mt-12">
-        <h2 className="text-xl font-bold text-heading">Todos los grupos, {page.year}</h2>
+        <h2 className="text-xl font-bold text-heading">Todos los grupos{page.year != null ? `, ${page.year}` : ''}</h2>
         <p className="mt-1 text-sm text-muted-text">De más a menos Sísifo.{noData.length ? ` Sin datos de sobreeducación: ${listText(noData.map(([code, name]) => `${code} ${lowerFirst(name ?? '')}`))}.` : ''}</p>
-        <div className="mt-4 overflow-x-auto">
-          <table className="w-full min-w-[860px] text-sm tabular-nums">
-            <thead>
-              <tr className="border-b border-card-border text-left text-xs text-muted-text">
-                <th className="py-2 pr-3 font-medium">Grupo</th>
-                <th className="py-2 pr-3 font-medium">País</th>
-                <th className="py-2 pr-3 text-right font-medium">Indicador</th>
-                <th className="py-2 pr-3 font-medium">Cuadrante</th>
-                <th className="py-2 pr-3 text-right font-medium">Sobreeducación</th>
-                <th className="py-2 pr-3 text-right font-medium">Ingreso del grupo</th>
-                <th className="py-2 text-right font-medium">Frente a un título</th>
-              </tr>
-            </thead>
-            <tbody>
-              {scored.map((i) => (
-                <tr key={`${i.country_iso3}-${i.group_code}`} className="border-b border-card-border">
-                  <td className="py-2 pr-3 text-heading">
-                    <a href={`#grupo-${i.group_code}`} className="hover:text-link-hover hover:underline"><span className="font-semibold">{i.group_code}</span> {i.group_name}</a>
-                  </td>
-                  <td className="py-2 pr-3 text-muted-text">{names[i.country_iso3]}</td>
-                  <td className="py-2 pr-3 text-right font-semibold text-heading">{fmt1(i.score)}</td>
-                  <td className="py-2 pr-3">{i.quadrant && <span className={`rounded-full px-2 py-0.5 text-xs font-semibold ${QUADRANT_BADGE[i.quadrant]}`}>{i.quadrant_label}</span>}</td>
-                  <td className="py-2 pr-3 text-right text-body">{i.overeducation != null ? `${num(i.overeducation, 1)} %` : '—'}</td>
-                  <td className="py-2 pr-3 text-right text-body">{money(i.earnings_usd, i.earnings_ppp)}</td>
-                  <td className="py-2 text-right text-body">{i.earnings_ratio != null ? num(i.earnings_ratio, 2) : '—'}</td>
+        {scored.length ? (
+          <div className="mt-4 overflow-x-auto">
+            <table className="w-full min-w-[860px] text-sm tabular-nums">
+              <thead>
+                <tr className="border-b border-card-border text-left text-xs text-muted-text">
+                  <th className="py-2 pr-3 font-medium">Grupo</th>
+                  <th className="py-2 pr-3 font-medium">País</th>
+                  <th className="py-2 pr-3 text-right font-medium">Indicador</th>
+                  <th className="py-2 pr-3 font-medium">Cuadrante</th>
+                  <th className="py-2 pr-3 text-right font-medium">Sobreeducación</th>
+                  <th className="py-2 pr-3 text-right font-medium">Ingreso del grupo</th>
+                  <th className="py-2 text-right font-medium">Frente a un título</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody>
+                {scored.map((i) => (
+                  <tr key={`${i.country_iso3}-${i.group_code}`} className="border-b border-card-border">
+                    <td className="py-2 pr-3 text-heading">
+                      <a href={`#grupo-${i.group_code}`} className="hover:text-link-hover hover:underline"><span className="font-semibold">{i.group_code}</span> {i.group_name}</a>
+                    </td>
+                    <td className="py-2 pr-3 text-muted-text">{names[i.country_iso3]}</td>
+                    <td className="py-2 pr-3 text-right font-semibold text-heading">{fmt1(i.score)}</td>
+                    <td className="py-2 pr-3">{i.quadrant && <span className={`rounded-full px-2 py-0.5 text-xs font-semibold ${QUADRANT_BADGE[i.quadrant]}`}>{i.quadrant_label}</span>}</td>
+                    <td className="py-2 pr-3 text-right text-body">{i.overeducation != null ? `${num(i.overeducation, 1)} %` : '—'}</td>
+                    <td className="py-2 pr-3 text-right text-body">{money(i.earnings_usd, i.earnings_ppp)}</td>
+                    <td className="py-2 text-right text-body">{i.earnings_ratio != null ? num(i.earnings_ratio, 2) : '—'}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        ) : (
+          <InfoNote className="mt-4" title="Sin grupos para mostrar">
+            No hay grupos con el indicador calculado para {page.year != null ? `el año ${page.year}` : 'ningún año'}. La tabla se completa cuando hay sobreeducación e ingresos comparables para al menos un grupo.
+          </InfoNote>
+        )}
       </section>
 
       <section className="mt-12 flex flex-col gap-4 border-t border-card-border pt-8">

@@ -1,12 +1,33 @@
-import type { ReactNode } from 'react';
+import { connection } from 'next/server';
+import { Suspense, type ReactNode } from 'react';
 import { AppHeader } from '@/components/ui/layout/AppHeader';
 import { MainNav } from '@/components/ui/layout/MainNav';
+import { requireUser } from '@/lib/auth/session';
+
+/** Lee la sesión: va dentro de un Suspense para no frenar el resto del layout. */
+async function Header() {
+  await connection(); // depende de la sesión: se arma en cada request, no al prerenderizar
+  const user = await requireUser();
+  return <AppHeader userName={user.full_name} userRole={user.role_label} unreadAlerts={0} />;
+}
+
+function HeaderSkeleton() {
+  return (
+    <header className="border-b border-card-border bg-canvas" aria-hidden>
+      <div className="mx-auto flex h-[72px] max-w-7xl items-center gap-3 px-4 sm:px-6">
+        <span className="size-10 rounded-[11px] bg-surface-2" />
+        <span className="h-4 w-44 rounded bg-surface-2" />
+      </div>
+    </header>
+  );
+}
 
 export default function AppLayout({ children }: { children: ReactNode }) {
   return (
     <>
-      {/* Usuario y alertas son datos de ejemplo hasta definir autenticación */}
-      <AppHeader userName="Santiago Morales" userRole="Administrador" unreadAlerts={9} />
+      <Suspense fallback={<HeaderSkeleton />}>
+        <Header />
+      </Suspense>
       <MainNav />
       <main className="flex-1">{children}</main>
     </>
