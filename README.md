@@ -61,7 +61,13 @@
 * **Python 3.11+**, **Node.js 20.9+** y **Git**.
 * **Docker Desktop** (para levantar la base PostgreSQL local).
 
-### 1. Levantar el Backend (API + Base de Datos)
+### 1. Clonar el repositorio
+```bash
+git clone https://github.com/e19-innovalab/observa_tendencias.git
+cd observa_tendencias
+```
+
+### 2. Levantar el Backend (API + Base de Datos)
 El backend se ejecuta en el puerto `8010`.
 
 ```bash
@@ -92,7 +98,7 @@ uvicorn app.main:app --reload --port 8010
 * **Swagger Docs:** `http://localhost:8010/docs`
 * **Explorer (herramienta de revisión en vivo):** `http://localhost:8010/explorer`
 
-### 2. Levantar el Frontend
+### 3. Levantar el Frontend
 El frontend se desarrolla en la carpeta `frontend/frontend` (rama `landing-login`) y corre en el puerto `3000`:
 
 ```bash
@@ -110,7 +116,7 @@ npm run dev                  # Abre http://localhost:3000
 ```
 *(Nota: Si el backend no está levantado o `NEXT_PUBLIC_USE_MOCKS=true`, la plataforma permite visualizarse con datos de ejemplo).*
 
-### 3. Ejecutar el Pipeline de Data Analytics (Opcional / Laboratorio)
+### 4. Ejecutar el Pipeline de Data Analytics (Opcional / Laboratorio)
 Para regenerar las tablas analíticas, gráficos estáticos y la matriz de habilidades e IA desde cero:
 
 ```bash
@@ -124,7 +130,7 @@ python pipeline.py --etapa 3
 python generar_matriz_habilidades_ia.py
 ```
 
-### 4. Ejecutar las Pruebas Automatizadas (QA / Testing)
+### 5. Ejecutar las Pruebas Automatizadas (QA / Testing)
 Con el backend (`:8010`) y el frontend (`:3000`) corriendo:
 
 ```bash
