@@ -4,6 +4,8 @@ import { Suspense } from 'react';
 import { ArrowRight } from 'lucide-react';
 import { Badge, type BadgeTone } from '@/components/ui/badge';
 import { PageSkeleton } from '@/components/data/PageSkeleton';
+import { GenerationalGapView } from '@/components/data/GenerationalGapView';
+import { OccupationMotionView } from '@/components/data/OccupationMotionView';
 import {
   ChartHeader,
   ChartLayout,
@@ -18,6 +20,7 @@ import { UrlSeg } from '@/components/data/UrlSeg';
 import { InfoNote } from '@/components/ui/feedback/InfoNote';
 import { DataSourceFooter } from '@/components/ui/layout/DataSourceFooter';
 import { PageHero } from '@/components/ui/layout/PageHero';
+import { SectionTabs } from '@/components/ui/navigation/SectionTabs';
 import { COUNTRY_COLORS, FALLBACK_COLOR } from '@/components/ui/charts/chartTheme';
 import { ApiError } from '@/lib/api/client';
 import { getEmployability } from '@/lib/api/employability';
@@ -52,10 +55,27 @@ const LEVEL_TONES: Record<string, BadgeTone> = {
 };
 
 type SearchParams = {
+  tab?: string;
   sector?: string;
   year?: string;
   orden?: string;
   sel?: string;
+  burbujas?: string;
+};
+
+const TABS = [
+  { id: 'ocupaciones', label: 'Ocupaciones' },
+  { id: 'brecha', label: 'Brecha generacional' },
+  { id: 'movimiento', label: 'Ocupaciones en movimiento' },
+];
+
+const TAB_DESCRIPTIONS: Record<string, string> = {
+  ocupaciones:
+    'Compará el índice de empleabilidad (ISE) de las ocupaciones entre Argentina, Chile y Uruguay y abrí la ficha de cada una.',
+  brecha:
+    'Cuántas veces es la desocupación de los jóvenes de 15 a 24 años respecto de la del total de la fuerza de trabajo en cada país.',
+  movimiento:
+    'Seguí año a año cómo se mueven los grandes grupos de ocupaciones según su salario, el empleo y la exposición a la IA.',
 };
 
 type DotRow = {
@@ -87,6 +107,31 @@ export default function OcupacionesPage({
 
 async function OcupacionesContent({ searchParams }: { searchParams: Promise<SearchParams> }) {
   const sp = await searchParams;
+  const tab: 'ocupaciones' | 'brecha' | 'movimiento' =
+    sp.tab === 'brecha' || sp.tab === 'movimiento' ? sp.tab : 'ocupaciones';
+  const tabs = <SectionTabs tabs={TABS} active={tab} />;
+
+  if (tab !== 'ocupaciones') {
+    return (
+      <>
+        <PageHero title="Ocupaciones" description={TAB_DESCRIPTIONS[tab]} />
+        <Page>
+          <div className="space-y-6">
+            {tabs}
+            <Suspense
+              fallback={
+                <p className="rounded-xl border border-dashed border-card-border bg-rail px-4 py-10 text-center text-[12.5px] text-muted-text">
+                  Cargando indicadores…
+                </p>
+              }
+            >
+              {tab === 'brecha' ? <GenerationalGapView /> : <OccupationMotionView sp={sp} />}
+            </Suspense>
+          </div>
+        </Page>
+      </>
+    );
+  }
 
   let countries: Country[] = [];
   let sectors: Sector[] = [];
@@ -199,54 +244,54 @@ async function OcupacionesContent({ searchParams }: { searchParams: Promise<Sear
 
   return (
     <>
-      <PageHero
-        title="Ocupaciones"
-        description="Compará el índice de empleabilidad (ISE) de las ocupaciones entre Argentina, Chile y Uruguay y abrí la ficha de cada una."
-      />
+      <PageHero title="Ocupaciones" description={TAB_DESCRIPTIONS.ocupaciones} />
 
       <Page>
-        <ChartHeader
-          eyebrow={`Índice de empleabilidad (ISE) · ${year ?? ''} · ${sectorName ?? 'ocupaciones destacadas'}`}
-          title="La misma ocupación, tres países"
-          subtitle="Cada fila es una ocupación y cada punto, su ISE en un país (0 a 100). Cuanto más larga la línea, más difiere entre países."
-          controls={
-            <>
-              <UrlSeg
-                name="sector"
-                label="Conjunto"
-                value={sectorParam ?? ''}
-                options={[
-                  { value: '', label: 'Destacadas' },
-                  ...sectors.map((sector) => ({
-                    value: sector.sector_code,
-                    label: sector.name,
-                  })),
-                ]}
-                reset={['sel']}
-              />
-              <UrlSeg
-                name="orden"
-                label="Orden"
-                value={sp.orden === 'diferencia' ? 'diferencia' : ''}
-                options={[
-                  { value: '', label: 'Mayor ISE' },
-                  { value: 'diferencia', label: 'Mayor diferencia' },
-                ]}
-              />
-              {yearOptions.length > 1 && (
+        <div className="space-y-4">
+          {tabs}
+
+          <ChartHeader
+            eyebrow={`Índice de empleabilidad (ISE) · ${year ?? ''} · ${sectorName ?? 'ocupaciones destacadas'}`}
+            title="La misma ocupación, tres países"
+            subtitle="Cada fila es una ocupación y cada punto, su ISE en un país (0 a 100). Cuanto más larga la línea, más difiere entre países."
+            controls={
+              <>
                 <UrlSeg
-                  name="year"
-                  label="Año"
-                  value={yearValue}
-                  options={yearOptions}
+                  name="sector"
+                  label="Conjunto"
+                  value={sectorParam ?? ''}
+                  options={[
+                    { value: '', label: 'Destacadas' },
+                    ...sectors.map((sector) => ({
+                      value: sector.sector_code,
+                      label: sector.name,
+                    })),
+                  ]}
                   reset={['sel']}
                 />
-              )}
-            </>
-          }
-        />
+                <UrlSeg
+                  name="orden"
+                  label="Orden"
+                  value={sp.orden === 'diferencia' ? 'diferencia' : ''}
+                  options={[
+                    { value: '', label: 'Mayor ISE' },
+                    { value: 'diferencia', label: 'Mayor diferencia' },
+                  ]}
+                />
+                {yearOptions.length > 1 && (
+                  <UrlSeg
+                    name="year"
+                    label="Año"
+                    value={yearValue}
+                    options={yearOptions}
+                    reset={['sel']}
+                  />
+                )}
+              </>
+            }
+          />
 
-        <ChartLayout
+          <ChartLayout
           stickyRail
           chart={
             rows.length === 0 ? (
@@ -440,6 +485,7 @@ async function OcupacionesContent({ searchParams }: { searchParams: Promise<Sear
           updatedAt={updatedAt ?? 'Sin fecha informada'}
           methodologyHref="/panorama-regional"
         />
+        </div>
       </Page>
     </>
   );

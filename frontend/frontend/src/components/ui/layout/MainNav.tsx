@@ -2,7 +2,7 @@
 
 import { Suspense } from 'react';
 import Link from 'next/link';
-import { usePathname, useSearchParams } from 'next/navigation';
+import { usePathname } from 'next/navigation';
 import { ChevronDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -11,7 +11,6 @@ const ITEMS = [
   { href: '/sectores', label: 'Sectores' },
   { href: '/ocupaciones', label: 'Ocupaciones' },
   { href: '/habilidades', label: 'Habilidades y formación' },
-  { href: '/habilidades?tab=genero', label: 'Género' },
 ];
 
 const INDICES = [
@@ -20,22 +19,15 @@ const INDICES = [
   { href: '/ludita', label: 'Indicador Ludita' },
   { href: '/reina-roja', label: 'Indicador Reina Roja' },
   { href: '/sisifo', label: 'Indicador Sísifo' },
-  { href: '/panorama?tab=brecha', label: 'Brecha generacional' },
-  { href: '/panorama?tab=movimiento', label: 'Ocupaciones en movimiento' },
 ];
 
 const INDEX_PATHS = ['/pulso', '/moctezuma', '/ludita', '/reina-roja', '/sisifo'];
 
-function isActive(href: string, pathname: string, tab: string | null) {
-  if (href === '/habilidades?tab=genero') {
-    return pathname.startsWith('/habilidades') && tab === 'genero';
-  }
-  if (href === '/habilidades') {
-    return pathname.startsWith('/habilidades') && tab !== 'genero';
-  }
+function isActive(href: string, pathname: string) {
   if (href === '/ocupaciones') return pathname.startsWith('/ocupaciones');
   if (href === '/sectores') return pathname.startsWith('/sectores');
   if (href === '/panorama-regional') return pathname.startsWith('/panorama-regional');
+  if (href === '/habilidades') return pathname.startsWith('/habilidades');
   return pathname === href || pathname.startsWith(`${href}/`);
 }
 
@@ -57,8 +49,6 @@ function NavFallback() {
 
 function NavItems() {
   const pathname = usePathname();
-  const search = useSearchParams();
-  const tab = search.get('tab');
   const indicesActive = INDEX_PATHS.some(
     (path) => pathname === path || pathname.startsWith(`${path}/`),
   );
@@ -66,7 +56,7 @@ function NavItems() {
   return (
     <>
       {ITEMS.map((item) => {
-        const active = isActive(item.href, pathname, tab);
+        const active = isActive(item.href, pathname);
         return (
           <Link
             key={item.href}

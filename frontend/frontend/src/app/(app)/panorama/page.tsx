@@ -1,9 +1,10 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { io } from 'next/cache';
+import { GenerationalGapView } from '@/components/data/GenerationalGapView';
 import { IndicatorPicker } from '@/components/data/IndicatorPicker';
 import { LinesChart, type LineSeries } from '@/components/data/LinesChart';
-import { MotionChart } from '@/components/data/MotionChart';
+import { OccupationMotionView } from '@/components/data/OccupationMotionView';
 import { Sparkline } from '@/components/data/Sparkline';
 import {
   ChartHeader,
@@ -20,8 +21,6 @@ import { YearRange } from '@/components/data/YearRange';
 import { HowCalculated } from '@/components/methodology/HowCalculated';
 import { COUNTRY_COLORS, FALLBACK_COLOR } from '@/components/ui/charts/chartTheme';
 import { ApiError } from '@/lib/api/client';
-import { getGenerationalGap } from '@/lib/api/generational';
-import { getMotion } from '@/lib/api/motion';
 import {
   getCompare,
   getCountries,
@@ -32,7 +31,6 @@ import {
   getTrends,
 } from '@/lib/api/panorama';
 import type { Country, ObservationPoint } from '@/lib/schemas/api';
-import type { GenerationalGap } from '@/lib/schemas/generational';
 import { formatChange, formatDate, formatValue } from '@/lib/utils/format';
 
 export const metadata: Metadata = { title: 'Panorama' };
@@ -70,13 +68,13 @@ export default async function PanoramaPage({
   if (sp.tab === 'brecha')
     return (
       <Page>
-        <GapTab />
+        <GenerationalGapView />
       </Page>
     );
   if (sp.tab === 'movimiento')
     return (
       <Page>
-        <MotionTab y={sp.burbujas} />
+        <OccupationMotionView sp={sp} />
       </Page>
     );
   return <PanoramaContent sp={sp} />;
@@ -446,137 +444,3 @@ async function PanoramaContent({ sp }: { sp: SearchParams }) {
   );
 }
 
-const one = new Intl.NumberFormat('es-AR', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
-
-async function GapTab() {
-  let gap, countries;
-  try {
-    [gap, countries] = await Promise.all([getGenerationalGap(), getCountries()]);
-  } catch (e) {
-    return (
-      <ErrorNote
-        message={e instanceof ApiError ? e.message : 'Error inesperado al cargar los datos.'}
-      />
-    );
-  }
-  const names = Object.fromEntries(countries.map((c) => [c.iso3, c.name_es]));
-  return gap.countries.some((c) => c.latest) ? (
-    <GenerationalGapSection gap={gap} names={names} />
-  ) : (
-    <p className="py-24 text-center text-sm text-muted-text">
-      Todavía no hay datos de la brecha generacional.
-    </p>
-  );
-}
-
-async function MotionTab({ y }: { y?: string }) {
-  let motion, countries;
-  try {
-    [motion, countries] = await Promise.all([getMotion(y), getCountries()]);
-  } catch (e) {
-    return (
-      <ErrorNote
-        message={e instanceof ApiError ? e.message : 'Error inesperado al cargar los datos.'}
-      />
-    );
-  }
-  const names = Object.fromEntries(countries.map((c) => [c.iso3, c.name_es]));
-  if (motion.points.length === 0) {
-    return (
-      <p className="py-24 text-center text-sm text-muted-text">
-        Todavía no hay datos de las ocupaciones en movimiento.
-      </p>
-    );
-  }
-  return (
-    <section className="flex flex-col gap-4" aria-labelledby="motion-title">
-      <div className="flex flex-wrap items-end justify-between gap-3">
-        <div className="flex max-w-3xl flex-col gap-1">
-          <Eyebrow>
-            Por grandes grupos de ocupaciones · {motion.years[0]}–{motion.years.at(-1)}
-          </Eyebrow>
-          <h1 id="motion-title" className="text-xl font-semibold text-heading">
-            {motion.title}
-          </h1>
-          <p className="text-sm text-body">
-            {[motion.description, motion.y.description].filter(Boolean).join(' ')}
-          </p>
-        </div>
-        <UrlSeg
-          name="burbujas"
-          label="Eje vertical"
-          value={motion.y.key === motion.y_options[0]?.key ? '' : motion.y.key}
-          options={motion.y_options.map((o, i) => ({
-            value: i === 0 ? '' : o.key,
-            label: o.short_label ?? o.label,
-          }))}
-          reset={[]}
-        />
-      </div>
-      <MotionChart key={motion.y.key} data={motion} names={names} />
-      <ul className="flex flex-col gap-1 text-xs leading-relaxed text-muted-text">
-        {motion.notes.map((n) => (
-          <li key={n}>{n}</li>
-        ))}
-      </ul>
-    </section>
-  );
-}
-
-/** Brecha generacional: desocupación joven dividida por la del total, por país. */
-function GenerationalGapSection({ gap, names }: { gap: GenerationalGap; names: Record<string, string> }) {
-  const withData = gap.countries.filter((c) => c.latest).sort((a, b) => b.latest!.ratio - a.latest!.ratio);
-  const series = withData.map((c) => ({
-    key: c.country_iso3,
-    label: names[c.country_iso3] ?? c.country_iso3,
-    color: COUNTRY_COLORS[c.country_iso3] ?? FALLBACK_COLOR,
-    points: c.points.map((p) => ({
-      period: String(p.year),
-      start: `${p.year}-01-01`,
-      value: p.ratio,
-    })),
-  }));
-  return (
-    <section aria-labelledby="brecha-generacional">
-      <Eyebrow>
-        {gap.youth.name} sobre {gap.total.name.toLowerCase()}
-      </Eyebrow>
-      <h1 id="brecha-generacional" className="mt-1 text-xl font-bold text-heading">
-        {gap.title}
-      </h1>
-      <p className="mt-1 max-w-3xl text-sm text-body">{gap.description}</p>
-      <div className="mt-4 grid gap-3 md:grid-cols-3">
-        {withData.map((c) => (
-          <div key={c.country_iso3} className="rounded-xl border border-card-border p-4">
-            <div className="flex items-baseline justify-between gap-2">
-              <span className="text-sm font-semibold text-heading">
-                {names[c.country_iso3] ?? c.country_iso3}
-              </span>
-              <span
-                className="text-3xl font-bold tabular-nums"
-                style={{ color: COUNTRY_COLORS[c.country_iso3] ?? FALLBACK_COLOR }}
-              >
-                {one.format(c.latest!.ratio)}×
-              </span>
-            </div>
-            <p className="mt-2 text-sm text-body">{c.headline}</p>
-            <p className="mt-1.5 text-xs text-muted-text">
-              Jóvenes {formatValue(c.latest!.youth, gap.youth.unit)} · todos{' '}
-              {formatValue(c.latest!.total, gap.total.unit)}
-              {c.points.length > 1 && ` · en ${c.points[0].year} era ${one.format(c.points[0].ratio)}×`}
-            </p>
-          </div>
-        ))}
-      </div>
-      <div className="mt-6 flex flex-col gap-2">
-        <p className="text-xs text-muted-text">
-          Desocupación joven dividida por la general, por año (1 = sin brecha).
-        </p>
-        <LinesChart series={series} unit="ratio" ariaLabel="Brecha generacional por país y año" />
-        <SourceLine
-          source={`Fuente: ${gap.source ?? '—'} · ${gap.youth.name} y ${gap.total.name.toLowerCase()}, de las mismas encuestas de hogares`}
-        />
-      </div>
-    </section>
-  );
-}

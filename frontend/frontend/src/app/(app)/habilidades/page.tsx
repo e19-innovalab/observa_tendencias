@@ -11,7 +11,6 @@ import { PageHero } from '@/components/ui/layout/PageHero';
 import { SectionHeading } from '@/components/ui/layout/SectionHeading';
 import { SectionTabs } from '@/components/ui/navigation/SectionTabs';
 import { PageSkeleton } from '@/components/data/PageSkeleton';
-import { GenderView } from '@/components/data/GenderView';
 import { GraduatesView } from '@/components/data/GraduatesView';
 import { SectorKpisView } from '@/components/data/SectorKpisView';
 import { SkillGapsView } from '@/components/data/SkillGapsView';
@@ -45,7 +44,6 @@ const TABS = [
   { id: 'gaps', label: 'Brechas de Habilidades' },
   { id: 'titulados', label: 'Titulados' },
   { id: 'sectores', label: 'Indicadores por sector' },
-  { id: 'genero', label: 'Género' },
   { id: 'projections', label: 'Proyecciones' },
 ];
 
@@ -67,15 +65,23 @@ export default async function HabilidadesPage({
       />
 
       <div className="mx-auto max-w-7xl space-y-6 px-4 py-6 sm:px-6">
-        <SectionTabs tabs={TABS} active={tab} />
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <SectionTabs tabs={TABS} active={tab} />
+          {/* Ancla normal: fuerza una carga limpia de /genero y evita reutilizar
+              un segmento cacheado de Habilidades en la navegación del cliente. */}
+          <a
+            href="/genero"
+            className="text-[12.5px] font-semibold text-link hover:text-link-hover hover:underline"
+          >
+            Ver indicadores de género →
+          </a>
+        </div>
 
         <Suspense fallback={<PageSkeleton />}>
           {tab === 'titulados' ? (
             <GraduatesView sp={sp} />
           ) : tab === 'sectores' ? (
             <SectorKpisView sp={sp} />
-          ) : tab === 'genero' ? (
-            <GenderView sp={sp} />
           ) : tab === 'projections' ? (
             <ProjectionsView />
           ) : (

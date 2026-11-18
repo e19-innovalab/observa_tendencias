@@ -11,6 +11,7 @@ export const PRIVATE_PREFIXES = [
   '/sectores',
   '/ocupaciones',
   '/habilidades',
+  '/genero',
   '/tendencias',
   '/pulso',
   '/moctezuma',
