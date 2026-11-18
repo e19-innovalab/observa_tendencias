@@ -49,7 +49,7 @@
 | :--- | :--- |
 | **Data Analytics** | Python 3.11+, Pandas, NumPy, SciPy, Statsmodels, Matplotlib, Configuraciones YAML |
 | **Backend & API** | FastAPI, PostgreSQL 17 (Docker / Supabase), SQLAlchemy, Alembic, APScheduler, Ollama / OpenRouter |
-| **Frontend** | Next.js (App Router), TypeScript, Tailwind CSS, shadcn/ui, Recharts, Zod |
+| **Frontend** | Next.js (App Router), TypeScript, Tailwind CSS, shadcn/ui, Recharts, Zod, TanStack Query, nuqs, lucide-react |
 | **Testing & QA** | Playwright (E2E y API Testing), Pytest (270+ tests en Backend) |
 | **Diseño UX/UI** | Figma, Miro, Google Drive |
 
@@ -93,20 +93,22 @@ uvicorn app.main:app --reload --port 8010
 * **Explorer (herramienta de revisión en vivo):** `http://localhost:8010/explorer`
 
 ### 2. Levantar el Frontend
-Podés correr el frontend principal (puerto `3000`) o el frontend minimal de producción (puerto `3001`):
+El frontend se desarrolla en la carpeta `frontend/frontend` (rama `landing-login`) y corre en el puerto `3000`:
 
 ```bash
-# Opción A: Frontend Principal (rama landing-login -> frontend/frontend)
 cd frontend/frontend
-npm install
-cp .env.example .env.local   # Apunta por defecto a http://localhost:8010
-npm run dev                  # Abre http://localhost:3000
 
-# Opción B: Frontend Minimal (publicado en Vercel -> backend/frontend_minimal)
-cd backend/frontend_minimal
+# 1. Instalar dependencias
 npm install
-npm run dev                  # Abre http://localhost:3001
+
+# 2. Configurar variables de entorno
+cp .env.example .env.local   # En Windows: copy .env.example .env.local
+                             # Apunta por defecto a NEXT_PUBLIC_API_URL=http://localhost:8010
+
+# 3. Levantar el servidor de desarrollo
+npm run dev                  # Abre http://localhost:3000
 ```
+*(Nota: Si el backend no está levantado o `NEXT_PUBLIC_USE_MOCKS=true`, la plataforma permite visualizarse con datos de ejemplo).*
 
 ### 3. Ejecutar el Pipeline de Data Analytics (Opcional / Laboratorio)
 Para regenerar las tablas analíticas, gráficos estáticos y la matriz de habilidades e IA desde cero:
@@ -155,7 +157,7 @@ Para mantener este documento ágil, la especificación profunda de cada área se
 
 * **Data Analytics ([`data_analytics/README.md`](data_analytics/README.md)):** Detalla la metodología científica, el inventario completo de fuentes oficiales de Argentina, Chile y Uruguay, las reglas de homologación internacional (CINE-F, CIIU, CIUO-08, ESCO) y las fórmulas matemáticas con las que fueron calculados todos los índices y proyecciones.
 * **Backend y Despliegue ([`backend/README.md`](backend/README.md) y [`backend/docs/despliegue.md`](backend/docs/despliegue.md)):** Explica la arquitectura de conectores automáticos, la configuración declarativa en archivos YAML, el funcionamiento del asistente *Baqueano*, el flujo de carga manual de datos y la guía de despliegue en Supabase, Render y Vercel.
-* **Frontend ([`frontend/frontend/README.md`](https://github.com/e19-innovalab/observa_tendencias/blob/landing-login/frontend/frontend/README.md) y [`backend/frontend_minimal/README.md`](backend/frontend_minimal/README.md)):** Documenta la estructura de componentes en Next.js, validación de contratos con Zod, manejo de variables de entorno, modo mocks y mapa de pantallas.
+* **Frontend ([`frontend/frontend/README.md`](https://github.com/e19-innovalab/observa_tendencias/blob/landing-login/frontend/frontend/README.md)):** Documenta la instalación y scripts de Next.js, configuración de variables de entorno (`NEXT_PUBLIC_API_URL`, `NEXT_PUBLIC_USE_MOCKS`, `ADMIN_API_KEY` vía Route Handlers), arquitectura de carpetas (`src/app/`, `src/components/ui/`, `src/lib/schemas/api.ts`), validación de contratos con Zod y reglas de desarrollo del equipo de Frontend.
 * **Diseño UX/UI ([`desing/README.md`](desing/README.md)):** Reúne la investigación de usuarios, arquitectura de información, definición de permisos por rol, estado de los wireframes y enlaces a los archivos editables en Figma, Miro y Google Drive.
 * **Testing y QA ([`tester/README.md`](https://github.com/e19-innovalab/observa_tendencias/blob/testing/pruebas/tester/README.md)):** Describe las pruebas automáticas en Playwright (`api.spec.js` y `navegacion.spec.js`), el checklist de pruebas manuales por sección y el registro de resultados.
 
