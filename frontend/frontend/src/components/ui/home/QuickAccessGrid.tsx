@@ -1,0 +1,48 @@
+import Link from 'next/link';
+import { ArrowRight, Activity, Briefcase, Globe2, GraduationCap, Layers, Sparkles, TrendingUp } from 'lucide-react';
+import { cn } from '@/lib/utils';
+import type { QuickAccess } from '@/lib/ui-types';
+
+const ICONS = {
+  globe: Globe2,
+  layers: Layers,
+  briefcase: Briefcase,
+  graduation: GraduationCap,
+  trend: TrendingUp,
+  pulse: Activity,
+  sparkles: Sparkles,
+};
+
+/** Accesos rápidos del inicio: 4 tarjetas y una destacada de ancho completo. */
+export function QuickAccessGrid({ items }: { items: QuickAccess[] }) {
+  return (
+    <div className="grid gap-4 sm:grid-cols-2">
+      {items.map((item) => {
+        const Icon = ICONS[item.icon];
+        return (
+          <Link
+            key={item.href}
+            href={item.href}
+            className={cn(
+              'group flex items-center gap-4 rounded-xl border border-card-border bg-canvas p-5 transition-all',
+              'hover:border-line hover:shadow-[var(--shadow-card)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus',
+              item.featured && 'sm:col-span-2',
+            )}
+          >
+            <span className="flex size-12 shrink-0 items-center justify-center rounded-xl bg-brand/8 text-brand">
+              <Icon className="size-6" aria-hidden />
+            </span>
+            <span className="min-w-0">
+              <span className="block font-semibold text-heading">{item.title}</span>
+              <span className="block text-sm text-muted-text">{item.description}</span>
+            </span>
+            <ArrowRight
+              className="ml-auto size-5 shrink-0 text-muted-text transition-transform group-hover:translate-x-0.5 group-hover:text-brand"
+              aria-hidden
+            />
+          </Link>
+        );
+      })}
+    </div>
+  );
+}
