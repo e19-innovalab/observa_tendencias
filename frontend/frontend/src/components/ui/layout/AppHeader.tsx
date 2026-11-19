@@ -1,5 +1,6 @@
 import Link from 'next/link';
-import { Bell, BookOpen, ChevronDown, Search } from 'lucide-react';
+import { Bell, BookOpen, ChevronDown, LogOut, Search } from 'lucide-react';
+import { logout } from '@/lib/auth/actions';
 
 type Props = {
   userName: string;
@@ -119,6 +120,16 @@ export function AppHeader({ userName, userRole, unreadAlerts }: Props) {
               <span className="block text-[13px] font-semibold text-heading">{userName}</span>
               <span className="block text-[11px] font-medium text-brand">{userRole}</span>
             </span>
+            <form action={logout}>
+              <button
+                type="submit"
+                aria-label="Cerrar sesión"
+                title="Cerrar sesión"
+                className="flex items-center rounded-lg p-2 text-muted-text hover:bg-surface-alt focus-visible:outline-2 focus-visible:outline-focus"
+              >
+                <LogOut className="size-4" aria-hidden />
+              </button>
+            </form>
           </div>
         </div>
       </div>
