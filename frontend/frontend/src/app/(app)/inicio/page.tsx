@@ -7,6 +7,7 @@ import { KpiCard } from '@/components/ui/indicators/KpiCard';
 import { SectionHeading } from '@/components/ui/layout/SectionHeading';
 import { getAlerts } from '@/lib/api/alerts';
 import { ApiError } from '@/lib/api/client';
+import { requireUser } from '@/lib/auth/session';
 import { getCountries, getDashboardSummary } from '@/lib/api/panorama';
 import { QUICK_ACCESS } from '@/lib/constants';
 import type { DashboardSummary, HighlightCard, Indicator } from '@/lib/schemas/api';
@@ -86,6 +87,8 @@ function buildFeed(alertsPage: Awaited<ReturnType<typeof getAlerts>> | null): Tr
 
 export default async function InicioPage() {
   await io(); // el inicio se calcula con datos vivos, no en el shell estático
+  const user = await requireUser();
+  const nombre = user.full_name.split(' ')[0];
 
   let kpis: Kpi[] = [];
   let feed: TrendFeedItem[] = [];
@@ -107,7 +110,7 @@ export default async function InicioPage() {
   return (
     <div className="mx-auto max-w-7xl space-y-10 px-4 py-8 sm:px-6">
       <header className="space-y-2">
-        <h1 className="text-3xl font-bold tracking-tight text-heading">¡Hola Santiago!</h1>
+        <h1 className="text-3xl font-bold tracking-tight text-heading">¡Hola {nombre}!</h1>
         <p className="max-w-3xl text-sm leading-relaxed text-muted-text sm:text-base">
           Estos son los datos más destacados del observatorio. Podés explorar las secciones del
           menú o usar los accesos rápidos.

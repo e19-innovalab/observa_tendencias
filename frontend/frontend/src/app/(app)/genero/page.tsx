@@ -14,15 +14,18 @@ type SearchParams = {
   sector_kpi?: string;
 };
 
-export default async function GeneroPage({
+async function Datos({ searchParams }: { searchParams: Promise<SearchParams> }) {
+  // Es una página privada con datos vivos: no debe servirse desde caché estática.
+  await connection();
+  const sp = await searchParams;
+  return <GenderView sp={sp} />;
+}
+
+export default function GeneroPage({
   searchParams,
 }: {
   searchParams: Promise<SearchParams>;
 }) {
-  // Es una página privada con datos vivos: no debe servirse desde caché estática.
-  await connection();
-  const sp = await searchParams;
-
   return (
     <>
       <PageHero
@@ -32,7 +35,7 @@ export default async function GeneroPage({
       <Page>
         <div className="space-y-6">
           <Suspense fallback={<PageSkeleton />}>
-            <GenderView sp={sp} />
+            <Datos searchParams={searchParams} />
           </Suspense>
         </div>
       </Page>

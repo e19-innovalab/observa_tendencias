@@ -103,6 +103,7 @@ function NavItems() {
             <Link
               key={item.href}
               href={item.href}
+              onClick={(e) => e.currentTarget.closest('details')?.removeAttribute('open')}
               className="block px-4 py-2.5 text-[13px] text-body hover:bg-surface-alt focus-visible:outline-2 focus-visible:outline-focus"
             >
               {item.label}
