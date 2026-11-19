@@ -13,8 +13,8 @@ Este espacio resume las decisiones de diseño, herramientas de trabajo, la organ
 
 ## Accesos Rápidos y Recursos Principales
 
-* **Espacio Colaborativo Centralizado:** [Tablero de Miro](https://miro.com/app/board/uXjVHI5DvM=/)
-* **Archivo de Diseño UI:** [Figma Colaborativo](https://www.figma.com/design/W3S2E5N9MKzAYEp90N9QhP/Gisella-Franco-s-team-library?node-id=3316-2&t=Rxj6O52WH7h4wmnc-1) | [Prototipo Navegable (wireframes)](https://www.figma.com/proto/W3S2E5N9MKzAYEp90N9QhP/Gisella-Franco-s-team-library?node-id=3364-1721&p=f&t=aN25UvDngecOjWQS-1&scaling=min-zoom&content-scaling=fixed&page-id=3316%3A2&starting-point-node-id=3364%3A1721)
+* **Espacio Colaborativo Centralizado:** [Tablero de Miro](https://miro.com/app/board/uXjVHI5DvM=/]https://miro.com/welcomeonboard/QWZCaXZGMXJwd1l0Z2FnVitETGFEQTMremtPZmJIWGo3VjBQTklVMGNheVFPaXA4cWJqK3ZiZTJFbW5neU56RnhJYmMrS0pVTnhxdjBYY0VLR1FtOHZOUUNHSnEwL1VvaWErR1A4VTdURDVUUVFTRUwrdU1JTWFrQUFMM09GcHNyVmtkMG5hNDA3dVlncnBvRVB2ZXBnPT0hdjE=?share_link_id=331330713620)
+* **Archivo de Diseño UI:** [Figma Colaborativo](https://www.figma.com/design/W3S2E5N9MKzAYEp90N9QhP/Gisella-Franco-s-team-library?node-id=3316-2&t=ehEecnaBA0vnpZFF-1) | [Prototipo Navegable (wireframes)](https://www.figma.com/proto/W3S2E5N9MKzAYEp90N9QhP/Gisella-Franco-s-team-library?node-id=3364-1721&p=f&t=aN25UvDngecOjWQS-1&scaling=min-zoom&content-scaling=fixed&page-id=3316%3A2&starting-point-node-id=3364%3A1721)
 * **Repositorio de Activos Exportados:** [Carpeta Google Drive - Diseño UX/UI](https://drive.google.com/drive/folders/1wFV2P4Krug6KoGZszjzpO06Nq6ueMoUx?usp=sharing)  
   *(Organizado en carpetas: Diagramas de flujo, Recursos gráficos, Sitemaps y Wireframes)*
 
