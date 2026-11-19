@@ -110,7 +110,6 @@ for sec, claes in SECTORES_CIIU.items():
 
 DISCIPLINA_ID_A_SECTOR = {
     '10': ('TEC01', 'Ingeniería en informática / computación', 'Tecnología', '0613'),
-    '19': ('TEC05', 'Técnico en programación / desarrollo de software', 'Tecnología', '0613'),
     '22': ('TUR01', 'Licenciatura en turismo / geografía', 'Turismo', '1015'),
     '1':  ('EDC05', 'Administración / ingeniería comercial', 'Economía del conocimiento', '0413'),
     '13': ('EDC02', 'Diseño gráfico / multimedia / UX-UI', 'Economía del conocimiento', '0211'),
@@ -131,8 +130,6 @@ DISCIPLINA_ID_A_SECTOR = {
 DISCIPLINA_TEXT_A_SECTOR = {
     'informatica': ('TEC01', 'Ingeniería en informática / computación', 'Tecnología', '0613'),
     'computacion': ('TEC01', 'Ingeniería en informática / computación', 'Tecnología', '0613'),
-    'ciencias de la informacion': ('TEC05', 'Técnico en programación / desarrollo de software', 'Tecnología', '0613'),
-    'ciencias de la informacion y de la comunicacion': ('TEC05', 'Técnico en programación / desarrollo de software', 'Tecnología', '0613'),
     'programacion': ('TEC05', 'Técnico en programación / desarrollo de software', 'Tecnología', '0613'),
     'sistemas': ('TEC02', 'Licenciatura en sistemas / ciencias de la computación', 'Tecnología', '0613'),
     'telecomunicaciones': ('TEC03', 'Ingeniería en telecomunicaciones', 'Tecnología', '0714'),
@@ -225,9 +222,8 @@ CARRERAS_OBJETIVO = [
 PATRONES_CARRERA = [(cid, c_nom, sec, cine, niv_esp, [re.compile(p, re.IGNORECASE) for p in pats])
                     for cid, c_nom, sec, cine, niv_esp, pats in CARRERAS_OBJETIVO]
 
-MAPA_DISCIPLINAS_URY = {
+MAPA_DISCIPLINAS_SPU = {
     'Informática': ('TEC01', 'Ingeniería en informática / computación', 'Tecnología', '0613'),
-    'Ciencias de la Información y de la Comunicación': ('TEC05', 'Técnico en programación / desarrollo de software', 'Tecnología', '0613'),
     'Economía y Administración': ('EDC05', 'Administración / ingeniería comercial', 'Economía del conocimiento', '0413'),
     'Estadística': ('EDC01', 'Estadística / ciencia de datos', 'Economía del conocimiento', '0542'),
     'Arquitectura y Diseño': ('EDC02', 'Diseño gráfico / multimedia / UX-UI', 'Economía del conocimiento', '0211'),
@@ -240,8 +236,11 @@ MAPA_DISCIPLINAS_URY = {
     'Ciencias del Suelo': ('ENE04', 'Geología / ingeniería en minas', 'Energía', '0724'),
     'Industrias': ('ENE03', 'Ingeniería mecánica', 'Energía', '0715'),
     'Ingeniería': ('ENE01', 'Ingeniería eléctrica', 'Energía', '0713'),
+    'Física': ('ENE01', 'Ingeniería eléctrica', 'Energía', '0713'),
+    'Química': ('ENE02', 'Ingeniería química', 'Energía', '0711'),
     'Demografía y Geografía': ('TUR01', 'Licenciatura en turismo / geografía', 'Turismo', '1015'),
 }
+MAPA_DISCIPLINAS_URY = MAPA_DISCIPLINAS_SPU
 
 
 def normalizar_texto(texto):
@@ -301,11 +300,16 @@ def inferir_nivel(carrera, tipo_inst=''):
 
 
 def inferir_gestion(institucion, clasificacion=''):
-    texto = normalizar_texto(f"{institucion} {clasificacion}")
-    if any(k in texto for k in ['estatal', 'publica', 'nacional', 'cruch']):
-        return 'publica'
-    if any(k in texto for k in ['privada', 'particular']):
+    clasif_norm = normalizar_texto(clasificacion)
+    if any(k in clasif_norm for k in ['privada', 'privado', 'privadas', 'privados', 'particular', 'institutos profesionales']):
         return 'privada'
+    if any(k in clasif_norm for k in ['estatal', 'estatales', 'publica', 'publico']):
+        return 'publica'
+    texto = normalizar_texto(f"{institucion} {clasificacion}")
+    if any(k in texto for k in ['privada', 'privado', 'privadas', 'privados', 'particular']):
+        return 'privada'
+    if any(k in texto for k in ['estatal', 'estatales', 'publica', 'nacional']):
+        return 'publica'
     return 'NS'
 
 
@@ -391,6 +395,10 @@ def procesar_chile_sies(paths, force_rebuild=False):
     cache_sies = paths['data_processed'] / 'chile_sies_cache.csv'
     if not force_rebuild and cache_sies.exists():
         df_s = pd.read_csv(cache_sies)
+        for col_dec in ['ingreso_1er_anio_clp', 'ingreso_4to_anio_clp', 'salario_clp', 'empleabilidad_1er_anio', 'empleabilidad_2do_anio']:
+            if col_dec in df_s.columns:
+                df_s[col_dec] = pd.to_numeric(df_s[col_dec], errors='coerce').round(2)
+        df_s.to_csv(cache_sies, index=False, encoding='utf-8')
         print(f"  ✅ Cargando SIES Chile desde cache: {cache_sies.name} ({len(df_s):,} filas)")
         return df_s
 
@@ -417,8 +425,8 @@ def procesar_chile_sies(paths, force_rebuild=False):
         'ingreso_1er_anio_clp': ing_1.round(2),
         'ingreso_4to_anio_clp': ing_4.round(2),
         'salario_clp': ing_1.round(2),  # Etapa 3 Item 3.7: ingreso al 1er año de egreso (inserción laboral inicial)
-        'empleabilidad_1er_anio': emp_1.round(4),
-        'empleabilidad_2do_anio': emp_2.round(4)
+        'empleabilidad_1er_anio': emp_1.round(2),
+        'empleabilidad_2do_anio': emp_2.round(2)
     })
 
     # Determinar nivel educativo
@@ -447,14 +455,14 @@ def procesar_chile_sies(paths, force_rebuild=False):
     test_dental = df_sies[dental_mask & cft_mask]
     if not test_dental.empty:
         r_d = test_dental.iloc[0]
-        print(f"    [Caso Testigo SIES] Técnico Dental CFT: Nivel={r_d['nivel']}, CarreraID={r_d['carrera_id']}, Salario 1er={r_d['salario_clp']:,.0f} CLP, Emp 1er={r_d['empleabilidad_1er_anio']:.3f}, Emp 2do={r_d['empleabilidad_2do_anio']:.3f}")
+        print(f"    [Caso Testigo SIES] Técnico Dental CFT: Nivel={r_d['nivel']}, CarreraID={r_d['carrera_id']}, Salario 1er={r_d['salario_clp']:,.0f} CLP, Emp 1er={r_d['empleabilidad_1er_anio']:.2f}, Emp 2do={r_d['empleabilidad_2do_anio']:.2f}")
 
     ind_mask = df_sies['carrera_origen'].str.contains('Ingeniería Industrial', case=False)
     ip_mask = df_sies['tipo_institucion'].str.contains('Institutos Profesionales|IP', case=False)
     test_ind = df_sies[ind_mask & ip_mask]
     if not test_ind.empty:
         r_i = test_ind.iloc[0]
-        print(f"    [Caso Testigo SIES] Ingeniería Industrial IP: Nivel={r_i['nivel']}, CarreraID={r_i['carrera_id']}, Salario 1er={r_i['salario_clp']:,.0f} CLP, Emp 1er={r_i['empleabilidad_1er_anio']:.3f}, Emp 2do={r_i['empleabilidad_2do_anio']:.3f}")
+        print(f"    [Caso Testigo SIES] Ingeniería Industrial IP: Nivel={r_i['nivel']}, CarreraID={r_i['carrera_id']}, Salario 1er={r_i['salario_clp']:,.0f} CLP, Emp 1er={r_i['empleabilidad_1er_anio']:.2f}, Emp 2do={r_i['empleabilidad_2do_anio']:.2f}")
 
     df_sies = df_sies.dropna(subset=['carrera_id']).copy()
     df_sies['pais'] = 'CHL'
@@ -558,94 +566,77 @@ def procesar_argentina(paths, force_rebuild=False):
     cols_group = ['pais', 'fuente_id', 'institucion', 'carrera_id', 'carrera_objetivo', 'sector', 'cine_f_codigo',
                   'anio', 'nivel', 'tipo_gestion', 'sexo']
     df_arg_final = df_matcheadas.groupby(cols_group, as_index=False, dropna=False)['valor'].sum()
+    df_arg_final = df_arg_final[df_arg_final['sexo'].isin(['F', 'M'])].copy()
     df_arg_final['nivel_granularidad'] = 'carrera'
     df_arg_final['calidad'] = 'alta'
     df_arg_final['marca_quiebre_serie'] = ''
     df_arg_final['n_muestral'] = np.nan
     df_arg_final['es_observado'] = pd.notna(df_arg_final['valor'])
 
-    # Generar registros consolidados sexo='T' para el trinomio de Araucano
-    cols_tot = ['pais', 'fuente_id', 'institucion', 'carrera_id', 'carrera_objetivo', 'sector', 'cine_f_codigo',
-                'anio', 'nivel', 'tipo_gestion', 'nivel_granularidad', 'calidad', 'marca_quiebre_serie',
-                'n_muestral', 'es_observado']
-    df_arg_tot = df_arg_final.groupby(cols_tot, as_index=False, dropna=False)['valor'].sum()
-    df_arg_tot['sexo'] = 'T'
-    df_arg_final = pd.concat([df_arg_final, df_arg_tot], ignore_index=True)
-
-    # Integracion de Anuarios SPU 2020-2022 (Decision Etapa 2 Item 2.1 Opcion 1)
-    col_map_spu = {
-        'e_informatica': ('TEC01', 'Ingeniería en informática / computación', 'Tecnología', '0613'),
-        'e_ing': ('ENE01', 'Ingeniería eléctrica / mecánica', 'Energía', '0713'),
-        'e_industrias': ('ENE03', 'Ingeniería mecánica / industrial', 'Energía', '0715'),
-        'e_suelo': ('ENE04', 'Geología / minería / suelo', 'Energía', '0724'),
-        'e_medicina': ('SAL01', 'Medicina', 'Salud', '0912'),
-        'e_odontologia': ('SAL03', 'Odontología', 'Salud', '0911'),
-        'e_paramedicas_auxiliares': ('SAL02', 'Enfermería / paramédicas', 'Salud', '0913'),
-        'e_paramedico_auxiliares': ('SAL02', 'Enfermería / paramédicas', 'Salud', '0913'),
-        'e_salud_publica': ('SAL02', 'Enfermería / salud pública', 'Salud', '0913'),
-        'e_sanidad': ('SAL02', 'Enfermería / sanidad', 'Salud', '0913'),
-        'e_bioquimica_farmacia': ('SAL05', 'Nutrición / bioquímica', 'Salud', '0915'),
-        'e_estadistica': ('EDC01', 'Estadística / ciencia de datos', 'Economía del conocimiento', '0542'),
-        'e_economia_administracion': ('EDC05', 'Administración / ingeniería comercial', 'Economía del conocimiento', '0413'),
-        'e_economia': ('EDC05', 'Administración / ingeniería comercial', 'Economía del conocimiento', '0413'),
-        'e_arquitectura_disenio': ('EDC02', 'Diseño gráfico / multimedia / UX-UI', 'Economía del conocimiento', '0211'),
-        'e_demografia_geografia': ('TUR01', 'Licenciatura en turismo / geografía', 'Turismo', '1015'),
-        'e_dg': ('TUR01', 'Licenciatura en turismo / geografía', 'Turismo', '1015')
-    }
-
-    dir_arg = paths['data_raw'] / 'argentina'
-    spu_filas = []
-    for yr in ['2020', '2021', '2022']:
-        for tipo, cap in [('publica', 'Capitulo 2 Pregrado Grado Estatal'), ('privada', 'Capitulo 2 Pregrado Grado Privado')]:
-            folder = dir_arg / f"Anuario {yr}" / cap
-            if not folder.exists():
+    # Integracion de Serie Continua SPU 2014-2023 (00._educ_superior_datos.csv) para sexo='T'
+    ruta_spu_serie = resolver_ruta_archivo('argentina/00._educ_superior_datos.csv',
+                                           paths['data_raw'], paths['data_processed'],
+                                           ['**/argentina/*educ_superior_datos*.csv'])
+    if ruta_spu_serie and ruta_spu_serie.exists():
+        df_spu_raw = None
+        for enc in ['latin-1', 'cp1252', 'utf-8']:
+            try:
+                df_try = pd.read_csv(ruta_spu_serie, sep=';', thousands='.', encoding=enc)
+                if len(df_try.columns) > 3:
+                    df_spu_raw = df_try
+                    break
+            except Exception:
                 continue
-            for p in folder.glob("*.csv"):
-                try:
-                    df_p = pd.read_csv(p, sep='|', encoding='latin-1')
-                    if 'nombre_corto' not in df_p.columns:
-                        continue
-                    cols_present = [c for c in col_map_spu if c in df_p.columns]
-                    if not cols_present:
-                        continue
-                    for _, r in df_p.iterrows():
-                        inst = str(r['nombre_corto']).strip()
-                        if 'Total' in inst or inst == '' or inst == 'nan':
-                            continue
-                        for col in cols_present:
-                            val = pd.to_numeric(r[col], errors='coerce')
-                            if pd.notna(val) and val > 0:
-                                cid, cnom, sec, cine = col_map_spu[col]
-                                spu_filas.append({
-                                    'pais': 'ARG',
-                                    'fuente_id': 'AR_SPU_ANUARIO',
-                                    'institucion': 'Sin dato observado',
-                                    'carrera_id': cid,
-                                    'carrera_objetivo': cnom,
-                                    'sector': sec,
-                                    'cine_f_codigo': cine,
-                                    'anio': int(yr),
-                                    'nivel': 'grado',
-                                    'tipo_gestion': tipo,
-                                    'sexo': 'T',
-                                    'valor': float(val),
-                                    'nivel_granularidad': 'disciplina',
-                                    'calidad': 'alta',
-                                    'marca_quiebre_serie': '',
-                                    'n_muestral': np.nan,
-                                    'es_observado': True
-                                })
-                except Exception:
-                    pass
 
-    if spu_filas:
-        df_spu = pd.DataFrame(spu_filas)
-        cols_spu_grp = ['pais', 'fuente_id', 'institucion', 'carrera_id', 'carrera_objetivo', 'sector', 'cine_f_codigo',
-                        'anio', 'nivel', 'tipo_gestion', 'sexo', 'nivel_granularidad', 'calidad', 'marca_quiebre_serie',
-                        'n_muestral', 'es_observado']
-        df_spu_agrup = df_spu.groupby(cols_spu_grp, as_index=False, dropna=False)['valor'].sum()
-        df_arg_final = pd.concat([df_arg_final, df_spu_agrup], ignore_index=True)
-        print(f"    • Incorporados {len(df_spu_agrup):,} registros de Anuarios SPU 2020-2022 (Total anos AR: {sorted(df_arg_final['anio'].unique())}).")
+        if df_spu_raw is not None:
+            df_egr = df_spu_raw[
+                (df_spu_raw['TIPO_ALUMNO'].astype(str).str.strip().str.upper() == 'EGRESADOS') &
+                (df_spu_raw['NIVEL_ACADEM'].astype(str).str.strip().isin(['Grado', 'Pregrado']))
+            ].copy()
+            if 'U_MED' in df_egr.columns:
+                df_egr = df_egr[df_egr['U_MED'].astype(str).str.strip() == 'Cantidad de personas']
+
+            df_egr['mapeo'] = df_egr['DISCIP_ESPECIF'].astype(str).str.strip().map(MAPA_DISCIPLINAS_SPU)
+            df_spu_m = df_egr.dropna(subset=['mapeo']).copy()
+
+            def ajustar_mapeo_spu(row):
+                cid, cnom, sec, cine = row['mapeo']
+                niv_str = str(row['NIVEL_ACADEM']).strip().lower()
+                if cid == 'TEC01' and 'pre' in niv_str:
+                    return ('TEC05', 'Técnico en programación / desarrollo de software', 'Tecnología', '0613')
+                return (cid, cnom, sec, cine)
+
+            df_spu_m['mapeo_ajustado'] = df_spu_m.apply(ajustar_mapeo_spu, axis=1)
+            df_spu_m['carrera_id'] = df_spu_m['mapeo_ajustado'].apply(lambda m: m[0])
+            df_spu_m['carrera_objetivo'] = df_spu_m['mapeo_ajustado'].apply(lambda m: m[1])
+            df_spu_m['sector'] = df_spu_m['mapeo_ajustado'].apply(lambda m: m[2])
+            df_spu_m['cine_f_codigo'] = df_spu_m['mapeo_ajustado'].apply(lambda m: m[3])
+
+            df_spu_m['pais'] = 'ARG'
+            df_spu_m['fuente_id'] = 'AR_SPU_SERIE'
+            df_spu_m['institucion'] = 'Sin dato observado'
+            df_spu_m['anio'] = pd.to_numeric(df_spu_m['ANIO'], errors='coerce').fillna(0).astype(int)
+            df_spu_m['valor'] = pd.to_numeric(df_spu_m['VALOR'], errors='coerce').fillna(0).round().astype(float)
+            df_spu_m['tipo_gestion'] = df_spu_m['TIPO_UNIV'].astype(str).str.lower().apply(
+                lambda g: 'privada' if 'privad' in g else ('publica' if ('pub' in g or 'púb' in g) else 'NS')
+            )
+            df_spu_m['nivel'] = df_spu_m['NIVEL_ACADEM'].astype(str).str.lower().apply(
+                lambda n: 'tecnico' if 'pre' in n else 'grado'
+            )
+            df_spu_m['sexo'] = 'T'
+            df_spu_m['nivel_granularidad'] = 'disciplina'
+            df_spu_m['calidad'] = 'alta'
+            df_spu_m['marca_quiebre_serie'] = ''
+            df_spu_m['n_muestral'] = np.nan
+            df_spu_m['es_observado'] = pd.notna(df_spu_m['valor']) & (df_spu_m['valor'] > 0)
+
+            cols_spu_grp = ['pais', 'fuente_id', 'institucion', 'carrera_id', 'carrera_objetivo', 'sector', 'cine_f_codigo',
+                            'anio', 'nivel', 'tipo_gestion', 'sexo', 'nivel_granularidad', 'calidad', 'marca_quiebre_serie',
+                            'n_muestral', 'es_observado']
+            df_spu_agrup = df_spu_m.groupby(cols_spu_grp, as_index=False, dropna=False)['valor'].sum()
+            df_spu_agrup = df_spu_agrup[df_spu_agrup['valor'] > 0]
+            df_arg_final = pd.concat([df_arg_final, df_spu_agrup], ignore_index=True)
+            print(f"    • Incorporados {len(df_spu_agrup):,} registros de Serie Continua SPU 2014-2023 (Total anos AR: {sorted(df_arg_final['anio'].unique())}).")
 
     df_arg_final.to_csv(cache_arg, index=False, encoding='utf-8')
     print(f"  ✅ Base de Argentina procesada exitosamente ({len(df_arg_final):,} filas agrupadas).")
@@ -658,6 +649,10 @@ def procesar_argentina_laboral(paths, force_rebuild=False):
         try:
             df_l = pd.read_csv(cache_lab)
             if len(df_l) > 0 and 'meses_observados' in df_l.columns:
+                for col_dec in ['w_mean', 'w_median', 'share_mujer', 'puestos']:
+                    if col_dec in df_l.columns:
+                        df_l[col_dec] = pd.to_numeric(df_l[col_dec], errors='coerce').round(2)
+                df_l.to_csv(cache_lab, index=False, encoding='utf-8')
                 print(f"  ✅ Cargando Mercado Laboral Argentina desde cache verificado: {cache_lab.name} ({len(df_l):,} filas)")
                 return df_l
         except Exception:
@@ -788,8 +783,8 @@ def procesar_argentina_laboral(paths, force_rebuild=False):
             'anio': int(anio),
             'w_mean': round(float(w_mean_pond), 2) if pd.notna(w_mean_pond) else np.nan,
             'w_median': round(float(w_median_pond), 2) if pd.notna(w_median_pond) else np.nan,
-            'share_mujer': round(float(share_muj_pond), 4) if pd.notna(share_muj_pond) else np.nan,
-            'puestos': round(float(puestos_tot), 1) if pd.notna(puestos_tot) else np.nan,
+            'share_mujer': round(float(share_muj_pond), 2) if pd.notna(share_muj_pond) else np.nan,
+            'puestos': round(float(puestos_tot), 2) if pd.notna(puestos_tot) else np.nan,
             'meses_observados': meses_val,
             'cobertura_meses': f"{meses_val}/12",
             'metodo_ponderacion': 'ponderado_por_puestos' if sum_puestos > 0 else 'promedio_simple'
@@ -805,79 +800,256 @@ def procesar_argentina_laboral(paths, force_rebuild=False):
     return df_wm_sec
 
 
+def clasificar_carrera_uruguay(nombre_carrera, nivel_dato='grado'):
+    """
+    Clasifica las carreras universitarias y tecnologicas del MEC Uruguay (Anuarios 2020-2024)
+    hacia las 25 CARRERAS_OBJETIVO (y sus 5 sectores estrategicos), manteniendo paridad
+    metodologica con Chile (Mi Futuro) y Argentina (SPU).
+    """
+    res = clasificar_titulo(nombre_carrera, nivel_dato)
+    if res:
+        return res
+    norm = normalizar_texto(nombre_carrera)
+    # 1. Tecnologia (excluyendo tecnologos agropecuarios/lecheros que contengan la palabra 'sistemas')
+    if (any(k in norm for k in ['tecnologias de la informacion', 'computacion', 'informatica', 'software', 'infraestructura informatica']) or
+        ('sistemas' in norm and not any(x in norm for x in ['lechera', 'agropecuar', 'electric', 'riesgo', 'drenaje', 'comunicacion']))):
+        if 'tecnic' in norm or 'tecnolog' in norm or 'analista' in norm or 'desarrollador' in norm:
+            return ('TEC05', 'Técnico en programación / desarrollo de software', 'Tecnología', '0613')
+        if 'licenciatur' in norm or 'licenciado' in norm or 'lic ' in norm:
+            return ('TEC02', 'Licenciatura en sistemas / ciencias de la computación', 'Tecnología', '0613')
+        return ('TEC01', 'Ingeniería en informática / computación', 'Tecnología', '0613')
+    if any(k in norm for k in ['telematica', 'telecomunicacion', 'sistemas de comunicacion']):
+        return ('TEC03', 'Ingeniería en telecomunicaciones', 'Tecnología', '0714')
+    if any(k in norm for k in ['electronica', 'control y automatica', 'mecatronica', 'mectronica']):
+        return ('TEC04', 'Ingeniería electrónica', 'Tecnología', '0714')
+
+    # 2. Economia del conocimiento
+    if any(k in norm for k in ['ciencia de datos', 'ciencias de datos', 'datos y negocios', 'business analytics', 'inteligencia artificial', 'estadistic', 'matematic']):
+        return ('EDC01', 'Estadística / ciencia de datos', 'Economía del conocimiento', '0542')
+    if any(k in norm for k in ['diseno', 'arquitect', 'animacion', 'videojuegos', 'audiovisual', 'multimedia']):
+        return ('EDC02', 'Diseño gráfico / multimedia / UX-UI', 'Economía del conocimiento', '0211')
+    if any(k in norm for k in ['ingenieria de produccion', 'ingeniero de produccion', 'logistica']):
+        return ('EDC03', 'Ingeniería industrial', 'Economía del conocimiento', '0715')
+    if any(k in norm for k in ['marketing', 'publicidad', 'comunicacion empresarial', 'negocios digitales', 'comercializacion', 'comunicacion']):
+        return ('EDC04', 'Marketing / publicidad', 'Economía del conocimiento', '0414')
+    if any(k in norm for k in ['contador', 'econom', 'administracion', 'adminsitracion', 'gerencia', 'direccion de empresas', 'gestion de empresas', 'negocios internacionales', 'comercio exterior', 'finanzas', 'relaciones laborales', 'recursos humanos', 'gestion humana', 'gestion universitaria']):
+        if 'turis' not in norm and 'gastronom' not in norm and 'agronegocios' not in norm and 'agropecuar' not in norm:
+            return ('EDC05', 'Administración / ingeniería comercial', 'Economía del conocimiento', '0413')
+
+    # 3. Salud
+    if any(k in norm for k in ['medicina', 'medico']) and 'veterinar' not in norm and 'forense' not in norm and 'transfusional' not in norm:
+        return ('SAL01', 'Medicina', 'Salud', '0912')
+    if any(k in norm for k in ['enfermer', 'emfermer', 'obstetr', 'partera', 'imagenolog', 'radioterapia', 'radioisotopos', 'laboratorio clinico', 'hemoterapia', 'medicina transfusional', 'anatomia patologica', 'instrumentacion quirurgica', 'neumocardiolog', 'neurofisiologia', 'acompanamiento terapeutico', 'registros medicos', 'salud ocupacional', 'oftalmolog']):
+        return ('SAL02', 'Enfermería', 'Salud', '0913')
+    if any(k in norm for k in ['odontolog', 'dental', 'higienista']):
+        return ('SAL03', 'Odontología', 'Salud', '0911')
+    if any(k in norm for k in ['fisioterap', 'kinesiolog', 'psicomotric', 'fonoaudiolog', 'terapia ocupacional', 'podologia', 'musicoterapia']):
+        return ('SAL04', 'Kinesiología / fisioterapia', 'Salud', '0915')
+    if any(k in norm for k in ['nutricion', 'dietista', 'quimico farmaceutico', 'bioquimic']):
+        return ('SAL05', 'Nutrición', 'Salud', '0915')
+
+    # 4. Energia
+    if any(k in norm for k in ['energias renovables', 'agroenergetico']):
+        return ('ENE05', 'Técnico/ingeniería en energías renovables', 'Energía', '0713')
+    if any(k in norm for k in ['electric', 'ingenieria civil', 'ingeniero civil', 'ingenieria biomedica', 'fisica', 'astronom']):
+        return ('ENE01', 'Ingeniería eléctrica', 'Energía', '0713')
+    if any(k in norm for k in ['quimic', 'ingenieria de alimentos', 'ingenieria en alimentos', 'ingeniero alimentario', 'analisis alimentario', 'lacteos']):
+        return ('ENE02', 'Ingeniería química', 'Energía', '0711')
+    if any(k in norm for k in ['mecanic', 'naval', 'madera', 'carnico', 'operador de alimentos']):
+        return ('ENE03', 'Ingeniería mecánica', 'Energía', '0715')
+    if any(k in norm for k in ['geolog', 'minero', 'agrimens', 'cartografia', 'recursos naturales', 'gestion ambiental', 'control ambiental', 'agua y desarrollo', 'recursos hidricos', 'ingenieria ambiental', 'atmosfera']):
+        return ('ENE04', 'Geología / ingeniería en minas', 'Energía', '0724')
+
+    # 5. Turismo
+    if any(k in norm for k in ['turism', 'turistic']):
+        return ('TUR01', 'Licenciatura en turismo', 'Turismo', '1015')
+    if any(k in norm for k in ['hoteler', 'hospitalidad']):
+        return ('TUR02', 'Hotelería / administración hotelera', 'Turismo', '1013')
+    if any(k in norm for k in ['gastronom', 'cocina', 'culinari']):
+        return ('TUR03', 'Gastronomía', 'Turismo', '1013')
+    if any(k in norm for k in ['eventos', 'recreacion']):
+        return ('TUR05', 'Gestión de eventos', 'Turismo', '1015')
+
+    return None
+
+
+def detectar_institucion_mec_uruguay(texto_bold, sheet_code):
+    """
+    Identifica si una fila en negrita de los cuadros II-7.2.1, II-7.2.2 o II-7.2.3
+    corresponde a una cabecera de institucion universitaria y devuelve (institucion_norm, tipo_gestion).
+    Si es una facultad, sede o nota al pie, devuelve None.
+    """
+    t = str(texto_bold).strip().replace('*', '').strip()
+    t_up = t.upper()
+    if sheet_code == 'II-7.2.1':
+        if 'UDELAR' in t_up or 'REPÚBLICA' in t_up or 'REPUBLICA' in t_up:
+            return ('Universidad de la República (UdelaR)', 'publica')
+        if 'UTEC' in t_up or 'TECNOLÓGICA' in t_up or 'TECNOLOGICA' in t_up:
+            return ('Universidad Tecnológica del Uruguay (UTEC)', 'publica')
+        return None
+
+    if sheet_code == 'II-7.2.2':
+        if 'UCU' in t_up or 'CATÓLICA' in t_up or 'CATOLICA' in t_up:
+            return ('Universidad Católica del Uruguay (UCU)', 'privada')
+        if 'ORT' in t_up:
+            return ('Universidad ORT Uruguay', 'privada')
+        if 'UNIVERSIDAD DE MONTEVIDEO' in t_up:
+            return ('Universidad de Montevideo (UM)', 'privada')
+        if 'UNIVERSIDAD DE LA EMPRESA' in t_up or t_up == 'UDE':
+            return ('Universidad de la Empresa (UDE)', 'privada')
+        if 'CLAEH' in t_up:
+            return ('Universidad CLAEH', 'privada')
+        return None
+
+    if sheet_code == 'II-7.2.3':
+        if 'ASOCIACIÓN CRISTIANA' in t_up or 'ASOCIACION CRISTIANA' in t_up:
+            return ('Instituto Universitario Asociación Cristiana de Jóvenes (IUACJ)', 'privada')
+        if 'CRANDON' in t_up:
+            return ('Instituto Metodista Universitario Crandon (IMUC)', 'privada')
+        if 'SOLER' in t_up:
+            return ('Instituto Universitario Monseñor Mariano Soler', 'privada')
+        if 'FRANCISCO DE ASÍS' in t_up or 'FRANCISCO DE ASIS' in t_up or 'UNIFA' in t_up:
+            return ('Instituto Universitario Francisco de Asís (UNIFA)', 'privada')
+        if 'CEDIIAP' in t_up:
+            return ('Instituto Universitario CEDIIAP', 'privada')
+        if 'PUNTA DEL ESTE' in t_up:
+            return ('Instituto Universitario Punta del Este (IUPE)', 'privada')
+        if 'ELBIO FERNÁNDEZ' in t_up or 'ELBIO FERNANDEZ' in t_up:
+            return ('Instituto Universitario Elbio Fernández', 'privada')
+        if 'MILITAR' in t_up or 'IMES' in t_up:
+            return ('Instituto Militar de Estudios Superiores', 'publica')
+        if 'POLICÍA' in t_up or 'POLICIA' in t_up:
+            return ('Escuela Nacional de Policía', 'publica')
+        return None
+
+    return None
+
+
 def procesar_uruguay(paths, force_rebuild=False):
     cache_ury = paths['data_processed'] / 'uruguay_egresados_cache.csv'
     if not force_rebuild and cache_ury.exists():
         try:
             df_u = pd.read_csv(cache_ury)
-            if len(df_u) > 0 and 'Turismo' in df_u['sector'].unique() and (df_u['valor'] % 1 == 0).all() and 'institucion' in df_u.columns:
+            if (len(df_u) > 0 and 'Turismo' in df_u['sector'].unique() and
+                set(df_u['fuente_id'].unique()) == {'UY_MEC_ANUARIO'} and
+                'F' in df_u['sexo'].unique() and 'institucion' in df_u.columns):
                 print(f"  ✅ Cargando Uruguay desde cache verificado: {cache_ury.name} ({len(df_u):,} filas)")
                 return df_u
         except Exception:
             pass
 
-    ruta_ury = resolver_ruta_archivo('uruguay/00._educ_superior_datos.csv',
-                                     paths['data_raw'], paths['data_processed'],
-                                     ['**/*educ_superior_datos*.csv'])
-    if not ruta_ury:
-        print("  ⚠️ Archivo de Uruguay Educacion Superior no encontrado.")
+    dir_ury = paths['data_raw'] / 'uruguay'
+    archivos_mec = sorted(dir_ury.glob('Anuario Estad*stico de Educaci*n 202*.xlsx'))
+    if not archivos_mec:
+        print("  ⚠️ Anuarios Estadisticos del MEC Uruguay (2020-2024) no encontrados en data/raw/uruguay.")
         return pd.DataFrame()
 
-    print(f"  • Leyendo Educacion Superior de Uruguay: {ruta_ury.name} (separador miles con punto)...")
-    df_raw = None
-    for enc in ['latin-1', 'cp1252', 'utf-8']:
+    print(f"  • Procesando {len(archivos_mec)} Anuarios Estadisticos del MEC Uruguay (2020-2024)...")
+    import openpyxl
+
+    def parse_num_mec(v):
+        if v is None or str(v).strip() in ("", "-", "s/d", "S/D"):
+            return 0.0
+        if isinstance(v, (int, float)):
+            return float(v)
+        s = str(v).replace("*", "").replace(".", "").replace(",", ".").strip()
         try:
-            df_try = pd.read_csv(ruta_ury, sep=';', thousands='.', encoding=enc)
-            if len(df_try.columns) > 3:
-                df_raw = df_try
-                break
+            return float(s)
         except Exception:
-            continue
+            return 0.0
 
-    if df_raw is None:
-        print("  ⚠️ No se pudo decodificar el archivo de Uruguay.")
+    registros_ury = []
+    for f_xlsx in archivos_mec:
+        try:
+            wb = openpyxl.load_workbook(f_xlsx, data_only=True)
+            sheets = {ws.title.strip(): ws for ws in wb.worksheets}
+            for sh_code, default_inst, default_gest in [
+                ('II-7.2.1', 'Universidad de la República (UdelaR)', 'publica'),
+                ('II-7.2.2', 'Universidad Privada Uruguay', 'privada'),
+                ('II-7.2.3', 'Instituto Universitario Uruguay', 'privada')
+            ]:
+                ws = sheets.get(sh_code)
+                if not ws:
+                    continue
+                title = " ".join(str(c.value) for row in ws.iter_rows(max_row=7) for c in row if c.value is not None)
+                m_yr = re.search(r"Todo el pa[ií]s,\s*(?P<year>\d{4})", title, re.I)
+                if m_yr:
+                    year = int(m_yr.group("year"))
+                else:
+                    m_fn = re.search(r"(202\d)", f_xlsx.name)
+                    year = int(m_fn.group(1)) if m_fn else 2024
+
+                started = False
+                curr_inst = default_inst
+                curr_gest = default_gest
+
+                for row in ws.iter_rows(min_row=8):
+                    cell_a = row[0]
+                    if cell_a is None or cell_a.value in (None, ""):
+                        continue
+                    name = str(cell_a.value).strip()
+                    if not started:
+                        if re.search(r"^TOTAL", name, re.I):
+                            started = True
+                        continue
+                    if re.search(r"^Fuente", name, re.I):
+                        break
+                    if cell_a.font and cell_a.font.b:
+                        det = detectar_institucion_mec_uruguay(name, sh_code)
+                        if det:
+                            curr_inst, curr_gest = det
+                        continue
+
+                    val_t = parse_num_mec(row[7].value if len(row) > 7 else None)
+                    val_m = parse_num_mec(row[8].value if len(row) > 8 else None)
+                    val_f = parse_num_mec(row[9].value if len(row) > 9 else None)
+                    if val_t == 0 and (val_m + val_f) > 0:
+                        val_t = val_m + val_f
+                    if val_t <= 0:
+                        continue
+
+                    niv = 'tecnico' if any(k in normalizar_texto(name) for k in ['tecnic', 'tecnolog', 'asistente', 'higienista', 'laboratorista']) else 'grado'
+                    m_car = clasificar_carrera_uruguay(name, niv)
+                    if not m_car:
+                        continue
+                    cid, cnom, sec, cine = m_car
+                    for sex_code, v_sex in [('T', val_t), ('M', val_m), ('F', val_f)]:
+                        if v_sex > 0:
+                            registros_ury.append({
+                                'pais': 'URY',
+                                'fuente_id': 'UY_MEC_ANUARIO',
+                                'institucion': curr_inst,
+                                'carrera_id': cid,
+                                'carrera_objetivo': cnom,
+                                'sector': sec,
+                                'cine_f_codigo': cine,
+                                'anio': int(year),
+                                'nivel': niv,
+                                'tipo_gestion': curr_gest,
+                                'sexo': sex_code,
+                                'valor': float(round(v_sex)),
+                                'nivel_granularidad': 'carrera',
+                                'calidad': 'alta',
+                                'marca_quiebre_serie': '',
+                                'n_muestral': np.nan,
+                                'es_observado': True
+                            })
+            wb.close()
+        except Exception as e:
+            print(f"  ⚠️ Error leyendo {f_xlsx.name}: {e}")
+
+    if not registros_ury:
         return pd.DataFrame()
 
-    df_egr = df_raw[df_raw['TIPO_ALUMNO'].astype(str).str.strip().str.upper() == 'EGRESADOS'].copy()
-    if 'U_MED' in df_egr.columns:
-        df_egr = df_egr[df_egr['U_MED'].astype(str).str.strip() == 'Cantidad de personas']
-
-    df_egr['mapeo'] = df_egr['DISCIP_ESPECIF'].astype(str).str.strip().map(MAPA_DISCIPLINAS_URY)
-    df_matcheadas = df_egr.dropna(subset=['mapeo']).copy()
-
-    df_matcheadas['carrera_id'] = df_matcheadas['mapeo'].apply(lambda m: m[0])
-    df_matcheadas['carrera_objetivo'] = df_matcheadas['mapeo'].apply(lambda m: m[1])
-    df_matcheadas['sector'] = df_matcheadas['mapeo'].apply(lambda m: m[2])
-    df_matcheadas['cine_f_codigo'] = df_matcheadas['mapeo'].apply(lambda m: m[3])
-
-    df_matcheadas['pais'] = 'URY'
-    df_matcheadas['fuente_id'] = 'UY_MEC_SUP'
-    df_matcheadas['institucion'] = 'Sin dato observado'
-    df_matcheadas['anio'] = pd.to_numeric(df_matcheadas['ANIO'], errors='coerce').fillna(0).astype(int)
-    df_matcheadas['valor'] = pd.to_numeric(df_matcheadas['VALOR'], errors='coerce').fillna(0).round().astype(int)
-
-    df_matcheadas['tipo_gestion'] = df_matcheadas['TIPO_UNIV'].astype(str).str.lower().apply(
-        lambda g: 'privada' if 'privad' in g else ('publica' if ('pub' in g or 'púb' in g) else 'NS')
-    )
-    df_matcheadas['nivel'] = df_matcheadas['NIVEL_ACADEM'].astype(str).str.lower().apply(
-        lambda n: 'posgrado' if 'pos' in n else ('tecnico' if 'pre' in n else 'grado')
-    )
-
-    df_matcheadas['sexo'] = 'T'
-    df_matcheadas['nivel_granularidad'] = 'carrera'
-    df_matcheadas['calidad'] = 'alta'
-    df_matcheadas['marca_quiebre_serie'] = ''
-    df_matcheadas['n_muestral'] = np.nan
-    df_matcheadas['es_observado'] = pd.notna(df_matcheadas['valor']) & (df_matcheadas['valor'] > 0)
-
+    df_ury_raw = pd.DataFrame(registros_ury)
     cols_group = ['pais', 'fuente_id', 'institucion', 'carrera_id', 'carrera_objetivo', 'sector', 'cine_f_codigo',
                   'anio', 'nivel', 'tipo_gestion', 'nivel_granularidad', 'calidad', 'marca_quiebre_serie',
                   'n_muestral', 'es_observado', 'sexo']
-    df_ury_final = df_matcheadas.groupby(cols_group, as_index=False, dropna=False)['valor'].sum()
+    df_ury_final = df_ury_raw.groupby(cols_group, as_index=False, dropna=False)['valor'].sum()
     df_ury_final = df_ury_final[df_ury_final['valor'] > 0]
     df_ury_final.to_csv(cache_ury, index=False, encoding='utf-8')
 
-    print(f"  ✅ [Uruguay] Egresados normalizados: {len(df_ury_final):,} registros consolidados (2014-2023, valores enteros observados).")
+    print(f"  ✅ [Uruguay] Egresados MEC 2020-2024 normalizados: {len(df_ury_final):,} registros consolidados por institucion, carrera y sexo.")
     return df_ury_final
 
 
@@ -997,7 +1169,7 @@ def normalizar_nombre_institucion(nombre: str, pais: str) -> str:
     return n
 
 
-def procesar_instituciones_oficiales(paths, df_chl_egresados, force_rebuild=False):
+def procesar_instituciones_oficiales(paths, df_chl_egresados, df_ury_egresados=None, force_rebuild=False):
     """
     Consolida las series institucionales observadas para Argentina (SPU), Chile (Mi Futuro) y Uruguay (MEC).
     Genera hecho_instituciones_egresados.csv con auditoria de gestion, sector y ano.
@@ -1006,7 +1178,7 @@ def procesar_instituciones_oficiales(paths, df_chl_egresados, force_rebuild=Fals
     cache_inst = paths['data_processed'] / 'hecho_instituciones_egresados.csv'
     if not force_rebuild and cache_inst.exists():
         df_cached = pd.read_csv(cache_inst)
-        if len(df_cached) > 0 and len(df_cached['pais'].unique()) >= 3:
+        if len(df_cached) > 0 and len(df_cached['pais'].unique()) >= 3 and 'Total Universitario' not in df_cached['sector'].unique():
             print(f"  ✅ Cargando instituciones desde cache: {cache_inst.name} ({len(df_cached):,} registros)")
             return df_cached
 
@@ -1038,12 +1210,13 @@ def procesar_instituciones_oficiales(paths, df_chl_egresados, force_rebuild=Fals
                 'es_observado': True
             })
 
-    # 2. Argentina desde Anuarios SPU (2020-2022) - Cobertura de los 5 sectores
+    # 2. Argentina desde Anuarios SPU (2020-2022) - Cobertura completa de los 5 sectores
     dir_arg = paths['data_raw'] / 'argentina'
     col_map_arg = {
         'e_informatica': 'Tecnología',
         'e_ing': 'Energía',
         'e_industrias': 'Energía',
+        'e_industria': 'Energía',
         'e_suelo': 'Energía',
         'e_medicina': 'Salud',
         'e_odontologia': 'Salud',
@@ -1064,13 +1237,38 @@ def procesar_instituciones_oficiales(paths, df_chl_egresados, force_rebuild=Fals
             folder = dir_arg / f"Anuario {yr}" / cap
             if not folder.exists():
                 continue
-            for p in folder.glob("*.csv"):
+            for p in sorted(folder.glob("*.csv")):
                 try:
-                    df_p = pd.read_csv(p, sep='|', encoding='latin-1')
-                    if 'nombre_corto' not in df_p.columns:
+                    df_p = None
+                    for enc in ['utf-8', 'latin-1', 'cp1252']:
+                        try:
+                            df_try = pd.read_csv(p, sep='|', encoding=enc)
+                            if len(df_try.columns) > 2:
+                                df_p = df_try
+                                break
+                        except Exception:
+                            continue
+                    if df_p is None:
                         continue
                     cols_present = [c for c in col_map_arg if c in df_p.columns]
                     if not cols_present:
+                        continue
+                    # Recuperar nombre_corto en Cuadro_2_2_14.csv desde Cuadro_2_2_10.csv / Cuadro_2_2_9.csv del mismo directorio
+                    if 'nombre_corto' not in df_p.columns:
+                        for ref_name in ['Cuadro_2_2_10.csv', 'Cuadro_2_2_9.csv']:
+                            ref_path = folder / ref_name
+                            if ref_path.exists():
+                                for enc in ['utf-8', 'latin-1', 'cp1252']:
+                                    try:
+                                        df_ref = pd.read_csv(ref_path, sep='|', encoding=enc)
+                                        if 'nombre_corto' in df_ref.columns and len(df_ref) == len(df_p):
+                                            df_p['nombre_corto'] = df_ref['nombre_corto']
+                                            break
+                                    except Exception:
+                                        continue
+                            if 'nombre_corto' in df_p.columns:
+                                break
+                    if 'nombre_corto' not in df_p.columns:
                         continue
                     for _, r in df_p.iterrows():
                         inst = str(r['nombre_corto']).strip()
@@ -1094,71 +1292,25 @@ def procesar_instituciones_oficiales(paths, df_chl_egresados, force_rebuild=Fals
                 except Exception:
                     pass
 
-    # 3. Uruguay: Serie Historica UdelaR (2020-2024) y Anuario Estadistico MEC (2024)
-    # A. UdelaR (Serie continua de grado por facultad / servicio)
-    p_odf = paths['data_raw'] / 'uruguay' / '1.Serie-Egresos-totales-Grado-por-Servicio-2000-2024.ods'
-    if p_odf.exists():
-        try:
-            df_odf = pd.read_excel(p_odf, engine='odf', header=4)
-            df_tot_u = df_odf[df_odf.iloc[:, 0].astype(str).str.contains('TOTAL')]
-            if not df_tot_u.empty:
-                for a_col in [2020, 2021, 2022, 2023, 2024]:
-                    if a_col in df_tot_u.columns:
-                        v_u = pd.to_numeric(df_tot_u[a_col].iloc[0], errors='coerce')
-                        if pd.notna(v_u) and v_u > 0:
-                            registros.append({
-                                'pais': 'URY',
-                                'fuente_id': 'UY_UDELAR_SERIE',
-                                'institucion': 'Universidad de la República (UdelaR)',
-                                'tipo_gestion': 'publica',
-                                'tipo_institucion': 'universidad',
-                                'sector': 'Total Universitario',
-                                'anio': int(a_col),
-                                'graduados': float(v_u),
-                                'es_observado': True
-                            })
-        except Exception as e:
-            print(f"    [Aviso UY UdelaR] {e}")
-
-    # B. Anuario Estadistico de Educacion 2024 (Cuadro II-7.1.1 con todas las universidades)
-    p_uy = paths['data_raw'] / 'uruguay' / 'Anuario Estadístico de Educación 2024.xlsx'
-    if p_uy.exists():
-        try:
-            import openpyxl
-            wb = openpyxl.load_workbook(p_uy, data_only=True)
-            sheet = wb['II-7.1.1    ']
-            deptos = ['CERRO LARGO', 'COLONIA', 'DURAZNO', 'MALDONADO', 'PAYSANDÚ', 'RIVERA', 'ROCHA', 'SALTO', 'SAN JOSÉ', 'SORIANO', 'TACUAREMBÓ', 'TREINTA Y TRES', 'CANELONES', 'FLORIDA', 'FLORES', 'LAVALLEJA', 'RÍO NEGRO', 'ARTIGAS']
-            for r in range(12, 70):
-                name = sheet.cell(r, 1).value
-                egr = sheet.cell(r, 8).value
-                if name and egr is not None:
-                    n_clean = str(name).strip().replace('*', '').strip()
-                    if any(k in n_clean.upper() for k in ['TOTAL', 'PÚBLICO', 'PRIVADO', 'MONTEVIDEO', 'RESTO DEL PAÍS', 'DEPARTAMENTO']) or len(n_clean) == 0:
-                        continue
-                    if n_clean.upper() in deptos:
-                        continue
-                    # Desduplicar UdelaR: la serie continua UY_UDELAR_SERIE ya cubre a la UdelaR (Decision Etapa 4 Item 4.1)
-                    if any(k in n_clean.upper() for k in ['UDELAR', 'REPUBLICA', 'REPÚBLICA']):
-                        continue
-                    val = pd.to_numeric(egr, errors='coerce')
-                    if pd.notna(val) and val >= 0:
-                        tipo_g = 'publica' if any(k in n_clean.upper() for k in ['UTEC', 'MILITAR', 'POLICÍA']) else 'privada'
-                        inst_norm = normalizar_nombre_institucion(n_clean, 'URY')
-                        for yr_u in [2022, 2024]:  # Año comun 2022 para ranking regional y ano 2024 nacional
-                            registros.append({
-                                'pais': 'URY',
-                                'fuente_id': 'UY_MEC_ANUARIO',
-                                'institucion': inst_norm,
-                                'tipo_gestion': tipo_g,
-                                'tipo_institucion': 'universidad',
-                                'sector': 'Total Universitario',
-                                'anio': yr_u,
-                                'graduados': float(val),
-                                'es_observado': True
-                            })
-            wb.close()
-        except Exception as e:
-            print(f"    [Aviso UY] Extraccion institucional MEC: {e}")
+    # 3. Uruguay: Series institucionales desagregadas por los 5 sectores estrategicos (Anuarios MEC 2020-2024)
+    if df_ury_egresados is not None and not df_ury_egresados.empty:
+        df_ury_tot = df_ury_egresados[df_ury_egresados['sexo'] == 'T'].copy()
+        grp_ury = df_ury_tot.groupby(['institucion', 'tipo_gestion', 'sector', 'anio'], as_index=False)['valor'].sum()
+        for _, r in grp_ury.iterrows():
+            if float(r['valor']) <= 0:
+                continue
+            inst_norm = normalizar_nombre_institucion(str(r['institucion']).strip(), 'URY')
+            registros.append({
+                'pais': 'URY',
+                'fuente_id': 'UY_MEC_ANUARIO',
+                'institucion': inst_norm,
+                'tipo_gestion': r['tipo_gestion'],
+                'tipo_institucion': 'universidad',
+                'sector': r['sector'],
+                'anio': int(r['anio']),
+                'graduados': float(r['valor']),
+                'es_observado': True
+            })
 
     df_inst = pd.DataFrame(registros)
     if not df_inst.empty:
@@ -1230,7 +1382,7 @@ def calcular_factores_ppa(paths):
         for a in anios_todos:
             # Factor PPA
             sub_ppa = df_ppa[(df_ppa['pais'] == p) & (df_ppa['anio'] == a)]
-            f_ppa = float(sub_ppa['factor_ppa'].iloc[0]) if not sub_ppa.empty else np.nan
+            f_ppa = round(float(sub_ppa['factor_ppa'].iloc[0]), 2) if not sub_ppa.empty else np.nan
 
             # IPC original y armonizado base 2016
             ipc_orig = np.nan
@@ -1248,18 +1400,19 @@ def calcular_factores_ppa(paths):
             else:
                 sub_wb = df_ipc_wb[(df_ipc_wb['pais'] == p) & (df_ipc_wb['anio'] == a)]
                 if not sub_wb.empty:
-                    ipc_orig = round(float(sub_wb['ipc_wb'].iloc[0]), 4)
+                    ipc_orig_raw = float(sub_wb['ipc_wb'].iloc[0])
+                    ipc_orig = round(ipc_orig_raw, 2)
                     fuente_ipc = 'Banco Mundial WDI'
                     base_orig = '2010=100'
-                    if p in val_base_2016 and pd.notna(ipc_orig):
-                        ipc_2016 = round((ipc_orig / val_base_2016[p]) * 100.0, 2)
+                    if p in val_base_2016 and pd.notna(ipc_orig_raw):
+                        ipc_2016 = round((ipc_orig_raw / val_base_2016[p]) * 100.0, 2)
 
             filas_macro.append({
                 'pais': p,
                 'anio': a,
                 'factor_ppa': f_ppa,
                 'metodo_ppa': 'PPA_PIB_PA.NUS.PPP',
-                'anio_base_ppa': 2025,
+                'anio_base_ppa': a,
                 'ipc_base_2016': ipc_2016,
                 'ipc_original': ipc_orig,
                 'fuente_ipc': fuente_ipc,
@@ -1310,11 +1463,12 @@ def procesar_ilostat_salarios(paths, df_macro):
                 anio = int(r['time'])
                 sex_raw = r['sex']
                 sex_cod = 'T' if sex_raw == 'SEX_T' else ('M' if sex_raw == 'SEX_M' else 'F')
-                val_moneda = float(r['obs_value'])
+                val_moneda_raw = float(r['obs_value'])
+                val_moneda = round(val_moneda_raw, 2)
 
                 ppa_rows = df_macro[(df_macro['pais'] == p) & (df_macro['anio'] == anio)]['factor_ppa'].values if not df_macro.empty else []
                 if len(ppa_rows) > 0 and pd.notna(ppa_rows[0]) and ppa_rows[0] > 0:
-                    f_ppa = float(ppa_rows[0])
+                    f_ppa = round(float(ppa_rows[0]), 2)
                     sal_usd = round(val_moneda / f_ppa, 2)
                 else:
                     f_ppa = np.nan
@@ -1373,7 +1527,7 @@ def procesar_uruguay_laboral(paths):
         df_valid = df.dropna(subset=['sector', 'valor']).copy()
 
         piv = df_valid.pivot_table(index=['sector', 'anio'], columns='sexo', values='valor', aggfunc='first').reset_index()
-        piv['share_mujeres'] = (piv['Mujeres'] / (piv['Mujeres'] + piv['Varones'])).round(3)
+        piv['share_mujeres'] = (piv['Mujeres'] / (piv['Mujeres'] + piv['Varones'])).round(2)
         piv['pais'] = 'URY'
         piv['fuente_id'] = 'UY_INE_ECH'
         return piv[['pais', 'fuente_id', 'sector', 'anio', 'share_mujeres']]
@@ -1387,6 +1541,7 @@ def procesar_ilostat_empleo(paths):
     Procesa las series oficiales de personas ocupadas de la OIT/ILOSTAT
     (EMP_TEMP_SEX_ECO_NB) para Argentina, Chile y Uruguay.
     Permite obtener share_mujeres observado por sector en los 3 paises para la ventana comun 2024 (Decision Etapa 1 Opcion B).
+    Exporta ademas ilostat_empleo_sectorial_limpio.csv con todas las metricas normalizadas a 2 decimales.
     """
     mapa_isic4_sector = {
         'ECO_ISIC4_J': 'Tecnología',
@@ -1397,6 +1552,7 @@ def procesar_ilostat_empleo(paths):
     }
     carpeta_ilo = paths['data_raw'] / 'ilostat'
     registros = []
+    registros_detalle = []
 
     for p in ['ARG', 'CHL', 'URY']:
         fpath = carpeta_ilo / f"EMP_TEMP_SEX_ECO_NB_{p}.csv"
@@ -1416,11 +1572,17 @@ def procesar_ilostat_empleo(paths):
 
             piv = sub.pivot_table(index=['sector', 'anio'], columns='sex', values='obs_value', aggfunc='first').reset_index()
             if 'SEX_F' in piv.columns and 'SEX_T' in piv.columns:
-                piv['share_mujeres'] = (piv['SEX_F'] / piv['SEX_T']).round(4)
+                piv['share_mujeres'] = (piv['SEX_F'] / piv['SEX_T']).round(2)
                 piv['puestos_empleo'] = (piv['SEX_T'] * 1000).round(0)
                 piv['pais'] = p
                 piv['fuente_id'] = 'OIT_ILOSTAT'
                 for _, r in piv.iterrows():
+                    f_val = round(float(r['SEX_F']), 2) if pd.notna(r.get('SEX_F')) else np.nan
+                    m_val = round(float(r['SEX_M']), 2) if pd.notna(r.get('SEX_M')) else np.nan
+                    t_val = round(float(r['SEX_T']), 2) if pd.notna(r.get('SEX_T')) else np.nan
+                    pct_f = round((float(r['SEX_F']) / float(r['SEX_T'])) * 100.0, 2) if (pd.notna(r.get('SEX_T')) and float(r['SEX_T']) > 0) else np.nan
+                    pct_m = round(100.0 - pct_f, 2) if pd.notna(pct_f) else np.nan
+                    brecha = round(pct_f - pct_m, 2) if pd.notna(pct_f) else np.nan
                     registros.append({
                         'pais': p,
                         'fuente_id': 'OIT_ILOSTAT',
@@ -1432,13 +1594,265 @@ def procesar_ilostat_empleo(paths):
                         'empleabilidad_1er_anio': np.nan,
                         'es_observado': True
                     })
+                    registros_detalle.append({
+                        'pais': p,
+                        'sector': r['sector'],
+                        'anio': int(r['anio']),
+                        'F': f_val,
+                        'M': m_val,
+                        'NB': np.nan,
+                        'total': t_val,
+                        'pct_mujeres': pct_f,
+                        'pct_varones': pct_m,
+                        'brecha_pct': brecha,
+                        'fuente': f'OIT_ILOSTAT (EMP_TEMP_SEX_ECO_NB_{p})',
+                        'nota_metodologica': 'Empleo total armonizado OIT por sexo y actividad CIIU Rev. 4 (en miles)'
+                    })
         except Exception as e:
             print(f"  ⚠️ Error procesando empleo ILOSTAT para {p}: {e}")
+
+    if registros_detalle:
+        df_det = pd.DataFrame(registros_detalle)
+        df_det.to_csv(paths['data_processed'] / 'ilostat_empleo_sectorial_limpio.csv', index=False, encoding='utf-8')
+        df_det.to_csv(paths['output'] / 'ilostat_empleo_sectorial_limpio.csv', index=False, encoding='utf-8')
 
     df_emp = pd.DataFrame(registros)
     if not df_emp.empty:
         print(f"  ✅ ILOSTAT empleo armonizado (Opcion B): {len(df_emp)} registros procesados (ARG, CHL, URY).")
     return df_emp
+
+
+def procesar_ilostat_empleo_educ_superior(paths):
+    """
+    Procesa y normaliza las series oficiales de personas ocupadas con Educacion Superior
+    (Nivel Avanzado / Terciario-Universitario: EDU_AGGREGATE_ADV) de la OIT/ILOSTAT
+    (EMP_TEMP_SEX_ECO_EDU_NB) por sector estrategico (CIIU Rev. 4) y sexo (F, M, T)
+    para Argentina, Chile y Uruguay. Todos los valores decimales se normalizan a 1 decimal.
+    """
+    mapa_isic4_sector = {
+        'ECO_ISIC4_J': 'Tecnología',
+        'ECO_ISIC4_M': 'Economía del conocimiento',
+        'ECO_ISIC4_Q': 'Salud',
+        'ECO_ISIC4_D': 'Energía',
+        'ECO_ISIC4_I': 'Turismo',
+    }
+    carpeta_ilo = paths['data_raw'] / 'ilostat'
+    registros_edu = []
+
+    for p in ['ARG', 'CHL', 'URY']:
+        fpath = carpeta_ilo / f"EMP_TEMP_SEX_ECO_EDU_NB_{p}.csv"
+        if not fpath.exists():
+            continue
+        try:
+            df = pd.read_csv(fpath)
+            sub = df[
+                (df['classif1'].isin(mapa_isic4_sector.keys())) &
+                (df['classif2'] == 'EDU_AGGREGATE_ADV') &
+                (df['sex'].isin(['SEX_T', 'SEX_M', 'SEX_F'])) &
+                (df['obs_value'].notna())
+            ].copy()
+            sub['sector'] = sub['classif1'].map(mapa_isic4_sector)
+            sub['anio'] = pd.to_numeric(sub['time'], errors='coerce')
+            sub = sub.dropna(subset=['anio'])
+            sub['anio'] = sub['anio'].astype(int)
+
+            piv = sub.pivot_table(index=['sector', 'anio'], columns='sex', values='obs_value', aggfunc='first').reset_index()
+            for _, r in piv.iterrows():
+                if pd.isna(r.get('SEX_F')) or pd.isna(r.get('SEX_M')):
+                    continue
+                f_raw = float(r['SEX_F'])
+                m_raw = float(r['SEX_M'])
+                t_raw = float(r['SEX_T']) if pd.notna(r.get('SEX_T')) and float(r['SEX_T']) > 0 else (f_raw + m_raw)
+                if t_raw <= 0:
+                    continue
+                f_val = round(f_raw, 2)
+                m_val = round(m_raw, 2)
+                t_val = round(t_raw, 2)
+                pct_f = round((f_raw / t_raw) * 100.0, 2)
+                pct_m = round(100.0 - pct_f, 2)
+                brecha = round(pct_f - pct_m, 2)
+                registros_edu.append({
+                    'pais': p,
+                    'sector': r['sector'],
+                    'anio': int(r['anio']),
+                    'F': f_val,
+                    'M': m_val,
+                    'NB': np.nan,
+                    'total': t_val,
+                    'pct_mujeres': pct_f,
+                    'pct_varones': pct_m,
+                    'brecha_pct': brecha,
+                    'fuente': f'OIT_ILOSTAT (EMP_TEMP_SEX_ECO_EDU_NB_{p} - EDU_AGGREGATE_ADV)',
+                    'nota_metodologica': 'Personas ocupadas con educacion superior/universitaria completa por sexo y sector CIIU Rev. 4 (en miles)'
+                })
+        except Exception as e:
+            print(f"  ⚠️ Error procesando empleo con educacion superior ILOSTAT para {p}: {e}")
+
+    df_edu = pd.DataFrame(registros_edu)
+    if not df_edu.empty:
+        df_edu.to_csv(paths['data_processed'] / 'ilostat_ocupados_educ_superior_limpio.csv', index=False, encoding='utf-8')
+        df_edu.to_csv(paths['output'] / 'ilostat_ocupados_educ_superior_limpio.csv', index=False, encoding='utf-8')
+        print(f"  ✅ ILOSTAT ocupados con educacion superior armonizados: {len(df_edu)} registros procesados (ARG, CHL, URY).")
+    return df_edu
+
+
+def procesar_graduados_totales_genero(paths, df_chl_egresados=None, df_ury_egresados=None, force_rebuild=False):
+    """
+    Limpia y normaliza el total nacional de graduados universitarios por genero (F, M, NB)
+    en la ventana comun tripartita 2020-2024:
+      - ARG: Anuarios Estadisticos Universitarios SPU 2020-2024:
+             * 2020-2022: Cuadro 2.1.4a (Estatal) + Cuadro 2.2.4a (Privado)
+             * 2023-2024: Cuadro 1.1.14 (1.1 Datos Generales 2023 y 2024)
+      - CHL: SIES / Mi Futuro (2020-2024)
+      - URY: Anuarios Estadisticos de Educacion MEC (2020-2024)
+    Todos los valores numericos y porcentuales se normalizan a 2 decimales.
+    """
+    import openpyxl
+
+    anios_comunes = [2020, 2021, 2022, 2023, 2024]
+    registros = []
+    dir_arg = paths['data_raw'] / 'argentina'
+
+    # 1. ARGENTINA: Anuarios SPU 2020-2022 (CSV)
+    for yr in [2020, 2021, 2022]:
+        f_tot, m_tot = 0.0, 0.0
+        encontrado = False
+        for cap, fname in [
+            ('Capitulo 2 Pregrado Grado Estatal', 'Cuadro_2_1_4_a.csv'),
+            ('Capitulo 2 Pregrado Grado Privado', 'Cuadro_2_2_4_a.csv'),
+        ]:
+            fpath = dir_arg / f"Anuario {yr}" / cap / fname
+            if not fpath.exists():
+                continue
+            for enc in ['utf-8', 'latin-1', 'cp1252']:
+                try:
+                    df_c = pd.read_csv(fpath, sep='|', encoding=enc)
+                    col_f = 'e_mujeres' if 'e_mujeres' in df_c.columns else ('egresados_m' if 'egresados_m' in df_c.columns else None)
+                    col_m = 'e_varones' if 'e_varones' in df_c.columns else ('egresados_v' if 'egresados_v' in df_c.columns else None)
+                    if col_f and col_m and len(df_c) > 0:
+                        r0 = df_c.iloc[0]
+                        f_tot += float(pd.to_numeric(r0[col_f], errors='coerce') or 0.0)
+                        m_tot += float(pd.to_numeric(r0[col_m], errors='coerce') or 0.0)
+                        encontrado = True
+                        break
+                except Exception:
+                    continue
+        if encontrado and (f_tot + m_tot) > 0:
+            tot = round(f_tot + m_tot, 2)
+            pct_f = round((f_tot / tot) * 100.0, 2)
+            pct_m = round(100.0 - pct_f, 2)
+            registros.append({
+                'pais': 'ARG',
+                'sector': 'Total Universitario',
+                'anio': yr,
+                'F': round(f_tot, 2),
+                'M': round(m_tot, 2),
+                'NB': np.nan,
+                'total': tot,
+                'pct_mujeres': pct_f,
+                'pct_varones': pct_m,
+                'pct_nb': np.nan,
+                'brecha_pct': round(pct_f - pct_m, 2),
+                'fuente': f'AR_SPU_ANUARIO (Cuadros 2.1.4a y 2.2.4a - Anuario {yr})',
+                'nota_metodologica': 'Total universitario nacional observado por genero (Estatal + Privado)'
+            })
+
+    # 2. ARGENTINA: Anuarios SPU 2023 y 2024 (XLSX Cuadro 1.1.14)
+    for yr, rel_pattern in [
+        (2023, '*1.1*Datos Generales*2023*.xlsx'),
+        (2024, '*1.1*Datos Generales*24*.xlsx'),
+    ]:
+        carpeta_yr = dir_arg / f"Anuario {yr}"
+        archivos_xlsx = list(carpeta_yr.rglob(rel_pattern)) if carpeta_yr.exists() else []
+        if not archivos_xlsx:
+            continue
+        try:
+            wb = openpyxl.load_workbook(archivos_xlsx[0], read_only=True, data_only=True)
+            if 'C 1.1.14' in wb.sheetnames:
+                ws = wb['C 1.1.14']
+                for row in ws.iter_rows(min_row=1, max_row=12, values_only=True):
+                    vals = list(row)
+                    if len(vals) > 20 and vals[1] is not None and str(vals[1]).strip().lower() == 'total':
+                        f_tot = float(pd.to_numeric(vals[18], errors='coerce') or 0.0)
+                        m_tot = float(pd.to_numeric(vals[20], errors='coerce') or 0.0)
+                        tot_rep = float(pd.to_numeric(vals[17], errors='coerce') or (f_tot + m_tot))
+                        nb_val = max(0.0, tot_rep - (f_tot + m_tot))
+                        tot = round(f_tot + m_tot + (nb_val if nb_val > 0 else 0.0), 2)
+                        if tot > 0:
+                            pct_f = round((f_tot / tot) * 100.0, 2)
+                            pct_m = round((m_tot / tot) * 100.0, 2)
+                            pct_nb = round((nb_val / tot) * 100.0, 2) if nb_val > 0 else np.nan
+                            registros.append({
+                                'pais': 'ARG',
+                                'sector': 'Total Universitario',
+                                'anio': yr,
+                                'F': round(f_tot, 2),
+                                'M': round(m_tot, 2),
+                                'NB': round(nb_val, 2) if nb_val > 0 else np.nan,
+                                'total': tot,
+                                'pct_mujeres': pct_f,
+                                'pct_varones': pct_m,
+                                'pct_nb': pct_nb,
+                                'brecha_pct': round(pct_f - pct_m, 2),
+                                'fuente': f'AR_SPU_ANUARIO (Cuadro 1.1.14 - Anuario {yr})',
+                                'nota_metodologica': 'Total universitario nacional observado por genero en Cuadro 1.1.14 SPU'
+                            })
+                        break
+            wb.close()
+        except Exception as e:
+            print(f"  ⚠️ Error limpiando Anuario SPU {yr}: {e}")
+
+    # 3. CHILE y URUGUAY: consolidacion 2020-2024 desde tablas limpias
+    for p_code, df_src, cache_name, f_label, nota in [
+        ('CHL', df_chl_egresados, 'chile_egresados_cache.csv', 'CL_MIFUTURO (SIES)', 'Total de graduados universitarios observados por genero en SIES / Mi Futuro'),
+        ('URY', df_ury_egresados, 'uruguay_egresados_cache.csv', 'UY_MEC_ANUARIO (Cuadros II-7.2.1 a II-7.2.3)', 'Total de graduados universitarios observados por genero en Anuarios Estadisticos MEC'),
+    ]:
+        df_c = df_src if (df_src is not None and not df_src.empty) else pd.DataFrame()
+        if df_c.empty:
+            cpath = paths['data_processed'] / cache_name
+            if cpath.exists():
+                df_c = pd.read_csv(cpath)
+        if df_c.empty:
+            continue
+        col_val = 'valor' if 'valor' in df_c.columns else 'graduados'
+        sub = df_c[(df_c['anio'].isin(anios_comunes)) & (df_c['sexo'].isin(['F', 'M', 'NB']))]
+        if sub.empty:
+            continue
+        piv = sub.groupby(['anio', 'sexo'])[col_val].sum().unstack(fill_value=0.0)
+        for yr in anios_comunes:
+            if yr not in piv.index:
+                continue
+            f_v = float(piv.loc[yr, 'F']) if 'F' in piv.columns else 0.0
+            m_v = float(piv.loc[yr, 'M']) if 'M' in piv.columns else 0.0
+            nb_v = float(piv.loc[yr, 'NB']) if 'NB' in piv.columns else 0.0
+            tot = round(f_v + m_v + nb_v, 2)
+            if tot <= 0:
+                continue
+            pct_f = round((f_v / tot) * 100.0, 2)
+            pct_m = round((m_v / tot) * 100.0, 2)
+            pct_nb = round((nb_v / tot) * 100.0, 2) if nb_v > 0 else (0.0 if p_code == 'CHL' else np.nan)
+            registros.append({
+                'pais': p_code,
+                'sector': 'Total Universitario',
+                'anio': int(yr),
+                'F': round(f_v, 2),
+                'M': round(m_v, 2),
+                'NB': round(nb_v, 2) if (nb_v > 0 or p_code == 'CHL') else np.nan,
+                'total': tot,
+                'pct_mujeres': pct_f,
+                'pct_varones': pct_m,
+                'pct_nb': pct_nb,
+                'brecha_pct': round(pct_f - pct_m, 2),
+                'fuente': f_label,
+                'nota_metodologica': nota
+            })
+
+    df_tot_gen = pd.DataFrame(registros).sort_values(['pais', 'anio']).reset_index(drop=True)
+    if not df_tot_gen.empty:
+        df_tot_gen.to_csv(paths['data_processed'] / 'graduados_totales_genero_limpio.csv', index=False, encoding='utf-8')
+        df_tot_gen.to_csv(paths['output'] / 'graduados_totales_genero_limpio.csv', index=False, encoding='utf-8')
+        print(f"  ✅ Graduados universitarios totales por genero (2020-2024) normalizados: {len(df_tot_gen)} registros.")
+    return df_tot_gen
 
 
 def generar_reporte_contexto_educativo_laboral(paths):
@@ -1463,8 +1877,10 @@ def generar_reporte_contexto_educativo_laboral(paths):
         df_m = df_m[(df_m['anio'] >= 2010) & (df_m['anio'] <= 2025)]
 
         # Ratio de proteccion educativa (cuanto menor a 1, mayor es la proteccion frente al desempleo)
-        df_m['ratio_desempleo_terciario_vs_total'] = (df_m['tasa_desempleo_educ_terciaria_pct'] / df_m['tasa_desempleo_general_pct']).round(3)
+        df_m['ratio_desempleo_terciario_vs_total'] = (df_m['tasa_desempleo_educ_terciaria_pct'] / df_m['tasa_desempleo_general_pct']).round(2)
         df_m['diferencial_puntos_pct'] = (df_m['tasa_desempleo_educ_terciaria_pct'] - df_m['tasa_desempleo_general_pct']).round(2)
+        df_m['tasa_desempleo_educ_terciaria_pct'] = df_m['tasa_desempleo_educ_terciaria_pct'].round(2)
+        df_m['tasa_desempleo_general_pct'] = df_m['tasa_desempleo_general_pct'].round(2)
 
         def diagnostico_proteccion(r):
             rat = r.get('ratio_desempleo_terciario_vs_total')
@@ -1494,8 +1910,10 @@ def generar_reporte_contexto_educativo_laboral(paths):
                     df_c['anio'] = df_c['anio'].astype(int)
                     # Indicador 99: Matricula terciaria
                     c99 = df_c[df_c['indicador_id'].astype(str) == '99'].groupby(['pais', 'anio'], as_index=False)['valor'].mean().rename(columns={'valor': 'tasa_matricula_terciaria_pct'})
+                    c99['tasa_matricula_terciaria_pct'] = c99['tasa_matricula_terciaria_pct'].round(2)
                     # Indicador 5701: Jovenes que estudian
                     c5701 = df_c[df_c['indicador_id'].astype(str) == '5701'].groupby(['pais', 'anio'], as_index=False)['valor'].mean().rename(columns={'valor': 'pct_jovenes_educ_superior_pct'})
+                    c5701['pct_jovenes_educ_superior_pct'] = c5701['pct_jovenes_educ_superior_pct'].round(2)
 
                     df_m = pd.merge(df_m, c99, on=['pais', 'anio'], how='left')
                     df_m = pd.merge(df_m, c5701, on=['pais', 'anio'], how='left')
@@ -1573,8 +1991,8 @@ def ejecutar_limpieza(base_dir=None, force_rebuild=False):
                     'pais': 'ARG', 'fuente_id': 'AR_CEPXXI', 'sector': r['sector'],
                     'carrera_id': 'SEC_GENERICO', 'carrera_objetivo': f"Promedio Sectorial {r['sector']}",
                     'anio': int(r['anio']), 'sexo': 'T',
-                    'salario_moneda_local': float(r['w_mean']), 'moneda_local': 'ARS',
-                    'factor_ppa': float(r['factor_ppa']) if pd.notna(r['factor_ppa']) else np.nan,
+                    'salario_moneda_local': round(float(r['w_mean']), 2), 'moneda_local': 'ARS',
+                    'factor_ppa': round(float(r['factor_ppa']), 2) if pd.notna(r['factor_ppa']) else np.nan,
                     'salario_usd_ppa': round(float(r['w_mean']) / float(r['factor_ppa']), 2) if pd.notna(r['factor_ppa']) and float(r['factor_ppa']) > 0 else np.nan,
                     'tipo_salario': 'medio_sectorial', 'metodo_ppa': 'PPA_PIB_PA.NUS.PPP',
                     'es_observado': pd.notna(r.get('w_mean'))
@@ -1584,8 +2002,8 @@ def ejecutar_limpieza(base_dir=None, force_rebuild=False):
                     'pais': 'ARG', 'fuente_id': 'AR_CEPXXI', 'sector': r['sector'],
                     'carrera_id': 'SEC_GENERICO', 'carrera_objetivo': f"Mediana Sectorial {r['sector']}",
                     'anio': int(r['anio']), 'sexo': 'T',
-                    'salario_moneda_local': float(r['w_median']), 'moneda_local': 'ARS',
-                    'factor_ppa': float(r['factor_ppa']) if pd.notna(r['factor_ppa']) else np.nan,
+                    'salario_moneda_local': round(float(r['w_median']), 2), 'moneda_local': 'ARS',
+                    'factor_ppa': round(float(r['factor_ppa']), 2) if pd.notna(r['factor_ppa']) else np.nan,
                     'salario_usd_ppa': round(float(r['w_median']) / float(r['factor_ppa']), 2) if pd.notna(r['factor_ppa']) and float(r['factor_ppa']) > 0 else np.nan,
                     'tipo_salario': 'mediano_sectorial', 'metodo_ppa': 'PPA_PIB_PA.NUS.PPP',
                     'es_observado': pd.notna(r.get('w_median'))
@@ -1601,13 +2019,13 @@ def ejecutar_limpieza(base_dir=None, force_rebuild=False):
 
         for _, r in df_chl_sies.iterrows():
             if pd.notna(r.get('salario_clp')):
-                f_ppa_val = float(f_ppa_chl) if pd.notna(f_ppa_chl) else np.nan
+                f_ppa_val = round(float(f_ppa_chl), 2) if pd.notna(f_ppa_chl) else np.nan
                 sal_usd = round(float(r['salario_clp']) / f_ppa_val, 2) if pd.notna(f_ppa_val) and f_ppa_val > 0 else np.nan
                 registros_salarios.append({
                     'pais': 'CHL', 'fuente_id': 'CL_SIES', 'sector': r['sector'],
                     'carrera_id': r['carrera_id'], 'carrera_objetivo': r['carrera_objetivo'], 'anio': 2024,
                     'sexo': 'T',
-                    'salario_moneda_local': float(r['salario_clp']), 'moneda_local': 'CLP',
+                    'salario_moneda_local': round(float(r['salario_clp']), 2), 'moneda_local': 'CLP',
                     'factor_ppa': f_ppa_val,
                     'salario_usd_ppa': sal_usd,
                     'tipo_salario': 'ingreso_1er_anio', 'metodo_ppa': 'PPA_PIB_PA.NUS.PPP',
@@ -1620,6 +2038,9 @@ def ejecutar_limpieza(base_dir=None, force_rebuild=False):
             registros_salarios.append(r.to_dict())
 
     hecho_salario = pd.DataFrame(registros_salarios)
+    for col_sal in ['salario_moneda_local', 'factor_ppa', 'salario_usd_ppa']:
+        if col_sal in hecho_salario.columns:
+            hecho_salario[col_sal] = pd.to_numeric(hecho_salario[col_sal], errors='coerce').round(2)
     hecho_salario.to_csv(paths['output'] / 'hecho_salario.csv', index=False, encoding='utf-8')
     hecho_salario.to_csv(paths['data_processed'] / 'hecho_salario.csv', index=False, encoding='utf-8')
     print(f"  ✅ hecho_salario.csv exportado exitosamente ({len(hecho_salario):,} filas en USD PPA del PIB).")
@@ -1635,8 +2056,8 @@ def ejecutar_limpieza(base_dir=None, force_rebuild=False):
                 'pais': 'CHL', 'fuente_id': 'CL_SIES', 'sector': r['sector'], 'anio': 2024,
                 'puestos_empleo': np.nan, 'share_mujeres': np.nan,
                 'meses_observados': np.nan,
-                'empleabilidad_1er_anio': float(r['empleabilidad_1er_anio']) if pd.notna(r.get('empleabilidad_1er_anio')) else np.nan,
-                'empleabilidad_2do_anio': float(r['empleabilidad_2do_anio']) if pd.notna(r.get('empleabilidad_2do_anio')) else np.nan,
+                'empleabilidad_1er_anio': round(float(r['empleabilidad_1er_anio']), 2) if pd.notna(r.get('empleabilidad_1er_anio')) else np.nan,
+                'empleabilidad_2do_anio': round(float(r['empleabilidad_2do_anio']), 2) if pd.notna(r.get('empleabilidad_2do_anio')) else np.nan,
                 'es_observado': pd.notna(r.get('empleabilidad_1er_anio')) | pd.notna(r.get('empleabilidad_2do_anio'))
             })
 
@@ -1647,8 +2068,8 @@ def ejecutar_limpieza(base_dir=None, force_rebuild=False):
         for _, r in df_ilo_emp.iterrows():
             registros_ocupacion.append({
                 'pais': r['pais'], 'fuente_id': r['fuente_id'], 'sector': r['sector'], 'anio': int(r['anio']),
-                'puestos_empleo': float(r['puestos_empleo']),
-                'share_mujeres': float(r['share_mujeres']),
+                'puestos_empleo': round(float(r['puestos_empleo']), 2),
+                'share_mujeres': round(float(r['share_mujeres']), 2),
                 'meses_observados': 12,
                 'empleabilidad_1er_anio': np.nan,
                 'empleabilidad_2do_anio': np.nan,
@@ -1656,9 +2077,17 @@ def ejecutar_limpieza(base_dir=None, force_rebuild=False):
             })
 
     hecho_ocupacion = pd.DataFrame(registros_ocupacion)
+    for col_oc in ['puestos_empleo', 'share_mujeres', 'empleabilidad_1er_anio', 'empleabilidad_2do_anio']:
+        if col_oc in hecho_ocupacion.columns:
+            hecho_ocupacion[col_oc] = pd.to_numeric(hecho_ocupacion[col_oc], errors='coerce').round(2)
     hecho_ocupacion.to_csv(paths['output'] / 'hecho_ocupacion_terciarios.csv', index=False, encoding='utf-8')
     hecho_ocupacion.to_csv(paths['data_processed'] / 'hecho_ocupacion_terciarios.csv', index=False, encoding='utf-8')
     print(f"  ✅ hecho_ocupacion_terciarios.csv exportado exitosamente ({len(hecho_ocupacion):,} filas - 100% OIT/SIES sin duplicados locales).")
+
+    # B2. Ocupados con Educacion Superior por sector y genero (ILOSTAT EMP_TEMP_SEX_ECO_EDU_NB)
+    # y Total Universitario de Graduados por genero (SPU 2020-2024, SIES y MEC)
+    procesar_ilostat_empleo_educ_superior(paths)
+    procesar_graduados_totales_genero(paths, df_chl_egresados, df_ury_egresados, force_rebuild=force_rebuild)
 
     # C. Reporte de contexto educativo y desempleo terciario (Banco Mundial y CEPALSTAT)
     generar_reporte_contexto_educativo_laboral(paths)
@@ -1679,7 +2108,7 @@ def ejecutar_limpieza(base_dir=None, force_rebuild=False):
     print(f"  ✅ hecho_egresados.csv consolidado exportado ({len(hecho_egresados):,} filas).")
 
     # Instituciones oficiales observadas (Tanda 4)
-    df_hecho_inst = procesar_instituciones_oficiales(paths, df_chl_egresados, force_rebuild=force_rebuild)
+    df_hecho_inst = procesar_instituciones_oficiales(paths, df_chl_egresados, df_ury_egresados, force_rebuild=force_rebuild)
 
     # Dimensiones
     dim_pais = pd.DataFrame([('ARG', 'Argentina'), ('CHL', 'Chile'), ('URY', 'Uruguay')], columns=['pais_iso3', 'pais_nombre'])

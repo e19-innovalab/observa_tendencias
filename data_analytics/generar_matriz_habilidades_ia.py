@@ -15,12 +15,20 @@ Articula:
 import csv
 import re
 import sys
+import unicodedata
 from pathlib import Path
 from collections import defaultdict, Counter
 import yaml
 
 if hasattr(sys.stdout, 'reconfigure'):
     sys.stdout.reconfigure(encoding='utf-8')
+
+
+def normalizar_texto(texto):
+    if texto is None:
+        return ''
+    s = unicodedata.normalize('NFKD', str(texto)).encode('ascii', 'ignore').decode('utf-8')
+    return re.sub(r'[^a-z0-9]+', ' ', s.lower()).strip()
 
 BASE_DIR = Path(r"c:\proyectos\observa_tendencias")
 REF_DIR = BASE_DIR / "backend" / "backend" / "config" / "reference"
@@ -94,10 +102,40 @@ CARRERAS_OBJETIVO = [
     ('TUR03', 'Gastronomía', 'Turismo', '1013', 'tecnico',
      [r'gastronom', r'cocina', r'culinari']),
     ('TUR04', 'Guía de turismo', 'Turismo', '1015', 'tecnico',
-     [r'guia.*turism']),
+     [r'guia.*turism', r'tecnic.*turism', r'turismo']),
     ('TUR05', 'Gestión de eventos', 'Turismo', '1015', 'ambos',
      [r'eventos', r'relaciones publicas']),
 ]
+
+# Conjunto estricto de codigos CIUO-08 / ISCO-08 validos por carrera objetivo
+# Garantiza 0 falsos positivos de otros dominios (ej. excluye Periodistas, Bibliotecarios y Tecnicos Agropecuarios de Tecnologia)
+MAPA_CIUO_PERMITIDOS = {
+    'TEC01': {'2511', '2512', '2514', '2519'},
+    'TEC02': {'2511', '2512', '2514', '2519'},
+    'TEC03': {'2152', '2153'},
+    'TEC04': {'2152', '3114'},
+    'TEC05': {'2512', '2514', '3511', '3512', '3514'},
+    'EDC01': {'2120', '2519'},
+    'EDC02': {'2166'},
+    'EDC03': {'2141'},
+    'EDC04': {'2431', '2432'},
+    'EDC05': {'2411', '2412', '2421', '2631', '3343'},
+    'SAL01': {'2211', '2212'},
+    'SAL02': {'2221', '3221'},
+    'SAL03': {'2261', '3251'},
+    'SAL04': {'2264'},
+    'SAL05': {'2262', '2265'},
+    'ENE01': {'2151', '3113'},
+    'ENE02': {'2145'},
+    'ENE03': {'2144', '3115'},
+    'ENE04': {'2114', '2146'},
+    'ENE05': {'2151', '3113'},
+    'TUR01': {'1411', '4221', '5113'},
+    'TUR02': {'1411', '4224'},
+    'TUR03': {'1412', '3434', '5120'},
+    'TUR04': {'4221', '5113'},
+    'TUR05': {'2432', '3332'},
+}
 
 def fmt_code(c):
     return f"{c:04d}" if isinstance(c, int) else str(c).zfill(4)
@@ -453,6 +491,96 @@ COMPETENCIAS_SECTORIALES_CATALOG = {
         "tipologia_general": "Habilidad Operativa Culinaria Presencial",
         "demanda_linkedin": "Muy Alta en temporada turística",
         "recomendacion": "Fortalecimiento de habilidades técnicas manuales, rapidez operativa y cumplimiento estricto de normas de bioseguridad alimentaria."
+    },
+    "2153": {
+        "nucleares": "Diseño de redes de telecomunicaciones móviles (4G/5G) y fibra óptica FTTH; Conmutación y enrutamiento IP/MPLS; Radiofrecuencia y enlaces satelitales",
+        "emergentes": "Virtualización de funciones de red (NFV/SDN); Conectividad IoT industrial y redes privadas 5G; Ciberseguridad en infraestructura de telecomunicaciones",
+        "transversales": "Coordinación de despliegues territoriales; Resolución de incidentes críticos de conectividad; Trabajo interdisciplinario en campo",
+        "digitales_ia": "Optimización predictiva de tráfico de red y mantenimiento preventivo de nodos mediante IA",
+        "vector_emergencia": "Despliegue de Redes 5G, Conectividad Territorial y Redes Abiertas",
+        "tipologia_general": "Habilidad Técnica Nuclear y de Expansión Estratégica",
+        "demanda_linkedin": "Alta (Operadores de telecomunicaciones, ISPs e integradores regionales)",
+        "recomendacion": "Profundizar en arquitecturas de red definidas por software (SDN), protocolos de seguridad y despliegue de fibra óptica."
+    },
+    "3114": {
+        "nucleares": "Ensamblaje y prueba de circuitos electrónicos; Instrumentación electrónica y calibración de sensores; Mantenimiento de placas y equipos de control",
+        "emergentes": "Integración de nodos IoT industriales; Mantenimiento de sistemas electrónicos de potencia e inversores solares; Automatización con microcontroladores",
+        "transversales": "Precisión manual y atención al detalle; Diagnóstico metódico de fallas; Cumplimiento de normas de seguridad electrostática (ESD)",
+        "digitales_ia": "Diagnóstico asistido de placas electrónicas y monitoreo remoto de telemetría de sensores",
+        "vector_emergencia": "Instrumentación Electrónica, IoT Industrial y Mantenimiento Avanzado",
+        "tipologia_general": "Habilidad Técnica Operativa en Sitio",
+        "demanda_linkedin": "Media-Alta (Industria manufacturera, telecomunicaciones y energía)",
+        "recomendacion": "Integrar formación en sensores IoT, electrónica de potencia para renovables y programación de PLC."
+    },
+    "2411": {
+        "nucleares": "Contabilidad financiera y de costos; Normas Internacionales de Información Financiera (NIIF/IFRS); Liquidación tributaria y auditoría de estados contables",
+        "emergentes": "Reporte integrado de sostenibilidad (NIIF S1/S2 y métricas ESG); Auditoría forense digital; Automatización de cierres contables y compliance fiscal electrónico",
+        "transversales": "Integridad ética y transparencia; Rigor analítico; Comunicación ejecutiva con directorios y entes reguladores",
+        "digitales_ia": "ERP cloud (SAP S/4HANA, Oracle NetSuite); Automatización RPA de conciliaciones y auditoría continua asistida por IA",
+        "vector_emergencia": "Auditoría Digital, Compliance Tributario y Reportes de Sostenibilidad ESG",
+        "tipologia_general": "Habilidad de Gestión Financiera y Cumplimiento Normativo",
+        "demanda_linkedin": "Muy Alta (Estudios contables, auditoras Big Four y corporaciones)",
+        "recomendacion": "Reconvertir tareas de carga contable repetitiva hacia análisis impositivo estratégico, normas internacionales NIIF y auditoría de sistemas."
+    },
+    "2412": {
+        "nucleares": "Evaluación de proyectos de inversión (VAN/TIR); Gestión de carteras y análisis de riesgo crediticio; Planificación financiera corporativa (FP&A)",
+        "emergentes": "Finanzas sostenibles y bonos verdes; Fintech y medios de pago digitales; Modelado estocástico de riesgos de mercado y liquidez",
+        "transversales": "Toma de decisiones bajo incertidumbre; Negociación financiera; Ética fiduciaria y comunicación con inversores",
+        "digitales_ia": "Modelado financiero avanzado en Python/Power BI; Algoritmos de scoring crediticio y proyección automatizada de flujo de caja",
+        "vector_emergencia": "Finanzas Corporativas (FP&A), Fintech y Finanzas Sostenibles",
+        "tipologia_general": "Habilidad Analítica Financiera y Estratégica",
+        "demanda_linkedin": "Alta (Banca, fintechs, fondos de inversión y áreas de finanzas corporativas)",
+        "recomendacion": "Fortalecer el dominio de ciencia de datos aplicada a finanzas, valoración de riesgos ESG y regulación fintech."
+    },
+    "3221": {
+        "nucleares": "Control de signos vitales y asistencia en higiene y confort del paciente; Preparación de material médico y apoyo en procedimientos clínicos básicos",
+        "emergentes": "Atención domiciliaria gerontológica integral; Apoyo en programas de vacunación y prevención comunitaria; Protocolos de bioseguridad hospitalaria",
+        "transversales": "Trato humanizado y paciencia; Empatía con pacientes vulnerables y adultos mayores; Trabajo colaborativo con enfermeros universitarios y médicos",
+        "digitales_ia": "Registro digital de controles de enfermería en dispositivos móviles hospitalarios",
+        "vector_emergencia": "Cuidado Asistencial Directo y Atención Gerontológica",
+        "tipologia_general": "Habilidad Presencial Humana y de Cuidado Crítico (Ineludible)",
+        "demanda_linkedin": "Muy Alta (Hospitales, clínicas, residencias de larga estadía y atención domiciliaria)",
+        "recomendacion": "Fortalecer competencias en cuidados gerontológicos, rehabilitación temprana y registro clínico digital."
+    },
+    "3251": {
+        "nucleares": "Asistencia clínica a cuatro manos en consultorio odontológico; Esterilización e instrumental dental; Profilaxis e higiene bucodental preventiva",
+        "emergentes": "Operación de escáneres intraorales 3D y radiología dental digital; Gestión de bioseguridad avanzada en clínicas odontológicas",
+        "transversales": "Destreza manual; Contención empática de pacientes pediátricos y adultos; Organización rigurosa del consultorio",
+        "digitales_ia": "Software de gestión de clínicas dentales e imagenología odontológica digital",
+        "vector_emergencia": "Asistencia Odontológica Digital y Prevención Bucodental",
+        "tipologia_general": "Habilidad Clínica Quirúrgica Odontológica",
+        "demanda_linkedin": "Media-Alta (Clínicas odontológicas y centros de salud)",
+        "recomendacion": "Capacitar en flujos de odontología digital CAD/CAM, radiología digital y educación preventiva comunitaria."
+    },
+    "2262": {
+        "nucleares": "Farmacología clínica y dispensación farmacéutica; Control de calidad de medicamentos y bromatología; Asesoramiento farmacoterapéutico y farmacovigilancia",
+        "emergentes": "Biotecnología farmacéutica y medicamentos biológicos; Ensayos clínicos regulados; Trazabilidad digital de medicamentos y cadena de frío",
+        "transversales": "Rigor ético y regulatorio; Atención farmacéutica empática al paciente; Precisión analítica en laboratorio",
+        "digitales_ia": "Sistemas de receta electrónica interoperable y detección automatizada de interacciones medicamentosas",
+        "vector_emergencia": "Farmacia Clínica, Biotecnología y Trazabilidad Sanitaria",
+        "tipologia_general": "Habilidad Clínica de Salud y Educación Alimentaria",
+        "demanda_linkedin": "Alta (Laboratorios farmacéuticos, farmacias hospitalarias y entes reguladores)",
+        "recomendacion": "Integrar formación en biotecnología, regulación de ensayos clínicos y seguimiento farmacoterapéutico digital."
+    },
+    "3115": {
+        "nucleares": "Mantenimiento mecánico preventivo y correctivo de maquinaria industrial; Alineación de equipos rotativos, bombas y compresores; Metrología y ajuste mecánico",
+        "emergentes": "Mantenimiento predictivo por ultrasonido, termografía y análisis de vibraciones; Operación de centros de mecanizado CNC multieje y mecatrónica",
+        "transversales": "Resolución práctica de averías en planta; Cumplimiento estricto de seguridad industrial; Trabajo en equipo con operadores e ingenieros",
+        "digitales_ia": "Sistemas GMAO/CMMS de gestión de mantenimiento y monitoreo de condición por sensores IoT",
+        "vector_emergencia": "Electromovilidad, Mantenimiento Predictivo 4.0 y Energía Eólica",
+        "tipologia_general": "Habilidad Técnica Operativa en Sitio",
+        "demanda_linkedin": "Alta (Plantas industriales, parques eólicos, minería y agroindustria)",
+        "recomendacion": "Especializar en mantenimiento predictivo 4.0, mecatrónica y mantenimiento de aerogeneradores y flotas eléctricas."
+    },
+    "1412": {
+        "nucleares": "Dirección operativa de restaurantes y servicios de alimentos y bebidas (A&B); Ingeniería de menú, control de costos de materias primas y gestión de proveedores",
+        "emergentes": "Gastronomía sustentable y reducción de desperdicio alimentario; Modelos de negocio multicanal (salón, experiencia enoturística y delivery optimizado)",
+        "transversales": "Liderazgo de equipos de salón y cocina; Orientación a la excelencia en el servicio; Negociación y manejo de presupuestos",
+        "digitales_ia": "Sistemas POS integrados con control predictivo de stock, reservas dinámicas y análisis de rentabilidad por plato",
+        "vector_emergencia": "Gastronomía Sostenible, Producto Local y Cocina de Autor",
+        "tipologia_general": "Habilidad de Gestión de Hospitalidad y Negocios Turísticos",
+        "demanda_linkedin": "Media-Alta (Polos gastronómicos, hoteles y bodegas turísticas)",
+        "recomendacion": "Profesionalizar la gestión financiera gastronómica, trazabilidad de proveedores locales y liderazgo de hospitalidad."
     }
 }
 
@@ -468,42 +596,52 @@ DEFAULT_COMPETENCIAS = {
     "recomendacion": "Actualización continua en metodologías ágiles, digitalización de flujos y adaptación tecnológica."
 }
 
-# Procesar correspondencia carrera -> CIUO
+# Procesar correspondencia carrera -> CIUO (con texto normalizado sin tildes y filtro estricto de dominio CIUO-08)
 matriz_filas = []
 
 for c_meta in CARRERAS_OBJETIVO:
     cid, cname, sector, cine, nivel, pats = c_meta
     compiled_pats = [re.compile(p, re.IGNORECASE) for p in pats]
-    
+    permitidos = MAPA_CIUO_PERMITIDOS.get(cid, set())
+
     # Chile
     chl_matched = set()
     for career_title, codes in chl_cw.items():
-        if any(cp.search(career_title) for cp in compiled_pats):
+        nt = normalizar_texto(career_title)
+        if any(cp.search(nt) for cp in compiled_pats):
             for code in codes:
-                chl_matched.add(fmt_code(code))
-                
+                fc = fmt_code(code)
+                if fc in permitidos:
+                    chl_matched.add(fc)
+
     # Argentina
     arg_matched = set()
     for career_title, entry in arg_cw.items():
-        if any(cp.search(career_title) for cp in compiled_pats) or \
-           (cname.lower() in career_title.lower()) or \
-           (cid.startswith('TEC') and 'inform' in career_title.lower()):
+        nt = normalizar_texto(career_title)
+        if any(cp.search(nt) for cp in compiled_pats) or (normalizar_texto(cname) in nt):
             if isinstance(entry, dict):
                 for lvl, codes in entry.items():
                     for code in codes:
-                        arg_matched.add(fmt_code(code))
+                        fc = fmt_code(code)
+                        if fc in permitidos:
+                            arg_matched.add(fc)
             elif isinstance(entry, list):
                 for code in entry:
-                    arg_matched.add(fmt_code(code))
-                    
+                    fc = fmt_code(code)
+                    if fc in permitidos:
+                        arg_matched.add(fc)
+
     # Uruguay
     ury_matched = set()
     for career_title, codes in ury_cw.items():
-        if any(cp.search(career_title) for cp in compiled_pats):
+        nt = normalizar_texto(career_title)
+        if any(cp.search(nt) for cp in compiled_pats):
             for code in codes:
-                ury_matched.add(fmt_code(code))
+                fc = fmt_code(code)
+                if fc in permitidos:
+                    ury_matched.add(fc)
 
-    all_codes = sorted(list(chl_matched | arg_matched | ury_matched))
+    all_codes = sorted(list((chl_matched | arg_matched | ury_matched) | permitidos))
     
     for code in all_codes:
         occ_info = isco_occupations.get(code, {})
@@ -563,8 +701,10 @@ columnas = list(matriz_filas[0].keys())
 destinos = [
     OUTPUT_DIR / "matriz_habilidades_riesgo_ia_sector.csv",
     OUTPUT_DIR / "matriz_habilidades_sectoriales_integrales.csv",
+    OUTPUT_DIR / "matriz_habilidades_ocupaciones_ia_2026.csv",
     PROCESSED_DIR / "matriz_habilidades_riesgo_ia_sector.csv",
     PROCESSED_DIR / "matriz_habilidades_sectoriales_integrales.csv",
+    PROCESSED_DIR / "matriz_habilidades_ocupaciones_ia_2026.csv",
     BACKEND_DATA_DIR / "matriz_habilidades_riesgo_ia_sector.csv",
     BACKEND_DATA_DIR / "matriz_habilidades_sectoriales_integrales.csv",
 ]

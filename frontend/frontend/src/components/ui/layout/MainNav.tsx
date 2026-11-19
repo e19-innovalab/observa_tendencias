@@ -11,6 +11,7 @@ const ITEMS = [
   { href: '/sectores', label: 'Sectores' },
   { href: '/ocupaciones', label: 'Ocupaciones' },
   { href: '/habilidades', label: 'Habilidades y formación' },
+  { href: '/genero', label: 'Género' },
 ];
 
 const INDICES = [

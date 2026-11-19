@@ -76,7 +76,14 @@ apis_supranacionales:
         clasificador: "CIIU Rev. 4 / ISIC Rev. 4 a 1 dígito (Secciones D, I, J, M, Q)"
         desagregacion_sexo: ["SEX_T", "SEX_M", "SEX_F"]
         paises: ["ARG", "CHL", "URY"]
-        uso_en_pipeline: "Derivación observada de share_mujeres en el empleo por sector para ARG, CHL y URY sin imputaciones ni ponderaciones artificiales (Decisión Etapa 1 Opción B)"
+        uso_en_pipeline: "Derivación observada de share_mujeres en el empleo total por sector para ARG, CHL y URY sin imputaciones ni ponderaciones artificiales (Decisión Etapa 1 Opción B)"
+      EMP_TEMP_SEX_ECO_EDU_NB:
+        descripcion: "Población ocupada por sexo, rama de actividad económica y nivel educativo alcanzado (miles de personas)"
+        clasificador: "CIIU Rev. 4 (Secciones D, I, J, M, Q) x Nivel Educativo Avanzado/Terciario (EDU_AGGREGATE_ADV)"
+        desagregacion_sexo: ["SEX_T", "SEX_M", "SEX_F"]
+        paises: ["ARG", "CHL", "URY"]
+        ventana_comun: "2022-2024 (Año común de corte: 2024)"
+        uso_en_pipeline: "Participación de mujeres con educación superior/universitaria completa por sector estratégico en el año común 2024 (ilostat_ocupados_educ_superior_limpio.csv, analisis_genero_integral.csv y reporte_brechas_genero_detallado.csv)"
 
   unesco_uis:
     nombre: "Instituto de Estadística de la UNESCO (UIS) - CINE-F 2013"
@@ -98,6 +105,16 @@ apis_supranacionales:
 
 fuentes_nacionales:
   argentina:
+    spu_serie_historica:
+      nombre: "Datos Abiertos de Educación Superior SPU (Serie Consolidada)"
+      archivo: "data/raw/argentina/00._educ_superior_datos.csv"
+      organismo: "Secretaría de Políticas Universitarias (SPU) / Ministerio de Capital Humano"
+      ventana_temporal: "2014-2023"
+      variables: ["ANIO", "TIPO_UNIV", "NIVEL_ACADEM", "DISCIP_OCDE", "DISCIP_ESPECIF", "U_MED", "VALOR"]
+      tratamiento_metodologico:
+        - "Lectura con thousands='.' para evitar artefactos fraccionarios"
+        - "Filtrado estricto por TIPO_ALUMNO == 'EGRESADOS' y NIVEL_ACADEM in ['Pregrado', 'Grado']"
+        - "Serie nacional continua de 10 años observados (2014-2023) por disciplina y gestión (Pública/Privada)"
     araucano:
       nombre: "Base SIU-Araucano de Graduados Universitarios"
       archivo: "data/raw/argentina/base_araucano_traducida.xlsx"
@@ -111,10 +128,14 @@ fuentes_nacionales:
         - "data/raw/argentina/anuario_csv_2020.zip"
         - "data/raw/argentina/anuario_csv_2021.zip"
         - "data/raw/argentina/anuario_csv_2022.zip"
+        - "data/raw/argentina/anuario_2023_spu.zip"
+        - "data/raw/argentina/adelanto_anuario_2024_spu.zip"
       organismo: "Secretaría de Políticas Universitarias (SPU) / Subsecretaría de Políticas Universitarias"
-      ventana_temporal: "2020-2022"
-      variables: ["institucion", "rama_disciplinar", "egresados"]
-      uso_en_pipeline: "Trazabilidad de graduados institucionales para rankings y consolidación de serie nacional de graduados de Argentina (2020-2022) en hecho_egresados.csv"
+      ventana_temporal: "2020-2024"
+      variables: ["institucion", "rama_disciplinar", "egresados", "egresados_mujeres", "egresados_varones"]
+      uso_en_pipeline:
+        - "Trazabilidad de graduados institucionales para rankings (públicas y privadas 2020-2022) en hecho_instituciones_egresados.csv"
+        - "Total nacional de graduados universitarios por género (F/M) en la ventana común tripartita 2020-2024 (Cuadros 2.1.4a/2.2.4a en 2020-2022 y Cuadro 1.1.14 en 2023-2024) para analisis_genero_integral.csv y reporte_brechas_genero_detallado.csv"
     cep_xxi:
       nombre: "Centro de Estudios para la Producción (CEP-XXI) / Secretaría de Industria"
       archivos:
@@ -163,29 +184,24 @@ fuentes_nacionales:
         - "Estratificación de nivel educativo: CFTs a técnico, IPs desagregados, Universidades a grado"
 
   uruguay:
-    mec_educ_superior:
-      nombre: "Datos Abiertos de Educación Superior (Egresados)"
-      archivo: "data/raw/uruguay/00._educ_superior_datos.csv"
+    mec_anuarios_educacion:
+      nombre: "Anuarios Estadísticos de Educación (MEC 2020-2024)"
+      archivos:
+        - "data/raw/uruguay/Anuario Estadístico de Educación 2020.xlsx"
+        - "data/raw/uruguay/Anuario Estadístico de Educación 2021.xlsx"
+        - "data/raw/uruguay/Anuario Estadístico de Educación 2022.xlsx"
+        - "data/raw/uruguay/Anuario Estadístico de Educación 2023.xlsx"
+        - "data/raw/uruguay/Anuario Estadístico de Educación 2024.xlsx"
       organismo: "Ministerio de Educación y Cultura (MEC) - División de Investigación y Estadística"
-      ventana_temporal: "2014-2023"
-      variables: ["ANIO", "TIPO_UNIV", "NIVEL_ACADEM", "DISCIP_OCDE", "DISCIP_ESPECIF", "U_MED", "VALOR"]
-      tratamiento_metodologico:
-        - "Lectura con thousands='.' para evitar artefactos fraccionarios"
-        - "Filtrado estricto por U_MED == 'Cantidad de personas'"
-        - "Desagregación por nivel académico (Pregrado / Grado / Posgrado)"
+      ventana_temporal: "2020-2024"
+      tablas: ["Cuadro II-7.2.1 (UdelaR y UTEC)", "Cuadro II-7.2.2 (Universidades Privadas)", "Cuadro II-7.2.3 (Institutos Universitarios Privados)"]
+      cobertura: "Egresados de grado por institución, carrera y sexo (F, M, Total) en UdelaR, UTEC, ORT, UCU, UM, UDE, CLAEH e institutos universitarios"
     udelar_serie_historica:
       nombre: "Serie Histórica de Egresos de Grado por Servicio (UdelaR)"
       archivo: "data/raw/uruguay/1.Serie-Egresos-totales-Grado-por-Servicio-2000-2024.ods"
       organismo: "Universidad de la República (UdelaR) - Dirección General de Planeamiento"
       ventana_temporal: "2000-2024"
-      uso_en_pipeline: "Fuente oficial de validación y paridad institucional para el ranking regional de universidades (año 2022)"
-    mec_anuario_2024:
-      nombre: "Anuario Estadístico de Educación 2024"
-      archivo: "data/raw/uruguay/Anuario Estadístico de Educación 2024.xlsx"
-      organismo: "Ministerio de Educación y Cultura (MEC)"
-      ventana_temporal: "2024 (Egresos 2023)"
-      tabla: "Cuadro II-7.1.1 Egresados de grado por institución universitaria"
-      cobertura: "Universidades públicas y privadas de Uruguay (UdelaR, UTEC, ORT, UCU, UM, UDE, CLAEH)"
+      uso_en_pipeline: "Fuente oficial de validación histórica de egresos de grado de UdelaR"
     ine_uruguay_empleo:
       nombre: "Distribución Porcentual de Personas Ocupadas según Sexo por Rama de Actividad"
       archivo: "data/raw/uruguay/10235_distribucion_porcentual_de_las_personas_ocupadas_segun_sexo_por_rama_de_actividad_en_ocupa.csv"

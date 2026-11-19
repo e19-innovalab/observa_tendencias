@@ -3,7 +3,7 @@
 import { Check, ChevronDown } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
-import type { ReactNode } from 'react';
+import { useId, useLayoutEffect, useRef, useState, type ReactNode } from 'react';
 
 export type Option = { value: string; label: string; count?: number };
 
@@ -39,6 +39,7 @@ export function ChipGroup({
   reset = [],
   withAll = true,
   hideLabel = false,
+  maxRows,
 }: {
   name: string;
   label: string;
@@ -48,13 +49,75 @@ export function ChipGroup({
   reset?: string[];
   withAll?: boolean;
   hideLabel?: boolean;
+  /** Si se indica, el listado se recorta a esa cantidad de renglones y ofrece «Cargar más». */
+  maxRows?: number;
 }) {
   const href = useHref();
+  const listId = useId();
+  const listRef = useRef<HTMLDivElement>(null);
+  const [clipHeight, setClipHeight] = useState<number | null>(null);
+  const [hasMore, setHasMore] = useState(false);
   const chips = withAll ? [{ value: '', label: `${allLabel} (${options.length})` }, ...options] : options;
+  const signature = options.map((option) => option.value).join('|');
+  // El estado guarda para qué listado se pidió «Cargar más»: al cambiar de grupo vuelve a recortarse.
+  const [expandedSignature, setExpandedSignature] = useState<string | null>(null);
+  const expanded = expandedSignature === signature;
+
+  useLayoutEffect(() => {
+    if (!maxRows) return;
+    const el = listRef.current;
+    if (!el) return;
+
+    const measure = () => {
+      const items = Array.from(el.children) as HTMLElement[];
+      if (!items.length) {
+        setHasMore(false);
+        setClipHeight(null);
+        return;
+      }
+
+      const containerTop = el.getBoundingClientRect().top;
+      const rowTops = [
+        ...new Set(items.map((item) => Math.round(item.getBoundingClientRect().top - containerTop))),
+      ].sort((a, b) => a - b);
+
+      if (rowTops.length <= maxRows) {
+        setHasMore(false);
+        setClipHeight(null);
+        return;
+      }
+
+      const lastVisibleTop = rowTops[maxRows - 1];
+      const visibleItems = items.filter(
+        (item) => Math.round(item.getBoundingClientRect().top - containerTop) <= lastVisibleTop,
+      );
+      const rowHeight = Math.max(...visibleItems.map((item) => item.offsetHeight));
+
+      setHasMore(true);
+      setClipHeight(lastVisibleTop + rowHeight);
+    };
+
+    measure();
+    const observer = new ResizeObserver(measure);
+    observer.observe(el);
+    window.addEventListener('resize', measure);
+    return () => {
+      observer.disconnect();
+      window.removeEventListener('resize', measure);
+    };
+  }, [allLabel, maxRows, signature, withAll]);
+
   return (
     <div>
       {!hideLabel && <Label>{label}</Label>}
-      <div className="flex flex-wrap gap-2" role="group" aria-label={label}>
+      <div
+        id={listId}
+        ref={listRef}
+        className={`flex flex-wrap gap-2 ${maxRows && !expanded ? 'overflow-hidden' : ''}`}
+        style={maxRows && !expanded && clipHeight ? { maxHeight: clipHeight } : undefined}
+        role="group"
+        aria-label={label}
+      >
         {chips.map((o) => {
           const active = o.value === value;
           return (
@@ -81,6 +144,22 @@ export function ChipGroup({
           );
         })}
       </div>
+
+      {maxRows && hasMore && (
+        <button
+          type="button"
+          onClick={() => setExpandedSignature(expanded ? null : signature)}
+          aria-expanded={expanded}
+          aria-controls={listId}
+          className="mt-2 inline-flex items-center gap-1.5 rounded-lg border border-card-border bg-canvas px-3 py-1.5 text-[12px] font-semibold text-brand transition-colors hover:border-brand focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
+        >
+          {expanded ? 'Mostrar menos' : 'Cargar más'}
+          <ChevronDown
+            className={`size-3.5 transition-transform ${expanded ? 'rotate-180' : ''}`}
+            aria-hidden
+          />
+        </button>
+      )}
     </div>
   );
 }

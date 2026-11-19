@@ -308,10 +308,11 @@ export default async function PanoramaRegionalPage({
               name="indicator"
               label="Indicadores"
               hideLabel
-              allLabel={`Ver todos (${inDomain.length})`}
+              allLabel="Ver todos"
               options={inDomain.map((item) => ({ value: item.code, label: item.name }))}
               value={indicator?.code ?? ''}
               reset={['page']}
+              maxRows={2}
             />
           </div>
         </FilterPanel>
