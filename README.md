@@ -3,8 +3,10 @@
 **Alcance Regional:** Argentina, Chile y Uruguay (Cono Sur)  
 **Programa:** InnovaLab  
 
-**Predix** es una plataforma de inteligencia laboral y educativa que integra **datos 100% observados de fuentes oficiales** (ministerios de educación y trabajo, institutos estadísticos nacionales, OIT, Banco Mundial y ESCO) para analizar la evolución del empleo, salarios reales/PPA, graduación universitaria, brechas de género y el impacto de la Inteligencia Artificial en **5 sectores estratégicos**: *Tecnología, Economía del Conocimiento, Salud, Energía y Turismo*.
+**Predix** es una plataforma de **análisis e inteligencia regional** que integra información **socioeconómica, laboral y educativa** a partir de series históricas y datos de fuentes oficiales y especializadas (ministerios de educación y trabajo, institutos estadísticos nacionales, OIT, Banco Mundial y ESCO).
+Mediante el procesamiento de estos datos y la aplicación de **modelos analíticos y estadísticos**, permite identificar tendencias y analizar la evolución del empleo, los salarios reales/PPA, la graduación universitaria, las brechas de género y el impacto de la inteligencia artificial en cinco **sectores estratégicos**: *Tecnología, Economía del Conocimiento, Salud, Energía y Turismo.* 
 
+ 
 ---
 
 ## Qué ofrece el producto
@@ -26,11 +28,11 @@
 
 | Inicio y Resumen | Panorama Regional |
 | :---: | :---: |
-| ![Inicio](https://github.com/e19-innovalab/observa_tendencias/blob/landing-login/frontend/frontend/src/capturas/inicio.png?raw=true) | ![Panorama Regional](https://github.com/e19-innovalab/observa_tendencias/blob/landing-login/frontend/frontend/src/capturas/panorama-regional-nuevo.png?raw=true) |
+| ![Inicio](frontend/frontend/src/capturas/inicio.png) | ![Panorama Regional](frontend/frontend/src/capturas/panorama-regional-nuevo.png) |
 
 | Análisis de Sectores | Detalle de Ocupación y Habilidades |
 | :---: | :---: |
-| ![Sectores](https://github.com/e19-innovalab/observa_tendencias/blob/landing-login/frontend/frontend/src/capturas/Sectores-nuevo.png?raw=true) | ![Detalle de Ocupación](https://github.com/e19-innovalab/observa_tendencias/blob/landing-login/frontend/frontend/src/capturas/detalle-ocupacion.png?raw=true) |
+| ![Sectores](frontend/frontend/src/capturas/Sectores-nuevo.png) | ![Detalle de Ocupación](frontend/frontend/src/capturas/detalle-ocupacion.png) |
 
 ### Visualizaciones del Motor Analítico (Data Analytics)
 
@@ -38,8 +40,8 @@
 | :---: | :---: | :---: |
 | ![Proyecciones](data_analytics/docs/img/muestra_proyeccion_fanchart.png) | ![Ranking Regional](data_analytics/docs/img/muestra_ranking_regional.png) | ![Contexto Empleo](data_analytics/docs/img/muestra_contexto_empleo.png) |
 
-* **Prototipo Interactivo (Figma):** [Ver Prototipo Navegable](https://www.figma.com/proto/W3S2E5N9MKzAYEp90N9QhP/Gisella-Franco-s-team-library?node-id=3364-1721&p=f&t=aN25UvDngecOjWQS-1&scaling=min-zoom&content-scaling=fixed&page-id=3316%3A2&starting-point-node-id=3364%3A1721)
-* **Tablero de Arquitectura y UX (Miro):** [Ver Tablero Central](https://miro.com/app/board/uXjVHI5DvM=/)
+* **Prototipo Interactivo (Figma):** [Ver Prototipo Navegable](https://www.figma.com/design/W3S2E5N9MKzAYEp90N9QhP/Gisella-Franco-s-team-library?node-id=3316-2&t=ehEecnaBA0vnpZFF-1)
+* **Tablero de Arquitectura y UX (Miro):** [Ver Tablero Central](https://miro.com/app/board/uXjVHl5OIvM=/?share_link_id=915102261259)
 
 ---
 
@@ -51,7 +53,7 @@
 | **Backend & API** | FastAPI, PostgreSQL 17 (Docker / Supabase), SQLAlchemy, Alembic, APScheduler, Ollama / OpenRouter |
 | **Frontend** | Next.js (App Router), TypeScript, Tailwind CSS, shadcn/ui, Recharts, Zod, TanStack Query, nuqs, lucide-react |
 | **Testing & QA** | Playwright (E2E y API Testing), Pytest (270+ tests en Backend) |
-| **Diseño UX/UI** | Figma, Miro, Google Drive |
+| **Diseño UX/UI** | Figma, Stitch, Miro, Adobe Illustrator |
 
 ---
 
@@ -92,14 +94,17 @@ python -m app.jobs.run --all
 python -m app.ingestion.load_analytics
 python -m app.jobs.recompute
 
-# 5. Iniciar el servidor FastAPI
+# 5. Crear un usuario local para iniciar sesión en el Frontend
+python -m app.jobs.create_user
+
+# 6. Iniciar el servidor FastAPI
 uvicorn app.main:app --reload --port 8010
 ```
 * **Swagger Docs:** `http://localhost:8010/docs`
 * **Explorer (herramienta de revisión en vivo):** `http://localhost:8010/explorer`
 
 ### 3. Levantar el Frontend
-El frontend se desarrolla en la carpeta `frontend/frontend` (rama `landing-login`) y corre en el puerto `3000`:
+El frontend se desarrolla en la carpeta `frontend/frontend` y corre en el puerto `3000`:
 
 ```bash
 cd frontend/frontend
@@ -131,7 +136,7 @@ python generar_matriz_habilidades_ia.py
 ```
 
 ### 5. Ejecutar las Pruebas Automatizadas (QA / Testing)
-Con el backend (`:8010`) y el frontend (`:3000`) corriendo:
+Con el backend (`:8010`) y el frontend (`:3000`) corriendo, y habiendo definido las credenciales del usuario de prueba en `tester/usuario.json` (`{ "email": "tu@mail.com", "clave": "tu-contraseña" }`):
 
 ```bash
 cd tester
@@ -148,9 +153,9 @@ npm run reporte        # Abre el reporte visual con capturas
 El aseguramiento de calidad de **Predix** abarca pruebas unitarias/integración en el motor de datos y pruebas End-to-End (E2E) sobre la plataforma:
 
 * **Pruebas de Backend (`pytest` en `backend/backend/tests/`):** Más de 270 pruebas automatizadas en memoria que validan conectores oficiales, cálculo del ISE, tendencias, homologaciones, validación de archivos de carga manual y verificación anti-alucinación de cifras en el asistente *Baqueano*.
-* **Pruebas Automáticas de QA (`Playwright` en `tester/tests/`):**
+* **Pruebas Automáticas de QA (`Playwright` en `tester/tests/` — 23/23 pruebas aprobadas):**
   * `api.spec.js`: Verifica disponibilidad del servicio (`/health`), catálogo tripartito de países (`/api/v1/countries`) y sectores estratégicos (`/api/v1/sectors`). **Resultado:** 3/3 pruebas aprobadas.
-  * `navegacion.spec.js`: Verifica renderizado sin errores inesperados y navegación entre las vistas principales (*Inicio, Panorama, Sectores, Ocupaciones, Habilidades, Experimental y Metodología*). **Resultado:** 12 pruebas ejecutadas en el ciclo de control local (9 aprobadas en primera corrida; se documentaron y ajustaron las validaciones de encabezado `h1` en *Panorama* y *Pulso laboral* y el requisito de recálculo previo para *Moctezuma*).
+  * `navegacion.spec.js`: Verifica el flujo completo con autenticación y navegación en el frontend: redirección al login sin sesión activa, inicio y cierre de sesión desde el header, saludo personalizado con el nombre del usuario, apertura y renderizado sin errores de las **13 páginas del menú** (*Inicio, Panorama, Sectores, Ocupaciones, Habilidades, Género, Pulso Laboral, Moctezuma, Ludita, Reina Roja, Sísifo, Metodología y Alertas*), cierre automático del menú desplegable *Experimentales* y avisos de estado vacío cuando una tabla no registra datos. **Resultado:** 20/20 pruebas aprobadas en la segunda corrida tras las correcciones de integración.
 * **Pruebas Manuales Funcionales:** Verificación de responsividad móvil, filtrado interactivo por rango de años y sector, despliegue de competencias esenciales/opcionales ESCO en fichas de ocupación, trazabilidad de fuentes y respuestas del asistente *Baqueano*.
 
 El detalle completo de los casos de prueba y bitácora de ejecución se encuentra en el `README` de `tester`.
@@ -163,8 +168,8 @@ Para mantener este documento ágil, la especificación profunda de cada área se
 
 * **Data Analytics ([`data_analytics/README.md`](data_analytics/README.md)):** Detalla la metodología científica, el inventario completo de fuentes oficiales de Argentina, Chile y Uruguay, las reglas de homologación internacional (CINE-F, CIIU, CIUO-08, ESCO) y las fórmulas matemáticas con las que fueron calculados todos los índices y proyecciones.
 * **Backend y Despliegue ([`backend/README.md`](backend/README.md) y [`backend/docs/despliegue.md`](backend/docs/despliegue.md)):** Explica la arquitectura de conectores automáticos, la configuración declarativa en archivos YAML, el funcionamiento del asistente *Baqueano*, el flujo de carga manual de datos y la guía de despliegue en Supabase, Render y Vercel.
-* **Frontend ([`frontend/frontend/README.md`](https://github.com/e19-innovalab/observa_tendencias/blob/landing-login/frontend/frontend/README.md)):** Documenta la instalación y scripts de Next.js, configuración de variables de entorno (`NEXT_PUBLIC_API_URL`, `NEXT_PUBLIC_USE_MOCKS`, `ADMIN_API_KEY` vía Route Handlers), arquitectura de carpetas (`src/app/`, `src/components/ui/`, `src/lib/schemas/api.ts`), validación de contratos con Zod y reglas de desarrollo del equipo de Frontend.
-* **Diseño UX/UI ([`desing/README.md`](desing/README.md)):** Reúne la investigación de usuarios, arquitectura de información, definición de permisos por rol, estado de los wireframes y enlaces a los archivos editables en Figma, Miro y Google Drive.
+* **Frontend ([`frontend/frontend/README.md`](frontend/frontend/README.md)):** Documenta la instalación y scripts de Next.js, configuración de variables de entorno (`NEXT_PUBLIC_API_URL`, `NEXT_PUBLIC_USE_MOCKS`, `ADMIN_API_KEY` vía Route Handlers), arquitectura de carpetas (`src/app/`, `src/components/ui/`, `src/lib/schemas/api.ts`), validación de contratos con Zod y reglas de desarrollo del equipo de Frontend.
+* **Diseño UX/UI ([`desing/README.md`](desing/README.md)):** Documenta el proceso de diseño UX/UI, incluyendo investigación y descubrimiento, arquitectura de información, flujos de navegación, definición de permisos por rol y diseño de interfaces e incluye los prototipos y enlaces a los espacios de trabajo en Figma, Miro y Google Drive.
 * **Testing y QA ([`tester/README.md`](https://github.com/e19-innovalab/observa_tendencias/blob/testing/pruebas/tester/README.md)):** Describe las pruebas automáticas en Playwright (`api.spec.js` y `navegacion.spec.js`), el checklist de pruebas manuales por sección y el registro de resultados.
 
 ---
