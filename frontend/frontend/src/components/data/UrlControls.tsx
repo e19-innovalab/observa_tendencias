@@ -226,7 +226,7 @@ export function Segmented({
     <div>
       <Label>{label}</Label>
       <div
-        className="inline-flex rounded-lg bg-surface-2 p-0.5"
+        className="inline-flex max-w-full flex-wrap rounded-lg bg-surface-2 p-0.5"
         role="group"
         aria-label={label}
       >

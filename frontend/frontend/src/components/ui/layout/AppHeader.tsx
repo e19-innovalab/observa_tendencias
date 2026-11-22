@@ -6,10 +6,11 @@ type Props = {
   userName: string;
   userRole: string;
   unreadAlerts: number;
+  canManage: boolean;
 };
 
 /** Isotipo del observatorio: barras ascendentes dentro del cuadrado de marca. */
-function LogoMark() {
+export function LogoMark() {
   return (
     <svg viewBox="0 0 24 24" className="size-5" aria-hidden fill="none">
       <rect x="3.2" y="12.4" width="3.4" height="8.2" rx="1.5" fill="currentColor" />
@@ -28,7 +29,7 @@ function initials(name: string) {
     .join('');
 }
 
-export function AppHeader({ userName, userRole, unreadAlerts }: Props) {
+export function AppHeader({ userName, userRole, unreadAlerts, canManage }: Props) {
   return (
     <header className="border-b border-card-border bg-canvas">
       <div className="mx-auto flex h-[72px] max-w-7xl items-center gap-3 px-4 sm:px-6 lg:gap-6">
@@ -88,7 +89,8 @@ export function AppHeader({ userName, userRole, unreadAlerts }: Props) {
             Metodología y fuentes
           </Link>
 
-          <details className="group relative">
+          {canManage && (
+          <details data-menu className="group relative">
             <summary className="flex cursor-pointer list-none items-center gap-1.5 rounded-lg px-2.5 py-2 text-[13px] font-medium text-body transition-colors hover:bg-surface-alt focus-visible:outline-2 focus-visible:outline-focus [&::-webkit-details-marker]:hidden">
               Administración
               <ChevronDown
@@ -111,6 +113,7 @@ export function AppHeader({ userName, userRole, unreadAlerts }: Props) {
               </Link>
             </div>
           </details>
+          )}
 
           <div className="ml-1 flex items-center gap-2.5 border-l border-card-border pl-2.5 sm:pl-3">
             <span className="flex size-10 items-center justify-center rounded-full bg-brand text-[12px] font-bold tracking-wide text-white">

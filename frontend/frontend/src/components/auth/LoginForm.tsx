@@ -1,10 +1,12 @@
 'use client';
 
-import { useActionState } from 'react';
+import { useActionState, useState } from 'react';
+import { Eye, EyeOff } from 'lucide-react';
 import { login, type LoginState } from '@/lib/auth/actions';
 
 export function LoginForm({ next }: { next: string }) {
   const [state, action, pending] = useActionState<LoginState, FormData>(login, {});
+  const [ver, setVer] = useState(false);
   return (
     <form action={action} className="space-y-5" noValidate>
       <input type="hidden" name="next" value={next} />
@@ -27,14 +29,25 @@ export function LoginForm({ next }: { next: string }) {
         <label htmlFor="password" className="block text-sm font-medium text-heading">
           Contraseña
         </label>
-        <input
-          id="password"
-          name="password"
-          type="password"
-          autoComplete="current-password"
-          required
-          className="w-full rounded-md border border-line bg-white px-3 py-2.5 text-sm text-body focus-visible:outline-2 focus-visible:outline-focus"
-        />
+        <div className="relative">
+          <input
+            id="password"
+            name="password"
+            type={ver ? 'text' : 'password'}
+            autoComplete="current-password"
+            required
+            className="w-full rounded-md border border-line bg-white py-2.5 pr-11 pl-3 text-sm text-body focus-visible:outline-2 focus-visible:outline-focus [&::-ms-reveal]:hidden"
+          />
+          <button
+            type="button"
+            onClick={() => setVer(!ver)}
+            aria-label={ver ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+            title={ver ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+            className="absolute top-1/2 right-2 flex size-8 -translate-y-1/2 items-center justify-center rounded-md text-muted-text hover:text-heading focus-visible:outline-2 focus-visible:outline-focus"
+          >
+            {ver ? <EyeOff className="size-4" aria-hidden /> : <Eye className="size-4" aria-hidden />}
+          </button>
+        </div>
       </div>
       {state.error && (
         <p

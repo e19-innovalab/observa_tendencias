@@ -47,7 +47,7 @@ function PillGroup({ options, current, variant, label, onSelect }: {
       aria-label={label}
       className={cn(
         'flex flex-wrap gap-2',
-        variant === 'segment' && 'inline-flex flex-nowrap rounded-lg bg-surface-2 p-0.5',
+        variant === 'segment' && 'inline-flex max-w-full flex-wrap rounded-lg bg-surface-2 p-0.5',
       )}
     >
       {options.map((option) => {
