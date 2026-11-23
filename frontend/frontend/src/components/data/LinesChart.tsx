@@ -31,7 +31,8 @@ type Props = {
 const W = 900;
 const H = 470;
 const L = 52;
-const R = 760;
+/** Sin etiquetas al final de cada línea, el área de dibujo llega casi hasta el borde. */
+const R = W - 40;
 const T = 16;
 const B = 438;
 const MAX_X_LABELS = 12;
@@ -50,8 +51,9 @@ function niceTicks(lo: number, hi: number, count = 5): number[] {
 }
 
 /**
- * Gráfico de líneas: etiquetas directas al final de cada línea, chips de país que también
- * son la leyenda, tooltip y, si hay, proyección punteada con el intervalo de la serie elegida.
+ * Gráfico de líneas: chips de país que también son la leyenda, tooltip y, si hay, proyección
+ * punteada con el intervalo de la serie elegida. Sin etiquetas al final de cada línea: el
+ * tooltip ya muestra el nombre y el valor, y así el área de dibujo ocupa todo el ancho.
  */
 export function LinesChart({ series, unit, mode = 'toggle', ariaLabel, fill = false }: Props) {
   const [off, setOff] = useState<Record<string, boolean>>({});
@@ -118,26 +120,6 @@ export function LinesChart({ series, unit, mode = 'toggle', ariaLabel, fill = fa
           `${i ? 'L' : 'M'}${x(index.get(p.period) ?? 0).toFixed(1)} ${y(p.value).toFixed(1)}`,
       )
       .join(' ');
-
-  const labels = shown
-    .map((s) => {
-      const last = s.projected?.length
-        ? s.projected[s.projected.length - 1]
-        : s.points[s.points.length - 1];
-      return last
-        ? {
-            key: s.key,
-            color: s.color,
-            text: `${s.label} ${formatValue(last.value, unit)}`,
-            ly: y(last.value) + 4,
-            lx: R + 10,
-          }
-        : null;
-    })
-    .filter((l): l is NonNullable<typeof l> => l !== null)
-    .sort((a, b) => a.ly - b.ly);
-  for (let i = 1; i < labels.length; i++)
-    if (labels[i].ly - labels[i - 1].ly < 16) labels[i].ly = labels[i - 1].ly + 16;
 
   const step = Math.max(1, Math.ceil(periods.length / MAX_X_LABELS));
   const firstProjected = Math.min(
@@ -327,19 +309,6 @@ export function LinesChart({ series, unit, mode = 'toggle', ariaLabel, fill = fa
               </g>
             );
           })}
-          {labels.map((l) => (
-            <text
-              key={l.key}
-              x={l.lx}
-              y={l.ly}
-              fontSize="13"
-              fontWeight="600"
-              fill={l.color}
-              opacity={mode === 'focus' && l.key !== focus ? 0.7 : 1}
-            >
-              {l.text}
-            </text>
-          ))}
           {hover !== null && (
             <line
               x1={x(hover)}
