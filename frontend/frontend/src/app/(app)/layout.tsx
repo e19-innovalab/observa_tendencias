@@ -3,6 +3,8 @@ import { Suspense, type ReactNode } from 'react';
 import { PrediDock } from '@/components/assistant/PrediDock';
 import { AppHeader } from '@/components/ui/layout/AppHeader';
 import { MainNav } from '@/components/ui/layout/MainNav';
+import { StickyBar } from '@/components/ui/layout/StickyBar';
+import { ExperimentalTabs } from '@/components/ui/navigation/ExperimentalTabs';
 import { apiGet } from '@/lib/api/client';
 import { getToken, requireUser } from '@/lib/auth/session';
 import { AssistantStatusSchema } from '@/lib/schemas/assistant';
@@ -11,7 +13,13 @@ import { AssistantStatusSchema } from '@/lib/schemas/assistant';
 async function Header() {
   await connection(); // depende de la sesión: se arma en cada request, no al prerenderizar
   const user = await requireUser();
-  return <AppHeader userName={user.full_name} userRole={user.role_label} unreadAlerts={0} />;
+  return <AppHeader userName={user.full_name} userRole={user.role_label} unreadAlerts={0} canManage={user.role !== 'viewer'} />;
+}
+
+async function Sticky() {
+  await connection();
+  const user = await requireUser();
+  return <StickyBar canManage={user.role !== 'viewer'} />;
 }
 
 /** Predi (antes Baqueano): solo si el asistente está prendido y el backend responde. */
@@ -41,6 +49,10 @@ export default function AppLayout({ children }: { children: ReactNode }) {
         <Header />
       </Suspense>
       <MainNav />
+      <Suspense fallback={null}>
+        <Sticky />
+      </Suspense>
+      <ExperimentalTabs />
       <main className="flex-1">{children}</main>
       <Suspense fallback={null}>
         <Assistant />

@@ -60,7 +60,7 @@ export default async function HabilidadesPage({
   return (
     <>
       <PageHero
-        title="Habilidades"
+        title="Habilidades y formación"
         description="Identificá las brechas entre la demanda del mercado laboral y la formación disponible, y anticipá las necesidades futuras."
       />
 

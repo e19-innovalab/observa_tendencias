@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import Image from 'next/image';
 import Link from 'next/link';
 import {
   ArrowRight,
@@ -340,10 +341,7 @@ export default function LandingPage() {
       <footer className="bg-heading py-12 text-sm text-white/70">
         <div className={`${box} space-y-8`}>
           <div className="flex flex-col items-center gap-4 text-center">
-            <p className="flex items-center gap-2 text-lg font-bold text-white">
-              <BarChart3 className="size-5" aria-hidden />
-              Observa Tendencias
-            </p>
+            <Image src="/predix-horizontal-blanco.svg" alt="Predix" width={126} height={36} className="h-9 w-auto" />
             <p className="max-w-md">
               Iniciativa para la integración, armonización y difusión de estadísticas socioeconómicas, laborales y formativas en el Cono Sur.
             </p>

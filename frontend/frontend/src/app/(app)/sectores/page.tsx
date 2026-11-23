@@ -212,9 +212,9 @@ async function SectoresContent({ searchParams }: { searchParams: Promise<SearchP
               </p>
             ) : (
               <>
-                <div className="grid grid-cols-[minmax(6.5rem,200px)_minmax(4rem,1fr)_5.5rem] gap-4 px-3 pb-2 text-[11px] text-label">
+                <div className="grid grid-cols-[1fr_auto] gap-4 px-3 pb-2 text-[11px] text-label sm:grid-cols-[minmax(6.5rem,200px)_minmax(4rem,1fr)_5.5rem]">
                   <span>Sector</span>
-                  <span className="flex justify-between">
+                  <span className="hidden justify-between sm:flex">
                     <span>0</span>
                     <span>25</span>
                     <span>50</span>
@@ -235,7 +235,7 @@ async function SectoresContent({ searchParams }: { searchParams: Promise<SearchP
                           scroll={false}
                           aria-current={on ? 'true' : undefined}
                           className={cn(
-                            'grid grid-cols-[minmax(6.5rem,200px)_minmax(4rem,1fr)_5.5rem] items-center gap-4 rounded-xl px-3 py-3.5 transition-colors',
+                            'grid grid-cols-[1fr_auto] items-center gap-x-4 gap-y-2.5 rounded-xl sm:grid-cols-[minmax(6.5rem,200px)_minmax(4rem,1fr)_5.5rem] sm:gap-4 px-3 py-3.5 transition-colors',
                             'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus',
                             on ? 'bg-brand/8' : 'hover:bg-surface',
                           )}
@@ -251,7 +251,7 @@ async function SectoresContent({ searchParams }: { searchParams: Promise<SearchP
                             </span>
                             <span className="truncate">{item.name}</span>
                           </span>
-                          <span className="relative block h-7 rounded-md bg-surface-2">
+                          <span className="relative col-span-2 row-start-2 block h-7 rounded-md bg-surface-2 sm:col-span-1 sm:row-start-auto">
                             {item.average_score !== null && (
                               <span
                                 className={cn(

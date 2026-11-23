@@ -15,8 +15,8 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: {
-    default: 'Observa Tendencias',
-    template: '%s · Observa Tendencias',
+    default: 'Predix',
+    template: '%s · Predix',
   },
   description:
     'Observatorio de datos de empleo, educación y tendencias para Argentina, Chile y Uruguay.',
