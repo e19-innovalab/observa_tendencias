@@ -1,7 +1,8 @@
 import Link from 'next/link';
 import { BarChart3, Info, Table2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { GenderBarChart } from '@/components/ui/charts/GenderBarChart';
+import { TrendLineChart } from '@/components/ui/charts/TrendLineChart';
+import { COUNTRY_COLORS, FALLBACK_COLOR } from '@/components/ui/charts/chartTheme';
 import { ChipGroup, SelectParam } from '@/components/data/UrlControls';
 import { ErrorNote } from '@/components/data/ui';
 import { getCountries } from '@/lib/api/panorama';
@@ -198,16 +199,19 @@ export async function GenderView({ sp }: { sp: SearchParams }) {
   const graduates = rowsFor((i) => i.pct_mujeres_graduadas != null);
   const employed = rowsFor((i) => i.pct_mujeres_ocupadas != null);
   const place = (i: Item) => [names[i.pais] ?? i.pais, i.sector];
-  /** Una barra por país para el sector activo (el año, si está, se muestra en la etiqueta). */
-  const bars = (list: Item[], field: 'pct_mujeres_graduadas' | 'pct_mujeres_ocupadas') =>
-    list
-      .filter((i) => i.sector === sector && i[field] != null)
-      .map((i) => ({
-        key: i.pais,
-        label: `${names[i.pais] ?? i.pais} (${i.anio})`,
-        value: i[field]!,
-      }))
-      .sort((a, b) => b.value - a.value);
+  const line = (field: 'pct_mujeres_graduadas' | 'pct_mujeres_ocupadas') =>
+    [...years]
+      .reverse()
+      .map((y) => {
+        const row: Record<string, string | number | null> = { label: String(y) };
+        for (const c of countries) {
+          row[c] =
+            kpis.items.find((i) => i.pais === c && i.sector === sector && i.anio === y)?.[field] ?? null;
+        }
+        return row;
+      })
+      .filter((row) => countries.some((c) => row[c] !== null));
+  const series = countries.map((c) => ({ key: c, label: c, color: COUNTRY_COLORS[c] ?? FALLBACK_COLOR }));
 
   return (
     <>
@@ -280,11 +284,7 @@ export async function GenderView({ sp }: { sp: SearchParams }) {
                 <h3 className="mb-2 text-sm font-semibold text-heading">
                   {sector}: % de mujeres entre titulados
                 </h3>
-                {bars(graduates, 'pct_mujeres_graduadas').length ? (
-                  <GenderBarChart rows={bars(graduates, 'pct_mujeres_graduadas')} unit="percent" />
-                ) : (
-                  <Vacio text="Sin datos de titulados para este sector." />
-                )}
+                <TrendLineChart data={line('pct_mujeres_graduadas')} series={series} unit="percent" />
               </div>
             </div>
           </>
@@ -330,11 +330,7 @@ export async function GenderView({ sp }: { sp: SearchParams }) {
               <h3 className="mb-2 text-sm font-semibold text-heading">
                 {sector}: % de mujeres entre ocupados
               </h3>
-              {bars(employed, 'pct_mujeres_ocupadas').length ? (
-                <GenderBarChart rows={bars(employed, 'pct_mujeres_ocupadas')} unit="percent" />
-              ) : (
-                <Vacio text="Sin datos de ocupados para este sector." />
-              )}
+              <TrendLineChart data={line('pct_mujeres_ocupadas')} series={series} unit="percent" />
             </div>
           </>
         )}

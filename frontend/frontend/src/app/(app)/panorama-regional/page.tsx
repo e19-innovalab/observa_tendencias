@@ -305,10 +305,10 @@ export default async function PanoramaRegionalPage({
     return item.options?.find((option) => option.value === value)?.code;
   };
 
-  const selectedCountries =
-    sp.country && sp.country !== 'all'
-      ? [sp.country]
-      : countries.map((country) => country.iso3);
+  const country = countries.some((item) => item.iso3 === sp.country)
+    ? sp.country!
+    : (countries[0]?.iso3 ?? '');
+  const selectedCountries = country ? [country] : [];
   const fromYear = sp.desde ?? String(thisYear - 10);
   const toYear = sp.hasta;
 
@@ -629,7 +629,12 @@ export default async function PanoramaRegionalPage({
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div className="flex flex-wrap items-center gap-2.5">
               <FilterLabel>Países</FilterLabel>
-              <CountryFilter countries={countries} value={sp.country ?? ''} reset={['page']} />
+              <CountryFilter
+                countries={countries}
+                value={country}
+                reset={['page']}
+                withAll={false}
+              />
             </div>
             <YearRange years={Array.from({ length: 30 }, (_, i) => thisYear - i)} desde={sp.desde} hasta={sp.hasta} />
           </div>

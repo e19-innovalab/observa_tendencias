@@ -20,6 +20,7 @@ export function CountryFilter({
   name = 'country',
   reset = [],
   compact = false,
+  withAll = true,
 }: {
   countries: Country[];
   value: string;
@@ -27,6 +28,8 @@ export function CountryFilter({
   reset?: string[];
   /** Muestra solo el código ISO3 (para paneles compactos). */
   compact?: boolean;
+  /** Si es false, no ofrece la opción «Todos»: siempre hay un país seleccionado. */
+  withAll?: boolean;
 }) {
   const pathname = usePathname();
   const search = useSearchParams();
@@ -44,20 +47,22 @@ export function CountryFilter({
 
   return (
     <div className="flex flex-wrap items-center gap-2" role="group" aria-label="Países">
-      <Link
-        href={href('')}
-        scroll={false}
-        aria-pressed={!value}
-        className={cn(
-          pill,
-          !value
-            ? 'border-brand bg-brand/8 font-semibold text-brand'
-            : 'border-card-border bg-canvas text-body hover:border-line',
-        )}
-      >
-        {!value && <Check className="size-3.5" aria-hidden />}
-        Todos ({countries.length})
-      </Link>
+      {withAll && (
+        <Link
+          href={href('')}
+          scroll={false}
+          aria-pressed={!value}
+          className={cn(
+            pill,
+            !value
+              ? 'border-brand bg-brand/8 font-semibold text-brand'
+              : 'border-card-border bg-canvas text-body hover:border-line',
+          )}
+        >
+          {!value && <Check className="size-3.5" aria-hidden />}
+          Todos ({countries.length})
+        </Link>
+      )}
       {countries.map((country) => {
         const active = value === country.iso3;
         return (
