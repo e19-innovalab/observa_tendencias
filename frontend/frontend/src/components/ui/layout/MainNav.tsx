@@ -3,7 +3,7 @@
 import { Suspense, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { ChevronDown, Menu, X } from 'lucide-react';
+import { BarChart3, Briefcase, ChevronDown, Factory, Globe, Lightbulb, Menu, User, X, type LucideIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 export const ITEMS = [
@@ -32,18 +32,103 @@ export function isActive(href: string, pathname: string) {
   return pathname === href || pathname.startsWith(`${href}/`);
 }
 
-const CELL =
-  'flex h-16 min-w-fit flex-1 items-center justify-center gap-2 border-r border-white/30 px-4 text-center text-[13.5px] font-medium transition-colors focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-white sm:text-[14px]';
+const ICONOS: Record<string, LucideIcon> = {
+  '/panorama-regional': Globe,
+  '/sectores': Factory,
+  '/ocupaciones': Briefcase,
+  '/habilidades': Lightbulb,
+  '/genero': User,
+};
 
-function NavFallback() {
+const DETALLE: Record<string, string> = {
+  '/pulso': 'Demanda y competencia en tiempo real',
+  '/moctezuma': 'Brecha tecnológica y social',
+  '/ludita': 'Riesgo de desplazamiento',
+  '/reina-roja': 'Obsolescencia de habilidades',
+  '/sisifo': 'Sobreeducación y subempleo',
+};
+
+export function cerrar(e: React.MouseEvent<HTMLElement>) {
+  e.currentTarget.closest('details')?.removeAttribute('open');
+}
+
+export function Secciones() {
+  const pathname = usePathname();
+  const enIndices = INDEX_PATHS.some((path) => pathname === path || pathname.startsWith(`${path}/`));
+
   return (
     <>
-      {ITEMS.map((item) => (
-        <span key={item.href} className={cn(CELL, 'bg-nav text-body')}>
-          {item.label}
-        </span>
-      ))}
-      <span className={cn(CELL, 'bg-nav text-body')}>Experimentales</span>
+      {ITEMS.map((item) => {
+        const active = isActive(item.href, pathname);
+        const Icono = ICONOS[item.href];
+        return (
+          <Link
+            key={item.href}
+            href={item.href}
+            aria-current={active ? 'page' : undefined}
+            className={cn(
+              'flex shrink-0 items-center gap-2 rounded-full border px-3 py-1.5 text-[13px] font-medium whitespace-nowrap transition-colors focus-visible:outline-2 focus-visible:outline-focus',
+              active ? 'border-brand bg-brand text-white' : 'border-card-border bg-canvas text-body hover:border-transparent hover:bg-surface-alt',
+            )}
+          >
+            {Icono && <Icono className={cn('hidden size-4 xl:block', active ? 'text-white' : 'text-muted-text')} aria-hidden />}
+            {item.label}
+            {active && <span className="size-1.5 rounded-full bg-white" aria-hidden />}
+          </Link>
+        );
+      })}
+
+      <details data-menu className="group relative shrink-0">
+        <summary
+          className={cn(
+            'flex cursor-pointer list-none items-center gap-2 rounded-lg border px-3 py-1.5 text-[13px] font-medium whitespace-nowrap focus-visible:outline-2 focus-visible:outline-focus [&::-webkit-details-marker]:hidden',
+            enIndices ? 'border-brand bg-brand text-white' : 'border-card-border text-body hover:bg-surface-alt',
+          )}
+        >
+          <BarChart3 className={cn('size-4', enIndices ? 'text-white' : 'text-muted-text')} aria-hidden />
+          Experimentales
+          <ChevronDown className="size-3.5 transition-transform group-open:rotate-180" aria-hidden />
+          <span className={cn('rounded px-1.5 py-0.5 text-[9.5px] font-bold', enIndices ? 'bg-white/20 text-white' : 'bg-brand text-white')}>
+            BETA
+          </span>
+        </summary>
+        <div className="absolute top-full right-0 z-50 mt-2 w-[600px] max-w-[calc(100vw-2rem)] rounded-xl border border-card-border bg-canvas p-5 shadow-lg">
+          <p className="border-b border-card-border pb-3 text-[13px] text-muted-text">
+            Modelos analíticos y fuentes alternativas para el monitoreo regional
+          </p>
+          <div className="mt-4 grid grid-cols-2 gap-6">
+            <div>
+              <p className="border-b border-card-border pb-2 text-[11px] font-semibold tracking-[0.1em] text-muted-text uppercase">
+                Tiempo real
+              </p>
+              <Link
+                href="/pulso"
+                onClick={cerrar}
+                className="mt-3 block rounded-lg bg-surface-alt px-3 py-2.5 hover:bg-surface-2 focus-visible:outline-2 focus-visible:outline-focus"
+              >
+                <span className="block text-[13px] font-medium text-heading">Pulso laboral (LinkedIn)</span>
+                <span className="block text-[12.5px] text-muted-text">{DETALLE['/pulso']}</span>
+              </Link>
+            </div>
+            <div className="border-l border-card-border pl-6">
+              <p className="border-b border-card-border pb-2 text-[11px] font-semibold tracking-[0.1em] text-muted-text uppercase">
+                Indicadores
+              </p>
+              {INDICES.filter((item) => item.href !== '/pulso').map((item) => (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  onClick={cerrar}
+                  className="mt-1 block rounded-lg px-3 py-2 hover:bg-surface-alt focus-visible:outline-2 focus-visible:outline-focus"
+                >
+                  <span className="block text-[13px] font-medium text-heading">{item.label.replace('Indicador ', '')}</span>
+                  <span className="block text-[12.5px] text-muted-text">{DETALLE[item.href]}</span>
+                </Link>
+              ))}
+            </div>
+          </div>
+        </div>
+      </details>
     </>
   );
 }
@@ -67,69 +152,7 @@ function useCerrarMenus(pathname: string) {
 function NavItems() {
   const pathname = usePathname();
   useCerrarMenus(pathname);
-  const indicesActive = INDEX_PATHS.some(
-    (path) => pathname === path || pathname.startsWith(`${path}/`),
-  );
-
-  return (
-    <>
-      {ITEMS.map((item) => {
-        const active = isActive(item.href, pathname);
-        return (
-          <Link
-            key={item.href}
-            href={item.href}
-            aria-current={active ? 'page' : undefined}
-            className={cn(
-              CELL,
-              active ? 'bg-nav-active text-white' : 'bg-nav text-body hover:bg-nav-hover',
-            )}
-          >
-            {item.label}
-          </Link>
-        );
-      })}
-
-      <details data-menu className="group relative flex min-w-fit flex-1">
-        <summary
-          className={cn(
-            CELL,
-            'w-full cursor-pointer list-none [&::-webkit-details-marker]:hidden',
-            indicesActive ? 'bg-nav-active text-white' : 'bg-nav text-body hover:bg-nav-hover',
-          )}
-        >
-          Experimentales
-          <ChevronDown
-            className={cn(
-              'size-4 transition-transform group-open:rotate-180',
-              indicesActive ? 'text-white/80' : 'text-muted-text',
-            )}
-            aria-hidden
-          />
-          <span
-            className={cn(
-              'rounded px-1.5 py-0.5 text-[9.5px] font-bold tracking-wide',
-              indicesActive ? 'bg-white/20 text-white' : 'bg-heading text-white',
-            )}
-          >
-            BETA
-          </span>
-        </summary>
-        <div className="absolute top-full right-0 z-40 mt-1 w-72 overflow-hidden rounded-xl border border-card-border bg-canvas py-1 shadow-lg">
-          {INDICES.map((item) => (
-            <Link
-              key={item.href}
-              href={item.href}
-              onClick={(e) => e.currentTarget.closest('details')?.removeAttribute('open')}
-              className="block px-4 py-2.5 text-[13px] text-body hover:bg-surface-alt focus-visible:outline-2 focus-visible:outline-focus"
-            >
-              {item.label}
-            </Link>
-          ))}
-        </div>
-      </details>
-    </>
-  );
+  return <Secciones />;
 }
 
 const LINK_CELU =
@@ -192,9 +215,9 @@ function MenuCelu() {
 
 export function MainNav() {
   return (
-    <nav aria-label="Principal" className="relative border-b border-white/50 bg-nav">
-      <div className="hidden items-stretch lg:flex">
-        <Suspense fallback={<NavFallback />}>
+    <nav aria-label="Principal" className="relative border-b border-card-border bg-nav lg:bg-surface">
+      <div className="mx-auto hidden max-w-7xl items-center gap-1 px-4 py-2.5 sm:px-6 lg:flex">
+        <Suspense fallback={null}>
           <NavItems />
         </Suspense>
       </div>

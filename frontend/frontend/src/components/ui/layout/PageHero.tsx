@@ -25,7 +25,7 @@ export function PageHero({
   title,
   description,
   breadcrumbs,
-  align = 'center',
+  align = 'left',
   leading,
   actions,
   children,
@@ -33,7 +33,7 @@ export function PageHero({
   const centered = align === 'center';
 
   return (
-    <section className="text-white" style={{ backgroundImage: 'var(--gradient-hero)' }}>
+    <section className="text-white" style={{ backgroundImage: 'linear-gradient(100deg, #080067 0%, #172bc4 100%)' }}>
       <div
         className={cn(
           'mx-auto max-w-7xl px-4 sm:px-6',
