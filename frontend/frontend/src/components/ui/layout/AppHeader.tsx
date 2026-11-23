@@ -1,3 +1,4 @@
+import Image from 'next/image';
 import Link from 'next/link';
 import { Bell, BookOpen, ChevronDown, LogOut, Search } from 'lucide-react';
 import { logout } from '@/lib/auth/actions';
@@ -8,17 +9,6 @@ type Props = {
   unreadAlerts: number;
   canManage: boolean;
 };
-
-/** Isotipo del observatorio: barras ascendentes dentro del cuadrado de marca. */
-export function LogoMark() {
-  return (
-    <svg viewBox="0 0 24 24" className="size-5" aria-hidden fill="none">
-      <rect x="3.2" y="12.4" width="3.4" height="8.2" rx="1.5" fill="currentColor" />
-      <rect x="10.3" y="7.4" width="3.4" height="13.2" rx="1.5" fill="currentColor" opacity="0.85" />
-      <rect x="17.4" y="3.4" width="3.4" height="17.2" rx="1.5" fill="currentColor" opacity="0.7" />
-    </svg>
-  );
-}
 
 function initials(name: string) {
   return name
@@ -37,17 +27,7 @@ export function AppHeader({ userName, userRole, unreadAlerts, canManage }: Props
           href="/inicio"
           className="flex shrink-0 items-center gap-3 rounded-lg focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
         >
-          <span className="flex size-10 items-center justify-center rounded-[11px] bg-brand text-white shadow-sm">
-            <LogoMark />
-          </span>
-          <span className="hidden leading-none sm:block">
-            <span className="block text-[12.5px] font-bold tracking-[0.13em] text-heading">
-              OBSERVATORIO
-            </span>
-            <span className="mt-1 block text-[10px] font-semibold tracking-[0.22em] text-brand">
-              CONO SUR
-            </span>
-          </span>
+          <Image src="/predix-horizontal.svg" alt="Predix" width={126} height={36} priority className="h-9 w-auto" />
         </Link>
 
         <form action="/panorama" role="search" className="hidden min-w-0 flex-1 justify-center lg:flex">

@@ -371,12 +371,10 @@ async function OcupacionesContent({ searchParams }: { searchParams: Promise<Sear
                           <Link
                             href={`/ocupaciones/${row.code}`}
                             aria-label={`Abrir la ficha de ${row.name}`}
-                            title="Abrir ficha"
-                            className={cn(
-                              'flex size-8 shrink-0 items-center justify-center rounded-md text-brand hover:bg-brand/10 focus-visible:opacity-100',
-                              on ? 'opacity-100' : 'opacity-0 group-hover:opacity-100',
-                            )}
+                            title="Ver detalle"
+                            className="flex h-8 shrink-0 items-center gap-1 rounded-md px-2 text-[12px] font-semibold whitespace-nowrap text-brand hover:bg-brand/10"
                           >
+                            <span className="hidden sm:inline">Ver detalle</span>
                             <ArrowRight className="size-4" aria-hidden />
                           </Link>
                         </li>

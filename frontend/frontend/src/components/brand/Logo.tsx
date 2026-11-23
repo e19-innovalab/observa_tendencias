@@ -1,6 +1,6 @@
+import Image from 'next/image';
 import Link from 'next/link';
 
-/** Marca provisoria hasta tener el logo definitivo (el diseño usa un marcador "LOGO"). */
 export function Logo({ href = '/', inverted = false }: { href?: string; inverted?: boolean }) {
   return (
     <Link
@@ -9,15 +9,14 @@ export function Logo({ href = '/', inverted = false }: { href?: string; inverted
         inverted ? 'text-white' : 'text-heading'
       }`}
     >
-      <span
-        aria-hidden
-        className={`flex size-8 items-center justify-center rounded-md text-sm font-bold ${
-          inverted ? 'bg-white text-brand' : 'bg-brand text-white'
-        }`}
-      >
-        OT
-      </span>
-      <span className="text-lg">Observa Tendencias</span>
+      <Image
+        src={inverted ? '/predix-horizontal-blanco.svg' : '/predix-horizontal.svg'}
+        alt="Predix"
+        width={126}
+        height={36}
+        priority
+        className="h-9 w-auto"
+      />
     </Link>
   );
 }

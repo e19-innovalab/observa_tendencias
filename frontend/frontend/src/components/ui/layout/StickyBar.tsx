@@ -1,6 +1,7 @@
 'use client';
 
 import { Suspense, useEffect, useState } from 'react';
+import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
@@ -17,7 +18,6 @@ import {
   type LucideIcon,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { LogoMark } from './AppHeader';
 import { INDEX_PATHS, INDICES, ITEMS, isActive } from './MainNav';
 
 const ICONOS: Record<string, LucideIcon> = {
@@ -115,9 +115,9 @@ export function StickyBar({ canManage }: { canManage: boolean }) {
         <Link
           href="/inicio"
           aria-label="Ir al inicio"
-          className="flex size-9 shrink-0 items-center justify-center rounded-[10px] bg-brand text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
+          className="flex shrink-0 items-center rounded-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
         >
-          <LogoMark />
+          <Image src="/predix-isotipo.svg" alt="Predix" width={51} height={57} className="h-9 w-auto" />
         </Link>
 
         <nav aria-label="Secciones" className="flex min-w-0 flex-1 items-center gap-1">

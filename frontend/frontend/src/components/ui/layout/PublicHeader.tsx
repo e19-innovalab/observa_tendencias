@@ -1,5 +1,5 @@
+import Image from 'next/image';
 import Link from 'next/link';
-import { BarChart3 } from 'lucide-react';
 
 const links = [
   { label: 'El observatorio', href: '/landing#observatorio' },
@@ -16,10 +16,7 @@ export function PublicHeader() {
           href="/landing"
           className="flex items-center gap-2 rounded-md py-1 text-brand focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
         >
-          <span className="flex size-9 items-center justify-center rounded-lg bg-brand text-white">
-            <BarChart3 className="size-5" aria-hidden />
-          </span>
-          <span className="hidden text-lg font-bold tracking-tight text-heading sm:block">Observa Tendencias</span>
+          <Image src="/predix-horizontal.svg" alt="Predix" width={126} height={36} priority className="h-9 w-auto" />
         </Link>
         <nav aria-label="Principal" className="hidden gap-6 text-sm font-medium text-body lg:flex">
           {links.map((l) => (
