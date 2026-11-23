@@ -629,7 +629,12 @@ export default async function PanoramaRegionalPage({
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div className="flex flex-wrap items-center gap-2.5">
               <FilterLabel>Países</FilterLabel>
-              <CountryFilter countries={countries} value={sp.country ?? ''} reset={['page']} />
+              <CountryFilter
+                countries={countries}
+                value={country}
+                reset={['page']}
+                withAll={false}
+              />
             </div>
             <YearRange years={Array.from({ length: 30 }, (_, i) => thisYear - i)} desde={sp.desde} hasta={sp.hasta} />
           </div>
