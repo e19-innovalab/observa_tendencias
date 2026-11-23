@@ -1,6 +1,4 @@
-import Link from 'next/link';
-import { BarChart3, Info, Table2 } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { Info } from 'lucide-react';
 import { TrendLineChart } from '@/components/ui/charts/TrendLineChart';
 import { COUNTRY_COLORS, FALLBACK_COLOR } from '@/components/ui/charts/chartTheme';
 import { ChipGroup, SelectParam } from '@/components/data/UrlControls';
@@ -8,7 +6,7 @@ import { ErrorNote } from '@/components/data/ui';
 import { getCountries } from '@/lib/api/panorama';
 import { getSectorKpis } from '@/lib/api/graduatesExtended';
 
-type SearchParams = { country?: string; anio?: string; sector_kpi?: string; vista_t?: string; vista_o?: string };
+type SearchParams = { country?: string; anio?: string; sector_kpi?: string };
 type Kpis = Awaited<ReturnType<typeof getSectorKpis>>;
 type Item = Kpis['items'][number];
 
@@ -65,12 +63,10 @@ function Table({
 function Section({
   title,
   text,
-  actions,
   children,
 }: {
   title: string;
   text: string;
-  actions?: React.ReactNode;
   children: React.ReactNode;
 }) {
   return (
@@ -80,87 +76,17 @@ function Section({
           <h2 className="text-lg font-semibold text-heading">{title}</h2>
           <p className="mt-1 text-sm text-muted-text">{text}</p>
         </div>
-        {actions}
       </div>
       {children}
     </section>
   );
 }
 
-function Vista({ sp, name }: { sp: SearchParams; name: 'vista_t' | 'vista_o' }) {
-  const tabla = sp[name] === 'tabla';
-  const href = (v: string) => {
-    const params = new URLSearchParams();
-    Object.entries(sp).forEach(([k, val]) => {
-      if (val && k !== name) params.set(k, val);
-    });
-    if (v) params.set(name, v);
-    const qs = params.toString();
-    return qs ? `?${qs}` : '?';
-  };
-  const cls = (on: boolean) =>
-    cn(
-      'flex items-center gap-1.5 rounded-md px-3 py-1.5 text-[12.5px] font-semibold',
-      on ? 'bg-canvas text-brand shadow-sm' : 'text-muted-text hover:text-heading',
-    );
-  return (
-    <div className="inline-flex shrink-0 rounded-lg bg-surface-2 p-0.5" role="group" aria-label="Ver como">
-      <Link href={href('')} scroll={false} aria-pressed={!tabla} className={cls(!tabla)}>
-        <BarChart3 className="size-4" aria-hidden /> Gráfico
-      </Link>
-      <Link href={href('tabla')} scroll={false} aria-pressed={tabla} className={cls(tabla)}>
-        <Table2 className="size-4" aria-hidden /> Tabla
-      </Link>
-    </div>
-  );
-}
-
-function Reparto({ rows }: { rows: { key: string; label: string; total: boolean; mujeres: number | null }[] }) {
-  return (
-    <div className="p-5">
-      <div className="mb-4 flex flex-wrap items-center gap-4 text-[12px] text-muted-text">
-        <span className="flex items-center gap-1.5">
-          <span className="size-3 rounded-sm bg-brand" aria-hidden /> Mujeres
-        </span>
-        <span className="flex items-center gap-1.5">
-          <span className="size-3 rounded-sm bg-brand/25" aria-hidden /> Varones
-        </span>
-        <span className="flex items-center gap-1.5">
-          <span className="h-3 w-0.5 bg-heading" aria-hidden /> Mitad (50 %)
-        </span>
-      </div>
-      <ul className="space-y-4">
-        {rows.map((r) => {
-          const m = r.mujeres == null ? null : Math.max(0, Math.min(100, r.mujeres));
-          return (
-            <li key={r.key}>
-              <div className="mb-1.5 flex items-baseline justify-between gap-3 text-[13px]">
-                <span className={cn('min-w-0', r.total ? 'font-semibold text-heading' : 'text-body')}>{r.label}</span>
-                {m != null && (
-                  <span className="shrink-0 text-[12px] text-muted-text">
-                    <span className="font-semibold text-heading">{percent(m)}</span> mujeres
-                  </span>
-                )}
-              </div>
-              {m == null ? (
-                <p className="text-[12px] text-muted-text">Sin dato</p>
-              ) : (
-                <div className="relative flex h-6 overflow-hidden rounded-md">
-                  <span className="h-full bg-brand" style={{ width: `${m}%` }} />
-                  <span className="h-full flex-1 bg-brand/25" />
-                  <span className="absolute inset-y-0 left-1/2 w-0.5 -translate-x-1/2 bg-heading" aria-hidden />
-                </div>
-              )}
-            </li>
-          );
-        })}
-      </ul>
-    </div>
-  );
-}
+/** Pestañas internas de la pantalla: cada una muestra su tabla y su gráfico de líneas. */
+export type GenderTab = 'titulados' | 'ocupados';
 
 /** Indicadores de género: titulados y ocupados por sexo, sus brechas y el diagnóstico de paridad. */
-export async function GenderView({ sp }: { sp: SearchParams }) {
+export async function GenderView({ sp, tab }: { sp: SearchParams; tab: GenderTab }) {
   let kpis: Kpis, catalog;
   try {
     [kpis, catalog] = await Promise.all([getSectorKpis(), getCountries()]);
