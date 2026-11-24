@@ -7,6 +7,7 @@ export const AssistantStatusSchema = z.object({
   model: z.string(),
   questions_per_day: z.number(),
   remaining_today: z.number().nullable(),
+  can_ask: z.boolean().default(false),
   max_question_chars: z.number(),
   history_turns: z.number(),
   texts: z.record(z.string(), z.string()),

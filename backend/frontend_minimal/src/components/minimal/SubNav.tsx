@@ -2,14 +2,15 @@
 
 import Link from 'next/link';
 import { usePathname, useSearchParams } from 'next/navigation';
+import { isFreePath } from '@/lib/auth/constants';
 import { inSection, onTab, SECTIONS } from './nav';
 
-/** Pestañas de la sección actual, debajo de la barra superior. */
-export function SubNav() {
+/** Pestañas de la sección actual, debajo de la barra superior. free: cuenta gratuita, solo en sus secciones. */
+export function SubNav({ free = false }: { free?: boolean }) {
   const pathname = usePathname();
   const tabParam = useSearchParams().get('tab');
   const section = SECTIONS.find((s) => s.tabs && inSection(pathname, s));
-  if (!section?.tabs) return null;
+  if (!section?.tabs || (free && !isFreePath(pathname))) return null;
   return (
     <nav aria-label={section.label} className="mx-auto flex max-w-[1360px] gap-6 overflow-x-auto px-4 sm:px-8">
       {section.tabs.map((t) => {

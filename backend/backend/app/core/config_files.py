@@ -418,11 +418,19 @@ class RoleConf(BaseModel):
     permissions: list[str]
 
 
+class GoogleLoginConf(BaseModel):
+    # role of the accounts created on a first Google sign-in
+    signup_role: str
+    # accepted issuers of Google's sign-in token
+    issuers: list[str]
+
+
 class AuthConf(BaseModel):
     token_ttl_hours: float
     password_min_length: int
     default_role: str
     roles: dict[str, RoleConf]
+    google: GoogleLoginConf
     statuses: dict[str, str]
     messages: dict[str, str]
 

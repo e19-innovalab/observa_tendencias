@@ -9,14 +9,17 @@ from app.models.base import Base
 
 class User(Base):
     """Observatory account. role: a key of app.yaml -> auth.roles; countries: ISO3 codes the user
-    works on (empty = the whole region); sector_code: sector of interest (None = all)."""
+    works on (empty = the whole region); sector_code: sector of interest (None = all).
+    password_hash is None for accounts that only sign in with Google; google_sub is Google's id of
+    the account, set on the first Google sign-in."""
 
     __tablename__ = "users"
     __table_args__ = (CheckConstraint("status IN ('active', 'suspended')", name="ck_users_status"),)
     user_id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     email: Mapped[str] = mapped_column(String(320), unique=True, index=True)
     full_name: Mapped[str] = mapped_column(Text)
-    password_hash: Mapped[str] = mapped_column(Text)
+    password_hash: Mapped[str | None] = mapped_column(Text, nullable=True)
+    google_sub: Mapped[str | None] = mapped_column(Text, unique=True, nullable=True)
     role: Mapped[str] = mapped_column(Text)
     sector_code: Mapped[str | None] = mapped_column(ForeignKey("sectors.sector_code"), nullable=True)
     countries: Mapped[list] = mapped_column(JSON().with_variant(JSONB, "postgresql"), default=list)

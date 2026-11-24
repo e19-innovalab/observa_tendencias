@@ -49,8 +49,8 @@ export function LoginForm({ next }: { next: string }) {
         {pending ? 'Ingresando…' : 'Ingresar'}
       </button>
       <p className="text-xs text-muted-text">
-        Las cuentas las crea un administrador del observatorio. Si no tenés acceso o olvidaste tu
-        contraseña, escribile a quien administra tu institución.
+        Las cuentas con acceso completo las crea un administrador del observatorio. Si no tenés
+        acceso o olvidaste tu contraseña, escribile a quien administra tu institución.
       </p>
     </form>
   );

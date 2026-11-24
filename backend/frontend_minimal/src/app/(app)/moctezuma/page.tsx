@@ -540,7 +540,7 @@ function HowItsCalculated({ page, names, params, reference: ref }: { page: Mocte
     },
     {
       title: `Escala de 0 a ${num(params.scale_max)} dentro del grupo`,
-      body: `El grupo son todas las ocupaciones de los países en el mismo año.${inverted.length ? ` Si un valor alto significa menos ritmo o menos capacidad (${lower(inverted)}), se invierte: ${num(params.scale_max)} − puntaje.` : ''} Si todo el grupo tiene el mismo valor, el puntaje es ${num(params.flat_cohort_score)}.`,
+      body: `El grupo son todas las ocupaciones de los países en el mismo año. 0 y ${num(params.scale_max)} no son calificaciones: marcan la posición de cada valor dentro del grupo, del más bajo al más alto.${national.length ? ` En ${lower(national)}, que son nacionales, el grupo tiene un solo valor por país: siempre hay un país en 0 y otro en ${num(params.scale_max)}, aunque estén muy cerca.` : ''}${inverted.length ? ` Si un valor alto significa menos ritmo o menos capacidad (${lower(inverted)}), se invierte: ${num(params.scale_max)} − puntaje.` : ''} Si todo el grupo tiene el mismo valor, el puntaje es ${num(params.flat_cohort_score)}.`,
       formula: `puntaje = (valor − mínimo del grupo) / (máximo − mínimo) × ${num(params.scale_max)}`,
     },
     {
@@ -628,6 +628,9 @@ function HowItsCalculated({ page, names, params, reference: ref }: { page: Mocte
               </tfoot>
             </table>
           </div>
+          <p className="max-w-3xl text-sm leading-relaxed text-slate-600">
+            Los puntajes muestran la posición dentro del grupo (paso 2), no una calificación: 0 es el extremo inferior y {num(params.scale_max)} el superior{inverted.length ? ', al revés en las invertidas' : ''}. Un 0 no indica ausencia ni un mal resultado: puede separarlo de los demás una diferencia chica.
+          </p>
         </>
       )}
 

@@ -158,6 +158,22 @@ def gender_rows(by_sex: dict, employment: dict, women: dict) -> list[dict]:
     return out
 
 
+def tertiary_employment_rows(session: Session) -> list[dict]:
+    """Employed with higher education by sex, per country and year. National only: ILOSTAT does
+    not publish it by sector. Values come in thousands of persons."""
+    codes = analytics_params("sector_kpis")["tertiary_employment"]
+    women, men = _annual(session, codes["women"]), _annual(session, codes["men"])
+    out = []
+    for (country, sector, year), female in women.items():
+        male = men.get((country, sector, year))
+        if sector is not None or male is None or not female + male:
+            continue
+        pct = round(female / (female + male) * 100, 2)
+        out.append({"pais": country, "anio": year, "mujeres": female * 1000, "varones": male * 1000,
+                    "pct_mujeres": pct, "brecha_pct": round(2 * pct - 100, 2), "diagnostico": parity_label(pct)})
+    return sorted(out, key=lambda r: (r["pais"], r["anio"]))
+
+
 def projection_rows(graduates: dict) -> list[dict]:
     """Indicative projection per sector, where the series has enough history and no gaps."""
     conf = analytics_params("sector_kpis")
@@ -242,7 +258,7 @@ def sector_kpis(session: Session) -> dict:
     return {"items": sorted(items, key=lambda i: (i["pais"], i["sector"], i["anio"])),
             "proyecciones": sorted(projections, key=lambda p: (p["pais"], p["sector"], p["anio"])),
             "nota": analytics_params("sector_kpis")["note"], "genero_nota": analytics_params("sector_kpis")["gender_note"],
-            **cep_series(session)}
+            "ocupados_educacion_superior": tertiary_employment_rows(session), **cep_series(session)}
 
 
 def cep_series(session: Session) -> dict:

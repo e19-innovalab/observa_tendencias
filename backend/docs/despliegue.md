@@ -1,6 +1,6 @@
 # Despliegue: Supabase + Render + Vercel
 
-Cómo publicar Observa Tendencias en la nube, con planes gratuitos.
+Cómo publicar Predix (antes Observa Tendencias) en la nube, con planes gratuitos.
 
 ```
 Navegador ──► Vercel (frontend minimal, Next.js) ──► Render (API FastAPI) ──► Supabase (PostgreSQL)
@@ -93,13 +93,14 @@ En [render.com](https://render.com): **New → Web Service** → conectá el rep
 | `DATABASE_URL` | La cadena del Session pooler de Supabase (con `postgresql+psycopg://`) |
 | `AUTH_SECRET` | Una clave nueva: `python -c "import secrets; print(secrets.token_urlsafe(48))"`. Distinta de la local |
 | `ADMIN_API_KEY` | Una clave nueva, para scripts |
+| `GOOGLE_CLIENT_ID` | El client ID de "Continuar con Google" (Google Cloud → Credenciales). No es secreto. Vacío: sin ingreso con Google |
 | `CORS_ORIGINS` | `["https://<tu-proyecto>.vercel.app"]` (después del paso 3) |
 | `ASSISTANT_PROVIDER` | `local`: el modelo abierto desde la API hospedada |
 | `ASSISTANT_BASE_URL` | URL de la API del servicio elegido, compatible con OpenAI. Por ejemplo, Groq: `https://api.groq.com/openai/v1`; OpenRouter: `https://openrouter.ai/api/v1`; Together: `https://api.together.xyz/v1` |
 | `ASSISTANT_MODEL` | Nombre del modelo en ese servicio. Tiene que aceptar herramientas ("tool calling" o "function calling"); elegirlo de su listado |
 | `ASSISTANT_LOCAL_API_KEY` | La clave de ese servicio |
 
-**Asistente en la nube:** ni Render ni Vercel pueden correr Ollama. El Baqueano usa el mismo tipo
+**Asistente en la nube:** ni Render ni Vercel pueden correr Ollama. Pixi usa el mismo tipo
 de modelo abierto a través de una API hospedada: es más rápido (1–5 segundos) y, con nuestro volumen,
 gratis o casi gratis. Antes de elegir el servicio, revisar sus condiciones actuales de uso
 gratuito y de precios. Hay dos cosas para saber:
@@ -131,16 +132,27 @@ En [vercel.com](https://vercel.com): **Add New → Project** → importá el rep
 | Root Directory | `backend/frontend_minimal` |
 | Framework Preset | Next.js |
 | Variable `NEXT_PUBLIC_API_URL` | La URL de Render, por ejemplo `https://observa-tendencias-api.onrender.com` |
+| Variable `NEXT_PUBLIC_GOOGLE_CLIENT_ID` | El mismo client ID que `GOOGLE_CLIENT_ID` de Render. Se lee al construir: después de cambiarlo, volver a desplegar |
 
 Después de publicar, copiá la URL de Vercel en `CORS_ORIGINS` de Render (paso 2) y reiniciá el
 servicio.
+
+**Ingreso con Google:** en Google Cloud → Google Auth Platform → Clientes → *Predix web*, agregá la
+URL de Vercel (por ejemplo `https://predix-silk.vercel.app`) a **Orígenes de JavaScript autorizados**.
+Sin URI de redirección: el botón usa una ventana emergente. El cliente es el mismo que en local
+(`http://localhost` y `http://localhost:3001`). La app tiene que estar publicada (*Audience →
+Publicar app*) para que entre cualquier cuenta de Google. Sin logo no hace falta verificarla; con
+logo, Google puede pedir una verificación que exige página de inicio y política de privacidad
+públicas (`/privacidad`).
 
 ## 4. Verificar
 
 1. `https://<api>.onrender.com/health` responde `{"status": "ok"}`.
 2. `https://<proyecto>.vercel.app` muestra el inicio de sesión; entrá con el usuario del paso 1.
+   Con `NEXT_PUBLIC_GOOGLE_CLIENT_ID`, aparece **Continuar con Google**: una cuenta nueva entra como
+   gratuita y ve solo Inicio y Panorama, sin Pixi.
 3. Panorama, Sectores y Ocupaciones muestran datos.
-4. La pestaña "Preguntale al Baqueano" responde "¿Cómo se calcula el ISE?".
+4. Con acceso completo, la pestaña "Preguntale a Pixi" responde "¿Cómo se calcula el ISE?".
 5. En Carga de datos se baja la plantilla y el ejemplo con errores se rechaza.
 
 ## 5. Después de publicar una versión con datos nuevos
@@ -151,9 +163,39 @@ Render corre `alembic upgrade head` al arrancar: **al unir el PR, las migracione
 2. `bcra_dolar`: el dólar oficial diario.
 3. `cep_xxi_argentina`: empleo y salarios de Argentina, que usan ese dólar. También carga los factores PPA.
 4. `esco` o, sin tocar las habilidades, `run_esco_occupations`: las ocupaciones ESCO de cada grupo para los enlaces y el buscador.
-5. `python -m app.jobs.recompute`: el ISE versión 0.3 y las tendencias de los indicadores nuevos. Puede generar alertas nuevas.
+5. Solo el ISE nuevo, con `recompute_employability`: sin él, Sectores y Ocupaciones quedan vacíos.
+
+**En el plan gratuito, no correr `python -m app.jobs.recompute` ni la fuente `esco` completos.** Borran y vuelven a escribir las brechas (unos 199 MB) en una sola transacción, y la base puede pasar de 500 MB y quedar en solo lectura. Con el plan Pro sí se pueden correr; el recálculo completo también calcula las tendencias de los indicadores nuevos y puede generar alertas.
+
+**Fuentes e indicadores nuevos:** hay que registrarlos antes de cargarlos, insertando solo los que falten. `python -m seeds.load` también borra las ocupaciones que ya no están en la configuración, junto con sus datos, así que conviene revisarlo antes de correrlo en producción.
+
+**Caché de Vercel:** el frontend guarda las respuestas de la API hasta una hora (Sectores y Ocupaciones, 5 minutos). Después de una carga, esas pantallas pueden seguir vacías durante ese tiempo.
 
 Las fuentes diarias y mensuales solo avanzan si hay un programador de tareas. Si no lo hay, hay que correrlas a mano.
+
+## 6. Actualización de noviembre de 2026 (Predix)
+
+Lo que hace falta para publicar Predix, Pixi, el ingreso con Google y los ocupados con educación
+superior por sexo. Primero el código; los datos, después.
+
+1. **Código:** PR al repositorio personal y unirlo. Render aplica la migración `0032` al arrancar
+   (columna `users.google_sub`; la contraseña pasa a ser opcional).
+2. **Variables:** `GOOGLE_CLIENT_ID` en Render y `NEXT_PUBLIC_GOOGLE_CLIENT_ID` en Vercel (volver a
+   desplegar Vercel). Agregar la URL de Vercel a `CORS_ORIGINS` y a los orígenes del cliente de
+   Google (paso 3).
+3. **Datos**, desde la computadora y con el `DATABASE_URL` de Supabase. Sin `seeds.load` ni
+   recálculo completo (sección 5):
+   - registrar `employment_tertiary_women` y `employment_tertiary_men`, cargar solo esas dos series
+     de ILOSTAT y calcular su tendencia;
+   - `lower_secondary_completion`: actualizar el indicador (tasa bruta, sin tope de 100 %) y
+     recalcular solo ese;
+   - `unemployment_rate`: actualizar su descripción (Pixi la lee);
+   - Moctezuma: actualizar el texto de su metodología (la nota de que el 0–100 es una posición en el
+     grupo). Se actualiza al recalcular ese indicador; como en el plan gratuito no se recalcula todo,
+     hay que actualizarla aparte.
+4. **Caché de Vercel:** purgarla, o esperar una hora.
+5. **Verificar:** pasos 2 y 4 de la sección 4, la tercera sección de Género y, en Panorama, la proyección
+   de la finalización de la secundaria baja de Chile por encima de 100 %.
 
 ## Quién hace qué
 
@@ -165,3 +207,4 @@ Las fuentes diarias y mensuales solo avanzan si hay un programador de tareas. Si
 | Subir el código a GitHub | Clon aparte + PR, y aprobar el PR |
 | Crear el servicio en Render y el proyecto en Vercel | Tu cuenta en cada sitio, conectada a GitHub |
 | Clave de la API hospedada del asistente | Tu cuenta en el servicio elegido (Groq, Together, OpenRouter…) |
+| Cliente OAuth de Google | Tu cuenta de Google Cloud (proyecto con el cliente *Predix web*) |
