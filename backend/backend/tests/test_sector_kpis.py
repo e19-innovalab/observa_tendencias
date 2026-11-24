@@ -18,6 +18,7 @@ from app.analytics.sector_kpis_run import (
     graduates_by_sector,
     projection_rows,
     recompute_sector_tables,
+    tertiary_employment_rows,
 )
 from app.core.config_files import analytics_params
 from app.core.database import get_session
@@ -94,6 +95,16 @@ def test_gender_compares_graduates_and_employment_and_labels_parity():
     assert edge["diagnostico_paridad"] == "Zona de paridad"
 
 
+def test_tertiary_employment_is_national_and_needs_both_sexes(monkeypatch):
+    series = {"employment_tertiary_women": {("ARG", None, 2023): 1830.0, ("ARG", None, 2024): 1900.0,
+                                            ("ARG", "health", 2023): 50.0},
+              "employment_tertiary_men": {("ARG", None, 2023): 1425.0, ("ARG", "health", 2023): 10.0}}
+    monkeypatch.setattr(sector_kpis_run, "_annual", lambda _session, code: series[code])
+    rows = tertiary_employment_rows(None)
+    assert [(r["anio"], r["pct_mujeres"]) for r in rows] == [(2023, 56.22)]
+    assert rows[0]["brecha_pct"] == 12.44 and rows[0]["diagnostico"] == "Zona de paridad"
+
+
 def test_projection_needs_history_without_gaps_and_only_covers_sectors():
     long = {("CHL", "health", 2007 + i): 100.0 + i * 5 for i in range(15)}
     gaps = {("CHL", "energy", y): 50.0 for y in range(2007, 2022) if y != 2015}
@@ -155,7 +166,8 @@ def session():
 
 def test_tables_fill_and_the_endpoint_joins_them(session, monkeypatch):
     values = {"employment": 250.0, "employment_women": 200.0, "mean_monthly_earnings_ppp": 1000.0,
-              "mean_monthly_earnings_ppp_women": 900.0, "mean_monthly_earnings_ppp_men": 1200.0}
+              "mean_monthly_earnings_ppp_women": 900.0, "mean_monthly_earnings_ppp_men": 1200.0,
+              "employment_tertiary_women": 600.0, "employment_tertiary_men": 400.0}
     monkeypatch.setattr(sector_kpis_run, "_annual",
                         lambda _session, code: {("CHL", "health", 2024): values[code], ("CHL", None, 2024): values[code]})
     session.add(Graduate(country_iso3="CHL", career_key="enfermeria", career="Enfermería", level="Pregrado",
@@ -181,7 +193,10 @@ def test_tables_fill_and_the_endpoint_joins_them(session, monkeypatch):
         assert row["brecha_salarial_pct"] == 25.0 and out["nota"]
         total = next(i for i in out["items"] if i["sector"] == "Total")
         assert total["pct_mujeres_graduadas"] == 80.0
-        dual = client.get("/api/v1/analytics/densidad-profesional", params={"enfoque": "local", "country": "CHL"}).json()
+        assert out["ocupados_educacion_superior"] == [{
+            "pais": "CHL", "anio": 2024, "mujeres": 600000.0, "varones": 400000.0, "pct_mujeres": 60.0,
+            "brecha_pct": 20.0, "diagnostico": "Zona de paridad"}]
+        dual =client.get("/api/v1/analytics/densidad-profesional", params={"enfoque": "local", "country": "CHL"}).json()
         assert dual["total"] >= 1
     finally:
         app.dependency_overrides.clear()

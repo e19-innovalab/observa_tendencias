@@ -21,6 +21,8 @@ dependencies = [
   "pyyaml>=6.0",
   "python-multipart>=0.0.9",
   "anthropic>=2.3",  # assistant with provider anthropic
+  "google-auth>=2.30",  # "Continuar con Google": checks Google's sign-in token
+  "requests>=2.31",  # google-auth downloads Google's public keys with it
 ]
 
 [project.optional-dependencies]

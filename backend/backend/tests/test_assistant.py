@@ -276,6 +276,12 @@ def test_unknown_questions_go_to_the_model(client, monkeypatch):
     assert body["source"] == "model" and fake.messages and body["answer"] == "No tengo ese dato."
 
 
+def test_how_another_indicator_is_measured_is_not_answered_with_the_ise(client, monkeypatch):
+    fake = _use(monkeypatch, Scripted([], "La desocupación se mide con encuestas."), scripted=True)
+    body = _ask(client, "que es la tasa de desocupacion y como se mide")
+    assert body["source"] == "model" and fake.messages and "ISE" not in body["answer"]
+
+
 def test_scale_from_the_instructions_is_not_flagged(client, monkeypatch):
     """ "de 0 a 100" comes from the instructions, not from the data: it is not an invented number."""
     _use(monkeypatch, Scripted([], "El índice va de 0 a 100."))
@@ -382,21 +388,23 @@ def test_provider_can_be_set_per_environment(monkeypatch):
 def test_every_configured_tool_reaches_its_endpoint(client, monkeypatch):
     """Each tool in app.yaml -> assistant.tools answers (no wrong path or parameter)."""
     samples = {"q": "software", "code": "2512", "occupation": "2512", "country": "ARG",
-               "methodology_type": "employability_index"}
+               "methodology_type": "employability_index", "domain": "education",
+               "indicator": "lower_secondary_completion"}
     calls = [(t.name, {k: samples[k] for k, p in t.params.items() if p.required or k in ("country",)})
              for t in CONF.tools]
     fake = _use(monkeypatch, Scripted(calls, "Listo."))
     client.post("/api/v1/assistant/ask", json={"question": "probar todo con 2512"})
     failed = [(r.tool, r.result[:80]) for r in fake.runs if not r.ok]
     assert not failed, failed
-    assert {"moctezuma_paises", "ludita_ocupacion", "reina_roja_ocupacion", "sisifo_paises"} <= {r.tool for r in fake.runs}
+    assert {"moctezuma_paises", "ludita_ocupacion", "reina_roja_ocupacion", "sisifo_paises",
+            "indicadores_panorama", "serie_indicador"} <= {r.tool for r in fake.runs}
 
 
 def test_the_name_question_has_a_fixed_answer_without_the_model(client, monkeypatch):
     fake = _use(monkeypatch, Scripted([], "no debería usarse"), scripted=True)
     r = _ask(client, "¿Cómo te llamás?")
     assert r["answer"] == CONF.scripted.templates["identity"] and r["source"] == "script"
-    assert r["answer"].startswith("Soy Baqueano") and fake.messages is None
+    assert r["answer"].startswith("Soy Pixi") and fake.messages is None
 
 
 def test_each_occupation_named_gets_its_link_first(client, monkeypatch):

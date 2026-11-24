@@ -17,6 +17,8 @@ class Settings(BaseSettings):
     cors_origins: list[str] = []
     admin_api_key: str = ""  # X-API-Key for upload / refresh / alert endpoints (scripts)
     auth_secret: str = ""  # signs login tokens; empty = login disabled
+    # OAuth client of "Continuar con Google" (Google Cloud console); empty = Google login off
+    google_client_id: str = ""
     config_dir: Path = BACKEND_DIR / "config"
     bcentral_user: str = ""
     bcentral_password: str = ""

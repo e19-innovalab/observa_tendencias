@@ -46,7 +46,9 @@ def hash_password(password: str) -> str:
     return f"scrypt${SCRYPT_N}${SCRYPT_R}${SCRYPT_P}${_b64(salt)}${_b64(digest)}"
 
 
-def verify_password(password: str, stored: str) -> bool:
+def verify_password(password: str, stored: str | None) -> bool:
+    if not stored:  # account that only signs in with Google
+        return False
     try:
         scheme, n, r, p, salt, digest = stored.split("$")
     except ValueError:
@@ -98,6 +100,27 @@ def decode_token(token: str, now: float | None = None) -> int:
     if data.get("exp", 0) < (now or time.time()):
         raise invalid
     return int(data["sub"])
+
+
+# --- Google sign-in ----------------------------------------------------------------------------
+def verify_google_credential(credential: str) -> dict:
+    """Claims of a Google sign-in token (ID token) issued for our OAuth client, with a verified
+    email; 503 when Google login is off, 401 otherwise."""
+    if not settings.google_client_id:
+        raise HTTPException(status.HTTP_503_SERVICE_UNAVAILABLE, _msg("google_off"))
+    from google.auth.transport import requests as google_requests  # only when used
+    from google.oauth2 import id_token
+
+    try:  # checks signature (Google's public keys), expiry and audience
+        claims = id_token.verify_oauth2_token(credential, google_requests.Request(),
+                                              settings.google_client_id)
+    except ValueError:
+        raise HTTPException(status.HTTP_401_UNAUTHORIZED, _msg("google_invalid")) from None
+    if claims.get("iss") not in app_config().auth.google.issuers or not claims.get("email"):
+        raise HTTPException(status.HTTP_401_UNAUTHORIZED, _msg("google_invalid"))
+    if not claims.get("email_verified"):
+        raise HTTPException(status.HTTP_401_UNAUTHORIZED, _msg("google_unverified"))
+    return claims
 
 
 # --- dependencies ------------------------------------------------------------------------------

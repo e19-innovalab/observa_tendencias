@@ -61,7 +61,8 @@ export async function GenderView({ sp }: { sp: SearchParams }) {
   const country = countryOptions.some((o) => o.value === sp.country) ? sp.country : undefined;
   const countries = countryOptions.map((o) => o.value).filter((c) => !country || c === country);
   const withGender = kpis.items.filter((i) => i.pct_mujeres_graduadas != null || i.pct_mujeres_ocupadas != null);
-  const years = [...new Set(withGender.map((i) => i.anio))].sort((a, b) => b - a);
+  const qualified = kpis.ocupados_educacion_superior;
+  const years = [...new Set([...withGender.map((i) => i.anio), ...qualified.map((r) => r.anio)])].sort((a, b) => b - a);
   const year = years.includes(Number(sp.anio)) ? Number(sp.anio) : undefined;
   const sectors = [...new Set(withGender.map((i) => i.sector))].filter((s) => s !== TOTAL).sort((a, b) => a.localeCompare(b, 'es'));
   const allSectors = [...sectors, TOTAL];
@@ -81,6 +82,16 @@ export async function GenderView({ sp }: { sp: SearchParams }) {
     return row;
   }).filter((row) => countries.some((c) => row[c] !== null));
   const series = countries.map((c) => ({ key: c, label: c, color: COUNTRY_COLORS[c] ?? FALLBACK_COLOR }));
+  /** Ocupados con educación superior: solo el total del país, la OIT no lo publica por sector. */
+  const qualifiedRows = countries.flatMap((c) => {
+    const found = qualified.filter((r) => r.pais === c && (!year || r.anio === year)).at(-1);
+    return found ? [found] : [];
+  });
+  const qualifiedLine = [...new Set(qualified.map((r) => r.anio))].sort((a, b) => a - b).map((y) => {
+    const row: Record<string, string | number | null> = { label: String(y) };
+    for (const c of countries) row[c] = qualified.find((r) => r.pais === c && r.anio === y)?.pct_mujeres ?? null;
+    return row;
+  }).filter((row) => countries.some((c) => row[c] !== null));
 
   return (
     <>
@@ -128,6 +139,23 @@ export async function GenderView({ sp }: { sp: SearchParams }) {
           <TrendLineChart data={line('pct_mujeres_ocupadas')} series={series} unit="percent" />
         </div>
       </Section>
+
+      {qualified.length > 0 && (
+        <Section title="Ocupados con educación superior" text="Participación de las mujeres entre las personas ocupadas con nivel avanzado: terciaria, CINE 5 o más (OIT). Es el total del país: la OIT no lo publica por sector. La brecha es el % de mujeres menos el % de varones.">
+          <Table
+            head={['País', 'Sector', 'Mujeres', 'Varones', '% mujeres', 'Brecha', 'Diagnóstico', 'Año']}
+            rows={qualifiedRows.map((r) => ({
+              key: r.pais,
+              total: false,
+              cells: [names[r.pais] ?? r.pais, TOTAL, count(r.mujeres), count(r.varones), percent(r.pct_mujeres), points(r.brecha_pct), r.diagnostico, r.anio],
+            }))}
+          />
+          <div className="border-t border-line/70 p-5">
+            <h3 className="mb-2 text-sm font-semibold text-heading">% de mujeres entre ocupados con educación superior</h3>
+            <TrendLineChart data={qualifiedLine} series={series} unit="percent" />
+          </div>
+        </Section>
+      )}
     </>
   );
 }

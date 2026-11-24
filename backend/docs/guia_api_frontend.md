@@ -1,9 +1,9 @@
 # Guía de la API para el frontend
 
 Qué endpoint alimenta cada pantalla del mockup ("Wireframes Observatorio Innova Lab" en Figma),
-qué devuelve y qué convenciones seguir. Estado al 18/10/2026.
+qué devuelve y qué convenciones seguir. Estado al 23/11/2026.
 
-- **Base URL (local):** `http://localhost:8010/api/v1`. La URL de despliegue se define más adelante, junto con Supabase.
+- **Base URL:** local, `http://localhost:8010/api/v1`; producción, `https://observa-tendencias.onrender.com/api/v1` (Render).
 - **Documentación interactiva** (todos los parámetros y esquemas): http://localhost:8010/docs. Se puede importar en Postman desde `http://localhost:8010/openapi.json`.
 - **Implementación de referencia:** el Explorer (http://localhost:8010/explorer, código en `backend/backend/app/static/explorer.html`) usa todos estos endpoints. Si hay dudas de cómo llamar a uno, está ahí.
 - **CORS:** los orígenes permitidos se configuran en `backend/.env` (`CORS_ORIGINS`). Por defecto, `http://localhost:3000` y `http://localhost:3010`.
@@ -172,7 +172,7 @@ Esta pantalla tampoco tiene diseño todavía.
 | Tendencia y proyección de egresados por carrera (los tres países) | `GET /graduates/trends?country=CHL` y `/graduates/projections?country=CHL` | Se calculan con la tabla oficial `graduates` después de cada carga, solo con pregrado y grado. Los datos vienen con `pais` en minúsculas (`chile`). En Uruguay los nombres cambian entre anuarios y se unifican con `config/reference/carreras_uruguay_nombres.yaml`; con datos desde 2020, todavía no tiene proyección. `nombre` es el que publica la fuente y `sector` el código del catálogo (`null`: otras actividades). `es_seguimiento: true` marca un programa de Chile encontrado por `tema`: cuenta también diplomados y posgrados y no se compara con las demás |
 | Totales por país y año | `GET /graduates/totals?sector=health&tema=` | `sector`: código del catálogo u `otros`. Sin `tema` suma solo carreras genéricas y disciplinas; con `tema`, sus programas, con todos los niveles |
 | Una carrera por institución y año | `GET /graduates/institutions?country=CHL&nombre=Enfermería` | Chile: universidades, institutos profesionales y centros de formación técnica. Uruguay: anuarios del MEC, desde 2020. Argentina: anuarios del DIU de 2014 a 2024, salvo 2019, que no tiene anuario publicado con estos cuadros. En 2015 faltan algunas disciplinas en los cuadros publicados. Las series de Argentina usan estos anuarios, salvo 2015 y 2019, que salen del archivo CTI. En `/graduates/trends`, `institucion_principal` es la de más titulados en el último año con datos y `n_instituciones` cuántas hubo |
-| Indicadores por sector | `GET /analytics/sectores` | Por país, sector y año: densidad profesional, personas ocupadas, % de mujeres entre titulados y ocupados, salarios por sexo y brecha salarial. Más la proyección de titulados por sector. Argentina trae el sexo de titulados solo en la fila `Total`. `cep_xxi` trae el empleo privado registrado y los salarios de Argentina (hasta noviembre de 2023): `salario_ars`, `salario_usd`, `salario_usd_ppa` e `indice_real` sobre `cep_base`; estos dos últimos solo en años completos (`meses` = 12), y `salario_usd` convierte cada mes con el dólar oficial mayorista diario del BCRA. `dolar_oficial` trae la última cotización. Para género, cada ítem trae `f`, `m`, `nb`, `pct_varones_graduados`, `brecha_graduados_pct`, `diagnostico_paridad`, `brecha_empleo_pct` y `diagnostico_empleo` |
+| Indicadores por sector | `GET /analytics/sectores` | Por país, sector y año: densidad profesional, personas ocupadas, % de mujeres entre titulados y ocupados, salarios por sexo y brecha salarial. Más la proyección de titulados por sector. Argentina trae el sexo de titulados solo en la fila `Total`. `cep_xxi` trae el empleo privado registrado y los salarios de Argentina (hasta noviembre de 2023): `salario_ars`, `salario_usd`, `salario_usd_ppa` e `indice_real` sobre `cep_base`; estos dos últimos solo en años completos (`meses` = 12), y `salario_usd` convierte cada mes con el dólar oficial mayorista diario del BCRA. `dolar_oficial` trae la última cotización. Para género, cada ítem trae `f`, `m`, `nb`, `pct_varones_graduados`, `brecha_graduados_pct`, `diagnostico_paridad`, `brecha_empleo_pct` y `diagnostico_empleo`. `ocupados_educacion_superior` trae, por país y año, los ocupados con educación superior (OIT, total del país, no por sector): `mujeres`, `varones` (personas), `pct_mujeres`, `brecha_pct` y `diagnostico` |
 | Filtro por institución | `GET /graduates/institutions/list?country=URY` y `GET /graduates/institutions/careers?institucion=Universidad CLAEH` | La lista trae cada institución y cuántas carreras tiene. El detalle trae solo los egresados de esa institución, por carrera y año, con `sector`, `tema` y `es_seguimiento`. La proyección es de la carrera en todo el país: no hay por institución |
 | Serie observada de una carrera | `GET /graduates/series?country=CHL&nombre=Técnico en Enfermería` | `puntos`: años desde el primero con egresados hasta el último del país. Un año sin egresados viene en 0. La proyección está aparte, en `/graduates/projections` |
 | Egresados por carrera en un año | `GET /graduates/by-year?year=2027&country=CHL` | Sin `year`, trae solo los años disponibles (`anios_observados`, `anios_proyectados`). Cada fila dice `tipo`: `observado` o `proyectado`, con su intervalo. La proyección existe solo para las carreras con al menos 12 años de historia sin huecos |
@@ -223,14 +223,26 @@ Criterios en `fuentes_y_criterios.md`, sección 7.
 | Cargar un archivo | 1) `POST /datasets/upload` (multipart: `file`, `profile`, `declared_source_name`, `declared_source_url`, `reference_date`) → reporte y vista previa · 2) `POST /datasets/{id}/commit` con `{"confirm_overlap": true}` si hace falta | Requiere `manage_data`. Antes de leerlo se revisa que el archivo sea lo que dice: un `.xlsx` real sin macros, o un CSV de texto en UTF-8, con un máximo de filas y de tamaño. Si el estado es `rejected`, mostrar primero `report.groups[]`: cada problema una vez, con cuántas filas, cuáles, qué valores y `hint` (qué hacer). Después, `report.errors[]` fila por fila. Si `report.overlaps.count` > 0, el archivo repite valores que ya publicó una fuente oficial: mostrar `overlaps.message` y pedir confirmación. Sin `confirm_overlap` la carga responde `409`. Los valores se guardan como fuente aparte y no reemplazan el dato oficial |
 | Historial de archivos | `GET /datasets?origin=download\|upload` | |
 
-### Asistente ("Preguntale al Observatorio")
-
-Responde preguntas con los datos del observatorio. Por dentro solo puede consultar endpoints de lectura de esta misma API (los de `app.yaml → assistant.tools`): no tiene acceso a la base, a internet ni a nada que modifique datos.
+### Inicio de sesión y cuentas
 
 | Elemento | Endpoint | Notas |
 |---|---|---|
-| Estado y textos | `GET /assistant` | `enabled`; `texts` (título, ejemplo para el campo de texto, aviso); `max_question_chars`; `history_turns`; `remaining_today` (preguntas que le quedan hoy a quien inició sesión, `null` sin sesión) |
-| Preguntar | `POST /assistant/ask` con body `{"question", "context"?, "history"?}` | Requiere sesión (permiso `view`). `links[]` trae primero la ficha de cada ocupación que nombra la respuesta; con `external: true`, las fuentes de afuera, que solo se consultan para los indicadores experimentales. Ver abajo |
+| Con contraseña | `POST /auth/login` con `{"email", "password"}` | Devuelve el token y el usuario |
+| Con Google | `POST /auth/google` con `{"credential"}` | `credential` es lo que devuelve el botón de Google Identity Services. La primera vez crea una cuenta **gratuita** (`free`, sin permisos). 503 si el backend no tiene `GOOGLE_CLIENT_ID`; 401 si la credencial no es válida o el correo no está verificado |
+| Usuario actual | `GET /auth/me` | `role`, `role_label` y `permissions` |
+
+**Cuenta gratuita:** el frontend le muestra solo Inicio y Panorama y oculta el resto. Los endpoints de
+datos de solo lectura son públicos, así que esa restricción es de pantalla; el asistente sí la exige
+en el backend.
+
+### Asistente ("Preguntale a Pixi")
+
+Responde preguntas con los datos del observatorio. Por dentro solo puede consultar endpoints de lectura de esta misma API (los de `app.yaml → assistant.tools`): no tiene acceso a la base ni a nada que modifique datos. La única consulta afuera es Wikipedia, solo para los indicadores experimentales.
+
+| Elemento | Endpoint | Notas |
+|---|---|---|
+| Estado y textos | `GET /assistant` | `enabled`; `texts` (título, ejemplo para el campo de texto, aviso); `max_question_chars`; `history_turns`; `remaining_today` (preguntas que le quedan hoy a quien inició sesión, `null` sin sesión); `can_ask` (`true` si la cuenta puede preguntar: mostrar la pestaña solo entonces) |
+| Preguntar | `POST /assistant/ask` con body `{"question", "context"?, "history"?}` | Requiere sesión con acceso completo (permiso `view`; las cuentas gratuitas no lo tienen). `links[]` trae primero la ficha de cada ocupación que nombra la respuesta; con `external: true`, las fuentes de afuera, que solo se consultan para los indicadores experimentales. Ver abajo |
 
 **Body.**
 - `context`: lo que la persona está mirando, todo opcional: `{"page": "/ocupaciones/2221", "country": "CHL", "occupation": "2221", "sector": "health"}`. Permite preguntas como "¿y en Uruguay?" desde una ficha.
@@ -271,7 +283,6 @@ El texto de cada error viene en `detail` (de `assistant.messages`). Con un model
 
 ## 3. Pendientes conocidos
 
-- **URL de producción:** se define con el despliegue y la base en Supabase.
-- **Dashboard viejo (`backend/frontend`):** usa solo `/jobs` y `/graduates/*`. El frontend minimal (`backend/frontend_minimal`) ya usa los endpoints de esta guía, con inicio de sesión y roles (`/auth/login`, `/auth/me`).
+- **Dashboard viejo (`backend/frontend`):** usa solo `/jobs` y `/graduates/*`. El frontend minimal (`backend/frontend_minimal`) ya usa los endpoints de esta guía, con inicio de sesión y roles (`/auth/login`, `/auth/google`, `/auth/me`).
 - **Carga manual, segunda etapa:** retirar una carga y marcar en las pantallas los datos de carga manual. La API todavía no los distingue en las series: hay que agregar ese dato a la respuesta antes de mostrarlo.
 - **Asistente:** el modelo que responde lo que no cubren las plantillas está en evaluación. Los textos y el comportamiento de la pantalla no cambian, porque vienen de `GET /assistant`.

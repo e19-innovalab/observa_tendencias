@@ -1,5 +1,6 @@
-# Observa Tendencias · frontend minimal + visual
+# Predix · frontend minimal + visual
 
+Frontend de **Predix** (antes Observa Tendencias); el asistente se llama **Pixi** (antes Baqueano).
 Segunda versión del frontend, con el mismo backend y los mismos datos que el frontend original. Cambia la
 experiencia: cada pantalla responde una pregunta con un gráfico grande y el menú es mínimo.
 
@@ -26,7 +27,11 @@ experiencia: cada pantalla responde una pregunta con un gráfico grande y el men
   evolución de la brecha.
 - Panorama → Ocupaciones en movimiento (`MotionChart.tsx`): burbujas por gran grupo × país, animadas
   año a año, con selector del eje vertical y tabla de datos. Cada grupo despliega sus ocupaciones.
-- Género: titulados y ocupados por sexo, brechas y diagnóstico de paridad (`GenderView.tsx`).
+- Género: titulados y ocupados por sexo, brechas y diagnóstico de paridad (`GenderView.tsx`). Una
+  tercera sección, "Ocupados con educación superior", muestra mujeres y varones ocupados con estudios
+  superiores y el % de mujeres de cada país (total del país, no por sector); aparece solo si hay datos.
+- Moctezuma: el paso 2 y una nota bajo el ranking explican que el 0–100 es una posición dentro del
+  grupo, no una calificación.
 - Indicadores por sector suma Argentina con CEP-XXI: puestos, % de mujeres, USD, USD PPA, pesos, salario
   real y el dólar oficial mayorista del último día hábil anterior, con su fecha (`SectorKpisView.tsx`).
 - Ficha de ocupación: cada habilidad dice Esencial u Opcional, sin puntajes, y se ven primero las 10 más
@@ -68,6 +73,30 @@ experiencia: cada pantalla responde una pregunta con un gráfico grande y el men
   textos y las preguntas de ejemplo vienen de `GET /assistant` (`app.yaml → assistant`). Si el
   asistente está apagado o el backend no responde, la pestaña no aparece.
 
+## Cuentas e inicio de sesión
+
+- **Con correo y contraseña:** cuentas que crea un administrador.
+- **Con Google** (`src/components/auth/GoogleButton.tsx`): el botón de Google Identity Services
+  devuelve una credencial que `loginWithGoogle` (`src/lib/auth/actions.ts`) manda a
+  `POST /auth/google`. La primera vez se crea una **cuenta gratuita**. El botón aparece solo si está
+  `NEXT_PUBLIC_GOOGLE_CLIENT_ID`.
+- **Cuenta gratuita:** ve solo **Inicio** y **Panorama** (`FREE_PREFIXES` en `src/lib/auth/constants.ts`).
+  El menú, las pestañas y el encabezado ocultan lo demás (sin buscador ni alertas); si entra a otra
+  dirección, ve "Esta sección es del acceso completo" (`ProOnly.tsx`). Pixi aparece solo con
+  `can_ask` de `GET /assistant`. El acceso completo lo da un administrador en *Usuarios y accesos*.
+- **Portada (`/`):** la sección *Acceso* explica las dos cuentas; el límite diario de Pixi lo toma de
+  `GET /assistant` (`questions_per_day`).
+- **`/privacidad`:** página pública con qué datos se guardan de cada cuenta y qué pasa con las
+  preguntas a Pixi.
+- `src/proxy.ts` manda a `/login` a quien no tiene sesión y pasa la ruta pedida al layout
+  (`x-pathname`), que decide si la muestra.
+
+## Marca
+
+Logo y favicon de Predix: `public/brand/` (horizontal e isotipo, en color y en blanco) y
+`src/app/favicon.ico`, `icon.svg` y `apple-icon.png`. `components/brand/Logo.tsx` y el encabezado
+los usan con `next/image`.
+
 ## Correr en local
 
 ```bash
@@ -76,7 +105,11 @@ npm run dev        # http://localhost:3001 (el frontend original usa el 3000)
 ```
 
 Necesita el backend en `NEXT_PUBLIC_API_URL` (`.env.local`, por defecto http://localhost:8010) y un
-usuario del backend para entrar (`python -m app.jobs.create_user`).
+usuario del backend para entrar (`python -m app.jobs.create_user`). Para el botón de Google,
+`NEXT_PUBLIC_GOOGLE_CLIENT_ID` en `.env.local`, con el mismo valor que `GOOGLE_CLIENT_ID` del backend,
+y la dirección local (`http://localhost:3001`, o el puerto que uses) entre los orígenes autorizados
+del cliente de Google. Se lee al arrancar o al construir: después de cambiarlo, reiniciá `npm run dev`
+o volvé a desplegar.
 
 ## Dónde está cada cosa
 
@@ -85,7 +118,7 @@ usuario del backend para entrar (`python -m app.jobs.create_user`).
 - `src/app/(app)/{panorama,sectores,ocupaciones,habilidades,pulso}`: las pantallas
   principales; `{moctezuma,ludita,reina-roja,sisifo}`: los indicadores experimentales, con sus gráficos en
   `src/components/minimal/` (`MoctezumaCharts`, `LuditaCharts`, `SisyphusChart`, `MotionChart`).
-- `src/components/minimal/AssistantDock.tsx` y `src/app/api/assistant`: el asistente. La ruta
+- `src/components/minimal/AssistantDock.tsx` y `src/app/api/assistant`: el asistente (Pixi). La ruta
   reenvía la pregunta al backend con la sesión (la cookie no es legible desde el navegador).
 - `src/app/api/search`: búsqueda del encabezado (consulta el backend desde el servidor, interpreta
   códigos CIUO y países, y ordena los resultados). Las reglas de coincidencia están en

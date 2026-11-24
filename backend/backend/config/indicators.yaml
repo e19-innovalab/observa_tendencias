@@ -53,7 +53,10 @@ indicators:
     unit: percent
     domain: labor
     higher_is_better: false
-    description: Desocupados como porcentaje de la fuerza de trabajo, 15 años y más.
+    description: >-
+      Desocupados como porcentaje de la fuerza de trabajo, 15 años y más. Desocupado es quien no
+      trabaja, buscó trabajo activamente y está disponible para empezar (criterio de la OIT); la
+      fuerza de trabajo suma ocupados y desocupados.
     value_range: [0, 100]
     series:
       - source: ilostat
@@ -311,6 +314,36 @@ indicators:
         total_code: ECO_ISIC4_TOTAL
         sector_aggregation: mean
         frequency: A
+  - code: employment_tertiary_women
+    name: Mujeres ocupadas con educación superior
+    unit: thousands_persons
+    domain: labor
+    higher_is_better: true
+    description: >-
+      Mujeres ocupadas con nivel avanzado: terciaria, CINE 5 o más (agregado de la OIT). Nacional:
+      la OIT no lo publica por sector. Con Varones ocupados con educación superior da la
+      participación de las mujeres en el empleo calificado.
+    value_range: [0, null]
+    series:
+      - source: ilostat
+        dataflow: DF_EMP_TEMP_SEX_EDU_NB
+        key: "{countries}.A..SEX_F.EDU_AGGREGATE_ADV"
+        frequency: A
+  - code: employment_tertiary_men
+    name: Varones ocupados con educación superior
+    unit: thousands_persons
+    domain: labor
+    higher_is_better: true
+    description: >-
+      Varones ocupados con nivel avanzado: terciaria, CINE 5 o más (agregado de la OIT). Nacional:
+      la OIT no lo publica por sector. Con Mujeres ocupadas con educación superior da la
+      participación de las mujeres en el empleo calificado.
+    value_range: [0, null]
+    series:
+      - source: ilostat
+        dataflow: DF_EMP_TEMP_SEX_EDU_NB
+        key: "{countries}.A..SEX_M.EDU_AGGREGATE_ADV"
+        frequency: A
   - code: earnings_tertiary_ppp
     name: Ingreso laboral mensual con educación superior (USD PPA)
     unit: ppp_usd_month
@@ -496,8 +529,13 @@ indicators:
     unit: percent
     domain: education
     higher_is_better: true
-    description: Tasa de finalización del primer ciclo de educación secundaria.
-    value_range: [0, 100]
+    description: >-
+      Tasa bruta de finalización del primer ciclo de educación secundaria: quienes ingresan al
+      último año del ciclo, de cualquier edad, como porcentaje de la población con la edad teórica
+      de ese año. Puede superar el 100 % porque cuenta también a quienes llegan con más edad (por
+      ingreso tardío o repetición); no es el porcentaje de jóvenes que terminó el ciclo.
+    # gross ratio (World Bank): over 100 is a valid value, so no upper bound
+    value_range: [0, null]
     series:
       - source: world_bank
         id: SE.SEC.CMPT.LO.ZS

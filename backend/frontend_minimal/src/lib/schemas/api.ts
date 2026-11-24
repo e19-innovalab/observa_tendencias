@@ -1,5 +1,5 @@
 /**
- * Esquemas Zod de la API de Observa Tendencias (FastAPI, prefijo /api/v1).
+ * Esquemas Zod de la API de Predix (FastAPI, prefijo /api/v1).
  * Generado a mano a partir de openapi.json (API v0.1.0).
  * Cubre: catálogos, indicadores, observaciones, compare, dashboard, tendencias,
  * proyecciones, metodologías y alertas. Pendientes: employability, jobs, skills,

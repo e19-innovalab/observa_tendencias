@@ -221,6 +221,16 @@ class CepXxiItem(BaseModel):
     indice_real: float | None = None
 
 
+class TertiaryEmploymentItem(BaseModel):
+    pais: str
+    anio: int
+    mujeres: float
+    varones: float
+    pct_mujeres: float
+    brecha_pct: float
+    diagnostico: str
+
+
 class DolarOficial(BaseModel):
     nombre: str
     fecha: date
@@ -232,6 +242,7 @@ class SectorKpis(BaseModel):
     proyecciones: list[SectorProjectionItem]
     nota: str
     genero_nota: str = ""
+    ocupados_educacion_superior: list[TertiaryEmploymentItem] = []
     cep_xxi: list[CepXxiItem] = []
     cep_nota: str = ""
     cep_base: int | None = None

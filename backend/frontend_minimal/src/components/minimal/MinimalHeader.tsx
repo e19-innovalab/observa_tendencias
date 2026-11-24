@@ -1,7 +1,9 @@
 import { Bell, LogOut } from 'lucide-react';
+import Image from 'next/image';
 import Link from 'next/link';
 import { Suspense } from 'react';
 import { logout } from '@/lib/auth/actions';
+import { PRO_PERMISSION } from '@/lib/auth/constants';
 import { PERMISSIONS, type User } from '@/lib/schemas/auth';
 import { Dropdown } from './Dropdown';
 import { HeaderHeight } from './HeaderHeight';
@@ -13,9 +15,8 @@ const menuItem = 'block w-full px-4 py-2 text-left text-sm text-slate-700 hover:
 
 function Brand() {
   return (
-    <Link href="/panorama" className="flex items-center gap-2 text-[15px] font-bold text-slate-900">
-      <span aria-hidden className="flex size-7 items-center justify-center rounded-md bg-blue-700 text-xs text-white">OT</span>
-      Observa Tendencias
+    <Link href="/panorama" className="flex items-center">
+      <Image src="/brand/predix-horizontal.svg" alt="Predix" width={126} height={36} priority className="h-7 w-auto" />
     </Link>
   );
 }
@@ -28,18 +29,21 @@ export function MinimalHeader({ user, unreadAlerts }: { user: User; unreadAlerts
     user.permissions.includes(PERMISSIONS.manageUsers) && { href: '/admin/usuarios', label: 'Usuarios y accesos' },
     user.permissions.includes(PERMISSIONS.manageData) && { href: '/admin/datos', label: 'Carga de datos' },
   ].filter(Boolean) as { href: string; label: string }[];
+  const pro = user.permissions.includes(PRO_PERMISSION); // cuenta gratuita: sin buscador ni alertas
   return (
     <header className="sticky top-0 z-30 border-b border-slate-200 bg-white/95 backdrop-blur">
       <HeaderHeight />
       <div className="mx-auto flex min-h-14 max-w-[1360px] flex-wrap items-center gap-x-6 gap-y-2 px-4 py-2 sm:px-8">
         <Brand />
-        <TopNav />
+        <TopNav free={!pro} />
         <div className="ml-auto flex flex-1 items-center justify-end gap-2">
-          <SearchPalette />
-          <Link href="/alertas" aria-label={`Alertas, ${unreadAlerts} sin leer`} className="relative flex size-10 items-center justify-center rounded-lg text-slate-600 hover:bg-slate-100">
-            <Bell className="size-5" aria-hidden />
-            {unreadAlerts > 0 && <span className="absolute right-2 top-2 size-2 rounded-full bg-red-600" aria-hidden />}
-          </Link>
+          {pro && <SearchPalette />}
+          {pro && (
+            <Link href="/alertas" aria-label={`Alertas, ${unreadAlerts} sin leer`} className="relative flex size-10 items-center justify-center rounded-lg text-slate-600 hover:bg-slate-100">
+              <Bell className="size-5" aria-hidden />
+              {unreadAlerts > 0 && <span className="absolute right-2 top-2 size-2 rounded-full bg-red-600" aria-hidden />}
+            </Link>
+          )}
           <Dropdown
             summaryClassName="flex size-9 cursor-pointer items-center justify-center rounded-full bg-indigo-100 text-xs font-semibold text-indigo-900"
             summary={<><span aria-hidden>{initials(user.full_name)}</span><span className="sr-only">Cuenta de {user.full_name}</span></>}
@@ -49,8 +53,14 @@ export function MinimalHeader({ user, unreadAlerts }: { user: User; unreadAlerts
                 <p className="text-sm font-semibold text-slate-900">{user.full_name}</p>
                 <p className="text-xs text-slate-500">{user.role_label} · {user.email}</p>
               </div>
-              <Link href="/alertas" className={menuItem}>Alertas</Link>
-              <Link href="/metodologia/ise" className={menuItem}>Metodología y fuentes</Link>
+              {pro ? (
+                <>
+                  <Link href="/alertas" className={menuItem}>Alertas</Link>
+                  <Link href="/metodologia/ise" className={menuItem}>Metodología y fuentes</Link>
+                </>
+              ) : (
+                <p className="px-4 py-2 text-xs text-slate-500">Cuenta gratuita: Inicio y Panorama. Para el acceso completo, pedíselo a un administrador.</p>
+              )}
               {admin.map((l) => <Link key={l.href} href={l.href} className={menuItem}>{l.label}</Link>)}
               <form action={logout} className="border-t border-slate-100">
                 <button type="submit" className={`${menuItem} flex items-center gap-2`}><LogOut className="size-4" aria-hidden /> Cerrar sesión</button>
@@ -60,7 +70,7 @@ export function MinimalHeader({ user, unreadAlerts }: { user: User; unreadAlerts
         </div>
       </div>
       <Suspense fallback={null}>
-        <SubNav />
+        <SubNav free={!pro} />
       </Suspense>
     </header>
   );

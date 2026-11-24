@@ -6,7 +6,7 @@ const inter = Inter({ variable: '--font-sans', subsets: ['latin'] });
 const geistMono = Geist_Mono({ variable: '--font-geist-mono', subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: { default: 'Observa Tendencias', template: '%s · Observa Tendencias' },
+  title: { default: 'Predix', template: '%s · Predix' },
   description:
     'Observatorio de tendencias laborales y educativas de Argentina, Chile y Uruguay: indicadores, ocupaciones, habilidades y proyecciones con datos oficiales.',
 };

@@ -1,7 +1,8 @@
-# Observatorio Predictivo de Tendencias · Módulo Data Analytics
+# Predix · Observatorio Predictivo de Tendencias · Módulo Data Analytics
 
 **Alcance Regional:** Argentina, Uruguay y Chile  
 **Programa:** InnovaLab  
+**Aplicación:** Predix (antes Observa Tendencias); su asistente es Pixi (antes Baqueano)  
 **Rol del Módulo:** Diseño metodológico, ingesta, limpieza, armonización multipaís, cálculo de indicadores estadísticos, proyecciones de tendencias socioeconómicas, laborales y educativas, y articulación formativa-ocupacional con impacto de Inteligencia Artificial.  
 **Norma Metodológica:** 100% Datos Observados Oficiales (Cero imputaciones sintéticas, estimaciones figuradas ni sustituciones artificiales). Todo lo que se proyecta o extiende se declara de forma explícita en pantalla.
 
@@ -54,9 +55,9 @@ El ecosistema tecnológico combina librerías científicas de Python para el mod
 | **Ingesta, APIs y Programación** | `requests`, `httpx`, `apscheduler` | Consumo de APIs REST oficiales (Banco Mundial, OIT, INDEC, BCRA, SIMEL, ESCO) y ejecución programada de jobs. |
 | **Lectura de Formatos Oficiales** | `openpyxl`, `odfpy`, `csv`, `zipfile` | Extracción automatizada de censos y anuarios en `.xlsx`, `.ods`, `.zip` y `.csv` (RFC 4180 / UTF-8). |
 | **Visualización Científica y UI** | `matplotlib` (>= 3.8.0) / Next.js, TypeScript, Tailwind, Recharts | Generación de gráficos estáticos de alta resolución (300 DPI) en `data_analytics/` y dashboards interactivos en la web. |
-| **API y Persistencia** | FastAPI, Pydantic, PostgreSQL (Supabase), SQLAlchemy, Alembic | Exposición de contratos JSON validados, persistencia relacional, control de revisiones (`data_revisions`) y migraciones (hasta `0031`). |
+| **API y Persistencia** | FastAPI, Pydantic, PostgreSQL (Supabase), SQLAlchemy, Alembic | Exposición de contratos JSON validados, persistencia relacional, control de revisiones (`data_revisions`) y migraciones (hasta `0032`). |
 | **Configuración Declarativa** | YAML (`fuentes.yaml` y `backend/backend/config/`) | Parametrización de fuentes, indicadores, reglas metodológicas y tablas de referencia sin valores hardcodeados. |
-| **Asistente Verificado** | API compatible con OpenAI (`nvidia/nemotron-3.5-super-vl:free` / Ollama / Claude) | Asistente **Baqueano** con verificación determinista de cifras contra la base de datos. |
+| **Asistente Verificado** | API compatible con OpenAI (`nvidia/nemotron-3.5-super-vl:free` / Ollama / Claude) | Asistente **Pixi** con verificación determinista de cifras contra la base de datos. |
 | **Taxonomías Internacionales** | UNESCO CINE-F 2013, UNSD CIIU Rev. 4 / CLAE2, OIT CIUO-08, ESCO, OIT WP 140 | Estándares internacionales para homologar carreras, sectores, ocupaciones, competencias e impacto de IA. |
 | **Entornos de Desarrollo (IDE)** | Google Antigravity IDE, Visual Studio Code | Entorno de desarrollo agéntico, inspección de terminales, ejecución de pipelines y control de calidad. |
 | **Pair Programming con IA** | **Claude AI** y **Gemini 4 Argon (Medium)** en Google Antigravity | Auditoría metodológica, refactorización modular, depuración semántica de matrices CIUO-08, pruebas de estrés algorítmico y consistencia matemática. |
@@ -99,7 +100,7 @@ graph TD
     end
 
     subgraph S3["3. Persistencia y Exposicion Central"]
-        DB["PostgreSQL / Supabase (Migraciones Alembic hasta 0031)"]
+        DB["PostgreSQL / Supabase (Migraciones Alembic hasta 0032)"]
         API["FastAPI REST (/api/v1/...)"]
         BK4 --> DB
         DA_OUT --> API
@@ -108,7 +109,7 @@ graph TD
 
     subgraph S4["4. Consumo Visual y Asistente"]
         UI1["Frontend Next.js (Panorama, Sectores, Ocupaciones, Genero, Metodologia)"]
-        UI2["Asistente Baqueano (Con chequeo estricto de numeros)"]
+        UI2["Asistente Pixi (Con chequeo estricto de numeros)"]
         API --> UI1
         API --> UI2
     end
@@ -124,13 +125,13 @@ graph TD
 | **1. Fuentes Oficiales** | APIs REST + Portales Estadísticos | Publicación de series de ARG, CHL y URY (SPU/DIU, CEP-XXI, INDEC, BCRA, SIES/Mi Futuro, MEC, UdelaR, BM, OIT, ESCO). | JSON directo y archivos oficiales validados con hash SHA-256. |
 | **2A. Laboratorio `data_analytics/`** | `ingesta_01.py`, `cleaning_02.py`, `indicadores_03.py`, `generar_matriz_habilidades_ia.py` | Homologación CINE-F/CIIU/CIUO-08, USD PPA, Z-scores ($|Z| \ge 1{,}4$), regresiones $t$-Student 95%, diagnóstico de género y curaduría de 114 cruces formativo-ocupacionales con riesgo IA (OIT WP 140). | 16 tablas CSV en `output/`, visualizaciones PNG y las 2 matrices de habilidades e IA consumidas por el backend. |
 | **2B. Jobs `backend/backend/`** | `app/connectors`, `app/datasets`, `app/ingestion`, `app/analytics` | Descarga programada, validación de esquemas, cruce con `config/reference/*.yaml`, suavizado de Holt, ISE v0.3 e indicadores experimentales. | Tablas relacionales actualizadas e historial de auditoría en `data_revisions`. |
-| **3. Base de Datos y API** | PostgreSQL, SQLAlchemy, Alembic (`0031`), FastAPI | Almacenamiento transaccional de hechos, dimensiones, observaciones y exposición de endpoints REST documentados. | Endpoints `/api/v1/analytics/...`, `/api/v1/graduates/...`, `/api/v1/employability/...`. |
-| **4. Frontend y UX/UI** | Next.js, TypeScript, Tailwind, Recharts, Baqueano | Representación interactiva con directivas anti-alucinación, notas metodológicas por indicador y asistente conversacional verificado. | Pantallas de usuario final y módulo *Metodología y fuentes*. |
+| **3. Base de Datos y API** | PostgreSQL, SQLAlchemy, Alembic (`0032`), FastAPI | Almacenamiento transaccional de hechos, dimensiones, observaciones y exposición de endpoints REST documentados. | Endpoints `/api/v1/analytics/...`, `/api/v1/graduates/...`, `/api/v1/employability/...`. |
+| **4. Frontend y UX/UI** | Next.js, TypeScript, Tailwind, Recharts, Pixi | Representación interactiva con directivas anti-alucinación, notas metodológicas por indicador y asistente conversacional verificado. | Pantallas de usuario final y módulo *Metodología y fuentes*. |
 
 ### Puntos de Contacto Interdisciplinarios:
 
 * **Data Analytics $\rightarrow$ Backend:** Define las fuentes oficiales, las reglas de armonización multipaís, los umbrales estadísticos (criterio EIGE/OIT 40%–60% y gradientes OIT WP 140) y provee directamente los CSV de matrices de habilidades e IA en `backend/data/processed/data_analytics/`.
-* **Backend $\rightarrow$ Frontend:** Expone los endpoints REST bajo esquemas Pydantic documentados en [`backend/docs/guia_api_frontend.md`](file:///c:/proyectos/observa_tendencias/backend/docs/guia_api_frontend.md).
+* **Backend $\rightarrow$ Frontend:** Expone los endpoints REST bajo esquemas Pydantic documentados en [`backend/docs/guia_api_frontend.md`](../backend/docs/guia_api_frontend.md).
 * **Data Analytics + Backend $\rightarrow$ UX/UI & Frontend:** Proveen los lineamientos visuales y el Manual Metodológico de Indicadores para que cada pantalla explique con transparencia cómo se calcula e interpreta cada métrica.
 
 ---
@@ -158,7 +159,7 @@ El Observatorio utiliza exclusivamente fuentes primarias auditadas de Argentina,
 | **Supranacional** | Comisión Europea / EE. UU. | Clasificador ESCO y O*NET | Versiones históricas y actual | API REST / Archivos | Competencias esenciales y opcionales por ocupación e insumos para el indicador *Reina Roja*. |
 | **Mercado Laboral** | Observatorio / LinkedIn | Relevamiento de Ofertas Laborales Cono Sur (Apify) | 2024–2026 | CSV (Muestra observada) | 640 publicaciones de empleo reales para monitoreo de demanda y validación de habilidades. |
 
-El detalle exhaustivo de URLs y validaciones de producción se encuentra en [`backend/docs/fuentes_y_criterios.md`](file:///c:/proyectos/observa_tendencias/backend/docs/fuentes_y_criterios.md) y en [`data_analytics/fuentes.yaml`](file:///c:/proyectos/observa_tendencias/data_analytics/fuentes.yaml).
+El detalle exhaustivo de URLs y validaciones de producción se encuentra en [`backend/docs/fuentes_y_criterios.md`](../backend/docs/fuentes_y_criterios.md) y en [`data_analytics/fuentes.yaml`](fuentes.yaml).
 
 ---
 
@@ -281,9 +282,15 @@ Evalúa la participación femenina en graduación universitaria, empleo sectoria
 * **$40\% \text{ a } 60\%$ de mujeres:** *Zona de Paridad Equilibrada*.
 * **$> 60\%$ de mujeres:** *Concentración / Sobrerrepresentación Femenina (Segregación horizontal)*.
 
+**Ocupados con educación superior** (OIT, `DF_EMP_TEMP_SEX_EDU_NB`, nivel avanzado: CINE 5 o más): mujeres y varones ocupados con estudios terciarios o universitarios y el % de mujeres entre ellos, de 2000 a 2025 (Argentina desde 2004, aglomerados urbanos de la EPH). Es el **total de cada país**: la OIT no lo publica por sector. Indicadores `employment_tertiary_women` y `employment_tertiary_men`; en la aplicación es la tercera sección de la pestaña Género (`ocupados_educacion_superior` en `/api/v1/analytics/sectores`).
+
 ### 8. Indicadores Temáticos y Rankings Universitarios
 * **Indicadores Temáticos (*Moctezuma, Ludita, Reina Roja, Sísifo y Brecha Generacional*):** Dimensionan la velocidad de recambio tecnológico, los cuadrantes de complementariedad vs. sustitución por IA y el desajuste educativo-ocupacional (sobrecalificación).
+* **Puntajes relativos de los indicadores experimentales:** cada dimensión se normaliza entre 0 y 100 **dentro del grupo comparado** (mín–máx). Los puntajes son **posiciones dentro del grupo, no calificaciones** de los países ni de las ocupaciones. Con datos nacionales hay tres valores, uno por país: el menor queda en 0 y el mayor en 100, aunque la diferencia sea chica. Un 0 no indica ausencia ni un mal resultado; los textos de la aplicación lo dicen así para no dar una imagen negativa de ningún país.
 * **Rankings Universitarios:** Top 10 regional evaluado en el último año común tripartito y rankings nacionales del último año disponible en cada país.
+
+### 9. Tasas brutas que pueden superar 100 %
+La **tasa de finalización de la secundaria baja** (Banco Mundial, `SE.SEC.CMPT.LO.ZS`) es una tasa bruta: divide a quienes ingresan al último año de ese nivel, de cualquier edad, por la población de la edad teórica. Con estudiantes que repiten o terminan tarde puede pasar de 100 %. No se recorta: `value_range: [0, null]` solo evita proyecciones negativas.
 
 ---
 
@@ -359,7 +366,8 @@ A continuación se presentan tres visualizaciones representativas generadas por 
 
 | Endpoint REST | Propósito y Parámetros Clave |
 |---|---|
-| `GET /api/v1/analytics/sectores` | KPIs consolidados por sector estratégico, género, proyecciones y series CEP-XXI. |
+| `GET /api/v1/analytics/sectores` | KPIs consolidados por sector estratégico, género, proyecciones y series CEP-XXI; `ocupados_educacion_superior` por país. |
+| `GET /api/v1/indicators`, `GET /api/v1/observations` | Indicadores nacionales del Panorama y sus series; Pixi los consulta. |
 | `GET /api/v1/analytics/densidad-profesional` | Densidad profesional (`graduados_por_mil_ocupados`) con parámetro `enfoque` (`local`, `regional_comun`, `todos`). |
 | `GET /api/v1/analytics/salarios/dual` | Comparativa salarial con parámetro `enfoque` (`regional` en USD PPA OIT o `local` en moneda constante / USD CEP-XXI). |
 | `GET /api/v1/analytics/habilidades` (y `/habilidades-ia`) | Matriz integral de habilidades sectoriales, vectores de emergencia y exposición a IA (OIT WP 140). |
@@ -371,7 +379,7 @@ A continuación se presentan tres visualizaciones representativas generadas por 
 
 ## 10. Especificaciones de Exposición para Frontend y UX/UI (Consumo Visual)
 
-El contrato detallado de la API se documenta en [`backend/docs/guia_api_frontend.md`](file:///c:/proyectos/observa_tendencias/backend/docs/guia_api_frontend.md).
+El contrato detallado de la API se documenta en [`backend/docs/guia_api_frontend.md`](../backend/docs/guia_api_frontend.md).
 
 ### Mapa de Navegación de la Aplicación:
 
@@ -383,6 +391,8 @@ El contrato detallado de la API se documenta en [`backend/docs/guia_api_frontend
 | **Experimental** | Moctezuma · Ludita · Reina Roja · Sísifo |
 | **Metodología y fuentes** | Manual de métodos, fórmulas de indicadores, criterios de paridad y estado en vivo de las fuentes |
 
+**Acceso:** con una cuenta de Google se entra gratis a **Inicio** y **Panorama**. Las demás secciones y Pixi (hasta 25 preguntas por día) necesitan acceso completo, que da un administrador. La portada lo explica en la sección *Acceso* y `/privacidad` detalla qué datos de la cuenta se guardan.
+
 ### Directivas Visuales y Principio Anti-Alucinación:
 1. **Gráficos de Proyecciones con Conos de Incertidumbre (Fan Charts):**
    * **Serie Observada (Hecho Censal):** Línea continua y sólida con marcadores en cada año observado.
@@ -391,9 +401,9 @@ El contrato detallado de la API se documenta en [`backend/docs/guia_api_frontend
    * Cada país expone hasta su último año oficial publicado indicando explícitamente el año de corte.
    * Las comparativas regionales directas (como el Top 10 de universidades o la matriz salarial OIT) utilizan el último año común tripartito.
    * Los años con cobertura parcial (como 2023 en CEP-XXI, con 11 meses observados) se señalizan en la interfaz y no reciben factores de conversión anuales para evitar distorsiones.
-3. **Principio Anti-Alucinación en UI y Asistente Baqueano:**
+3. **Principio Anti-Alucinación en UI y Asistente Pixi:**
    * **Cero datos inventados en pantalla:** Ante la ausencia de dato oficial, la interfaz muestra `"—"` o `"Dato no relevado oficialmente"`, prohibiendo interpolar líneas sobre años vacíos.
-   * **Verificación determinista en Baqueano:** Cada cifra mencionada por el asistente conversacional se coteja automáticamente contra los payloads JSON consultados en la API; si un número no proviene de la consulta, la respuesta se bloquea.
+   * **Verificación determinista en Pixi:** Cada cifra mencionada por el asistente conversacional se coteja automáticamente contra los payloads JSON consultados en la API; si un número no proviene de la consulta, la respuesta se bloquea.
 
 ---
 
@@ -425,14 +435,14 @@ observa_tendencias/
     │   │   ├── datasets/                <- Lectores de archivos oficiales (universities, tracked_careers, cep_xxi, bcra_fx)
     │   │   ├── ingestion/               <- Pipeline de actualización e historial en data_revisions
     │   │   ├── analytics/               <- Motor de recálculo (Holt, ISE v0.3, brechas, KPIs sectoriales, experimentales)
-    │   │   ├── assistant/               <- Asistente Baqueano con chequeo de números
+    │   │   ├── assistant/               <- Asistente Pixi con chequeo de números
     │   │   └── api/v1/                  <- Endpoints REST FastAPI
     │   ├── config/
     │   │   ├── sources.yaml             <- Fuentes, URLs y cronogramas de actualización
     │   │   ├── indicators.yaml          <- Definición de los 29 indicadores y sus series
     │   │   ├── analytics.yaml           <- Parámetros metodológicos (ISE, Holt, umbrales, alertas)
     │   │   └── reference/               <- Tablas YAML de correspondencia (CINE-F, CIUO-08, carreras, universidades)
-    │   └── migrations/                  <- Migraciones Alembic (hasta 0031)
+    │   └── migrations/                  <- Migraciones Alembic (hasta 0032)
     ├── data/
     │   ├── raw/                         <- Descargas oficiales con control de huella y LinkedIn
     │   └── processed/data_analytics/    <- Matrices CSV de habilidades e IA leídas por la API
@@ -464,6 +474,9 @@ observa_tendencias/
 | **diagnostico_paridad** | Etiqueta | Clasificación bajo el estándar **EIGE / OIT (40%–60%)**: *Zona de paridad equilibrada* ($40\%–60\%$), *Subrepresentación femenina* ($<40\%$), *Concentración femenina* ($>60\%$) o *Pocos casos* ($<30$ registros). |
 | **oit_exposicion_media** / **oit_gradiente** | Métrica IA | Puntaje medio $[0, 1]$ y categoría oficial de exposición a IA generativa según OIT Working Paper 140 (2025). |
 | **relation** | Etiqueta ESCO | Clasifica cada competencia de una ocupación como *Esencial* (`essential`) u *Opcional* (`optional`) según el estándar europeo ESCO. |
+| **ocupados_educacion_superior** | Métrica | Mujeres y varones ocupados con educación superior, % de mujeres y brecha; total del país (OIT). |
+| **tasa bruta** | Concepto | Cociente que puede superar 100 % porque el numerador incluye personas fuera de la edad teórica. |
+| **puntaje relativo** | Concepto | Valor de 0 a 100 dentro del grupo comparado; una posición, no una calificación. |
 
 ---
 
@@ -483,3 +496,11 @@ El desarrollo fundacional del módulo en `data_analytics/`, auditado mediante *p
 * **Consolidación de Series Universitarias y Laborales:** Integración completa de los Anuarios del DIU (2012–2024) con complemento CTI (2015 y 2019), serie histórica de UdelaR y verificación byte a byte de CEP-XXI junto con el tipo de cambio mayorista diario del BCRA (`bcra_fx.py`).
 * **Estandarización de Factor PPA e ISE v0.3:** Adopción del factor PPA de consumo privado alineado con la OIT y consolidación de la fórmula tripartita del ISE v0.3 (manteniendo equivalencia de tramos con la v0.2).
 * **Despliegue de Vistas Analíticas y Asistente Baqueano:** Exposición en producción de las vistas de Género, KPIs Sectoriales e indicadores experimentales (*Moctezuma, Ludita, Reina Roja, Sísifo*), respaldada por **274 tests automatizados** (`pytest`, `ruff`, `tsc` y `next build`).
+
+### Fase III: Revisión de la actualización propuesta y Predix (2026-11-23)
+* **Ocupados con educación superior por sexo (OIT):** tercera sección de Género, de 2000 a 2025. De la propuesta de actualización se tomó lo que tiene fuente oficial con API.
+* **Finalización de la secundaria baja:** tratada como tasa bruta, sin tope de 100 %.
+* **Pixi:** nuevo nombre del asistente, con dos herramientas para el Panorama; la plantilla de metodología responde solo sobre el ISE; límite de 25 preguntas por cuenta por día.
+* **Puntajes experimentales:** nota de que el 0–100 es una posición dentro del grupo.
+* **Predix:** nuevo nombre de la aplicación; ingreso con Google con cuenta gratuita (Inicio y Panorama) y acceso completo asignado por un administrador (migración `0032`).
+* **Verificación:** 281 tests, `ruff`, `tsc` y `eslint`; ingreso con Google probado en local con una cuenta real.

@@ -2,13 +2,15 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { isFreePath } from '@/lib/auth/constants';
 import { inSection, SECTIONS } from './nav';
 
-export function TopNav() {
+/** free: cuenta gratuita, solo las secciones que puede abrir. */
+export function TopNav({ free = false }: { free?: boolean }) {
   const pathname = usePathname();
   return (
     <nav aria-label="Secciones" className="flex flex-wrap gap-0.5">
-      {SECTIONS.map((s) => {
+      {SECTIONS.filter((s) => !free || isFreePath(s.href.split('?')[0])).map((s) => {
         const active = inSection(pathname, s);
         return (
           <Link
