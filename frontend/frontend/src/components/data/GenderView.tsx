@@ -167,100 +167,76 @@ export async function GenderView({ sp, tab }: { sp: SearchParams; tab: GenderTab
         <p className="mt-1">{kpis.genero_nota}</p>
       </section>
 
-      <Section
-        actions={<Vista sp={sp} name="vista_t" />}
-        title="Titulados por sexo"
-        text="Cuántas personas se titulan y cómo se reparten. La brecha es el % de mujeres menos el % de varones: positiva significa más mujeres. Argentina publica el sexo solo para el total del país; la categoría no binaria solo aparece en Chile."
-      >
-        {graduates.length === 0 ? (
-          <Vacio text="Todavía no hay datos de titulados por sexo para mostrar." />
-        ) : (
-          <>
-            {sp.vista_t !== 'tabla' ? (
-              <Reparto
+      {tab === 'titulados' ? (
+        <Section
+          title="Titulados por sexo"
+          text="Cuántas personas se titulan y cómo se reparten. La brecha es el % de mujeres menos el % de varones: positiva significa más mujeres. Argentina publica el sexo solo para el total del país; la categoría no binaria solo aparece en Chile."
+        >
+          {graduates.length === 0 ? (
+            <Vacio text="Todavía no hay datos de titulados por sexo para mostrar." />
+          ) : (
+            <>
+              <Table
+                head={['País', 'Sector', 'Mujeres', 'Varones', 'No binario', '% mujeres', '% varones', 'Brecha', 'Diagnóstico', 'Año']}
                 rows={graduates.map((i) => ({
                   key: `${i.pais}-${i.sector}`,
-                  label: `${names[i.pais] ?? i.pais} · ${i.sector} (${i.anio})`,
                   total: i.sector === TOTAL,
-                  mujeres: i.pct_mujeres_graduadas ?? null,
+                  cells: [
+                    ...place(i),
+                    count(i.f),
+                    count(i.m),
+                    i.nb ? count(i.nb) : '—',
+                    percent(i.pct_mujeres_graduadas),
+                    percent(i.pct_varones_graduados),
+                    points(i.brecha_graduados_pct),
+                    i.diagnostico_paridad ?? '—',
+                    i.anio,
+                  ],
                 }))}
               />
-            ) : (
-            <Table
-              head={['País', 'Sector', 'Mujeres', 'Varones', 'No binario', '% mujeres', '% varones', 'Brecha', 'Diagnóstico', 'Año']}
-              rows={graduates.map((i) => ({
-                key: `${i.pais}-${i.sector}`,
-                total: i.sector === TOTAL,
-                cells: [
-                  ...place(i),
-                  count(i.f),
-                  count(i.m),
-                  i.nb ? count(i.nb) : '—',
-                  percent(i.pct_mujeres_graduadas),
-                  percent(i.pct_varones_graduados),
-                  points(i.brecha_graduados_pct),
-                  i.diagnostico_paridad ?? '—',
-                  i.anio,
-                ],
-              }))}
-            />
-            )}
-            <div className="grid gap-6 border-t border-card-border p-5">
-              <div>
+              <div className="border-t border-card-border p-5">
                 <h3 className="mb-2 text-sm font-semibold text-heading">
                   {sector}: % de mujeres entre titulados
                 </h3>
                 <TrendLineChart data={line('pct_mujeres_graduadas')} series={series} unit="percent" />
               </div>
-            </div>
-          </>
-        )}
-      </Section>
-
-      <Section
-        actions={<Vista sp={sp} name="vista_o" />}
-        title="Personas ocupadas y salarios"
-        text="Participación de las mujeres en el empleo del sector (OIT). La brecha de empleo es el % de mujeres menos el % de varones. La brecha salarial es cuánto menos ganan las mujeres que los varones, sin ajustar por ocupación ni horas; negativa significa que ganan más."
-      >
-        {employed.length === 0 ? (
-          <Vacio text="Todavía no hay datos de ocupados por sexo para mostrar." />
-        ) : (
-          <>
-            {sp.vista_o !== 'tabla' ? (
-              <Reparto
+            </>
+          )}
+        </Section>
+      ) : (
+        <Section
+          title="Personas ocupadas y salarios"
+          text="Participación de las mujeres en el empleo del sector (OIT). La brecha de empleo es el % de mujeres menos el % de varones. La brecha salarial es cuánto menos ganan las mujeres que los varones, sin ajustar por ocupación ni horas; negativa significa que ganan más."
+        >
+          {employed.length === 0 ? (
+            <Vacio text="Todavía no hay datos de ocupados por sexo para mostrar." />
+          ) : (
+            <>
+              <Table
+                head={['País', 'Sector', '% mujeres', 'Brecha de empleo', 'Brecha salarial', 'Diagnóstico', 'Año']}
                 rows={employed.map((i) => ({
                   key: `${i.pais}-${i.sector}`,
-                  label: `${names[i.pais] ?? i.pais} · ${i.sector} (${i.anio})`,
                   total: i.sector === TOTAL,
-                  mujeres: i.pct_mujeres_ocupadas ?? null,
+                  cells: [
+                    ...place(i),
+                    percent(i.pct_mujeres_ocupadas),
+                    points(i.brecha_empleo_pct),
+                    percent(i.brecha_salarial_pct),
+                    i.diagnostico_empleo ?? '—',
+                    i.anio,
+                  ],
                 }))}
               />
-            ) : (
-            <Table
-              head={['País', 'Sector', '% mujeres', 'Brecha de empleo', 'Brecha salarial', 'Diagnóstico', 'Año']}
-              rows={employed.map((i) => ({
-                key: `${i.pais}-${i.sector}`,
-                total: i.sector === TOTAL,
-                cells: [
-                  ...place(i),
-                  percent(i.pct_mujeres_ocupadas),
-                  points(i.brecha_empleo_pct),
-                  percent(i.brecha_salarial_pct),
-                  i.diagnostico_empleo ?? '—',
-                  i.anio,
-                ],
-              }))}
-            />
-            )}
-            <div className="border-t border-card-border p-5">
-              <h3 className="mb-2 text-sm font-semibold text-heading">
-                {sector}: % de mujeres entre ocupados
-              </h3>
-              <TrendLineChart data={line('pct_mujeres_ocupadas')} series={series} unit="percent" />
-            </div>
-          </>
-        )}
-      </Section>
+              <div className="border-t border-card-border p-5">
+                <h3 className="mb-2 text-sm font-semibold text-heading">
+                  {sector}: % de mujeres entre ocupados
+                </h3>
+                <TrendLineChart data={line('pct_mujeres_ocupadas')} series={series} unit="percent" />
+              </div>
+            </>
+          )}
+        </Section>
+      )}
     </>
   );
 }

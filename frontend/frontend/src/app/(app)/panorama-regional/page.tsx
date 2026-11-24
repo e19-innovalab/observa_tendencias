@@ -525,6 +525,13 @@ export default async function PanoramaRegionalPage({
               ? formatChange(item.change, item.change_kind, unit)
               : null,
         }));
+ 
+  // Los «por país» con «Todos» muestran el primero: conviene decirlo para que no parezca un error.
+  const fallbackCountry =
+    PER_COUNTRY_KEYS.has(entry.key) && !countryFilter
+      ? countries.find((country) => country.iso3 === selectedCountries[0])
+      : undefined;
+
   const latest = rows.filter((row) => row.value !== null);
   const top = [...latest].sort((a, b) => b.value! - a.value!)[0];
   const moved = [...rows]
@@ -538,7 +545,9 @@ export default async function PanoramaRegionalPage({
       moved.changeText &&
       (latest.length > 1
         ? `El mayor cambio es el de ${names[moved.iso] ?? moved.iso}: ${moved.changeText} respecto de ${moved.prevPeriod}.`
-        : `Solo ${names[moved.iso] ?? moved.iso} tiene datos: ${moved.changeText}.`),
+        : fallbackCountry
+          ? `La serie de ${names[moved.iso] ?? moved.iso} cambió ${moved.changeText} respecto de ${moved.prevPeriod}.`
+          : `Solo ${names[moved.iso] ?? moved.iso} tiene datos: ${moved.changeText}.`),
   ]
     .filter(Boolean)
     .join(' ');
@@ -575,12 +584,6 @@ export default async function PanoramaRegionalPage({
       }),
     ]),
   };
-
-  // Los «por país» con «Todos» muestran el primero: conviene decirlo para que no parezca un error.
-  const fallbackCountry =
-    PER_COUNTRY_KEYS.has(entry.key) && !countryFilter
-      ? countries.find((country) => country.iso3 === selectedCountries[0])
-      : undefined;
 
   const chartSubtitle =
     [
