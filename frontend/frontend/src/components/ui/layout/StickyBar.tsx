@@ -17,6 +17,7 @@ import {
   User,
   type LucideIcon,
 } from 'lucide-react';
+import { DixiButton } from '@/components/assistant/DixiButton';
 import { cn } from '@/lib/utils';
 import { INDEX_PATHS, INDICES, ITEMS, isActive } from './MainNav';
 
@@ -127,6 +128,7 @@ export function StickyBar({ canManage }: { canManage: boolean }) {
         </nav>
 
         <div className="flex shrink-0 items-center gap-1">
+          <DixiButton />
           <Link href="/alertas" aria-label="Alertas" title="Alertas" className={ICON}>
             <TrendingUp className="size-4" aria-hidden />
           </Link>

@@ -1,6 +1,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { Bell, BookOpen, ChevronDown, LogOut, Search } from 'lucide-react';
+import { DixiButton } from '@/components/assistant/DixiButton';
 import { logout } from '@/lib/auth/actions';
 
 type Props = {
@@ -47,6 +48,7 @@ export function AppHeader({ userName, userRole, unreadAlerts, canManage }: Props
         </form>
 
         <div className="ml-auto flex items-center gap-1 sm:gap-2">
+          <DixiButton />
           <Link
             href="/alertas"
             className="flex items-center gap-2 rounded-lg px-2.5 py-2 text-[13px] font-medium text-body hover:bg-surface-alt focus-visible:outline-2 focus-visible:outline-focus"

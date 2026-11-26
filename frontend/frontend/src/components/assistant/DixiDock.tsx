@@ -6,7 +6,8 @@ import Link from 'next/link';
 import { usePathname, useSearchParams } from 'next/navigation';
 import { Fragment, useCallback, useEffect, useRef, useState } from 'react';
 import { cn } from '@/lib/utils';
-import prediBot from './predi-bot.jpg';
+import { DIXI_OPEN_EVENT } from './dixi';
+import fairyBotIcon from './fairy-bot-icon.svg';
 import type {
   AssistantAnswer,
   AssistantChoice,
@@ -28,8 +29,9 @@ type Turn =
     };
 
 /** Nombre visible del asistente en esta aplicación. */
-const NAME = 'Predi';
+const NAME = 'Dixi';
 const TAGLINE = 'IA de Predix';
+const HOVER_LABEL = `${NAME} · ${TAGLINE}`;
 
 /** Tamaño de la burbuja flotante y margen mínimo con los bordes de la ventana. */
 const BUBBLE_SIZE = 64;
@@ -72,17 +74,17 @@ function Rich({ text }: { text: string }) {
   );
 }
 
-/** El backend todavía llama «Baqueano» al asistente: acá se muestra siempre como Predi. */
+/** El backend todavía llama «Baqueano» o «Pixi» al asistente: acá se muestra siempre como Dixi. */
 function rename(text: string) {
-  return text.replace(/baqueano/gi, NAME);
+  return text.replace(/baqueano|pixi/gi, NAME);
 }
 
 /**
- * Predi: burbuja azul arrastrable que abre un panel de conversación.
+ * Dixi: burbuja arrastrable que abre un panel de conversación.
  * La conversación sigue al cambiar de página y usa el mismo asistente del observatorio
  * (GET /assistant y POST /assistant/ask) que la versión Baqueano.
  */
-export function PrediDock({ status }: { status: AssistantStatus }) {
+export function DixiDock({ status }: { status: AssistantStatus }) {
   const context = useAssistantContext();
   const t: Record<string, string> = Object.fromEntries(
     Object.entries({ ...status.texts, name: NAME, title: TAGLINE, tab: NAME }).map(([key, value]) => [
@@ -92,6 +94,8 @@ export function PrediDock({ status }: { status: AssistantStatus }) {
   );
 
   const [open, setOpen] = useState(false);
+  /** La burbuja se puede ocultar; el icono de las barras vuelve a abrir el panel. */
+  const [hidden, setHidden] = useState(false);
   const [turns, setTurns] = useState<Turn[]>([]);
   const [draft, setDraft] = useState('');
   const [busy, setBusy] = useState(false);
@@ -140,6 +144,16 @@ export function PrediDock({ status }: { status: AssistantStatus }) {
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
   }, [open]);
+
+  // El icono de la barra de herramientas abre el panel y restaura la burbuja.
+  useEffect(() => {
+    const fromToolbar = () => {
+      setHidden(false);
+      setOpen(true);
+    };
+    window.addEventListener(DIXI_OPEN_EVENT, fromToolbar);
+    return () => window.removeEventListener(DIXI_OPEN_EVENT, fromToolbar);
+  }, []);
 
   useEffect(() => {
     end.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
@@ -245,44 +259,58 @@ export function PrediDock({ status }: { status: AssistantStatus }) {
 
   return (
     <>
-      {!open && (
-        <button
-          type="button"
-          aria-label={`${NAME}: ${TAGLINE}`}
-          title={TAGLINE}
-          onPointerDown={onPointerDown}
-          onPointerMove={onPointerMove}
-          onPointerUp={onPointerUp}
-          onPointerCancel={onPointerCancel}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter' || e.key === ' ') {
-              e.preventDefault();
-              setOpen(true);
-            }
-          }}
+      {!open && !hidden && (
+        <div
           style={pos ? { left: pos.left, top: pos.top } : undefined}
-          className={cn(
-            'group fixed z-50 size-16 touch-none rounded-full',
-            'bg-brand shadow-[0_10px_30px_-8px_rgb(23_43_196/0.65)] ring-4 ring-white/70',
-            'transition-transform hover:scale-105 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus',
-            dragging ? 'scale-105 cursor-grabbing' : 'cursor-grab',
-            pos ? '' : 'invisible',
-          )}
+          className={cn('group fixed z-50 size-16 touch-none', pos ? '' : 'invisible')}
         >
-          <Image
-            src={prediBot}
-            alt=""
-            fill
-            sizes="64px"
-            draggable={false}
-            className="pointer-events-none rounded-full object-cover select-none"
-          />
+          <button
+            type="button"
+            aria-label={`${NAME}: ${TAGLINE}`}
+            title={HOVER_LABEL}
+            onPointerDown={onPointerDown}
+            onPointerMove={onPointerMove}
+            onPointerUp={onPointerUp}
+            onPointerCancel={onPointerCancel}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                setOpen(true);
+              }
+            }}
+            className={cn(
+              'size-full touch-none rounded-full',
+              'bg-brand shadow-[0_10px_30px_-8px_rgb(23_43_196/0.65)] ring-4 ring-white/70',
+              'transition-transform hover:scale-105 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus',
+              dragging ? 'scale-105 cursor-grabbing' : 'cursor-grab',
+            )}
+          >
+            <Image
+              src={fairyBotIcon}
+              alt=""
+              fill
+              sizes="64px"
+              draggable={false}
+              unoptimized
+              className="pointer-events-none rounded-full object-cover select-none"
+            />
 
-          <span className="pointer-events-none absolute right-full mr-3 hidden items-center gap-1.5 rounded-lg bg-heading px-2.5 py-1.5 text-[11.5px] font-medium whitespace-nowrap text-white opacity-0 shadow-md transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100 sm:flex">
-            <Sparkles className="size-3" aria-hidden />
-            {TAGLINE}
-          </span>
-        </button>
+            <span className="pointer-events-none absolute right-full mr-3 hidden items-center gap-1.5 rounded-lg bg-heading px-2.5 py-1.5 text-[11.5px] font-medium whitespace-nowrap text-white opacity-0 shadow-md transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100 sm:flex">
+              <Sparkles className="size-3" aria-hidden />
+              {HOVER_LABEL}
+            </span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setHidden(true)}
+            title="Ocultar a Dixi"
+            aria-label="Ocultar a Dixi"
+            className="absolute -top-1.5 -right-1.5 flex size-6 items-center justify-center rounded-full border border-card-border bg-canvas text-muted-text shadow-sm transition-colors hover:bg-surface-alt hover:text-heading focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
+          >
+            <X className="size-3.5" aria-hidden />
+          </button>
+        </div>
       )}
 
       <aside

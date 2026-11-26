@@ -1,6 +1,6 @@
 import { connection } from 'next/server';
 import { Suspense, type ReactNode } from 'react';
-import { PrediDock } from '@/components/assistant/PrediDock';
+import { DixiDock } from '@/components/assistant/DixiDock';
 import { AppHeader } from '@/components/ui/layout/AppHeader';
 import { MainNav } from '@/components/ui/layout/MainNav';
 import { StickyBar } from '@/components/ui/layout/StickyBar';
@@ -22,13 +22,13 @@ async function Sticky() {
   return <StickyBar canManage={user.role !== 'viewer'} />;
 }
 
-/** Predi (antes Baqueano): solo si el asistente está prendido y el backend responde. */
+/** Dixi (antes Predi y Baqueano): solo si el asistente está prendido y el backend responde. */
 async function Assistant() {
   await connection(); // depende de la sesión: se arma en cada request, no al prerenderizar
   const status = await apiGet('/assistant', AssistantStatusSchema, {}, 0, { token: await getToken() }).catch(
     () => null,
   );
-  return status?.enabled ? <PrediDock status={status} /> : null;
+  return status?.enabled ? <DixiDock status={status} /> : null;
 }
 
 function HeaderSkeleton() {

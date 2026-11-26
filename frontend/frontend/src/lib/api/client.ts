@@ -107,3 +107,21 @@ export async function apiSend<T>(
   if (res.status === 204 || !schema) return null;
   return parse(await res.json(), schema, path);
 }
+
+/** POST con multipart (carga de archivos): fetch arma el Content-Type con el boundary. */
+export async function apiSendForm<T>(
+  path: string,
+  schema: ZodType<T>,
+  body: FormData,
+  options: Options = {},
+): Promise<T> {
+  const res = await send(buildUrl(path), {
+    method: 'POST',
+    headers: authHeaders(options.token),
+    body,
+    cache: 'no-store',
+    signal: options.signal,
+  });
+  if (!res.ok) throw await errorFrom(res, path);
+  return parse(await res.json(), schema, path);
+}

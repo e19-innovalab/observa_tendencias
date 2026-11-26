@@ -1,6 +1,7 @@
 import { ExternalLink, FileSpreadsheet } from 'lucide-react';
 import type { Metadata } from 'next';
 import { Suspense } from 'react';
+import { DatasetUpload } from '@/components/admin/DatasetUpload';
 import { PageSkeleton } from '@/components/data/PageSkeleton';
 import { SelectParam, Segmented } from '@/components/data/UrlControls';
 import { ErrorNote } from '@/components/data/ui';
@@ -8,6 +9,9 @@ import { InfoNote } from '@/components/ui/feedback/InfoNote';
 import { PageHero } from '@/components/ui/layout/PageHero';
 import { getDatasetProfiles, getDatasets } from '@/lib/api/admin';
 import { ApiError } from '@/lib/api/client';
+import { getCurrentUser } from '@/lib/auth/session';
+import { PERMISSIONS } from '@/lib/schemas/auth';
+import { DATASET_STATUS_CLASSES, DATASET_STATUS_LABELS } from '@/lib/utils/datasets';
 import { formatDate } from '@/lib/utils/format';
 
 export const metadata: Metadata = { title: 'Carga de datos' };
@@ -15,21 +19,6 @@ export const metadata: Metadata = { title: 'Carga de datos' };
 type SearchParams = { formato?: string; origen?: string };
 
 const HISTORY_LIMIT = 100;
-/** Estados del archivo en el backend (datasets). */
-const STATUS_LABELS: Record<string, string> = {
-  validated: 'Revisado, listo para cargar',
-  loaded: 'Cargado',
-  unchanged: 'Sin cambios',
-  replaced: 'Reemplazado',
-  rejected: 'Rechazado',
-  format_changed: 'Cambió el formato',
-};
-const STATUS_STYLES: Record<string, string> = {
-  loaded: 'border-success/40 bg-success-soft text-success',
-  validated: 'border-brand/40 bg-surface text-brand',
-  rejected: 'border-alert-critical-border bg-alert-critical-bg text-alert-critical-text',
-  format_changed: 'border-alert-warning-border bg-alert-warning-bg text-alert-warning-text',
-};
 const ORIGINS = [
   { value: 'todos', label: 'Todos' },
   { value: 'download', label: 'Descargas automáticas' },
@@ -42,7 +31,7 @@ export default function DatosPage({ searchParams }: { searchParams: Promise<Sear
     <>
       <PageHero
         title="Carga de datos"
-        description="Consultá el historial de todo lo que se leyó, descargó o cargó a mano en el observatorio, con su estado y los avisos de validación."
+        description="Subí un archivo para revisarlo antes de cargarlo y consultá el historial de todo lo que se leyó, descargó o cargó a mano en el observatorio."
       />
       <Suspense fallback={<PageSkeleton />}>
         <DatosContent searchParams={searchParams} />
@@ -74,13 +63,20 @@ async function DatosContent({ searchParams }: { searchParams: Promise<SearchPara
   }
 
   const titles = Object.fromEntries(profiles.map((p) => [p.dataset_code, p.title]));
+  const user = await getCurrentUser();
+  const canManage = !!user?.permissions.includes(PERMISSIONS.manageData);
 
   return (
     <div className="mx-auto max-w-7xl space-y-6 px-4 py-8 sm:px-6">
-      <InfoNote title="Subir archivos">
-        La carga manual de archivos requiere una sesión con el permiso de gestión de datos. Mientras
-        la autenticación no esté conectada, esta pantalla muestra el historial en modo lectura.
-      </InfoNote>
+      {canManage ? (
+        <DatasetUpload profiles={profiles} />
+      ) : (
+        <InfoNote title="Subir archivos">
+          Tu rol no tiene permiso para cargar archivos. Podés consultar el historial en modo
+          lectura. Si necesitás cargar datos, pedile a quien administra tu institución que te
+          asigne el permiso de gestión de datos.
+        </InfoNote>
+      )}
 
       <section className="overflow-hidden rounded-xl border border-card-border bg-rail">
         <div className="flex flex-wrap items-end justify-between gap-4 border-b border-card-border p-4">
@@ -182,9 +178,9 @@ async function DatosContent({ searchParams }: { searchParams: Promise<SearchPara
                     <td className="px-4 py-3 text-right">{whole.format(f.records)}</td>
                     <td className="px-4 py-3">
                       <span
-                        className={`whitespace-nowrap rounded-full border px-2 py-0.5 text-xs font-medium ${STATUS_STYLES[f.status] ?? 'border-card-border bg-surface text-body'}`}
+                        className={`whitespace-nowrap rounded-full border px-2 py-0.5 text-xs font-medium ${DATASET_STATUS_CLASSES[f.status] ?? 'border-card-border bg-surface text-body'}`}
                       >
-                        {STATUS_LABELS[f.status] ?? f.status}
+                        {DATASET_STATUS_LABELS[f.status] ?? f.status}
                       </span>
                       {(warnings > 0 || errors > 0) && (
                         <p className="mt-1 text-[11px] text-muted-text">

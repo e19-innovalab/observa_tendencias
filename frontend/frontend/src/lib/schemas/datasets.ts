@@ -72,3 +72,8 @@ export const DatasetFileSchema = z.object({
     .loose(),
 });
 export type DatasetFile = z.infer<typeof DatasetFileSchema>;
+
+export const DatasetUploadResultSchema = DatasetFileSchema.extend({
+  preview: z.array(z.record(z.string(), z.unknown())).default([]),
+});
+export type DatasetUploadResult = z.infer<typeof DatasetUploadResultSchema>;
