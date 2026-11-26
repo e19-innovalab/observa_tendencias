@@ -311,10 +311,24 @@ export default async function PanoramaRegionalPage({
     return item.options?.find((option) => option.value === value)?.code;
   };
 
-  const selectedCountries =
-    sp.country && sp.country !== 'all'
-      ? [sp.country]
-      : countries.map((country) => country.iso3);
+  const countryFilter = countries.some((item) => item.iso3 === sp.country)
+    ? sp.country!
+    : undefined;
+  const defaultCountry = countries[0]?.iso3;
+
+  /**
+   * Países a consultar según el indicador. Los «por país» no comparan: con un país elegido
+   * usan ese; con «Todos», el primero de la lista. El resto sigue comparando los tres.
+   */
+  const countriesFor = (item: CatalogEntry) => {
+    if (PER_COUNTRY_KEYS.has(item.key)) {
+      const single = countryFilter ?? defaultCountry;
+      return single ? [single] : [];
+    }
+    return countryFilter ? [countryFilter] : countries.map((country) => country.iso3);
+  };
+
+  const selectedCountries = countriesFor(entry);
   const fromYear = sp.desde ?? String(thisYear - 10);
   const toYear = sp.hasta;
 
