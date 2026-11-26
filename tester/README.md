@@ -28,7 +28,7 @@ Prueba el front con un usuario logueado:
 - Las 13 páginas del menú abren sin error y muestran contenido.
 - El menú lleva a Sectores y a Género.
 - El menú Experimentales se cierra al elegir una opción.
-- Género avisa cuando no hay datos.
+- Género muestra sus dos pestañas: titulados y ocupados.
 
 ### Cómo correrlas
 
@@ -55,11 +55,18 @@ npm run test:api
 npm run test:front
 ```
 
-Para probar el sitio publicado en vez del local:
+Para probar el sitio publicado en vez del local, se agregan las dos direcciones en `usuario.json`:
 
-```bash
-FRONT_URL=https://link-del-front API_URL=https://link-del-back npm test
+```json
+{
+  "email": "tu@mail.com",
+  "clave": "tu-contraseña",
+  "front": "https://link-del-front",
+  "api": "https://link-del-back"
+}
 ```
+
+Si no se ponen, se usa el front y el back locales. El usuario tiene que existir en el back que se prueba.
 
 Al terminar, `npm run reporte` abre un reporte con el resultado de cada prueba. Si alguna falla, guarda una captura de la pantalla.
 
@@ -154,3 +161,27 @@ Quedan pendientes para back y data:
 - Reina Roja sin datos (faltan versiones de O*NET o ESCO).
 - Género sin ocupados por sexo (falta empleo por sexo de la OIT).
 - Migraciones 0019 y 0020.
+
+### 26/11/2026, contra el sitio publicado (MVP)
+
+Se corrieron las pruebas contra el front publicado en Vercel (https://predix-silk.vercel.app) y el back de Render, con el front nuevo ya unido a main.
+
+Antes de correrlas se actualizaron tres pruebas por cambios del front:
+
+- El login ahora tiene el botón para ver la contraseña, así que la prueba busca el campo exacto.
+- El menú Experimentales ahora es un panel de dos columnas.
+- Género ahora tiene dos pestañas, así que la prueba entra a Titulados y después a Ocupados.
+
+Se corrieron 23 pruebas y pasaron las 23.
+
+- API: las 3 pasaron.
+- Login: sin sesión manda al login, se puede entrar y cerrar sesión vuelve al login.
+- El saludo usa el nombre del usuario.
+- Las 13 páginas cargan sin error.
+- El menú lleva a cada sección y Experimentales se cierra al elegir.
+- Género muestra sus dos pestañas.
+
+Observaciones:
+
+- El back de Render está en el plan gratis y se duerme cuando no se usa. El primer ingreso puede tardar hasta un minuto en contestar, por eso la prueba de login espera hasta 60 segundos.
+- En una corrida, un ingreso tardó más de un minuto y pasó en el segundo intento. Si se va a mostrar la página en una presentación, conviene abrirla un rato antes para que el back se despierte.

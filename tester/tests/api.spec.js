@@ -1,6 +1,11 @@
 const { test, expect } = require('@playwright/test');
 
-const api = process.env.API_URL || 'http://127.0.0.1:8010';
+const fs = require('fs');
+const path = require('path');
+
+const archivo = path.join(__dirname, '..', 'usuario.json');
+const local = fs.existsSync(archivo) ? JSON.parse(fs.readFileSync(archivo, 'utf-8')) : {};
+const api = process.env.API_URL || local.api || 'http://127.0.0.1:8010';
 
 test('el back responde', async ({ request }) => {
   const res = await request.get(`${api}/health`);

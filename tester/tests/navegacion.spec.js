@@ -7,7 +7,7 @@ const archivo = path.join(__dirname, '..', 'usuario.json');
 const local = fs.existsSync(archivo) ? JSON.parse(fs.readFileSync(archivo, 'utf-8')) : {};
 const email = process.env.TEST_EMAIL || local.email;
 const clave = process.env.TEST_PASSWORD || local.clave;
-const nombre = process.env.TEST_NAME || 'Cheri';
+const nombre = process.env.TEST_NAME || local.nombre;
 
 const paginas = [
   '/inicio',
@@ -28,9 +28,9 @@ const paginas = [
 async function entrar(page) {
   await page.goto('/login');
   await page.getByLabel('Correo electrónico').fill(email);
-  await page.getByLabel('Contraseña').fill(clave);
+  await page.getByLabel('Contraseña', { exact: true }).fill(clave);
   await page.getByRole('button', { name: 'Ingresar' }).click();
-  await expect(page).toHaveURL(/\/inicio/);
+  await expect(page).toHaveURL(/\/inicio/, { timeout: 60000 });
 }
 
 test('sin sesion lleva al login', async ({ page }) => {
@@ -53,7 +53,10 @@ test('cerrar sesion vuelve al login', async ({ page }) => {
 
 test('el saludo usa el nombre del usuario', async ({ page }) => {
   await entrar(page);
-  await expect(page.getByRole('heading', { level: 1 })).toContainText(nombre);
+  const saludo = page.getByRole('heading', { level: 1 });
+  if (nombre) await expect(saludo).toContainText(nombre);
+  else await expect(saludo).toHaveText(/¡Hola \S+!/);
+  await expect(saludo).not.toContainText('Santiago');
 });
 
 for (const ruta of paginas) {
@@ -78,14 +81,18 @@ test('el menu lleva a cada seccion', async ({ page }) => {
 test('el menu experimentales se cierra al elegir', async ({ page }) => {
   await entrar(page);
   const menu = page.getByRole('navigation', { name: 'Principal' });
-  await menu.getByText('Experimentales').click();
-  await menu.getByRole('link', { name: 'Indicador Moctezuma' }).click();
+  const lista = menu.locator('details[data-menu]').filter({ visible: true });
+  await lista.locator('summary').click();
+  await lista.getByRole('link', { name: /Moctezuma/ }).click();
   await expect(page).toHaveURL(/\/moctezuma/);
-  await expect(menu.locator('details')).not.toHaveAttribute('open', '');
+  await expect(lista).not.toHaveAttribute('open', '');
 });
 
-test('genero avisa cuando no hay datos', async ({ page }) => {
+test('genero muestra las dos secciones', async ({ page }) => {
   await entrar(page);
   await page.goto('/genero');
-  await expect(page.getByText('Todavía no hay datos de ocupados por sexo para mostrar.')).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Titulados por sexo' })).toBeVisible();
+  await page.getByRole('link', { name: 'Personas ocupadas y salarios' }).click();
+  await expect(page).toHaveURL(/tab=ocupados/);
+  await expect(page.getByRole('heading', { name: 'Personas ocupadas y salarios' })).toBeVisible();
 });
