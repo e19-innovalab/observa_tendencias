@@ -1,6 +1,8 @@
 import type { Metadata } from 'next';
 import { redirect } from 'next/navigation';
+import Link from 'next/link';
 import { Suspense } from 'react';
+import { GoogleButton } from '@/components/auth/GoogleButton';
 import { LoginForm } from '@/components/auth/LoginForm';
 import { Logo } from '@/components/brand/Logo';
 import { safeNext } from '@/lib/auth/constants';
@@ -12,7 +14,27 @@ export const metadata: Metadata = { title: 'Ingresar' };
 async function LoginGate({ searchParams }: { searchParams: PageProps<'/login'>['searchParams'] }) {
   const next = safeNext((await searchParams).next);
   if (await getCurrentUser()) redirect(next);
-  return <LoginForm next={next} />;
+  // OAuth client of "Continuar con Google" (Google Cloud); empty = only email and password
+  const googleClientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
+  return (
+    <div className="space-y-6">
+      {googleClientId && (
+        <>
+          <div className="space-y-2">
+            <GoogleButton clientId={googleClientId} next={next} />
+            <p className="text-xs text-muted-text">
+              Con Google entrás gratis a Inicio y Panorama.{' '}
+              <Link href="/privacidad" className="underline hover:text-heading">Privacidad</Link>
+            </p>
+          </div>
+          <div className="flex items-center gap-3 text-xs text-muted-text" aria-hidden>
+            <span className="h-px flex-1 bg-line" /> o con tu correo <span className="h-px flex-1 bg-line" />
+          </div>
+        </>
+      )}
+      <LoginForm next={next} />
+    </div>
+  );
 }
 
 export default function LoginPage({ searchParams }: PageProps<'/login'>) {
@@ -41,7 +63,11 @@ export default function LoginPage({ searchParams }: PageProps<'/login'>) {
           </div>
           <div className="space-y-2">
             <h2 className="text-2xl font-semibold text-heading">Ingresar al observatorio</h2>
-            <p className="text-sm text-muted-text">Usá la cuenta que te dio tu institución.</p>
+            <p className="text-sm text-muted-text">
+              {process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID
+                ? 'Entrá con Google o con la cuenta que te dio tu institución.'
+                : 'Usá la cuenta que te dio tu institución.'}
+            </p>
           </div>
           <Suspense fallback={<div className="h-72 animate-pulse rounded-md bg-surface-2" aria-hidden />}>
             <LoginGate searchParams={searchParams} />

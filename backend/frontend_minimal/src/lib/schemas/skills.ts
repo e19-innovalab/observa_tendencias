@@ -206,6 +206,15 @@ export const SectorKpisSchema = z.object({
   })),
   nota: z.string(),
   genero_nota: z.string().default(''),
+  ocupados_educacion_superior: z.array(z.object({
+    pais: z.string(),
+    anio: z.number(),
+    mujeres: z.number(),
+    varones: z.number(),
+    pct_mujeres: z.number(),
+    brecha_pct: z.number(),
+    diagnostico: z.string(),
+  })).default([]),
   cep_xxi: z.array(z.object({
     sector: z.string(),
     anio: z.number(),

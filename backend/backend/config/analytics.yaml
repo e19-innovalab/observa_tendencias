@@ -252,6 +252,12 @@ moctezuma:
     50 es equilibrio: el ritmo del cambio y la capacidad de respuesta están parejos. Por encima
     de 50 el cambio va más rápido que la respuesta; 100 sería el ritmo más alto con la menor
     capacidad del grupo. Es un puntaje relativo al grupo comparado, no una medida absoluta.
+
+    Los puntajes de 0 a 100 son posiciones dentro del grupo, no calificaciones de los países ni
+    de las ocupaciones. Un 0 en una dimensión solo dice que ese valor es el más bajo de los
+    comparados, aunque la diferencia con los demás sea chica; en las dimensiones nacionales hay
+    un valor por país, así que siempre hay uno en 0 y otro en 100.
+
     Niveles: Baja por debajo de levels.low, Alta por encima de levels.high, Media en el medio.
 
     Solo se calcula si cada lado tiene datos para al menos min_side_coverage de su peso: sin
@@ -743,8 +749,12 @@ sector_kpis:
     men: Subrepresentación femenina
     few: Pocos casos
   parity_criterion: Entre 40 % y 60 % de mujeres (EIGE / OIT)
+  # Employed with higher education by sex: national only (ILOSTAT has no sector breakdown), read
+  # from the observations when the screen asks, so no table to rebuild.
+  tertiary_employment: {women: employment_tertiary_women, men: employment_tertiary_men}
   gender_note: >-
-    Titulados: Mi Futuro, anuarios del DIU y del MEC. Ocupados y salarios: OIT. Diagnóstico de paridad
+    Titulados: Mi Futuro, anuarios del DIU y del MEC. Ocupados, ocupados con educación superior
+    (total del país, no por sector) y salarios: OIT. Diagnóstico de paridad
     con el criterio EIGE / OIT: entre 40 % y 60 % de mujeres es zona de paridad; por debajo,
     subrepresentación femenina; por encima, concentración femenina. Con menos de 30 titulados no se da
     diagnóstico. Los años pueden diferir entre columnas: cada una muestra su último dato.

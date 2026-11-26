@@ -1,15 +1,17 @@
-import { ArrowRight, BarChart3, Database, GitCompareArrows, LineChart, Search, ShieldCheck, Sparkles, Users } from 'lucide-react';
+import { ArrowRight, BarChart3, Check, Database, GitCompareArrows, LineChart, Search, ShieldCheck, Sparkles, Users } from 'lucide-react';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { Suspense } from 'react';
 import { Logo } from '@/components/brand/Logo';
 import { DEFAULT_SECTOR_STYLE, SECTOR_STYLE } from '@/components/sectors/sectorIcons';
+import { apiGet } from '@/lib/api/client';
 import { getCountries, getDashboardSummary, getSectors } from '@/lib/api/common';
+import { AssistantStatusSchema } from '@/lib/schemas/assistant';
 import { getOccupations } from '@/lib/api/skills';
 import { getSources } from '@/lib/api/sources';
 import { formatDate, formatValue } from '@/lib/utils/format';
 
-export const metadata: Metadata = { title: 'Observa Tendencias · Observatorio del mercado laboral del Cono Sur' };
+export const metadata: Metadata = { title: 'Predix · Observatorio del mercado laboral del Cono Sur' };
 
 const ENTER = '/inicio'; // sin sesión, el proxy manda al login y vuelve acá
 
@@ -49,6 +51,7 @@ export default function LandingPage() {
             <a href="#como-funciona" className="hover:text-heading">Cómo funciona</a>
             <a href="#fuentes" className="hover:text-heading">Fuentes</a>
             <a href="#alcance" className="hover:text-heading">Alcance</a>
+            <a href="#acceso" className="hover:text-heading">Acceso</a>
           </nav>
           <Link href={ENTER} className="rounded-md bg-brand px-4 py-2 text-sm font-semibold text-white hover:bg-brand-hover">Ingresar</Link>
         </div>
@@ -142,6 +145,16 @@ export default function LandingPage() {
           </Suspense>
         </section>
 
+        <section id="acceso" className="scroll-mt-16 bg-surface py-20">
+          <div className="mx-auto max-w-5xl px-6">
+            <p className="text-center text-xs font-semibold uppercase tracking-widest text-brand">Acceso</p>
+            <h2 className="mt-2 text-center text-3xl font-bold tracking-tight text-heading">Dos formas de usar Predix</h2>
+            <Suspense fallback={<div className="mt-10 h-64 animate-pulse rounded-lg bg-surface-2" />}>
+              <AccessPlans />
+            </Suspense>
+          </div>
+        </section>
+
         <section className="bg-heading py-20 text-center text-white">
           <div className="mx-auto max-w-3xl px-6">
             <h2 className="text-3xl font-bold tracking-tight">Comprendé el mercado laboral desde los datos</h2>
@@ -161,6 +174,58 @@ export default function LandingPage() {
         </div>
       </footer>
     </div>
+  );
+}
+
+/** Cuenta gratuita (Google) y acceso completo. El límite diario de Pixi viene de la API (app.yaml). */
+async function AccessPlans() {
+  const status = await apiGet('/assistant', AssistantStatusSchema, {}, 600).catch(() => null);
+  const pixi = status?.enabled
+    ? `Pixi, el asistente que responde con los datos del observatorio${status.questions_per_day ? `: hasta ${status.questions_per_day} preguntas por día` : ''}`
+    : null;
+  const plans = [
+    {
+      title: 'Cuenta gratuita',
+      how: 'Entrás con tu cuenta de Google, sin trámites.',
+      items: ['Inicio', 'Panorama: indicadores de cada país, brecha generacional y ocupaciones en movimiento'],
+      cta: { href: ENTER, label: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID ? 'Entrar con Google' : 'Ingresar' },
+    },
+    {
+      title: 'Acceso completo',
+      how: 'Lo da un administrador del observatorio, a una cuenta nueva o a una gratuita.',
+      items: [
+        'Todo lo de la cuenta gratuita',
+        'Ocupaciones, sectores, brechas de habilidades, titulados y género',
+        'Pulso laboral, indicadores experimentales y alertas',
+        ...(pixi ? [pixi] : []),
+      ],
+      cta: null,
+    },
+  ];
+  return (
+    <>
+      <div className="mt-10 grid gap-5 md:grid-cols-2">
+        {plans.map((p) => (
+          <div key={p.title} className="flex flex-col rounded-lg border border-line bg-white p-6">
+            <h3 className="text-lg font-semibold text-heading">{p.title}</h3>
+            <p className="mt-1 text-sm text-muted-text">{p.how}</p>
+            <ul className="mt-4 flex-1 space-y-2 text-sm text-body">
+              {p.items.map((item) => (
+                <li key={item} className="flex gap-2"><Check className="mt-0.5 size-4 shrink-0 text-brand" aria-hidden /> {item}</li>
+              ))}
+            </ul>
+            {p.cta && (
+              <Link href={p.cta.href} className="mt-6 inline-flex items-center gap-2 self-start rounded-md bg-brand px-4 py-2 text-sm font-semibold text-white hover:bg-brand-hover">
+                {p.cta.label} <ArrowRight className="size-4" aria-hidden />
+              </Link>
+            )}
+          </div>
+        ))}
+      </div>
+      <p className="mt-6 text-center text-sm text-muted-text">
+        Qué datos guardamos de tu cuenta: <Link href="/privacidad" className="text-link hover:underline">Privacidad</Link>
+      </p>
+    </>
   );
 }
 

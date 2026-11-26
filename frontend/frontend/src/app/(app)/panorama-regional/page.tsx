@@ -65,6 +65,12 @@ const HIDDEN_INDICATORS = new Set([
   'youth_unemployment_rate_survey',
 ]);
 
+/**
+ * Indicadores «por país»: se leen de a un país a la vez, aunque el filtro global diga
+ * «Todos». Con «Todos» se usa el primer país de la lista para no mezclar realidades.
+ */
+const PER_COUNTRY_KEYS = new Set(['mean_monthly_earnings_by_country', 'earnings_tertiary']);
+
 type CatalogOption = { value: string; code: string; label: string };
 type CatalogEntry = {
   key: string;
@@ -322,9 +328,12 @@ export default async function PanoramaRegionalPage({
 
   const kpiEntries = inDomain.filter((item) => item.kind !== 'graduates').slice(0, 4);
   const kpiCodes = kpiEntries.map(codeFor);
+  const kpiCountries = kpiEntries.map(countriesFor);
   const kpiPromise = Promise.all(
-    kpiCodes.map((itemCode) =>
-      itemCode ? getCompare(itemCode, selectedCountries).catch(() => null) : Promise.resolve(null),
+    kpiCodes.map((itemCode, index) =>
+      itemCode
+        ? getCompare(itemCode, kpiCountries[index]).catch(() => null)
+        : Promise.resolve(null),
     ),
   );
 
@@ -453,7 +462,7 @@ export default async function PanoramaRegionalPage({
         label: itemVariant ? `${item.name} · ${itemVariant}` : item.name,
         value: formatValue(value, itemUnit),
         year,
-        codes: selectedCountries.join(', '),
+        codes: (kpiCountries[index] ?? []).join(', '),
         changeText:
           change === null
             ? null
@@ -502,6 +511,13 @@ export default async function PanoramaRegionalPage({
               ? formatChange(item.change, item.change_kind, unit)
               : null,
         }));
+ 
+  // Los «por país» con «Todos» muestran el primero: conviene decirlo para que no parezca un error.
+  const fallbackCountry =
+    PER_COUNTRY_KEYS.has(entry.key) && !countryFilter
+      ? countries.find((country) => country.iso3 === selectedCountries[0])
+      : undefined;
+
   const latest = rows.filter((row) => row.value !== null);
   const top = [...latest].sort((a, b) => b.value! - a.value!)[0];
   const moved = [...rows]
@@ -515,7 +531,9 @@ export default async function PanoramaRegionalPage({
       moved.changeText &&
       (latest.length > 1
         ? `El mayor cambio es el de ${names[moved.iso] ?? moved.iso}: ${moved.changeText} respecto de ${moved.prevPeriod}.`
-        : `Solo ${names[moved.iso] ?? moved.iso} tiene datos: ${moved.changeText}.`),
+        : fallbackCountry
+          ? `La serie de ${names[moved.iso] ?? moved.iso} cambió ${moved.changeText} respecto de ${moved.prevPeriod}.`
+          : `Solo ${names[moved.iso] ?? moved.iso} tiene datos: ${moved.changeText}.`),
   ]
     .filter(Boolean)
     .join(' ');
@@ -557,6 +575,9 @@ export default async function PanoramaRegionalPage({
     [
       description,
       entry.kind === 'gender' && variantLabel ? `Mostrando: ${variantLabel}.` : null,
+      fallbackCountry
+        ? `Con «Todos» se muestra ${fallbackCountry.name_es}; elegí otro país para cambiar la serie.`
+        : null,
     ]
       .filter(Boolean)
       .join(' ') || undefined;
@@ -629,12 +650,7 @@ export default async function PanoramaRegionalPage({
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div className="flex flex-wrap items-center gap-2.5">
               <FilterLabel>Países</FilterLabel>
-              <CountryFilter
-                countries={countries}
-                value={country}
-                reset={['page']}
-                withAll={false}
-              />
+              <CountryFilter countries={countries} value={sp.country ?? ''} reset={['page']} />
             </div>
             <YearRange years={Array.from({ length: 30 }, (_, i) => thisYear - i)} desde={sp.desde} hasta={sp.hasta} />
           </div>

@@ -1,9 +1,10 @@
 import { NextResponse, type NextRequest } from 'next/server';
-import { LOGIN_PATH, PRIVATE_PREFIXES, SESSION_COOKIE } from '@/lib/auth/constants';
+import { LOGIN_PATH, PATH_HEADER, PRIVATE_PREFIXES, SESSION_COOKIE } from '@/lib/auth/constants';
 
 /**
  * Chequeo optimista: sin cookie de sesión, las rutas privadas van al login (con ?next= para volver).
- * La validación real del token la hace cada página contra el backend (getCurrentUser).
+ * La validación real del token la hace cada página contra el backend (getCurrentUser). También
+ * pasa la ruta en PATH_HEADER: el layout la usa para limitar las cuentas gratuitas.
  */
 export function proxy(request: NextRequest) {
   const { pathname, search } = request.nextUrl;
@@ -13,7 +14,9 @@ export function proxy(request: NextRequest) {
     url.searchParams.set('next', `${pathname}${search}`);
     return NextResponse.redirect(url);
   }
-  return NextResponse.next();
+  const headers = new Headers(request.headers);
+  headers.set(PATH_HEADER, pathname);
+  return NextResponse.next({ request: { headers } });
 }
 
 export const config = {

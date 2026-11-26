@@ -1,23 +1,21 @@
+import Image from 'next/image';
 import Link from 'next/link';
 
-/** Marca provisoria hasta tener el logo definitivo (el diseño usa un marcador "LOGO"). */
+/** Logo horizontal de Predix; inverted usa la versión blanca, para fondos oscuros. */
 export function Logo({ href = '/', inverted = false }: { href?: string; inverted?: boolean }) {
   return (
     <Link
       href={href}
-      className={`flex items-center gap-2 font-semibold tracking-tight focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-focus ${
-        inverted ? 'text-white' : 'text-heading'
-      }`}
+      className="flex items-center focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-focus"
     >
-      <span
-        aria-hidden
-        className={`flex size-8 items-center justify-center rounded-md text-sm font-bold ${
-          inverted ? 'bg-white text-brand' : 'bg-brand text-white'
-        }`}
-      >
-        OT
-      </span>
-      <span className="text-lg">Observa Tendencias</span>
+      <Image
+        src={inverted ? '/brand/predix-horizontal-blanco.svg' : '/brand/predix-horizontal.svg'}
+        alt="Predix"
+        width={126}
+        height={36}
+        priority
+        className="h-8 w-auto"
+      />
     </Link>
   );
 }

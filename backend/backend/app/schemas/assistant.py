@@ -68,6 +68,7 @@ class AssistantStatus(BaseModel):
     model: str
     questions_per_day: int
     remaining_today: int | None = None  # None when not logged in
+    can_ask: bool = False  # the logged-in user's role has the assistant's permission
     max_question_chars: int
     history_turns: int
     texts: dict[str, str]

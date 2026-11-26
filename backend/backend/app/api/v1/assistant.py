@@ -3,7 +3,7 @@ from fastapi import APIRouter, Depends, Header, Request
 from sqlalchemy.orm import Session
 
 from app.assistant import service
-from app.core.auth import current_user, optional_user, require_permission
+from app.core.auth import current_user, optional_user, permissions_of, require_permission
 from app.core.config_files import app_config
 from app.core.database import get_session
 from app.models import User
@@ -22,6 +22,7 @@ def assistant_status(user: User | None = Depends(optional_user), session: Sessio
         enabled=conf.enabled, provider=conf.provider, model=p.model if p else "",
         questions_per_day=conf.limits.questions_per_user_per_day,
         remaining_today=service.remaining_today(session, user.user_id) if user else None,
+        can_ask=bool(user) and conf.permission in permissions_of(user.role),
         max_question_chars=conf.max_question_chars, history_turns=conf.history_turns, texts=conf.texts,
         examples=conf.examples)
 

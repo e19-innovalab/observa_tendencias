@@ -828,7 +828,7 @@ El asistente ("Baqueano") solo usa datos del observatorio. Responde de dos maner
 2. **Con un modelo**, para lo demás. Por defecto es un modelo abierto local (Ollama, `qwen2.5:7b-instruct`); también puede ser Claude.
    - **Qué puede consultar.** Solo los endpoints de lectura de `assistant.tools`. Solo puede usar códigos CIUO que salieron de la búsqueda, de la pregunta o de la página.
    - **Chequeo de números.** Todo número de la respuesta tiene que estar en los datos consultados, con una tolerancia de 0,5 %; una proporción también vale como porcentaje. Si no está, la respuesta se reemplaza por un aviso (`numbers_check.on_unverified: block`).
-   - **Límites.** 30 preguntas por persona por día y 500 en total.
+   - **Límites.** 25 preguntas por persona por día y 500 en total.
 
 Cada pregunta queda en `assistant_logs`: pregunta, contexto, consultas, respuesta, números no verificados, tokens y tiempo. Esos registros no se editan. Limitación conocida: una afirmación sin números ("tiene un ISE alto") no se puede verificar así.
 

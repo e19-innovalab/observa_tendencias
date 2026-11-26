@@ -1,4 +1,9 @@
 {
     "python.terminal.useEnvFile": true,
-    "git.ignoreLimitWarning": true
+    "git.ignoreLimitWarning": true,
+    "python.defaultInterpreterPath": "${workspaceFolder}/data_analytics/.venv/Scripts/python.exe",
+    "python.venvFolders": [
+        "data_analytics",
+        "backend/backend"
+    ]
 }

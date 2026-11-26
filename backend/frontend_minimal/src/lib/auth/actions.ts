@@ -22,6 +22,18 @@ export async function login(_prev: LoginState, formData: FormData): Promise<Logi
   redirect(next);
 }
 
+/** El token del botón de Google -> sesión. Una cuenta nueva entra como gratuita (lo decide el backend). */
+export async function loginWithGoogle(credential: string, nextPath: string): Promise<LoginState> {
+  const next = safeNext(nextPath);
+  try {
+    const res = await apiSend('POST', '/auth/google', LoginResponseSchema, { credential });
+    if (res) await setSession(res.access_token, res.expires_at);
+  } catch (e) {
+    return { error: e instanceof ApiError ? e.message : 'No se pudo ingresar con Google.' };
+  }
+  redirect(next);
+}
+
 export async function logout(): Promise<void> {
   await clearSession();
   redirect(LOGIN_PATH);

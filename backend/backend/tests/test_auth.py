@@ -128,3 +128,70 @@ def test_login_disabled_without_secret(client, monkeypatch):
     monkeypatch.setattr(settings, "auth_secret", "")
     r = client.post("/api/v1/auth/login", json={"email": "admin@obs.org", "password": PASSWORD})
     assert r.status_code == 503
+
+
+GOOGLE_CLAIMS = {
+    "new": {"iss": "https://accounts.google.com", "sub": "g-1", "email": "Nueva@Gmail.com", "email_verified": True, "name": "Nina Nueva"},
+    "viewer": {"iss": "accounts.google.com", "sub": "g-2", "email": "viewer@obs.org", "email_verified": True},
+    "viewer-other": {"iss": "accounts.google.com", "sub": "g-3", "email": "viewer@obs.org", "email_verified": True},
+    "unverified": {"iss": "accounts.google.com", "sub": "g-4", "email": "x@gmail.com", "email_verified": False},
+    "foreign": {"iss": "https://evil.example", "sub": "g-5", "email": "y@gmail.com", "email_verified": True},
+}
+
+
+@pytest.fixture
+def google(client, monkeypatch):
+    """Google's token check replaced by a table of claims; 'bad' is a token Google rejects."""
+    from google.oauth2 import id_token
+
+    def verify(credential, _request, audience):
+        assert audience == "client-123"
+        if credential not in GOOGLE_CLAIMS:
+            raise ValueError("bad token")
+        return GOOGLE_CLAIMS[credential]
+
+    monkeypatch.setattr(settings, "google_client_id", "client-123")
+    monkeypatch.setattr(id_token, "verify_oauth2_token", verify)
+    return lambda credential: client.post("/api/v1/auth/google", json={"credential": credential})
+
+
+def test_google_login_is_off_without_a_client_id(client):
+    assert client.post("/api/v1/auth/google", json={"credential": "new"}).status_code == 503
+
+
+def test_google_creates_a_free_account_without_the_assistant(client, google):
+    r = google("new")
+    assert r.status_code == 200, r.text
+    user = r.json()["user"]
+    assert user["email"] == "nueva@gmail.com" and user["full_name"] == "Nina Nueva"
+    assert user["role"] == app_config().auth.google.signup_role and user["permissions"] == []
+    headers = {"Authorization": f"Bearer {r.json()['access_token']}"}
+    assert client.get("/api/v1/assistant", headers=headers).json()["can_ask"] is False
+    assert client.post("/api/v1/assistant/ask", headers=headers, json={"question": "hola"}).status_code == 403
+    # no password: the account only signs in with Google, and the same account signs in again
+    assert client.post("/api/v1/auth/login", json={"email": "nueva@gmail.com", "password": PASSWORD}).status_code == 401
+    assert google("new").json()["user"]["user_id"] == user["user_id"]
+
+
+def test_google_signs_in_an_existing_account_with_its_role(client, google):
+    r = google("viewer")
+    assert r.status_code == 200 and r.json()["user"]["role"] == "viewer"
+    headers = {"Authorization": f"Bearer {r.json()['access_token']}"}
+    assert client.get("/api/v1/assistant", headers=headers).json()["can_ask"] is True
+    # the password still works, and another Google account cannot take the same email
+    assert client.post("/api/v1/auth/login", json={"email": "viewer@obs.org", "password": PASSWORD}).status_code == 200
+    assert google("viewer-other").status_code == 401
+
+
+def test_google_rejects_bad_tokens_foreign_issuers_and_unverified_emails(client, google):
+    assert google("bad").status_code == 401
+    assert google("foreign").status_code == 401
+    r = google("unverified")
+    assert r.status_code == 401 and r.json()["detail"] == app_config().auth.messages["google_unverified"]
+
+
+def test_a_suspended_account_cannot_sign_in_with_google(client, google):
+    admin = _login(client, "admin@obs.org")
+    viewer_id = google("viewer").json()["user"]["user_id"]
+    assert client.patch(f"/api/v1/users/{viewer_id}", headers=admin, json={"status": "suspended"}).status_code == 200
+    assert google("viewer").status_code == 403

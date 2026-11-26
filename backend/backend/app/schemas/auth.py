@@ -30,6 +30,10 @@ class LoginRequest(BaseModel):
     password: str
 
 
+class GoogleLoginRequest(BaseModel):
+    credential: str  # the ID token the Google button returns
+
+
 class LoginResponse(BaseModel):
     access_token: str
     token_type: str = "bearer"

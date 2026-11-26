@@ -1,7 +1,7 @@
 # Application settings that are not secrets and do not change between environments.
 # Environment-specific values (database, CORS origins, API key) live in backend/.env.
 
-app_name: Observa Tendencias
+app_name: Predix
 api_prefix: /api/v1
 version: "0.1.0"
 
@@ -823,7 +823,7 @@ jobs_view:
 search:
   aliases_file: reference/ocupaciones_nombres_locales.yaml
 
-# Assistant ("Preguntale al Observatorio"): answers questions with the observatory's own data. It
+# Assistant (Pixi, "Preguntale a Pixi"): answers questions with the observatory's own data. It
 # can only call the read-only API endpoints listed under tools (in-process, same answers the
 # frontend gets); it has no database, web or write access. Every question is logged in
 # assistant_logs (question, tools used, answer, tokens, time) and counts toward the daily limits.
@@ -869,7 +869,7 @@ assistant:
   history_turns: 6
   # Questions answered by the model per day. Scripted answers (templates, no cost) do not count.
   limits:
-    questions_per_user_per_day: 30
+    questions_per_user_per_day: 25
     questions_per_day: 500
   # Tool results are trimmed before the model reads them: lists to this many items, then the
   # whole text to this many characters; keys listed here are removed (texts for screens).
@@ -887,7 +887,7 @@ assistant:
     year_range: [1990, 2100]
     on_unverified: block
   system_prompt: |
-    Sos Baqueano, el asistente del Observatorio de Tendencias de InnovaLab, que estudia el trabajo y
+    Sos Pixi, el asistente de Predix, el observatorio de InnovaLab que estudia el trabajo y
     la formación en Argentina (ARG), Chile (CHL) y Uruguay (URY). Respondés en español rioplatense,
     claro y breve (hasta 150 palabras), para personas que no son especialistas.
 
@@ -901,12 +901,15 @@ assistant:
     - Para ubicar una ocupación en el ranking de un país, usá el campo position de ranking_ocupaciones
       («puesto position de position_of»). Sirve también con un filtro de sector: el puesto sigue siendo
       el del país. Los gerentes son el gran grupo 1: su código CIUO empieza con 1.
-    - Si te preguntan tu nombre o quién sos, respondé: «Soy Baqueano, el asistente del Observatorio de Tendencias de InnovaLab. No tengo un nombre propio; me encargo de responder consultas sobre trabajo y formación en Argentina, Chile y Uruguay usando los datos del observatorio.»
+    - Si te preguntan tu nombre o quién sos, respondé: «Soy Pixi, el asistente de Predix, el observatorio de InnovaLab. Respondo consultas sobre trabajo y formación en Argentina, Chile y Uruguay con los datos del observatorio.»
     - Si las herramientas no tienen la respuesta, decí que el observatorio no tiene ese dato. No
       respondas con conocimiento general sobre otros temas.
     - El ISE (Índice Sintético de Empleabilidad) va de 0 a 100. Los salarios en USD PPA sirven
       para comparar países; en USD son al tipo de cambio oficial promedio de cada año, que publica la OIT.
     - No des consejos personales de carrera; describí lo que muestran los datos.
+    - Para los indicadores nacionales del Panorama (empleo, economía, educación), buscá el código
+      con indicadores_panorama y los valores con serie_indicador. Para explicar un valor raro,
+      usá la definición del indicador (description).
     - Además del ISE, el observatorio tiene cuatro índices con nombre propio, cada uno con sus
       herramientas (las definiciones vienen en los resultados): Moctezuma (ritmo del cambio
       tecnológico frente a la capacidad de respuesta), Ludita (exposición a la IA generativa
@@ -995,6 +998,27 @@ assistant:
           description: "employability_index: ISE · skill_gap: brechas · trend: tendencias · projection: proyecciones · moctezuma_index, ludita_index, red_queen_index, sisyphus_index: indicadores experimentales"
           required: true
       link: {path: "/metodologia", label: "Metodología"}
+    # National indicators of Panorama: the list of one area (codes, definitions, sources) and the
+    # yearly values of one indicator in one country.
+    - name: indicadores_panorama
+      description: >-
+        Indicadores nacionales del Panorama de un área, con código, nombre, unidad, qué mide
+        (description) y fuente. Sirve para encontrar el código de un indicador y explicar qué mide.
+      path: /indicators
+      params:
+        domain: {type: string, enum: [labor, economic, education], description: "labor: Laborales · economic: Socioeconómicos · education: Educativos", required: true}
+      link: {path: "/panorama", label: "Panorama"}
+    - name: serie_indicador
+      description: >-
+        Valores observados por año de un indicador nacional del Panorama en un país, con la
+        definición del indicador y la fuente. Pedí desde un año reciente: devuelve hasta 30 años.
+      path: /observations
+      params:
+        indicator: {type: string, description: "Código del indicador (de indicadores_panorama)", required: true}
+        country: {type: string, description: "ARG, CHL o URY", required: true}
+        from_year: {type: integer, description: "Primer año (por ejemplo, 10 años antes del actual)"}
+      fixed: {data_type: observed}
+      link: {path: "/panorama", query: [indicator], label: "Ver en Panorama"}
     # The observatory's named indices (Moctezuma, Ludita, Reina Roja, Sísifo). Per-country
     # summaries and per-occupation detail; results include each index's official definitions.
     - name: moctezuma_paises
@@ -1084,8 +1108,9 @@ assistant:
     enabled: true
     # Words that say what is asked (accents and case do not matter; phrases allowed).
     intent_words:
-      identity: ["como te llamas", "como te llaman", "cual es tu nombre", "tu nombre", "quien sos", "quien eres"]
-      methodology: ["como se calcula", "como se mide", "metodologia", "que es el ise", "que mide el ise", "que significa el ise"]
+      identity: ["como te llamas", "como te llaman", "cual es tu nombre", "tu nombre", "quien sos", "quien eres", "quien es pixi", "que es pixi"]
+      # only the ISE: "cómo se mide" alone also asks about other indicators, which go to the model
+      methodology: ["como se calcula el ise", "como se mide el ise", "como se calcula la empleabilidad", "metodologia del ise", "que es el ise", "que mide el ise", "que significa el ise", "indice sintetico de empleabilidad"]
       sectors: [sector, sectores, rama, ramas]
       ranking_top: [mejores, mejor, "mas empleables", "mas empleabilidad", "mas alto", "mas altos", top]
       ranking_bottom: [peores, peor, "menos empleables", "mas bajo", "mas bajos"]
@@ -1107,7 +1132,7 @@ assistant:
     # Shown as the model in the log and the response.
     model_label: plantillas
     templates:
-      identity: "Soy Baqueano, el asistente del Observatorio de Tendencias de InnovaLab. No tengo un nombre propio; me encargo de responder consultas sobre trabajo y formación en Argentina, Chile y Uruguay usando los datos del observatorio."
+      identity: "Soy Pixi, el asistente de Predix, el observatorio de InnovaLab. Respondo consultas sobre trabajo y formación en Argentina, Chile y Uruguay con los datos del observatorio."
       occupation: "**{name}** (CIUO {code})"
       alias_note: "«{term}» corresponde a **{name}** (CIUO {code})."
       salary_title: "Salario medio de {occupation}:"
@@ -1148,10 +1173,10 @@ assistant:
     blocked_no_links: "No pude verificar los números de la respuesta con los datos del observatorio. Probá preguntar por una ocupación o un sector con otras palabras, o buscalo en el buscador de arriba."
   # Texts for the screen (the frontend shows them as they are). name: what the bot is called.
   texts:
-    name: Baqueano
-    title: Preguntale al Observatorio
-    tab: Preguntale al Baqueano
-    intro: "Conozco los datos del observatorio. Preguntame por una ocupación, un sector, un país o cómo se calcula un indicador."
+    name: Pixi
+    title: Preguntale a Predix
+    tab: Preguntale a Pixi
+    intro: "Conozco los datos de Predix. Preguntame por una ocupación, un sector, un país o cómo se calcula un indicador."
     placeholder: "Por ejemplo: ¿cómo le va a Enfermería en Chile?"
     disclaimer: "Responde con los datos del observatorio. Puede equivocarse: verificá en las páginas enlazadas."
     thinking: "Buscando en los datos… puede tardar hasta un minuto."
@@ -1187,6 +1212,15 @@ auth:
     viewer:
       label: Consultas
       permissions: [view]
+    # Created on a first "Continuar con Google". Without view: the screens show only Inicio and
+    # Panorama and the assistant is off; an administrator upgrades the role for full access.
+    free:
+      label: Gratuita
+      permissions: []
+  # "Continuar con Google": the client id is GOOGLE_CLIENT_ID in backend/.env (empty = off).
+  google:
+    signup_role: free
+    issuers: [accounts.google.com, https://accounts.google.com]
   statuses:
     active: Activo
     suspended: Suspendido
@@ -1205,6 +1239,9 @@ auth:
     unknown_country: "País fuera del catálogo: {country}"
     wrong_password: "La contraseña actual no es correcta"
     last_admin: "No se puede quitar el rol ni suspender al último administrador activo"
+    google_off: "El ingreso con Google no está configurado"
+    google_invalid: "No se pudo verificar la cuenta de Google. Probá de nuevo."
+    google_unverified: "Tu cuenta de Google no tiene el correo verificado."
 
 messages:
   db_unavailable: "No se pudo conectar a la base de datos. Revisá DATABASE_URL en backend/.env"

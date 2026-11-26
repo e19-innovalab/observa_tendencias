@@ -1,10 +1,10 @@
-# Observa Tendencias · Observatorio de tendencias laborales y educativas
+# Predix · Observatorio de tendencias laborales y educativas
 
-Observatorio predictivo de tendencias laborales y educativas del Cono Sur (Argentina, Uruguay y
+**Predix** (antes Observa Tendencias; el repositorio conserva ese nombre) es el observatorio predictivo de tendencias laborales y educativas del Cono Sur (Argentina, Uruguay y
 Chile), del programa InnovaLab. Junta datos oficiales de empleo, salarios, educación y formación,
 calcula tendencias, proyecciones, un Índice Sintético de Empleabilidad (ISE) por ocupación,
 brechas de habilidades, indicadores de género, alertas e indicadores experimentales (Moctezuma,
-Ludita, Reina Roja, Sísifo), y los expone en una API y en un frontend con un asistente.
+Ludita, Reina Roja, Sísifo), y los expone en una API y en un frontend con un asistente, **Pixi** (antes Baqueano).
 
 ## Estructura
 
@@ -148,7 +148,7 @@ anteriores y se genera una alerta. Detalle de cada fuente, URL y criterio en
 
 | Dónde | Qué |
 |---|---|
-| `backend/.env` | Secretos y valores por entorno: `DATABASE_URL`, credenciales de Postgres, `CORS_ORIGINS`, `ADMIN_API_KEY`, `AUTH_SECRET` (inicio de sesión), `ANTHROPIC_API_KEY` y `ASSISTANT_LOCAL_API_KEY` (asistente, solo la del proveedor elegido) |
+| `backend/.env` | Secretos y valores por entorno: `DATABASE_URL`, credenciales de Postgres, `CORS_ORIGINS`, `ADMIN_API_KEY`, `AUTH_SECRET` (inicio de sesión), `GOOGLE_CLIENT_ID` (ingreso con Google; no es secreto, vacío = apagado), `ANTHROPIC_API_KEY` y `ASSISTANT_LOCAL_API_KEY` (asistente, solo la del proveedor elegido) |
 | `config/catalog.yaml` | Países, sectores (CIIU e ILOSTAT), universo de ocupaciones (las 436 de CIUO-08), destacadas, excluidas y reglas de nombres |
 | `config/sources.yaml` | Fuentes, URLs, frecuencia y horario de actualización, opciones de cada conector, reintentos HTTP |
 | `config/indicators.yaml` | Indicadores y las series de cada fuente que los alimentan |
@@ -174,9 +174,9 @@ Desde `backend/backend`, con el entorno virtual activado:
 | `python -m app.jobs.scheduler` | Actualización automática según los horarios de `sources.yaml` (`--list` muestra los horarios) |
 | `python -m app.jobs.validate_crosswalk` | Revisa las correspondencias carrera → ocupación después de editarlas |
 | `python -m app.ingestion.load_analytics` | Carga el CSV de ofertas de LinkedIn |
-| `python -m app.jobs.create_user` | Crea un usuario (para entrar a los frontends) |
+| `python -m app.jobs.create_user` | Crea un usuario con contraseña y rol (para entrar a los frontends) |
 | `ollama serve` · `ollama pull qwen2.5:7b-instruct` | Modelo local del asistente (solo si se usa `provider: local`) |
-| `pytest` · `ruff check .` | Tests y estilo de código |
+| `pytest` · `ruff check .` | Tests y estilo de código. Con `GOOGLE_CLIENT_ID` en `.env`, correr `GOOGLE_CLIENT_ID= pytest` |
 
 ## Historial: no se borra nada
 
@@ -190,7 +190,21 @@ Desde `backend/backend`, con el entorno virtual activado:
 - **Asistente:** cada pregunta queda en `assistant_logs` con la respuesta, las consultas que hizo,
   los números que no pudo verificar, los tokens y el tiempo.
 
-## Asistente (Baqueano)
+## Cuentas y acceso
+
+| Cuenta | Cómo se crea | Qué ve |
+|---|---|---|
+| **Gratuita** | Sola, al entrar con **Continuar con Google** | Inicio y Panorama, sin Pixi |
+| **Acceso completo** | La crea un administrador, o cambia el rol de una cuenta gratuita en *Usuarios y accesos* | Todo, según su rol (administrador, editor, consultas) |
+
+El backend verifica la credencial de Google (`POST /api/v1/auth/google`) y guarda solo nombre,
+correo e id de Google. Roles y permisos en `config/app.yaml → auth`. Pixi exige acceso completo en
+el backend; las demás páginas se ocultan en el frontend, porque los datos de lectura son públicos.
+Para activarlo hace falta un cliente OAuth de Google de tipo *Aplicación web*, con la dirección del
+frontend entre sus orígenes autorizados, y su client ID en `GOOGLE_CLIENT_ID` (backend) y
+`NEXT_PUBLIC_GOOGLE_CLIENT_ID` (frontend). Detalle en [`backend/README.md`](backend/README.md).
+
+## Asistente (Pixi)
 
 Responde preguntas con los datos del observatorio (`POST /api/v1/assistant/ask`, con sesión). Solo
 puede consultar endpoints de lectura de la API, listados en `config/app.yaml → assistant.tools`.
@@ -199,7 +213,10 @@ Revisa que cada número de la respuesta aparezca en los datos que consultó. Tod
 
 - **Enlaces:** cada ocupación que nombra la respuesta trae el enlace a su ficha, antes de los demás.
 - **Ranking:** cada ocupación trae su puesto entre todas las del país (`position`, `position_of`), también con filtro de sector.
-- **Nombre:** preguntarle cómo se llama devuelve siempre el mismo texto, sin usar el modelo.
+- **Nombre:** preguntarle cómo se llama o quién es Pixi devuelve siempre el mismo texto, sin usar el modelo.
+- **Panorama:** consulta los indicadores nacionales y sus series (`indicadores_panorama`, `serie_indicador`), con la descripción de cada uno.
+- **Metodología por plantilla:** solo para el ISE. Las preguntas sobre cómo se mide otro indicador las responde el modelo con su descripción.
+- **Solo con acceso completo:** las cuentas gratuitas no ven la pestaña.
 - **Indicadores experimentales** (Moctezuma, Ludita, Reina Roja, Sísifo; `assistant.web_search`):
   - **Búsqueda afuera:** puede consultar Wikipedia y cita lo que usó. En cualquier otro tema esa herramienta no existe para el modelo. Lo que devuelve se trata como información de terceros, nunca como instrucciones.
   - **Fórmulas:** lee la metodología de cada indicador. El chequeo de números acepta además 100 − un valor publicado, que esas fórmulas usan, y solo en estas preguntas.
@@ -296,7 +313,7 @@ Explorer ya incluye la misma vista de ofertas.
 - Tendencias, proyecciones orientativas y alertas.
 - ISE por ocupación (436 ocupaciones × 3 países), con demanda neta, salario y riesgo de automatización. La tasa de inserción salió del índice en la versión 0.3 porque no tiene fuente; los puntajes no cambiaron.
 - Titulados por carrera, institución y sexo en los tres países, con tendencia y proyección por sector.
-- Indicadores por sector: densidad profesional, salarios y brecha salarial. Indicadores de género: titulados y ocupados por sexo, brechas y diagnóstico de paridad.
+- Indicadores por sector: densidad profesional, salarios y brecha salarial. Indicadores de género: titulados y ocupados por sexo, brechas y diagnóstico de paridad, y ocupados con educación superior por sexo en cada país (OIT).
 - Argentina: empleo privado registrado y salarios de CEP-XXI, en pesos, USD (dólar oficial mes a mes), USD PPA y salario real.
 - Habilidades por ocupación en dos niveles: el grupo CIUO y cada ocupación ESCO que junta, encontrable desde el buscador.
 - Brechas de habilidades de Argentina, Chile y Uruguay, con las carreras clasificadas por la CINE-F 2013 (UNESCO).
@@ -306,8 +323,8 @@ Explorer ya incluye la misma vista de ofertas.
   generacional y las burbujas de Ocupaciones en movimiento (sección 7 de [`docs/fuentes_y_criterios.md`](docs/fuentes_y_criterios.md)).
 - Carga manual de archivos: plantilla descargable, control del archivo real, errores agrupados y
   aviso de choque con datos oficiales. Historial de datos.
-- Inicio de sesión con roles (administrador, editor, consultas).
-- Asistente "Baqueano": respuestas por plantilla para las preguntas frecuentes y modelo (hospedado,
+- Inicio de sesión con roles (administrador, editor, consultas) y con Google: cuenta gratuita (Inicio y Panorama) y acceso completo asignado por un administrador.
+- Asistente Pixi: respuestas por plantilla para las preguntas frecuentes y modelo (hospedado,
   local o Claude) para el resto, con chequeo de números, enlaces a cada ocupación, búsqueda externa
   solo para los indicadores experimentales, límites diarios y registro.
 - Buscador tolerante: tildes, orden, plural y género, y nombres locales de ocupaciones.
@@ -321,9 +338,9 @@ Explorer ya incluye la misma vista de ofertas.
 - **Tasa de inserción:** salió del ISE. El pedido al SIES queda en pausa por si se retoma.
 - **Buscador del SIES (salarios de Chile por carrera):** no tiene descarga pública.
 - **Segunda fuente externa del asistente:** a definir. The KPI Institute prohíbe el acceso automatizado en sus términos; OpenAlex es una alternativa abierta.
-- **Supabase y despliegue:** en curso, siguiendo [`docs/despliegue.md`](docs/despliegue.md). Ya se reactivó el proyecto de Supabase; faltan cargar la base en la nube, subir el código y crear los servicios en Render y Vercel.
+- **Producción** ([`docs/despliegue.md`](docs/despliegue.md)): publicada en Supabase, Render y Vercel (última actualización: 2026-11-05). Falta publicar la actualización de noviembre (Predix, Pixi, ingreso con Google, ocupados con educación superior por sexo) y cargar sus datos (sección 6 de esa guía).
 - **Fuentes sin conector:** CEPALSTAT y Banco Central de Chile.
-- **Asistente:** todavía no tiene una herramienta para responder sobre género.
+- **Asistente:** todavía no tiene herramientas para Titulados, Género e Indicadores por sector.
 - **Búsqueda por significado:** entrenar el modelo del prototipo (`backend/ml/occupation_match/`)
   y conectarlo al buscador y al asistente.
 - **Carga manual, segunda etapa:** retirar una carga sin borrarla y marcar en las pantallas los
