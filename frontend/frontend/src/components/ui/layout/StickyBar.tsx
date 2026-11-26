@@ -3,94 +3,17 @@
 import { Suspense, useEffect, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
 import {
-  BarChart3,
   BookOpen,
-  Briefcase,
   ChevronDown,
-  Factory,
-  Globe,
-  Lightbulb,
   Settings,
   TrendingUp,
-  User,
-  type LucideIcon,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { INDEX_PATHS, INDICES, ITEMS, isActive } from './MainNav';
-
-const ICONOS: Record<string, LucideIcon> = {
-  '/panorama-regional': Globe,
-  '/sectores': Factory,
-  '/ocupaciones': Briefcase,
-  '/habilidades': Lightbulb,
-  '/genero': User,
-};
+import { Secciones, cerrar } from './MainNav';
 
 const ICON =
   'flex size-9 items-center justify-center rounded-lg text-muted-text hover:bg-surface-alt focus-visible:outline-2 focus-visible:outline-focus';
-
-function cerrar(e: React.MouseEvent<HTMLElement>) {
-  e.currentTarget.closest('details')?.removeAttribute('open');
-}
-
-function Secciones() {
-  const pathname = usePathname();
-  const enIndices = INDEX_PATHS.some((path) => pathname === path || pathname.startsWith(`${path}/`));
-
-  return (
-    <>
-      {ITEMS.map((item) => {
-        const active = isActive(item.href, pathname);
-        const Icono = ICONOS[item.href];
-        return (
-          <Link
-            key={item.href}
-            href={item.href}
-            aria-current={active ? 'page' : undefined}
-            className={cn(
-              'flex shrink-0 items-center gap-2 rounded-full px-3 py-2 text-[13px] font-medium whitespace-nowrap transition-colors focus-visible:outline-2 focus-visible:outline-focus',
-              active ? 'bg-brand text-white' : 'text-body hover:bg-surface-alt',
-            )}
-          >
-            {Icono && <Icono className={cn('hidden size-4 xl:block', active ? 'text-white' : 'text-muted-text')} aria-hidden />}
-            {item.label}
-            {active && <span className="size-1.5 rounded-full bg-white" aria-hidden />}
-          </Link>
-        );
-      })}
-
-      <details data-menu className="group relative shrink-0">
-        <summary
-          className={cn(
-            'flex cursor-pointer list-none items-center gap-2 rounded-lg border px-3 py-1.5 text-[13px] font-medium whitespace-nowrap focus-visible:outline-2 focus-visible:outline-focus [&::-webkit-details-marker]:hidden',
-            enIndices ? 'border-brand bg-brand text-white' : 'border-card-border text-body hover:bg-surface-alt',
-          )}
-        >
-          <BarChart3 className={cn('size-4', enIndices ? 'text-white' : 'text-muted-text')} aria-hidden />
-          Experimentales
-          <ChevronDown className="size-3.5 transition-transform group-open:rotate-180" aria-hidden />
-          <span className={cn('rounded px-1.5 py-0.5 text-[9.5px] font-bold', enIndices ? 'bg-white/20 text-white' : 'bg-brand text-white')}>
-            BETA
-          </span>
-        </summary>
-        <div className="absolute top-full left-0 z-50 mt-2 w-64 overflow-hidden rounded-xl border border-card-border bg-canvas py-1 shadow-lg">
-          {INDICES.map((item) => (
-            <Link
-              key={item.href}
-              href={item.href}
-              onClick={cerrar}
-              className="block px-4 py-2.5 text-[13px] text-body hover:bg-surface-alt focus-visible:outline-2 focus-visible:outline-focus"
-            >
-              {item.label}
-            </Link>
-          ))}
-        </div>
-      </details>
-    </>
-  );
-}
 
 export function StickyBar({ canManage }: { canManage: boolean }) {
   const [visible, setVisible] = useState(false);

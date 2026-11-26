@@ -25,7 +25,7 @@ export function PageHero({
   title,
   description,
   breadcrumbs,
-  align = 'center',
+  align = 'left',
   leading,
   actions,
   children,
@@ -33,11 +33,11 @@ export function PageHero({
   const centered = align === 'center';
 
   return (
-    <section className="text-white" style={{ backgroundImage: 'var(--gradient-hero)' }}>
+    <section className="text-white" style={{ backgroundImage: 'linear-gradient(90deg, #172bc4 0%, #080067 100%)' }}>
       <div
         className={cn(
           'mx-auto max-w-7xl px-4 sm:px-6',
-          centered ? 'py-9 text-center sm:py-11' : 'py-8',
+          centered ? 'py-9 text-center sm:py-11' : 'py-5 sm:py-6',
         )}
       >
         <div
@@ -76,7 +76,7 @@ export function PageHero({
                 'font-bold tracking-tight text-white',
                 centered
                   ? 'text-[32px] leading-tight sm:text-[40px]'
-                  : 'text-[29px] leading-tight sm:text-[36px]',
+                  : 'text-[22px] leading-tight font-semibold sm:text-[24px]',
               )}
             >
               {title}
@@ -85,7 +85,7 @@ export function PageHero({
             {description && (
               <p
                 className={cn(
-                  'mt-3 text-[13.5px] leading-relaxed text-blue-50/90',
+                  'mt-2 text-[13px] leading-relaxed text-blue-50/90',
                   centered ? 'mx-auto max-w-[860px] sm:text-[14px]' : 'max-w-[680px]',
                 )}
               >
