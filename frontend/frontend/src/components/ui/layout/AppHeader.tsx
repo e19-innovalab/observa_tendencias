@@ -1,6 +1,6 @@
 import Image from 'next/image';
 import Link from 'next/link';
-import { Bell, BookOpen, ChevronDown, Database, FileText, LogOut, Search } from 'lucide-react';
+import { Bell, BookOpen, ChevronDown, LogOut, Search } from 'lucide-react';
 import { logout } from '@/lib/auth/actions';
 
 type Props = {
@@ -78,31 +78,25 @@ export function AppHeader({ userName, userRole, unreadAlerts, canManage }: Props
                 aria-hidden
               />
             </summary>
-            <div className="absolute right-0 z-30 mt-2 w-64 rounded-xl border border-card-border bg-canvas p-2 shadow-lg">
+            <div className="absolute right-0 z-30 mt-2 w-56 overflow-hidden rounded-xl border border-card-border bg-canvas py-1 shadow-lg">
               <Link
                 href="/admin/datos"
-                className="flex items-center gap-3 rounded-lg px-2.5 py-2 text-[13px] font-medium text-heading hover:bg-surface-alt focus-visible:outline-2 focus-visible:outline-focus"
+                className="block px-4 py-2.5 text-[13px] text-body hover:bg-surface-alt focus-visible:outline-2 focus-visible:outline-focus"
               >
-                <span className="flex size-7 items-center justify-center rounded-md bg-surface-alt text-brand">
-                  <Database className="size-4" aria-hidden />
-                </span>
-                Gestión de datos
+                Carga de datos
               </Link>
               <Link
                 href="/metodologia/fuentes"
-                className="flex items-center gap-3 rounded-lg px-2.5 py-2 text-[13px] font-medium text-heading hover:bg-surface-alt focus-visible:outline-2 focus-visible:outline-focus"
+                className="block px-4 py-2.5 text-[13px] text-body hover:bg-surface-alt focus-visible:outline-2 focus-visible:outline-focus"
               >
-                <span className="flex size-7 items-center justify-center rounded-md bg-surface-alt text-brand">
-                  <FileText className="size-4" aria-hidden />
-                </span>
                 Fuentes y actualización
               </Link>
             </div>
           </details>
           )}
 
-          <div className="ml-1 flex items-center gap-2.5 rounded-xl bg-surface-alt py-1.5 pr-1.5 pl-2">
-            <span className="flex size-8 items-center justify-center rounded-full bg-brand text-[12px] font-bold tracking-wide text-white">
+          <div className="ml-1 flex items-center gap-2.5 border-l border-card-border pl-2.5 sm:pl-3">
+            <span className="flex size-10 items-center justify-center rounded-full bg-brand text-[12px] font-bold tracking-wide text-white">
               {initials(userName)}
             </span>
             <span className="hidden leading-tight md:block">
