@@ -706,21 +706,7 @@ export default async function PanoramaRegionalPage({
           </div>
         )}
 
-        {kpiCards.length > 0 && (
-          <section aria-label="Indicadores del grupo" className="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-            {kpiCards.map((kpi) => (
-              <KpiCard
-                key={kpi.label}
-                label={kpi.label}
-                value={kpi.value}
-                year={kpi.year}
-                codes={kpi.codes}
-                changeText={kpi.changeText}
-                tone={kpi.tone}
-              />
-            ))}
-          </section>
-        )}
+        
 
         <div className="mt-4 grid gap-4 lg:grid-cols-[minmax(0,1fr)_300px]">
           <ChartCard
