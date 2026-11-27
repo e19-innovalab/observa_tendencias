@@ -63,6 +63,9 @@ const HIDDEN_INDICATORS = new Set([
   'employment_women',
   // Se prefiere la serie del Banco Mundial; la de encuestas no aporta otra lectura acá.
   'youth_unemployment_rate_survey',
+  // Ya no se muestra en esta pantalla.
+  'employment',
+  'genai_exposure',
 ]);
 
 /**
@@ -688,7 +691,7 @@ export default async function PanoramaRegionalPage({
               name="indicator"
               label="Indicadores"
               hideLabel
-              allLabel="Ver todos"
+              withAll={false}
               options={inDomain.map((item) => ({ value: item.key, label: item.name }))}
               value={entry.key}
               reset={['page']}
