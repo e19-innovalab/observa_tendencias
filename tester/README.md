@@ -185,3 +185,16 @@ Observaciones:
 
 - El back de Render está en el plan gratis y se duerme cuando no se usa. El primer ingreso puede tardar hasta un minuto en contestar, por eso la prueba de login espera hasta 60 segundos.
 - En una corrida, un ingreso tardó más de un minuto y pasó en el segundo intento. Si se va a mostrar la página en una presentación, conviene abrirla un rato antes para que el back se despierte.
+
+### 27/11/2026, última corrida antes de la postulación
+
+Se volvieron a correr las pruebas contra el sitio publicado, después de los últimos cambios del front (se sacaron las KPI de Panorama regional y se ajustó el ancho para pantallas grandes).
+
+Se corrieron 23 pruebas y pasaron las 23.
+
+- API: las 3 pasaron.
+- Login, cerrar sesión y saludo: pasaron.
+- Las 13 páginas cargan sin error.
+- El menú, Experimentales y las pestañas de Género: pasaron.
+
+Observación: el back de Render estaba dormido. La primera consulta tardó más de un minuto y el primer ingreso pasó en el segundo intento. Es lo mismo de la corrida anterior, no un error de la página.
