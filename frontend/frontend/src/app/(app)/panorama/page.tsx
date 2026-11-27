@@ -53,6 +53,8 @@ const PERIODS = [
 const DEFAULT_YEARS = 10;
 const YEARS_BACK = 30;
 const SPARKS = 5;
+/** Indicadores que ya no se muestran en el panorama. */
+const HIDDEN_INDICATORS = new Set(['genai_exposure']);
 const FREQUENCIES: Record<string, string> = { A: 'Anual', Q: 'Trimestral', M: 'Mensual' };
 const BADGE: Record<string, string> = {
   favorable: 'bg-alert-positive-bg text-alert-positive-text',
@@ -114,7 +116,8 @@ async function PanoramaContent({ sp }: { sp: SearchParams }) {
 
   let data;
   try {
-    const [indicators, countries] = await Promise.all([getIndicators(), getCountries()]);
+    const [allIndicators, countries] = await Promise.all([getIndicators(), getCountries()]);
+    const indicators = allIndicators.filter((i) => !HIDDEN_INDICATORS.has(i.code));
     const iso = countries.map((c) => c.iso3);
     const highlight = countries[0]
       ? (await getDashboardSummary(countries[0].iso3)).highlights[0]?.indicator.code

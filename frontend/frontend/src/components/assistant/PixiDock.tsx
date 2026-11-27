@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { usePathname, useSearchParams } from 'next/navigation';
 import { Fragment, useCallback, useEffect, useRef, useState } from 'react';
 import { cn } from '@/lib/utils';
-import { DIXI_OPEN_EVENT } from './dixi';
+import { PIXI_OPEN_EVENT } from './pixi';
 import fairyBotIcon from './fairy-bot-icon.svg';
 import type {
   AssistantAnswer,
@@ -29,7 +29,7 @@ type Turn =
     };
 
 /** Nombre visible del asistente en esta aplicación. */
-const NAME = 'Dixi';
+const NAME = 'Pixi';
 const TAGLINE = 'IA de Predix';
 const HOVER_LABEL = `${NAME} · ${TAGLINE}`;
 
@@ -74,17 +74,17 @@ function Rich({ text }: { text: string }) {
   );
 }
 
-/** El backend todavía llama «Baqueano» o «Pixi» al asistente: acá se muestra siempre como Dixi. */
+/** El backend todavía puede llamar «Baqueano» o «Dixi» al asistente: acá se muestra siempre como Pixi. */
 function rename(text: string) {
-  return text.replace(/baqueano|pixi/gi, NAME);
+  return text.replace(/baqueano|dixi/gi, NAME);
 }
 
 /**
- * Dixi: burbuja arrastrable que abre un panel de conversación.
+ * Pixi: burbuja arrastrable que abre un panel de conversación.
  * La conversación sigue al cambiar de página y usa el mismo asistente del observatorio
  * (GET /assistant y POST /assistant/ask) que la versión Baqueano.
  */
-export function DixiDock({ status }: { status: AssistantStatus }) {
+export function PixiDock({ status }: { status: AssistantStatus }) {
   const context = useAssistantContext();
   const t: Record<string, string> = Object.fromEntries(
     Object.entries({ ...status.texts, name: NAME, title: TAGLINE, tab: NAME }).map(([key, value]) => [
@@ -151,8 +151,8 @@ export function DixiDock({ status }: { status: AssistantStatus }) {
       setHidden(false);
       setOpen(true);
     };
-    window.addEventListener(DIXI_OPEN_EVENT, fromToolbar);
-    return () => window.removeEventListener(DIXI_OPEN_EVENT, fromToolbar);
+    window.addEventListener(PIXI_OPEN_EVENT, fromToolbar);
+    return () => window.removeEventListener(PIXI_OPEN_EVENT, fromToolbar);
   }, []);
 
   useEffect(() => {
@@ -304,8 +304,8 @@ export function DixiDock({ status }: { status: AssistantStatus }) {
           <button
             type="button"
             onClick={() => setHidden(true)}
-            title="Ocultar a Dixi"
-            aria-label="Ocultar a Dixi"
+            title="Ocultar a Pixi"
+            aria-label="Ocultar a Pixi"
             className="absolute -top-1.5 -right-1.5 flex size-6 items-center justify-center rounded-full border border-card-border bg-canvas text-muted-text shadow-sm transition-colors hover:bg-surface-alt hover:text-heading focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
           >
             <X className="size-3.5" aria-hidden />
@@ -325,9 +325,14 @@ export function DixiDock({ status }: { status: AssistantStatus }) {
       >
         <header className="flex items-start justify-between gap-3 border-b border-card-border bg-surface px-4 py-3">
           <div className="flex min-w-0 items-center gap-2.5">
-            <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-brand text-sm font-bold text-white">
-              {NAME[0]}
-            </span>
+            <Image
+              src={fairyBotIcon}
+              alt=""
+              width={36}
+              height={36}
+              unoptimized
+              className="size-9 shrink-0 rounded-full"
+            />
             <div className="min-w-0">
               <p className="text-base font-semibold text-heading">{NAME}</p>
               <p className="truncate text-xs text-muted-text">{TAGLINE}</p>
