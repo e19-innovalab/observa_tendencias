@@ -46,7 +46,7 @@ function Pestanias() {
 
   return (
     <nav aria-label="Indicadores experimentales" className="border-b border-card-border bg-canvas">
-      <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-x-10 px-4 sm:px-6">
+      <div className="mx-auto flex max-w-[1600px] flex-wrap items-center justify-between gap-x-10 px-4 sm:px-6">
         <Grupo titulo="Tiempo real" items={TIEMPO_REAL} pathname={pathname} />
         <Grupo titulo="Indicadores" items={INDICADORES} pathname={pathname} />
       </div>

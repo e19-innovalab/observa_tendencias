@@ -64,7 +64,7 @@ export default async function HabilidadesPage({
         description="Identificá las brechas entre la demanda del mercado laboral y la formación disponible, y anticipá las necesidades futuras."
       />
 
-      <div className="mx-auto max-w-7xl space-y-6 px-4 py-6 sm:px-6">
+      <div className="mx-auto max-w-[1600px] space-y-6 px-4 py-6 sm:px-6">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <SectionTabs tabs={TABS} active={tab} />
           {/* Ancla normal: fuerza una carga limpia de /genero y evita reutilizar

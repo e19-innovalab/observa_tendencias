@@ -268,7 +268,7 @@ async function PanoramaContent({ sp }: { sp: SearchParams }) {
 
   return (
     <>
-      <div className="mx-auto max-w-7xl px-4 py-6 pb-12 sm:px-6">
+      <div className="mx-auto max-w-[1600px] px-4 py-6 pb-12 sm:px-6">
         <ChartHeader
           eyebrow={`${indicator.domain_label} · ${FREQUENCIES[frequency] ?? frequency}`}
           title={<IndicatorPicker current={indicator} indicators={indicators} />}
@@ -435,7 +435,7 @@ async function PanoramaContent({ sp }: { sp: SearchParams }) {
           </section>
         )}
       </div>
-      <div className="mx-auto max-w-7xl px-4 pb-12 sm:px-6">
+      <div className="mx-auto max-w-[1600px] px-4 pb-12 sm:px-6">
         <div className="mt-10">
           <HowCalculated
             types={['trend', 'projection']}

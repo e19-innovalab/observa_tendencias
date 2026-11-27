@@ -100,7 +100,7 @@ async function AlertasContent({ searchParams }: { searchParams: Promise<SearchPa
     ]);
   } catch (e) {
     return (
-      <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6">
+      <div className="mx-auto max-w-[1600px] px-4 py-8 sm:px-6">
         <ErrorNote message={e instanceof ApiError ? e.message : 'Error inesperado al cargar las alertas.'} />
       </div>
     );
@@ -110,7 +110,7 @@ async function AlertasContent({ searchParams }: { searchParams: Promise<SearchPa
   const severityLabel = Object.fromEntries(rules.severities.map((s) => [s.code, s.label]));
 
   return (
-    <div className="mx-auto max-w-7xl space-y-8 px-4 py-8 sm:px-6">
+    <div className="mx-auto max-w-[1600px] space-y-8 px-4 py-8 sm:px-6">
       <section aria-label="Resumen" className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
         <div className="rounded-xl border border-card-border bg-rail p-4">
           <p className="text-xs font-semibold uppercase tracking-wide text-muted-text">Alertas</p>

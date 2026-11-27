@@ -112,7 +112,7 @@ export function StickyBar({ canManage }: { canManage: boolean }) {
         visible ? 'translate-y-0' : '-translate-y-full',
       )}
     >
-      <div className="mx-auto flex h-14 max-w-7xl items-center gap-3 px-4 sm:px-6">
+      <div className="mx-auto flex h-14 max-w-[1600px] items-center gap-3 px-4 sm:px-6">
         <Link
           href="/inicio"
           aria-label="Ir al inicio"

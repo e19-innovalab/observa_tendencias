@@ -106,7 +106,7 @@ async function MetodologiaContent({ params }: { params: Promise<{ tema: string }
   const topic = TOPICS[tema];
   if (!topic) notFound();
   return (
-    <div className="mx-auto grid max-w-7xl gap-6 px-4 py-6 sm:px-6 lg:grid-cols-[14rem_1fr]">
+    <div className="mx-auto grid max-w-[1600px] gap-6 px-4 py-6 sm:px-6 lg:grid-cols-[14rem_1fr]">
       <nav aria-label="Temas de metodología">
         <ul className="space-y-1 rounded-xl border border-card-border bg-canvas p-2 shadow-[var(--shadow-card)]">
           {Object.entries(TOPICS).map(([key, t]) => (

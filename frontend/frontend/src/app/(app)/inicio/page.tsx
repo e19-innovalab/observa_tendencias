@@ -108,7 +108,7 @@ export default async function InicioPage() {
   }
 
   return (
-    <div className="mx-auto max-w-7xl space-y-10 px-4 py-8 sm:px-6">
+    <div className="mx-auto max-w-[1600px] space-y-10 px-4 py-8 sm:px-6">
       <header className="space-y-2">
         <h1 className="text-3xl font-bold tracking-tight text-heading">¡Hola {nombre}!</h1>
         <p className="max-w-3xl text-sm leading-relaxed text-muted-text sm:text-base">

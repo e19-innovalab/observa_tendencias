@@ -250,7 +250,7 @@ export default async function PanoramaRegionalPage({
           title="Panorama Regional"
           description="Analiza y compara la evolución de indicadores socioeconómicos, laborales y educativos en Argentina, Chile y Uruguay a través de datos históricos y proyecciones."
         />
-        <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6">
+        <div className="mx-auto max-w-[1600px] px-4 py-6 sm:px-6">
           <ApiErrorNote
             message={error instanceof ApiError ? error.message : 'Error inesperado al cargar los datos.'}
           />
@@ -285,7 +285,7 @@ export default async function PanoramaRegionalPage({
           title="Panorama Regional"
           description="Analiza y compara la evolución de indicadores socioeconómicos, laborales y educativos en Argentina, Chile y Uruguay a través de datos históricos y proyecciones."
         />
-        <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6">
+        <div className="mx-auto max-w-[1600px] px-4 py-6 sm:px-6">
           <p className="rounded-xl border border-dashed border-card-border px-4 py-16 text-center text-[12.5px] text-muted-text">
             No hay indicadores disponibles.
           </p>
@@ -662,7 +662,7 @@ export default async function PanoramaRegionalPage({
         description="Analiza y compara la evolución de indicadores socioeconómicos, laborales y educativos en Argentina, Chile y Uruguay a través de datos históricos y proyecciones."
       />
 
-      <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6">
+      <div className="mx-auto max-w-[1600px] px-4 py-6 sm:px-6">
         <FilterPanel>
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div className="flex flex-wrap items-center gap-2.5">

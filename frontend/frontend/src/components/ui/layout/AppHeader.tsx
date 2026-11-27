@@ -23,7 +23,7 @@ function initials(name: string) {
 export function AppHeader({ userName, userRole, unreadAlerts, canManage }: Props) {
   return (
     <header className="border-b border-card-border bg-canvas">
-      <div className="mx-auto flex h-[72px] max-w-7xl items-center gap-3 px-4 sm:px-6 lg:gap-6">
+      <div className="mx-auto flex h-[72px] max-w-[1600px] items-center gap-3 px-4 sm:px-6 lg:gap-6">
         <Link
           href="/inicio"
           className="flex shrink-0 items-center gap-3 rounded-lg focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"

@@ -10,7 +10,7 @@ export function Page({
   className?: string;
 }) {
   return (
-    <div className={`mx-auto max-w-7xl px-4 py-6 pb-12 sm:px-6 ${className}`}>{children}</div>
+    <div className={`mx-auto max-w-[1600px] px-4 py-6 pb-12 sm:px-6 ${className}`}>{children}</div>
   );
 }
 

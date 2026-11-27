@@ -54,7 +54,7 @@ async function DatosContent({ searchParams }: { searchParams: Promise<SearchPara
     ]);
   } catch (e) {
     return (
-      <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6">
+      <div className="mx-auto max-w-[1600px] px-4 py-8 sm:px-6">
         <ErrorNote
           message={e instanceof ApiError ? e.message : 'Error inesperado al cargar los datos.'}
         />
@@ -67,7 +67,7 @@ async function DatosContent({ searchParams }: { searchParams: Promise<SearchPara
   const canManage = !!user?.permissions.includes(PERMISSIONS.manageData);
 
   return (
-    <div className="mx-auto max-w-7xl space-y-6 px-4 py-8 sm:px-6">
+    <div className="mx-auto max-w-[1600px] space-y-6 px-4 py-8 sm:px-6">
       {canManage ? (
         <DatasetUpload profiles={profiles} />
       ) : (

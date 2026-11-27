@@ -34,7 +34,7 @@ async function Assistant() {
 function HeaderSkeleton() {
   return (
     <header className="border-b border-card-border bg-canvas" aria-hidden>
-      <div className="mx-auto flex h-[72px] max-w-7xl items-center gap-3 px-4 sm:px-6">
+      <div className="mx-auto flex h-[72px] max-w-[1600px] items-center gap-3 px-4 sm:px-6">
         <span className="size-10 rounded-[11px] bg-surface-2" />
         <span className="h-4 w-44 rounded bg-surface-2" />
       </div>

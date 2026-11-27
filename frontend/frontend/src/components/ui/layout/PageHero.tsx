@@ -36,7 +36,7 @@ export function PageHero({
     <section className="text-white" style={{ backgroundImage: 'var(--gradient-hero)' }}>
       <div
         className={cn(
-          'mx-auto max-w-7xl px-4 sm:px-6',
+          'mx-auto max-w-[1600px] px-4 sm:px-6',
           centered ? 'py-9 text-center sm:py-11' : 'py-8',
         )}
       >

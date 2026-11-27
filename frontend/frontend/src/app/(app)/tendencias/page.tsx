@@ -92,7 +92,7 @@ export default async function TendenciasPage({ searchParams }: { searchParams: P
           title="Tendencias"
           description="Seguí la evolución de los indicadores socioeconómicos, laborales y educativos de Argentina, Chile y Uruguay."
         />
-        <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6">
+        <div className="mx-auto max-w-[1600px] px-4 py-6 sm:px-6">
           <ApiErrorNote message={errorMessage} />
         </div>
       </>
@@ -218,7 +218,7 @@ export default async function TendenciasPage({ searchParams }: { searchParams: P
         description="Seguí la evolución de los indicadores socioeconómicos, laborales y educativos de Argentina, Chile y Uruguay, y compará su proyección."
       />
 
-      <div className="mx-auto max-w-7xl space-y-4 px-4 py-6 sm:px-6">
+      <div className="mx-auto max-w-[1600px] space-y-4 px-4 py-6 sm:px-6">
         <SectionTabs
           tabs={[
             { id: 'trends', label: 'Tendencias' },
